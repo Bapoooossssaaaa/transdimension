@@ -43,7 +43,7 @@ public class PlushSpotBlockEntity extends BlockEntity {
 		BlockState result = Blocks.AIR.defaultBlockState();
 		StructureStart village = villageAt(serverLevel, pos);
 		if (village.isValid()) {
-			long villageId = village.getChunkPos().toLong();
+			long villageId = village.getChunkPos().pack();
 			PlushLedger ledger = serverLevel.getAttachedOrElse(ModAttachments.PLUSH_LEDGER, PlushLedger.EMPTY);
 			if (!ledger.villages().contains(villageId)) {
 				int plush = ledger.leastGiven(ModBlocks.PLUSHES.size(), serverLevel.getRandom());

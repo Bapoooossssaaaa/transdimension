@@ -1,5 +1,7 @@
 package dev.goober.transdimension.registry;
 
+import com.mojang.serialization.Codec;
+
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 
@@ -11,6 +13,10 @@ public final class ModAttachments {
 	/** On a level: which villages already got their plush, and how many of each cat went out. */
 	public static final AttachmentType<PlushLedger> PLUSH_LEDGER = AttachmentRegistry.createPersistent(
 			TransDimension.id("plush_ledger"), PlushLedger.CODEC);
+
+	/** On a player: Maddie already gave them her wand and wings. Survives death. */
+	public static final AttachmentType<Boolean> MADDIE_GIFTED = AttachmentRegistry.create(TransDimension.id("maddie_gifted"),
+			builder -> builder.persistent(Codec.BOOL).copyOnDeath());
 
 	private ModAttachments() {
 	}

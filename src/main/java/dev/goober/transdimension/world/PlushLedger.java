@@ -12,7 +12,7 @@ import net.minecraft.util.RandomSource;
  * Per-world record of the village plushes: the villages (by structure start chunk) that already got one, and how
  * many of each plush have been handed out. Saved with the level through a Fabric data attachment.
  *
- * @param villages  start chunks ({@code ChunkPos#toLong}) of villages whose plush has been placed
+ * @param villages  start chunks ({@code ChunkPos#pack}) of villages whose plush has been placed
  * @param handedOut how many times each plush (index into {@code ModBlocks.PLUSHES}) has been placed
  */
 public record PlushLedger(List<Long> villages, List<Integer> handedOut) {

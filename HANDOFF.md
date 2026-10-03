@@ -80,9 +80,9 @@ These come from primers, older versions or the shape of 26.2 data, not from 26.2
 | `ModEntities` boats | `new Boat(EntityType, Level, Supplier<Item>)`, `new ChestBoat(...)` in `net.minecraft.world.entity.vehicle.boat` | Look at how vanilla `EntityTypes` builds `CHERRY_BOAT`. |
 | `ModItems` | `new BoatItem(EntityType, Properties)`; `Equippable.builder(...).setEquipSound(...).setDamageOnHurt(false)`; `new ItemLore(List<Component>)`; `Properties#useCooldown(float)` | Compare with vanilla's elytra and boat items in `Items`. |
 | `TransDimensionClient` | `new BoatRenderer(Context, ModelLayerLocation)`, `BoatModel::createBoatModel`/`createChestBoatModel` (`net.minecraft.client.model.object.boat`), `new ThrownItemRenderer<>(context, 1.25F, true)` | Use `ThrownItemRenderer::new` if the 3-argument constructor is gone. |
-| `PlushSpotBlockEntity` | `StructureManager#getStructureWithPieceAt(BlockPos, HolderSet<Structure>)`, `StructureStart#getChunkPos()` | `LocationPredicate` uses the same lookup for its `structures` check. |
-| `Maddie` | `Mob#setHomeTo(BlockPos, int)` (1.21.6 rename of `restrictTo`), `LookAtPlayerGoal(..., float, float)`, `WaterAvoidingRandomStrollGoal(..., double, float)`, `Entity#getTags/addTag`, `canBeLeashed()`, `ValueInput#getIntOr` | All are small; remove the stroll goal if needed. |
-| `TransMagicBolt` | `Entity#hurtServer`, `damageSources().indirectMagic`, `LivingEntity#knockback(double, double, double)`, `new DustParticleOptions(int rgb, float scale)` | |
+| `PlushSpotBlockEntity` | `StructureManager#getStructureWithPieceAt(BlockPos, HolderSet<Structure>)` | `LocationPredicate` uses the same lookup for its `structures` check. |
+| `Maddie` | `Mob#setHomeTo(BlockPos, int)` (1.21.6 rename of `restrictTo`), `LookAtPlayerGoal(..., float, float)`, `WaterAvoidingRandomStrollGoal(..., double, float)`, `canBeLeashed()`, `ValueInput#getIntOr` | All are small; remove the stroll goal if needed. |
+| `TransMagicBolt` | `Entity#hurtServer`, `damageSources().indirectMagic`, `new DustParticleOptions(int rgb, float scale)` | |
 | `TransWings`, `WingsController` | `Player#tryToStartFallFlying()`, `KeyMapping#isDown()`, `Mth.TWO_PI`, `Mth.DEG_TO_RAD` | |
 | `MaddieRenderer` | `MobRenderer` with `HumanoidModel<HumanoidRenderState>`; `CubeDeformation(float)`, `PartPose.ZERO` | |
 | `MaddieDialogueScreen` | `Screen#rebuildWidgets()`, `Screen#tick()`, `SoundEvents.NOTE_BLOCK_BIT` | `extractBackground` and the 12-argument `blit` are confirmed by Fabric's test mods. |

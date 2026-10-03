@@ -31,6 +31,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 import dev.goober.transdimension.network.OpenMaddieDialoguePayload;
+import dev.goober.transdimension.registry.ModAttachments;
 import dev.goober.transdimension.registry.ModItems;
 
 /**
@@ -41,8 +42,6 @@ import dev.goober.transdimension.registry.ModItems;
  * potters around within a few blocks of where she first stood.
  */
 public class Maddie extends PathfinderMob {
-	/** Entity tag a player gets once Maddie has given them her gifts (saved with the player). */
-	public static final String GIFTED_TAG = "transdimension.maddie_gifted";
 	private static final int HOME_RADIUS = 4;
 
 	@Nullable
@@ -100,7 +99,7 @@ public class Maddie extends PathfinderMob {
 	}
 
 	public static boolean hasGifted(Player player) {
-		return player.getTags().contains(GIFTED_TAG);
+		return player.getAttachedOrElse(ModAttachments.MADDIE_GIFTED, false);
 	}
 
 	/** Hands over the Trans Wand and Trans Wings, once per player. Called when the player accepts in the dialogue. */
@@ -108,7 +107,7 @@ public class Maddie extends PathfinderMob {
 		if (hasGifted(player) || !(this.level() instanceof ServerLevel level)) {
 			return;
 		}
-		player.addTag(GIFTED_TAG);
+		player.setAttached(ModAttachments.MADDIE_GIFTED, true);
 		for (ItemStack gift : new ItemStack[]{new ItemStack(ModItems.TRANS_WAND), new ItemStack(ModItems.TRANS_WINGS)}) {
 			if (!player.addItem(gift)) {
 				player.drop(gift, false);

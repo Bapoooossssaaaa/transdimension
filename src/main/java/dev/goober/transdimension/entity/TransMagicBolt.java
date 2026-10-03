@@ -21,7 +21,7 @@ import dev.goober.transdimension.registry.ModItems;
 
 /**
  * The Trans Wand's spell: a glowing heart that ignores gravity, trails pink, blue and white sparkles and bursts on
- * impact, dealing magic damage (6, three hearts) with a little knockback. It fizzles out after three seconds.
+ * impact, dealing magic damage (6, three hearts). It fizzles out after three seconds.
  */
 public class TransMagicBolt extends ThrowableItemProjectile {
 	private static final float DAMAGE = 6.0F;
@@ -69,9 +69,6 @@ public class TransMagicBolt extends ThrowableItemProjectile {
 			Entity target = result.getEntity();
 			Entity owner = this.getOwner();
 			target.hurtServer(serverLevel, this.damageSources().indirectMagic(this, owner), DAMAGE);
-			if (target instanceof LivingEntity living) {
-				living.knockback(0.4, -this.getDeltaMovement().x, -this.getDeltaMovement().z);
-			}
 		}
 	}
 
