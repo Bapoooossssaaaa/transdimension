@@ -9,8 +9,17 @@
           "Name": "transdimension:trans_crystal_ore"
         },
         "target": {
-          "predicate_type": "minecraft:block_match",
-          "block": "transdimension:trans_stone"
+          "predicate_type": "minecraft:tag_match",
+          "tag": "transdimension:trans_stone_ore_replaceables"
+        }
+      },
+      {
+        "state": {
+          "Name": "transdimension:trans_deepslate_crystal_ore"
+        },
+        "target": {
+          "predicate_type": "minecraft:tag_match",
+          "tag": "transdimension:trans_deepslate_ore_replaceables"
         }
       }
     ]

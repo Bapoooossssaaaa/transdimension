@@ -143,10 +143,12 @@ EXTRAS = {
     "plains/houses/plains_butcher_shop_1": {
         (7, 2, 2): (T + "trans_cake", {"bites": "0"}, None),       # on the counter
         (7, 2, 3): LANTERN + (None,),
-        (8, 1, 2): chest(T + "chests/trans_bakery", "west"),       # behind the counter
+        # Behind the counter, at the end of the aisle (x=8, z=2..4): its front faces down the aisle.
+        (8, 1, 2): chest(T + "chests/trans_bakery", "south"),
     },
     "plains/houses/plains_butcher_shop_2": {
         (4, 2, 4): (T + "trans_cake", {"bites": "0"}, None),
+        # In the corner by the counter; its front faces the walkway between the doors (z=3).
         (7, 1, 4): chest(T + "chests/trans_bakery", "north"),
     },
 }

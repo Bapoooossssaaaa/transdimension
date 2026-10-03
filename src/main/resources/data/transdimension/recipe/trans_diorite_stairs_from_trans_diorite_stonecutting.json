@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "transdimension:trans_diorite",
+  "result": {
+    "count": 1,
+    "id": "transdimension:trans_diorite_stairs"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:trans_deepslate_redstone_ore",
+    "transdimension:trans_redstone_ore"
+  ]
+}

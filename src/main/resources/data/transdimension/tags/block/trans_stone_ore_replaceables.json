@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:trans_andesite",
+    "transdimension:trans_diorite",
+    "transdimension:trans_granite",
+    "transdimension:trans_stone"
+  ]
+}

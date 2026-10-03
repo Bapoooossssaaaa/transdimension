@@ -1,0 +1,62 @@
+{
+  "variants": {
+    "axis=x": [
+      {
+        "model": "transdimension:block/trans_deepslate",
+        "x": 90,
+        "y": 90
+      },
+      {
+        "model": "transdimension:block/trans_deepslate_mirrored",
+        "x": 90,
+        "y": 90
+      },
+      {
+        "model": "transdimension:block/trans_deepslate",
+        "x": 90,
+        "y": 90
+      },
+      {
+        "model": "transdimension:block/trans_deepslate_mirrored",
+        "x": 90,
+        "y": 90
+      }
+    ],
+    "axis=y": [
+      {
+        "model": "transdimension:block/trans_deepslate"
+      },
+      {
+        "model": "transdimension:block/trans_deepslate_mirrored"
+      },
+      {
+        "model": "transdimension:block/trans_deepslate",
+        "y": 180
+      },
+      {
+        "model": "transdimension:block/trans_deepslate_mirrored",
+        "y": 180
+      }
+    ],
+    "axis=z": [
+      {
+        "model": "transdimension:block/trans_deepslate",
+        "x": 90
+      },
+      {
+        "model": "transdimension:block/trans_deepslate_mirrored",
+        "x": 90
+      },
+      {
+        "model": "transdimension:block/trans_deepslate",
+        "x": 90,
+        "y": 180
+      },
+      {
+        "model": "transdimension:block/trans_deepslate_mirrored",
+        "x": 90,
+        "y": 180
+      }
+    ]
+  }
+}

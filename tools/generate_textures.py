@@ -50,7 +50,14 @@ R_BLUE = [hexc(c) for c in ("0F2A4D", "1F5288", "3487C2", "5BCEFA", "93DEFB", "C
 R_PINK = [hexc(c) for c in ("4D1A33", "87395A", "C26683", "F5A9B8", "F9C8D2", "FDE6EB")]
 R_PEARL = [hexc(c) for c in ("4E4A66", "7D7A96", "A9A7C0", "D2D1E3", "EEEEF6", "FFFFFF")]
 R_LAVENDER = [hexc(c) for c in ("2F2652", "4E4382", "7468B4", "A096D8", "C9C1EF", "ECE8FB")]
-R_STONE = [hexc(c) for c in ("5A5170", "786E90", "978DAE", "B5ABC8", "D1C9DE", "E9E4F1")]
+# Stone is a soft warm grey (it used to be lavender); trans colours show up as sparse glints instead.
+R_STONE = [hexc(c) for c in ("4E484C", "6A6368", "888085", "A69EA3", "C3BCC0", "DDD7DA")]
+R_MORTAR = [hexc(c) for c in ("3A3539", "524C50", "6C6569", "878084", "A29B9F", "BDB7BA")]
+# Deep slate: cool blue-grey, darker than stone.
+R_DEEPSLATE = [hexc(c) for c in ("15181F", "21262F", "2F3542", "404858", "535D6F", "687487")]
+R_GRANITE = [hexc(c) for c in ("6A3846", "8E5165", "B07186", "CF94A7", "E6B8C6", "F6DCE4")]
+R_DIORITE = [hexc(c) for c in ("8A8E99", "AAB0BB", "C8CED7", "E0E5EB", "F2F5F8", "FFFFFF")]
+R_ANDESITE = [hexc(c) for c in ("3C4758", "536176", "6B7C93", "8697AE", "A2B3C8", "C0CEDF")]
 R_DIRT = [hexc(c) for c in ("3E2235", "5C364D", "7B4C66", "996581", "B5819C")]
 R_SAND = [hexc(c) for c in ("C27C92", "D896A8", "E8B2C0", "F4CBD5", "FCE3EA")]
 R_SANDSTONE = [hexc(c) for c in ("9C5370", "BE7590", "D898AD", "EAB6C7", "F7D5E0")]
@@ -320,21 +327,42 @@ def trans_grass_block_snow():
     return gradient_map(img, [hexc("B9CBE6"), hexc("DCE8F7"), hexc("F4F8FE"), WHITE], mask=snow, out=out)
 
 
+def glints(img, src, ramp_out, top=0.97, bottom=0.03, chance=0.5, pink_mix=0.35, blue_mix=0.3, seed=5):
+    """Sprinkles a few pink glints on the brightest pixels of `src` and blue ones on the darkest
+    (each candidate pixel with probability `chance`), on top of the already recoloured `img`."""
+    lo, hi = lum_range(src)
+    rng = random.Random(seed)
+    out = img.copy()
+    for p in pixels(src):
+        px = src.getpixel(p)
+        if px[3] == 0:
+            continue
+        t = (lum(px) - lo) / (hi - lo)
+        c = out.getpixel(p)
+        if t >= top and rng.random() < chance:
+            out.putpixel(p, (*mix(c[:3], PINK, pink_mix), c[3]))
+        elif t <= bottom and rng.random() < chance:
+            out.putpixel(p, (*mix(c[:3], BLUE, blue_mix), c[3]))
+    return out
+
+
 def trans_stone():
-    return gradient_map(vblock("stone"), R_STONE)
+    """Warm grey stone with the odd pink and blue glint."""
+    base = vblock("stone")
+    return glints(gradient_map(base, R_STONE), base, R_STONE)
 
 
 def trans_cobblestone():
-    """Every cobble gets its own pastel trans colour; the mortar between them is soft lavender."""
+    """Grey cobbles, a few of them blushing pink or blue, set in darker mortar."""
     img = vblock("cobblestone")
     lo, hi = lum_range(img)
     norm = lambda px: (lum(px) - lo) / (hi - lo)
     stone_px = lambda p, px: norm(px) > 0.3
     labels, count = components(img, stone_px)
     rng = random.Random(7)
-    ramps = [mix_ramp(R_STONE, light_ramp(PINK, 0.55), 0.45), mix_ramp(R_STONE, light_ramp(BLUE, 0.55), 0.4),
-             mix_ramp(R_STONE, R_PEARL, 0.6)]
-    choice = [ramps[(i + rng.randrange(3)) % 3] for i in range(count)]
+    ramps = [mix_ramp(R_STONE, light_ramp(PINK, 0.55), 0.38), mix_ramp(R_STONE, light_ramp(BLUE, 0.55), 0.32),
+             R_STONE, mix_ramp(R_STONE, R_PEARL, 0.35)]
+    choice = [ramps[(i + rng.randrange(4)) % 4] for i in range(count)]
     out = img.copy()
     for p in pixels(img):
         px = img.getpixel(p)
@@ -342,18 +370,20 @@ def trans_cobblestone():
         if p in labels:
             c = sample(choice[labels[p]], 0.15 + 0.85 * t)
         else:
-            c = sample(R_LAVENDER, 0.1 + t * 1.2)
+            c = sample(R_MORTAR, 0.1 + t * 1.2)
         out.putpixel(p, (*c, px[3]))
     return out
 
 
-def bricks_from(img, seed=11, accent=None):
-    """Pearl-white bricks with a whisper of pink or blue per brick, separated by lavender mortar."""
+def bricks_from(img, seed=11, accent=None, base=None, mortar=None, tint=0.3):
+    """Pale bricks with a whisper of pink or blue per brick, separated by grey mortar."""
+    base = base or R_PEARL
+    mortar = mortar or R_MORTAR
     lo, hi = lum_range(img)
     norm = lambda px: (lum(px) - lo) / (hi - lo)
     brick = lambda p, px: norm(px) > 0.28
     labels, count = components(img, brick)
-    tints = [mix_ramp(R_PEARL, light_ramp(PINK, 0.6), 0.3), mix_ramp(R_PEARL, light_ramp(BLUE, 0.6), 0.3)]
+    tints = [mix_ramp(base, light_ramp(PINK, 0.6), tint), mix_ramp(base, light_ramp(BLUE, 0.6), tint)]
     out = img.copy()
     for p in pixels(img):
         px = img.getpixel(p)
@@ -361,8 +391,98 @@ def bricks_from(img, seed=11, accent=None):
         if p in labels:
             c = sample(tints[(labels[p] + seed) % 2], 0.12 + 0.88 * t)
         else:
-            c = sample(R_LAVENDER, 0.05 + t * 1.4)
+            c = sample(mortar, 0.05 + t * 1.4)
         out.putpixel(p, (*c, px[3]))
+    return out
+
+
+# ============================================================================================ deepslate
+def trans_deepslate(name="deepslate"):
+    base = vblock(name)
+    return glints(gradient_map(base, R_DEEPSLATE), base, R_DEEPSLATE, top=0.985, bottom=-1.0, chance=0.4, pink_mix=0.3)
+
+
+def deepslate_bricks(name, seed):
+    """Dark slate bricks or tiles; each one leans faintly pink or blue."""
+    deep_mortar = [hexc(c) for c in ("0B0D12", "13161C", "1C2029", "272C37", "333A47", "414959")]
+    return bricks_from(vblock(name), seed=seed, base=R_DEEPSLATE, mortar=deep_mortar, tint=0.16)
+
+
+def chiseled_trans_deepslate():
+    img = gradient_map(vblock("chiseled_deepslate"), R_DEEPSLATE)
+    return paste_heart(img, 7, 7, shade(PINK, 0.8), outline=hexc("5C2A44"))
+
+
+# ============================================================================================ granite, diorite, andesite, gravel
+def trans_granite(name="granite"):
+    """Rose granite: dusty pink with darker rose and pearly flecks."""
+    return gradient_map(vblock(name), R_GRANITE)
+
+
+def trans_diorite(name="diorite"):
+    """Pearl diorite: white stone whose dark flecks are trans blue."""
+    img = vblock(name)
+    lo, hi = lum_range(img)
+    fleck = lambda p, px: (lum(px) - lo) / (hi - lo) < 0.35
+    out = gradient_map(img, R_DIORITE, mask=lambda p, px: not fleck(p, px))
+    return gradient_map(img, [hexc("2F6FA8"), hexc("4FA6DD"), hexc("8FD4F7")], mask=fleck, out=out)
+
+
+def trans_andesite(name="andesite"):
+    """Sky andesite: soft blue-grey with a few pink grains."""
+    base = vblock(name)
+    return glints(gradient_map(base, R_ANDESITE), base, R_ANDESITE, top=0.95, bottom=-1.0, chance=0.35, pink_mix=0.4)
+
+
+def trans_gravel():
+    """Pebbles in grey, pink, blue and white."""
+    img = vblock("gravel")
+    lo, hi = lum_range(img)
+    norm = lambda px: (lum(px) - lo) / (hi - lo)
+    pebble = lambda p, px: norm(px) > 0.42
+    labels, count = components(img, pebble)
+    rng = random.Random(31)
+    ramps = [R_STONE, mix_ramp(R_STONE, light_ramp(PINK, 0.5), 0.55), mix_ramp(R_STONE, light_ramp(BLUE, 0.5), 0.5),
+             mix_ramp(R_STONE, R_PEARL, 0.6), R_STONE]
+    choice = [ramps[rng.randrange(len(ramps))] for _ in range(count)]
+    out = img.copy()
+    for p in pixels(img):
+        px = img.getpixel(p)
+        t = norm(px)
+        c = sample(choice[labels[p]], 0.1 + 0.9 * t) if p in labels else sample(R_MORTAR, t * 1.3)
+        out.putpixel(p, (*c, px[3]))
+    return out
+
+
+# ============================================================================================ ores
+def ore_on(base_new, base_vanilla, ore_vanilla, ramp):
+    """Moves the ore of a vanilla ore texture onto a new background. Coloured ore pixels keep their
+    vanilla colours (so ores stay recognisable); grey pixels that differ from the vanilla background
+    (the ore's outlines and shading) are re-shaded with the new rock's palette."""
+    out = base_new.copy()
+    lo, hi = lum_range(base_vanilla)
+    for p in pixels(ore_vanilla):
+        px = ore_vanilla.getpixel(p)
+        if px[:3] == base_vanilla.getpixel(p)[:3]:
+            continue
+        if hsv(px)[1] > 0.14:
+            out.putpixel(p, px)
+        else:
+            c = sample(ramp, (lum(px) - lo) / (hi - lo))
+            out.putpixel(p, (*c, px[3]))
+    return out
+
+
+ORES = ("coal", "iron", "copper", "gold", "redstone", "lapis", "diamond", "emerald")
+
+
+def trans_ores():
+    stone_new, deep_new = trans_stone(), trans_deepslate()
+    stone_v, deep_v = vblock("stone"), vblock("deepslate")
+    out = {}
+    for ore in ORES:
+        out[f"trans_{ore}_ore"] = ore_on(stone_new, stone_v, vblock(f"{ore}_ore"), R_STONE)
+        out[f"trans_deepslate_{ore}_ore"] = ore_on(deep_new, deep_v, vblock(f"deepslate_{ore}_ore"), R_DEEPSLATE)
     return out
 
 
@@ -375,7 +495,7 @@ def cracked_trans_stone_bricks():
 
 
 def chiseled_trans_stone_bricks():
-    img = gradient_map(vblock("chiseled_stone_bricks"), mix_ramp(R_PEARL, R_LAVENDER, 0.25))
+    img = gradient_map(vblock("chiseled_stone_bricks"), mix_ramp(R_PEARL, R_MORTAR, 0.3))
     # A little heart carved into the centre panel.
     return paste_heart(img, 7, 7, shade(PINK, 0.95), outline=hexc("9E4C6B"))
 
@@ -556,6 +676,22 @@ def trans_crystal_ore():
     return out
 
 
+def trans_deepslate_crystal_ore():
+    """The crystal ore in deep slate: alternately blue and pink gems on dark slate."""
+    ore = vblock("deepslate_diamond_ore")
+    deep_v = vblock("deepslate")
+    gem = lambda p, px: hsv(px)[1] > 0.25
+    out = ore_on(trans_deepslate(), deep_v, ore, R_DEEPSLATE)
+    labels, count = components(ore, gem)
+    ramps = [[hexc("1F5288"), hexc("3EA5E6"), BLUE, hexc("E8F9FF")], [hexc("8E3E60"), hexc("E07D9C"), PINK, hexc("FFF0F4")]]
+    lo, hi = lum_range(ore, gem)
+    for p, label in labels.items():
+        px = ore.getpixel(p)
+        c = sample(ramps[label % 2], (lum(px) - lo) / (hi - lo))
+        out.putpixel(p, (*c, px[3]))
+    return out
+
+
 def trans_crystal_item():
     return gradient_map(vitem("amethyst_shard"), R_TRANS, curve=lambda t: 0.08 + 0.92 * t)
 
@@ -586,6 +722,37 @@ def trans_stained_glass():
         colour = FLAG[bands[y]] if FLAG[bands[y]] != WHITE else (240, 240, 250)
         c = mix(shade(colour, 0.85), mix(colour, WHITE, 0.5), t)
         out.putpixel((x, y), (*c, min(255, round(px[3] * 1.12))))
+    return out
+
+
+def trans_glass():
+    """Clear glass (what trans sand smelts into): vanilla glass with a pink and blue frame."""
+    base = vblock("glass")
+    out = base.copy()
+    for (x, y) in pixels(base):
+        px = base.getpixel((x, y))
+        if px[3] == 0:
+            continue
+        edge_x, edge_y = x in (0, 15), y in (0, 15)
+        if edge_x and edge_y:
+            c = WHITE
+        elif edge_y:
+            c = mix(BLUE, WHITE, 0.25)
+        elif edge_x:
+            c = mix(PINK, WHITE, 0.2)
+        else:
+            c = mix(px[:3], WHITE, 0.4)
+        out.putpixel((x, y), (*c, px[3]))
+    return out
+
+
+def trans_glass_pane_top():
+    base = vblock("glass_pane_top")
+    out = base.copy()
+    for (x, y) in pixels(base):
+        px = base.getpixel((x, y))
+        if px[3]:
+            out.putpixel((x, y), (*mix(BLUE if (y // 4) % 2 == 0 else PINK, WHITE, 0.3), px[3]))
     return out
 
 
@@ -1338,8 +1505,25 @@ def main():
         "trans_sandstone": sandstone("sandstone"), "trans_sandstone_top": sandstone("sandstone_top"),
         "trans_sandstone_bottom": sandstone("sandstone_bottom"), "cut_trans_sandstone": sandstone("cut_sandstone"),
         "chiseled_trans_sandstone": chiseled_trans_sandstone(),
+        # deepslate
+        "trans_deepslate": trans_deepslate(), "trans_deepslate_top": trans_deepslate("deepslate_top"),
+        "cobbled_trans_deepslate": trans_deepslate("cobbled_deepslate"),
+        "polished_trans_deepslate": trans_deepslate("polished_deepslate"),
+        "trans_deepslate_bricks": deepslate_bricks("deepslate_bricks", 3),
+        "cracked_trans_deepslate_bricks": deepslate_bricks("cracked_deepslate_bricks", 3),
+        "trans_deepslate_tiles": deepslate_bricks("deepslate_tiles", 1),
+        "cracked_trans_deepslate_tiles": deepslate_bricks("cracked_deepslate_tiles", 1),
+        "chiseled_trans_deepslate": chiseled_trans_deepslate(),
+        # granite, diorite, andesite, gravel
+        "trans_granite": trans_granite(), "polished_trans_granite": trans_granite("polished_granite"),
+        "trans_diorite": trans_diorite(), "polished_trans_diorite": trans_diorite("polished_diorite"),
+        "trans_andesite": trans_andesite(), "polished_trans_andesite": trans_andesite("polished_andesite"),
+        "trans_gravel": trans_gravel(),
+        **trans_ores(),
+        "trans_glass": trans_glass(), "trans_glass_pane_top": trans_glass_pane_top(),
         # crystals
-        "trans_crystal_ore": trans_crystal_ore(), "trans_crystal_block": trans_crystal_block(),
+        "trans_crystal_ore": trans_crystal_ore(), "trans_deepslate_crystal_ore": trans_deepslate_crystal_ore(),
+        "trans_crystal_block": trans_crystal_block(),
         "trans_crystal_cluster": trans_crystal_cluster(),
         # wood
         "trans_log": trans_log(), "trans_log_top": trans_log_top(), "stripped_trans_log": stripped_trans_log(),
@@ -1363,7 +1547,7 @@ def main():
     for name in ("trans_crystal_cluster", "trans_sapling", "pride_blossom"):
         save_mcmeta(f"block/{name}.png", CUTOUT)
     save_mcmeta("block/trans_leaves.png", LEAVES_META)
-    for name in ("trans_stained_glass", "trans_pink_stained_glass", "trans_blue_stained_glass"):
+    for name in ("trans_stained_glass", "trans_pink_stained_glass", "trans_blue_stained_glass", "trans_glass"):
         save_mcmeta(f"block/{name}.png", GLASS_META)
     save_mcmeta("block/trans_lantern.png", {"animation": {"frametime": 8}})
     save_mcmeta("block/pride_oven_front.png", {"animation": {"interpolate": False, "frametime": 4}})

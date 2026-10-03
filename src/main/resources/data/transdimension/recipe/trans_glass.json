@@ -5,6 +5,6 @@
   "experience": 0.1,
   "ingredient": "transdimension:trans_sand",
   "result": {
-    "id": "minecraft:glass"
+    "id": "transdimension:trans_glass"
   }
 }

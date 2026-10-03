@@ -2,12 +2,14 @@ package dev.goober.transdimension.registry;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
@@ -124,51 +126,24 @@ public final class ModItems {
 	public static final ResourceKey<CreativeModeTab> CREATIVE_TAB_KEY = ResourceKey.create(
 			BuiltInRegistries.CREATIVE_MODE_TAB.key(), TransDimension.id("trans_dimension"));
 
+	/** Technical items that shouldn't show up in the creative tab. */
+	private static final Set<String> HIDDEN_FROM_TAB = Set.of("trans_magic_bolt");
+
 	public static final CreativeModeTab CREATIVE_TAB = FabricCreativeModeTab.builder()
 			.icon(() -> new ItemStack(TRANS_CRYSTAL))
 			.title(Component.translatable("itemGroup.transdimension.trans_dimension"))
 			.displayItems((parameters, output) -> {
-				for (ItemLike entry : creativeTabContents()) {
-					output.accept(entry);
+				// Everything the mod registers, in registration order (blocks first, by family, then items).
+				for (Item item : BuiltInRegistries.ITEM) {
+					Identifier id = BuiltInRegistries.ITEM.getKey(item);
+					if (id.getNamespace().equals(TransDimension.MOD_ID) && !HIDDEN_FROM_TAB.contains(id.getPath())) {
+						output.accept(item);
+					}
 				}
 			})
 			.build();
 
 	private ModItems() {
-	}
-
-	private static List<ItemLike> creativeTabContents() {
-		return List.of(
-				// nature
-				ModBlocks.TRANS_GRASS_BLOCK, ModBlocks.TRANS_DIRT, ModBlocks.TRANS_SAND, ModBlocks.TRANS_STONE,
-				ModBlocks.TRANS_COBBLESTONE, ModBlocks.TRANS_LOG, ModBlocks.TRANS_WOOD, ModBlocks.STRIPPED_TRANS_LOG,
-				ModBlocks.STRIPPED_TRANS_WOOD, ModBlocks.TRANS_LEAVES, ModBlocks.TRANS_SAPLING, ModBlocks.PRIDE_BLOSSOM,
-				ModBlocks.TRANS_CRYSTAL_ORE, ModBlocks.TRANS_CRYSTAL_CLUSTER, ModBlocks.TRANS_CRYSTAL_BLOCK,
-				// trans wood
-				ModBlocks.TRANS_PLANKS, ModBlocks.TRANS_STAIRS, ModBlocks.TRANS_SLAB, ModBlocks.TRANS_FENCE,
-				ModBlocks.TRANS_FENCE_GATE, ModBlocks.TRANS_DOOR, ModBlocks.TRANS_TRAPDOOR, ModBlocks.TRANS_BUTTON,
-				ModBlocks.TRANS_PRESSURE_PLATE,
-				// trans stone
-				ModBlocks.TRANS_STONE_STAIRS, ModBlocks.TRANS_STONE_SLAB, ModBlocks.TRANS_STONE_BUTTON,
-				ModBlocks.TRANS_STONE_PRESSURE_PLATE, ModBlocks.TRANS_COBBLESTONE_STAIRS, ModBlocks.TRANS_COBBLESTONE_SLAB,
-				ModBlocks.TRANS_COBBLESTONE_WALL, ModBlocks.TRANS_STONE_BRICKS, ModBlocks.CRACKED_TRANS_STONE_BRICKS,
-				ModBlocks.CHISELED_TRANS_STONE_BRICKS, ModBlocks.TRANS_STONE_BRICK_STAIRS, ModBlocks.TRANS_STONE_BRICK_SLAB,
-				ModBlocks.TRANS_STONE_BRICK_WALL,
-				// trans sandstone
-				ModBlocks.TRANS_SANDSTONE, ModBlocks.CUT_TRANS_SANDSTONE, ModBlocks.CHISELED_TRANS_SANDSTONE,
-				ModBlocks.TRANS_SANDSTONE_STAIRS, ModBlocks.TRANS_SANDSTONE_SLAB, ModBlocks.TRANS_SANDSTONE_WALL,
-				// glass, wool, light, furniture
-				ModBlocks.TRANS_STAINED_GLASS, ModBlocks.TRANS_STAINED_GLASS_PANE, ModBlocks.TRANS_PINK_STAINED_GLASS,
-				ModBlocks.TRANS_PINK_STAINED_GLASS_PANE, ModBlocks.TRANS_BLUE_STAINED_GLASS, ModBlocks.TRANS_BLUE_STAINED_GLASS_PANE,
-				ModBlocks.TRANS_WOOL, ModBlocks.TRANS_CARPET, ModBlocks.TRANS_LANTERN, ModBlocks.TRANS_CHAIR, ModBlocks.TRANS_TABLE,
-				// bakery
-				ModBlocks.PRIDE_OVEN, ModBlocks.TRANS_CAKE,
-				TRANS_DONUT, TRANS_COOKIE, TRANS_CUPCAKE, TRANS_MACARON, TRANS_BOBA,
-				// gear
-				TRANS_CRYSTAL, TRANS_SWORD, TRANS_PICKAXE, TRANS_AXE, TRANS_SHOVEL, TRANS_HOE,
-				TRANS_HELMET, TRANS_CHESTPLATE, TRANS_LEGGINGS, TRANS_BOOTS,
-				SILLY_CAT_SPAWN_EGG
-		);
 	}
 
 	private static FoodProperties food(int nutrition, float saturation, boolean alwaysEdible) {

@@ -3,7 +3,7 @@
   "category": "building",
   "group": "stained_glass",
   "key": {
-    "#": "minecraft:glass",
+    "#": "transdimension:trans_glass",
     "P": "minecraft:pink_dye",
     "B": "minecraft:light_blue_dye",
     "W": "minecraft:white_dye"

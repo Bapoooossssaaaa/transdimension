@@ -144,6 +144,19 @@ def loot_cluster(name, drop):
         "rolls": 1.0}])
 
 
+def loot_like_vanilla(block, vanilla, swaps=None):
+    """Copies a vanilla 26.2 block loot table (tools/vanilla_extra/templates/loot/) with its block ids swapped for ours."""
+    with open(os.path.join(TEMPLATES, "loot", f"{vanilla}.json"), encoding="utf-8") as f:
+        text = f.read()
+    swaps = dict(swaps or {})
+    swaps.setdefault(f"minecraft:{vanilla}", rid(block))
+    for old, new in swaps.items():
+        text = text.replace(f'"{old}"', f'"{rid(new)}"')
+    d = json.loads(text)
+    d["random_sequence"] = f"{NS}:blocks/{block}"
+    loot(block, d)
+
+
 def loot_pot(name, plant):
     return table(name, [
         {"conditions": [{"condition": "minecraft:survives_explosion"}], "entries": [{"type": "minecraft:item", "name": "minecraft:flower_pot"}], "rolls": 1.0},
@@ -175,8 +188,35 @@ def smelting(result, ingredient, xp=0.1, category="blocks"):
             "ingredient": rid(ingredient), "result": {"id": rid(result)}}
 
 
+def blasting(result, ingredient, xp=0.1, category="misc"):
+    return {"type": "minecraft:blasting", "category": category, "cookingtime": 100, "experience": xp,
+            "ingredient": rid(ingredient), "result": {"id": rid(result)}}
+
+
+def stone_recipes(prefix, base, wall=True, cut_from=()):
+    """Stairs, slab (and wall) from `base` by crafting and stonecutting, and stonecutting from the blocks in `cut_from`."""
+    recipe(f"{prefix}_stairs", shaped(f"{prefix}_stairs", ["#  ", "## ", "###"], {"#": base}, 4))
+    recipe(f"{prefix}_slab", shaped(f"{prefix}_slab", ["###"], {"#": base}, 6))
+    parts = [("stairs", 1), ("slab", 2)]
+    if wall:
+        recipe(f"{prefix}_wall", shaped(f"{prefix}_wall", ["###", "###"], {"#": base}, 6, category="misc"))
+        parts.append(("wall", 1))
+    for source in [base, *cut_from]:
+        for part, count in parts:
+            recipe(f"{prefix}_{part}_from_{source}_stonecutting", stonecutting(f"{prefix}_{part}", source, count))
+
+
 def stonecutting(result, ingredient, count=1):
     return {"type": "minecraft:stonecutting", "ingredient": rid(ingredient), "result": {"count": count, "id": rid(result)}}
+
+
+# Vanilla ores re-made in trans rock: (name, English name, mining tier); ORE_SMELTING has what they smelt into.
+ORE_INFO = [("coal", "Coal", "stone"), ("iron", "Iron", "stone"), ("copper", "Copper", "stone"), ("gold", "Gold", "iron"),
+            ("redstone", "Redstone", "iron"), ("lapis", "Lapis Lazuli", "stone"), ("diamond", "Diamond", "iron"),
+            ("emerald", "Emerald", "iron")]
+ORE_SMELTING = {"coal": ("minecraft:coal", 0.1), "iron": ("minecraft:iron_ingot", 0.7), "copper": ("minecraft:copper_ingot", 0.7),
+                "gold": ("minecraft:gold_ingot", 1.0), "redstone": ("minecraft:redstone", 0.7), "lapis": ("minecraft:lapis_lazuli", 0.2),
+                "diamond": ("minecraft:diamond", 1.0), "emerald": ("minecraft:emerald", 1.0)}
 
 
 # ============================================================================================ registry of generated things
@@ -228,6 +268,27 @@ def log(block, english, side, end):
     name(block, english)
     mine(block, "axe")
     loot(block, loot_self(block))
+
+
+def mirrored_pillar(block, english, side, end, tool="pickaxe"):
+    """A deepslate-style pillar whose sides are randomly mirrored and rotated (vanilla's deepslate blockstate)."""
+    blockstate(block, from_template("deepslate", "deepslate", block))
+    textures = {"end": block_tex(end), "side": block_tex(side)}
+    model(block, {"parent": "minecraft:block/cube_column", "textures": textures})
+    model(f"{block}_mirrored", {"parent": "minecraft:block/cube_column_mirrored", "textures": textures})
+    item_def(block, f"{NS}:block/{block}")
+    name(block, english)
+    mine(block, tool)
+
+
+def stone_family(base, english, prefix, prefix_english, texture=None, wall_too=True, tool="pickaxe"):
+    """A full block plus its stairs and slab (and wall), all sharing one texture."""
+    cube(base, english, texture=texture or base, tool=tool)
+    tex = {k: texture or base for k in ("bottom", "top", "side")}
+    stairs(f"{prefix}_stairs", f"{prefix_english} Stairs", base, tex, tool)
+    slab(f"{prefix}_slab", f"{prefix_english} Slab", base, tex, tool)
+    if wall_too:
+        wall(f"{prefix}_wall", f"{prefix_english} Wall", texture or base)
 
 
 def wood(block, english, side):
@@ -488,10 +549,40 @@ def generate_blocks():
     slab("trans_sandstone_slab", "Trans Sandstone Slab", "trans_sandstone", sand_tex, "pickaxe")
     wall("trans_sandstone_wall", "Trans Sandstone Wall", "trans_sandstone")
 
+    # ---- trans deepslate family
+    mirrored_pillar("trans_deepslate", "Trans Deepslate", "trans_deepslate", "trans_deepslate_top")
+    loot_like_vanilla("trans_deepslate", "deepslate", {"minecraft:cobbled_deepslate": "cobbled_trans_deepslate"})
+    stone_family("cobbled_trans_deepslate", "Cobbled Trans Deepslate", "cobbled_trans_deepslate", "Cobbled Trans Deepslate")
+    stone_family("polished_trans_deepslate", "Polished Trans Deepslate", "polished_trans_deepslate", "Polished Trans Deepslate")
+    stone_family("trans_deepslate_bricks", "Trans Deepslate Bricks", "trans_deepslate_brick", "Trans Deepslate Brick")
+    cube("cracked_trans_deepslate_bricks", "Cracked Trans Deepslate Bricks")
+    stone_family("trans_deepslate_tiles", "Trans Deepslate Tiles", "trans_deepslate_tile", "Trans Deepslate Tile")
+    cube("cracked_trans_deepslate_tiles", "Cracked Trans Deepslate Tiles")
+    cube("chiseled_trans_deepslate", "Chiseled Trans Deepslate")
+
+    # ---- rose granite, pearl diorite, sky andesite, gravel
+    for stone, english in (("granite", "Rose Granite"), ("diorite", "Pearl Diorite"), ("andesite", "Sky Andesite")):
+        stone_family(f"trans_{stone}", english, f"trans_{stone}", english)
+        stone_family(f"polished_trans_{stone}", f"Polished {english}", f"polished_trans_{stone}", f"Polished {english}", wall_too=False)
+    cube("trans_gravel", "Trans Gravel", tool="shovel", drop=None)
+    loot_like_vanilla("trans_gravel", "gravel")
+
+    # ---- vanilla ores, at home in trans stone and trans deepslate
+    for ore, english, tier in ORE_INFO:
+        for block, vanilla, label in ((f"trans_{ore}_ore", f"{ore}_ore", f"Trans {english} Ore"),
+                                      (f"trans_deepslate_{ore}_ore", f"deepslate_{ore}_ore", f"Trans Deepslate {english} Ore")):
+            cube(block, label, drop=None)
+            loot_like_vanilla(block, vanilla)
+            tag("block", f"{ore}_ores", block)
+            tag("item", f"{ore}_ores", block)
+            tag("block", f"needs_{tier}_tool", block)
+
     # ---- crystals
     cube("trans_crystal_ore", "Trans Crystal Ore", drop=None)
     loot("trans_crystal_ore", loot_ore("trans_crystal_ore", "trans_crystal"))
-    tag("block", "needs_iron_tool", "trans_crystal_ore", "trans_crystal_block")
+    cube("trans_deepslate_crystal_ore", "Trans Deepslate Crystal Ore", drop=None)
+    loot("trans_deepslate_crystal_ore", loot_ore("trans_deepslate_crystal_ore", "trans_crystal"))
+    tag("block", "needs_iron_tool", "trans_crystal_ore", "trans_deepslate_crystal_ore", "trans_crystal_block")
     cube("trans_crystal_block", "Block of Trans Crystal")
     tag("block", "crystal_sound_blocks", "trans_crystal_block")
     blockstate("trans_crystal_cluster", from_template("amethyst_cluster", "amethyst_cluster", "trans_crystal_cluster"))
@@ -547,6 +638,8 @@ def generate_blocks():
     tag("item", "small_flowers", "pride_blossom")
 
     # ---- glass, wool and light
+    glass("trans_glass", "Trans Glass")
+    pane("trans_glass_pane", "Trans Glass Pane", "trans_glass")
     glass("trans_stained_glass", "Trans Pride Stained Glass")
     pane("trans_stained_glass_pane", "Trans Pride Stained Glass Pane", "trans_stained_glass")
     glass("trans_pink_stained_glass", "Trans Pink Stained Glass")
@@ -697,17 +790,49 @@ def generate_recipes():
     R("chiseled_trans_sandstone", shaped("chiseled_trans_sandstone", ["#", "#"], {"#": "trans_sandstone_slab"}, 1))
     R("cut_trans_sandstone_from_trans_sandstone_stonecutting", stonecutting("cut_trans_sandstone", "trans_sandstone"))
     R("chiseled_trans_sandstone_from_trans_sandstone_stonecutting", stonecutting("chiseled_trans_sandstone", "trans_sandstone"))
-    R("glass_from_trans_sand", smelting("minecraft:glass", "trans_sand"))
-    # glass and wool
+    # glass and wool: trans sand smelts into trans glass, which takes dye like vanilla glass
+    R("trans_glass", smelting("trans_glass", "trans_sand"))
     R("trans_stained_glass", shaped("trans_stained_glass", ["PBW", "B#B", "WBP"],
-                                    {"#": "minecraft:glass", "P": "minecraft:pink_dye", "B": "minecraft:light_blue_dye", "W": "minecraft:white_dye"}, 5, group="stained_glass"))
-    R("trans_pink_stained_glass", shaped("trans_pink_stained_glass", ["###", "#X#", "###"], {"#": "minecraft:glass", "X": "transdimension:pride_blossom"}, 8, group="stained_glass"))
-    R("trans_blue_stained_glass", shaped("trans_blue_stained_glass", ["###", "#X#", "###"], {"#": "minecraft:glass", "X": "transdimension:trans_crystal"}, 8, group="stained_glass"))
-    for glass_block in ("trans_stained_glass", "trans_pink_stained_glass", "trans_blue_stained_glass"):
+                                    {"#": "trans_glass", "P": "minecraft:pink_dye", "B": "minecraft:light_blue_dye", "W": "minecraft:white_dye"}, 5, group="stained_glass"))
+    R("trans_pink_stained_glass", shaped("trans_pink_stained_glass", ["###", "#X#", "###"], {"#": "trans_glass", "X": "transdimension:pride_blossom"}, 8, group="stained_glass"))
+    R("trans_blue_stained_glass", shaped("trans_blue_stained_glass", ["###", "#X#", "###"], {"#": "trans_glass", "X": "transdimension:trans_crystal"}, 8, group="stained_glass"))
+    for glass_block in ("trans_glass", "trans_stained_glass", "trans_pink_stained_glass", "trans_blue_stained_glass"):
         R(f"{glass_block}_pane", shaped(f"{glass_block}_pane", ["###", "###"], {"#": glass_block}, 16, category="misc", group="stained_glass_pane"))
     R("trans_wool", shaped("trans_wool", ["L", "P", "W"], {"L": "minecraft:light_blue_wool", "P": "minecraft:pink_wool", "W": "minecraft:white_wool"}, 3, group="wool"))
     R("trans_carpet", shaped("trans_carpet", ["##"], {"#": "trans_wool"}, 3, category="misc", group="carpet"))
     R("trans_lantern", shaped("trans_lantern", ["XXX", "X#X", "XXX"], {"#": "minecraft:torch", "X": "transdimension:trans_crystal"}, 2, category="misc"))
+    # deepslate: cobbled -> polished -> bricks -> tiles, like vanilla
+    R("trans_deepslate", smelting("trans_deepslate", "cobbled_trans_deepslate"))
+    R("polished_trans_deepslate", shaped("polished_trans_deepslate", ["##", "##"], {"#": "cobbled_trans_deepslate"}, 4))
+    R("trans_deepslate_bricks", shaped("trans_deepslate_bricks", ["##", "##"], {"#": "polished_trans_deepslate"}, 4))
+    R("trans_deepslate_tiles", shaped("trans_deepslate_tiles", ["##", "##"], {"#": "trans_deepslate_bricks"}, 4))
+    R("chiseled_trans_deepslate", shaped("chiseled_trans_deepslate", ["#", "#"], {"#": "cobbled_trans_deepslate_slab"}, 1))
+    R("cracked_trans_deepslate_bricks", smelting("cracked_trans_deepslate_bricks", "trans_deepslate_bricks"))
+    R("cracked_trans_deepslate_tiles", smelting("cracked_trans_deepslate_tiles", "trans_deepslate_tiles"))
+    deepslate_chain = ["cobbled_trans_deepslate", "polished_trans_deepslate", "trans_deepslate_bricks", "trans_deepslate_tiles"]
+    prefixes = {"cobbled_trans_deepslate": "cobbled_trans_deepslate", "polished_trans_deepslate": "polished_trans_deepslate",
+                "trans_deepslate_bricks": "trans_deepslate_brick", "trans_deepslate_tiles": "trans_deepslate_tile"}
+    for i, base in enumerate(deepslate_chain):
+        stone_recipes(prefixes[base], base, wall=True, cut_from=deepslate_chain[:i])
+        for earlier in deepslate_chain[:i]:
+            R(f"{base}_from_{earlier}_stonecutting", stonecutting(base, earlier))
+    R("chiseled_trans_deepslate_from_cobbled_trans_deepslate_stonecutting", stonecutting("chiseled_trans_deepslate", "cobbled_trans_deepslate"))
+    # rose granite, pearl diorite, sky andesite: made from trans cobblestone and quartz, like their vanilla twins
+    R("trans_diorite", shaped("trans_diorite", ["CQ", "QC"], {"C": "trans_cobblestone", "Q": "minecraft:quartz"}, 2))
+    R("trans_andesite", shapeless("trans_andesite", ["trans_diorite", "trans_cobblestone"], 2))
+    R("trans_granite", shapeless("trans_granite", ["trans_diorite", "minecraft:quartz"], 1))
+    for stone in ("granite", "diorite", "andesite"):
+        R(f"polished_trans_{stone}", shaped(f"polished_trans_{stone}", ["##", "##"], {"#": f"trans_{stone}"}, 4))
+        R(f"polished_trans_{stone}_from_trans_{stone}_stonecutting", stonecutting(f"polished_trans_{stone}", f"trans_{stone}"))
+        stone_recipes(f"trans_{stone}", f"trans_{stone}", wall=True)
+        stone_recipes(f"polished_trans_{stone}", f"polished_trans_{stone}", wall=False, cut_from=[f"trans_{stone}"])
+    # ores smelt and blast into their vanilla goods
+    for ore, (result, xp) in ORE_SMELTING.items():
+        for block in (f"trans_{ore}_ore", f"trans_deepslate_{ore}_ore"):
+            R(f"{result.split(':')[1]}_from_smelting_{block}", {**smelting(result, block, xp, category="misc"), "group": result.split(":")[1]})
+            R(f"{result.split(':')[1]}_from_blasting_{block}", {**blasting(result, block, xp), "group": result.split(":")[1]})
+    R("trans_crystal_from_smelting_deepslate_ore", smelting("trans_crystal", "trans_deepslate_crystal_ore", 1.0, category="misc"))
+    R("trans_crystal_from_blasting_deepslate_ore", blasting("trans_crystal", "trans_deepslate_crystal_ore", 1.0))
     # crystal
     R("trans_crystal_block", shaped("trans_crystal_block", ["###", "###", "###"], {"#": "trans_crystal"}, 1))
     R("trans_crystal_from_block", shapeless("trans_crystal", ["trans_crystal_block"], 9, category="misc"))
@@ -725,10 +850,16 @@ def generate_misc():
     tag("item", "sand", "trans_sand")
     tag("block", "smelts_to_glass", "trans_sand")
     tag("item", "smelts_to_glass", "trans_sand")
-    tag("block", "base_stone_overworld", "trans_stone")
-    tag("block", "overworld_carver_replaceables", "trans_stone", "trans_dirt", "trans_grass_block", "trans_sand", "trans_sandstone")
-    tag("item", "stone_tool_materials", "trans_cobblestone")
-    tag("item", "stone_crafting_materials", "trans_cobblestone")
+    rocks = ("trans_stone", "trans_granite", "trans_diorite", "trans_andesite", "trans_deepslate")
+    tag("block", "base_stone_overworld", *rocks)
+    tag("block", "overworld_carver_replaceables", *rocks, "trans_dirt", "trans_grass_block", "trans_sand", "trans_sandstone", "trans_gravel")
+    # What the realm's ore and rock-blob features may replace.
+    tag("block", "trans_stone_ore_replaceables", "trans_stone", "trans_granite", "trans_diorite", "trans_andesite", ns=NS)
+    tag("block", "trans_deepslate_ore_replaceables", "trans_deepslate", ns=NS)
+    tag("block", "trans_base_stone", *rocks, ns=NS)
+    tag("item", "stone_tool_materials", "trans_cobblestone", "cobbled_trans_deepslate")
+    tag("item", "stone_crafting_materials", "trans_cobblestone", "cobbled_trans_deepslate")
+    tag("block", "enderman_holdable", "trans_gravel")
     for t in ("animals_spawnable_on", "rabbits_spawnable_on", "wolves_spawnable_on", "foxes_spawnable_on",
               "frogs_spawnable_on", "parrots_spawnable_on", "valid_spawn"):
         tag("block", t, "trans_grass_block")
@@ -855,6 +986,7 @@ def remove_stale():
         os.path.join(ASSETS, "models", "item", "trans_water_bucket.json"),
         os.path.join(ASSETS, "models", "item", "pride_blossom.json"),
         os.path.join(DATA, "minecraft", "tags", "fluid", "water.json"),
+        os.path.join(DATA, NS, "recipe", "glass_from_trans_sand.json"),
     ]
     for p in stale:
         if os.path.exists(p):

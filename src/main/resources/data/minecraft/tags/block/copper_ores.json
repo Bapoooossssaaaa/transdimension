@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:trans_copper_ore",
+    "transdimension:trans_deepslate_copper_ore"
+  ]
+}

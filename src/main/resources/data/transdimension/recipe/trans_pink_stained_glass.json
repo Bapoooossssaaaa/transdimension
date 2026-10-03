@@ -3,7 +3,7 @@
   "category": "building",
   "group": "stained_glass",
   "key": {
-    "#": "minecraft:glass",
+    "#": "transdimension:trans_glass",
     "X": "transdimension:pride_blossom"
   },
   "pattern": [

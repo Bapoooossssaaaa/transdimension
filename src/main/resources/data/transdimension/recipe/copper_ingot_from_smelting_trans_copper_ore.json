@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "cookingtime": 200,
+  "experience": 0.7,
+  "ingredient": "transdimension:trans_copper_ore",
+  "result": {
+    "id": "minecraft:copper_ingot"
+  },
+  "group": "copper_ingot"
+}

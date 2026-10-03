@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:trans_deepslate_iron_ore",
+    "transdimension:trans_iron_ore"
+  ]
+}

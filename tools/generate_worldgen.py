@@ -248,9 +248,12 @@ def generate_features():
     pf("trans_crystal_geode", f"{NS}:trans_crystal_geode", geode(28, 30))
     pf("trans_crystal_geode_common", f"{NS}:trans_crystal_geode", geode(6, 50))
 
-    # ---- ores (existing configured feature: veins of size 7 in trans stone)
-    cf("ore_trans_crystal", {"type": "minecraft:ore", "config": {"discard_chance_on_air_exposure": 0.0, "size": 7, "targets": [{
-        "state": state("trans_crystal_ore"), "target": {"predicate_type": "minecraft:block_match", "block": f"{NS}:trans_stone"}}]}})
+    # ---- ores: trans crystal veins in trans stone and trans deepslate
+    cf("ore_trans_crystal", {"type": "minecraft:ore", "config": {"discard_chance_on_air_exposure": 0.0, "size": 7, "targets": [
+        {"state": state("trans_crystal_ore"), "target": {"predicate_type": "minecraft:tag_match", "tag": f"{NS}:trans_stone_ore_replaceables"}},
+        {"state": state("trans_deepslate_crystal_ore"),
+         "target": {"predicate_type": "minecraft:tag_match", "tag": f"{NS}:trans_deepslate_ore_replaceables"}}]}})
+    generate_vanilla_ores()
     ore = lambda count, lo, hi, shape="trapezoid": [{"type": "minecraft:count", "count": count}, {"type": "minecraft:in_square"},
                                                    {"type": "minecraft:height_range", "height": {"type": f"minecraft:{shape}", "max_inclusive": hi, "min_inclusive": lo}},
                                                    {"type": "minecraft:biome"}]
@@ -264,6 +267,53 @@ def generate_features():
         "state": state("trans_cobblestone")}})
     pf("trans_boulders", f"{NS}:trans_boulder", [{"type": "minecraft:rarity_filter", "chance": 3}, {"type": "minecraft:in_square"},
                                                  {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"}, {"type": "minecraft:biome"}])
+
+
+# ============================================================================================ vanilla ores
+VANILLA_ORES = os.path.join(HERE, "vanilla_extra", "templates", "worldgen", "ores")
+ORE_NAMES = ("coal", "iron", "copper", "gold", "redstone", "lapis", "diamond", "emerald")
+ORE_SWAPS = {
+    **{f"minecraft:{o}_ore": f"{NS}:trans_{o}_ore" for o in ORE_NAMES},
+    **{f"minecraft:deepslate_{o}_ore": f"{NS}:trans_deepslate_{o}_ore" for o in ORE_NAMES},
+    "minecraft:dirt": f"{NS}:trans_dirt", "minecraft:gravel": f"{NS}:trans_gravel", "minecraft:granite": f"{NS}:trans_granite",
+    "minecraft:diorite": f"{NS}:trans_diorite", "minecraft:andesite": f"{NS}:trans_andesite",
+    "minecraft:stone_ore_replaceables": f"{NS}:trans_stone_ore_replaceables",
+    "minecraft:deepslate_ore_replaceables": f"{NS}:trans_deepslate_ore_replaceables",
+    "minecraft:base_stone_overworld": f"{NS}:trans_base_stone",
+}
+
+
+def swap_ids(obj):
+    if isinstance(obj, dict):
+        return {k: swap_ids(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [swap_ids(v) for v in obj]
+    if isinstance(obj, str):
+        return ORE_SWAPS.get(obj, obj)
+    return obj
+
+
+def generate_vanilla_ores():
+    """Vanilla 26.2's overworld ores and rock blobs (same sizes, counts and heights), placing trans ores in trans rock.
+    Each vanilla feature X becomes transdimension:trans_X."""
+    for kind in ("configured", "placed"):
+        folder = os.path.join(VANILLA_ORES, kind)
+        for f in sorted(os.listdir(folder)):
+            with open(os.path.join(folder, f), encoding="utf-8") as fh:
+                d = swap_ids(json.load(fh))
+            name = "trans_" + f[:-5]
+            if kind == "configured":
+                cf(name, d)
+            else:
+                pf(name, f"{NS}:trans_" + d["feature"].split(":", 1)[1], d["placement"])
+
+
+# Rock blobs first, then ores, in vanilla's order.
+TRANS_ORES = [f"{NS}:trans_{n}" for n in (
+    "ore_dirt", "ore_gravel", "ore_granite_upper", "ore_granite_lower", "ore_diorite_upper", "ore_diorite_lower",
+    "ore_andesite_upper", "ore_andesite_lower", "ore_coal_upper", "ore_coal_lower", "ore_iron_upper", "ore_iron_middle",
+    "ore_iron_small", "ore_gold", "ore_gold_lower", "ore_redstone", "ore_redstone_lower", "ore_diamond", "ore_diamond_medium",
+    "ore_diamond_large", "ore_diamond_buried", "ore_lapis", "ore_lapis_buried", "ore_copper")]
 
 
 # ============================================================================================ biomes
@@ -285,7 +335,7 @@ OCEAN_MONSTERS = [spawn("minecraft:drowned", 100, 1, 1)] + [m for m in MONSTERS 
 BATS = [spawn("minecraft:bat", 10, 8, 8)]
 
 UNDERGROUND = ["minecraft:monster_room", "minecraft:monster_room_deep"]
-ORES = [f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_deep", "minecraft:disk_clay"]
+ORES = TRANS_ORES + [f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_deep", "minecraft:disk_clay"]
 SPRINGS = ["minecraft:spring_water", "minecraft:spring_lava"]
 CAVE_DECOR = ["minecraft:glow_lichen"]
 
@@ -405,7 +455,7 @@ def generate_biomes():
           sky="#a9c4ff", fog="#e8e0ff", music_sound="minecraft:music.overworld.jagged_peaks",
           particles=particles("minecraft:snowflake", 0.001),
           features=land(f"{NS}:trans_boulders", f"{NS}:trans_crystal_spikes_rare", "minecraft:patch_grass_taiga",
-                        ores=ORES + [f"{NS}:ore_trans_crystal_extra"], top=["minecraft:freeze_top_layer"]),
+                        ores=ORES + [f"{NS}:ore_trans_crystal_extra", f"{NS}:trans_ore_emerald"], top=["minecraft:freeze_top_layer"]),
           creatures=[spawn("minecraft:goat", 8, 1, 3), spawn("minecraft:rabbit", 3, 2, 3), spawn("silly_cat", 1, 1, 1)])
 
     biome("trans_beach", temperature=0.8, downfall=0.4, grass="#f5a9b8", foliage="#f5a9b8", water="#5bcefa", water_fog="#1f6fa8",
@@ -435,7 +485,8 @@ def generate_biomes():
     biome("crystal_caves", temperature=0.5, downfall=0.5, grass="#8ed8f8", foliage="#f5a9b8", water="#a88cf5", water_fog="#4a3a8f",
           sky="#9fb8ff", fog="#d9c8ff", music_sound="minecraft:music.overworld.lush_caves",
           particles=particles("minecraft:end_rod", 0.003),
-          features={3: UNDERGROUND, 2: [f"{NS}:trans_crystal_geode_common"], 6: ORES + [f"{NS}:ore_trans_crystal_extra"],
+          features={3: UNDERGROUND, 2: [f"{NS}:trans_crystal_geode_common"],
+                    6: ORES + [f"{NS}:ore_trans_crystal_extra", f"{NS}:trans_ore_copper_large"],
                     7: CAVE_DECOR + [f"{NS}:trans_crystal_clusters_cave_floor", f"{NS}:trans_crystal_clusters_cave_ceiling"], 8: SPRINGS},
           creatures=[])
 
@@ -448,6 +499,7 @@ FEATURE_RANK = [
     "minecraft:fossil_upper", f"{NS}:trans_crystal_geode_common", f"{NS}:trans_crystal_geode",
     "minecraft:monster_room", "minecraft:monster_room_deep",
     # ores
+    *TRANS_ORES, f"{NS}:trans_ore_copper_large", f"{NS}:trans_ore_emerald",
     f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_extra", "minecraft:disk_clay", "minecraft:disk_sand",
     # underground decoration
     "minecraft:glow_lichen", f"{NS}:trans_crystal_clusters_cave_floor", f"{NS}:trans_crystal_clusters_cave_ceiling",
@@ -578,6 +630,9 @@ def surface_rule():
             cond(floor(add_surface_depth=True), under),
             sandstone_layer,
         )),
+        # Trans deepslate below y=0, blending into trans stone up to y=8, like vanilla deepslate.
+        cond({"type": "minecraft:vertical_gradient", "false_at_and_above": {"absolute": 8}, "random_name": "minecraft:deepslate",
+              "true_at_and_below": {"absolute": 0}}, block("trans_deepslate", axis="y")),
     )
 
 

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column_mirrored",
+  "textures": {
+    "end": "transdimension:block/trans_deepslate_top",
+    "side": "transdimension:block/trans_deepslate"
+  }
+}

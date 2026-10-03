@@ -11,6 +11,8 @@ import net.minecraft.references.BlockItemId;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.ColorRGBA;
+import net.minecraft.util.valueproviders.ConstantInt;
+import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.BlockItem;
@@ -29,8 +31,10 @@ import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.PressurePlateBlock;
+import net.minecraft.world.level.block.RedStoneOreBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.SlabBlock;
@@ -38,6 +42,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.StainedGlassBlock;
 import net.minecraft.world.level.block.StainedGlassPaneBlock;
 import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.UntintedParticleLeavesBlock;
 import net.minecraft.world.level.block.WallBlock;
@@ -115,10 +120,82 @@ public final class ModBlocks {
 	public static final Block TRANS_SANDSTONE_SLAB = slab("trans_sandstone_slab", Blocks.SANDSTONE_SLAB);
 	public static final Block TRANS_SANDSTONE_WALL = wall("trans_sandstone_wall", Blocks.SANDSTONE_WALL);
 
+	// ---------------------------------------------------------------- trans deepslate family
+	public static final Block TRANS_DEEPSLATE = register("trans_deepslate", RotatedPillarBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE));
+	public static final Block COBBLED_TRANS_DEEPSLATE = copy("cobbled_trans_deepslate", Blocks.COBBLED_DEEPSLATE);
+	public static final Block COBBLED_TRANS_DEEPSLATE_STAIRS = stairs("cobbled_trans_deepslate_stairs", COBBLED_TRANS_DEEPSLATE, Blocks.COBBLED_DEEPSLATE_STAIRS);
+	public static final Block COBBLED_TRANS_DEEPSLATE_SLAB = slab("cobbled_trans_deepslate_slab", Blocks.COBBLED_DEEPSLATE_SLAB);
+	public static final Block COBBLED_TRANS_DEEPSLATE_WALL = wall("cobbled_trans_deepslate_wall", Blocks.COBBLED_DEEPSLATE_WALL);
+	public static final Block POLISHED_TRANS_DEEPSLATE = copy("polished_trans_deepslate", Blocks.POLISHED_DEEPSLATE);
+	public static final Block POLISHED_TRANS_DEEPSLATE_STAIRS = stairs("polished_trans_deepslate_stairs", POLISHED_TRANS_DEEPSLATE, Blocks.POLISHED_DEEPSLATE_STAIRS);
+	public static final Block POLISHED_TRANS_DEEPSLATE_SLAB = slab("polished_trans_deepslate_slab", Blocks.POLISHED_DEEPSLATE_SLAB);
+	public static final Block POLISHED_TRANS_DEEPSLATE_WALL = wall("polished_trans_deepslate_wall", Blocks.POLISHED_DEEPSLATE_WALL);
+	public static final Block TRANS_DEEPSLATE_BRICKS = copy("trans_deepslate_bricks", Blocks.DEEPSLATE_BRICKS);
+	public static final Block TRANS_DEEPSLATE_BRICK_STAIRS = stairs("trans_deepslate_brick_stairs", TRANS_DEEPSLATE_BRICKS, Blocks.DEEPSLATE_BRICK_STAIRS);
+	public static final Block TRANS_DEEPSLATE_BRICK_SLAB = slab("trans_deepslate_brick_slab", Blocks.DEEPSLATE_BRICK_SLAB);
+	public static final Block TRANS_DEEPSLATE_BRICK_WALL = wall("trans_deepslate_brick_wall", Blocks.DEEPSLATE_BRICK_WALL);
+	public static final Block CRACKED_TRANS_DEEPSLATE_BRICKS = copy("cracked_trans_deepslate_bricks", Blocks.CRACKED_DEEPSLATE_BRICKS);
+	public static final Block TRANS_DEEPSLATE_TILES = copy("trans_deepslate_tiles", Blocks.DEEPSLATE_TILES);
+	public static final Block TRANS_DEEPSLATE_TILE_STAIRS = stairs("trans_deepslate_tile_stairs", TRANS_DEEPSLATE_TILES, Blocks.DEEPSLATE_TILE_STAIRS);
+	public static final Block TRANS_DEEPSLATE_TILE_SLAB = slab("trans_deepslate_tile_slab", Blocks.DEEPSLATE_TILE_SLAB);
+	public static final Block TRANS_DEEPSLATE_TILE_WALL = wall("trans_deepslate_tile_wall", Blocks.DEEPSLATE_TILE_WALL);
+	public static final Block CRACKED_TRANS_DEEPSLATE_TILES = copy("cracked_trans_deepslate_tiles", Blocks.CRACKED_DEEPSLATE_TILES);
+	public static final Block CHISELED_TRANS_DEEPSLATE = copy("chiseled_trans_deepslate", Blocks.CHISELED_DEEPSLATE);
+
+	// ---------------------------------------------------------------- rose granite, pearl diorite, sky andesite, gravel
+	public static final Block TRANS_GRANITE = copy("trans_granite", Blocks.GRANITE);
+	public static final Block TRANS_GRANITE_STAIRS = stairs("trans_granite_stairs", TRANS_GRANITE, Blocks.GRANITE_STAIRS);
+	public static final Block TRANS_GRANITE_SLAB = slab("trans_granite_slab", Blocks.GRANITE_SLAB);
+	public static final Block TRANS_GRANITE_WALL = wall("trans_granite_wall", Blocks.GRANITE_WALL);
+	public static final Block POLISHED_TRANS_GRANITE = copy("polished_trans_granite", Blocks.POLISHED_GRANITE);
+	public static final Block POLISHED_TRANS_GRANITE_STAIRS = stairs("polished_trans_granite_stairs", POLISHED_TRANS_GRANITE, Blocks.POLISHED_GRANITE_STAIRS);
+	public static final Block POLISHED_TRANS_GRANITE_SLAB = slab("polished_trans_granite_slab", Blocks.POLISHED_GRANITE_SLAB);
+	public static final Block TRANS_DIORITE = copy("trans_diorite", Blocks.DIORITE);
+	public static final Block TRANS_DIORITE_STAIRS = stairs("trans_diorite_stairs", TRANS_DIORITE, Blocks.DIORITE_STAIRS);
+	public static final Block TRANS_DIORITE_SLAB = slab("trans_diorite_slab", Blocks.DIORITE_SLAB);
+	public static final Block TRANS_DIORITE_WALL = wall("trans_diorite_wall", Blocks.DIORITE_WALL);
+	public static final Block POLISHED_TRANS_DIORITE = copy("polished_trans_diorite", Blocks.POLISHED_DIORITE);
+	public static final Block POLISHED_TRANS_DIORITE_STAIRS = stairs("polished_trans_diorite_stairs", POLISHED_TRANS_DIORITE, Blocks.POLISHED_DIORITE_STAIRS);
+	public static final Block POLISHED_TRANS_DIORITE_SLAB = slab("polished_trans_diorite_slab", Blocks.POLISHED_DIORITE_SLAB);
+	public static final Block TRANS_ANDESITE = copy("trans_andesite", Blocks.ANDESITE);
+	public static final Block TRANS_ANDESITE_STAIRS = stairs("trans_andesite_stairs", TRANS_ANDESITE, Blocks.ANDESITE_STAIRS);
+	public static final Block TRANS_ANDESITE_SLAB = slab("trans_andesite_slab", Blocks.ANDESITE_SLAB);
+	public static final Block TRANS_ANDESITE_WALL = wall("trans_andesite_wall", Blocks.ANDESITE_WALL);
+	public static final Block POLISHED_TRANS_ANDESITE = copy("polished_trans_andesite", Blocks.POLISHED_ANDESITE);
+	public static final Block POLISHED_TRANS_ANDESITE_STAIRS = stairs("polished_trans_andesite_stairs", POLISHED_TRANS_ANDESITE, Blocks.POLISHED_ANDESITE_STAIRS);
+	public static final Block POLISHED_TRANS_ANDESITE_SLAB = slab("polished_trans_andesite_slab", Blocks.POLISHED_ANDESITE_SLAB);
+	public static final Block TRANS_GRAVEL = register("trans_gravel",
+			properties -> new ColoredFallingBlock(new ColorRGBA(0xFFB9AEB4), properties),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.GRAVEL));
+
+	// ---------------------------------------------------------------- vanilla ores in trans stone and trans deepslate
+	public static final Block TRANS_COAL_ORE = ore("trans_coal_ore", UniformInt.of(0, 2), Blocks.COAL_ORE);
+	public static final Block TRANS_DEEPSLATE_COAL_ORE = ore("trans_deepslate_coal_ore", UniformInt.of(0, 2), Blocks.DEEPSLATE_COAL_ORE);
+	public static final Block TRANS_IRON_ORE = ore("trans_iron_ore", ConstantInt.of(0), Blocks.IRON_ORE);
+	public static final Block TRANS_DEEPSLATE_IRON_ORE = ore("trans_deepslate_iron_ore", ConstantInt.of(0), Blocks.DEEPSLATE_IRON_ORE);
+	public static final Block TRANS_COPPER_ORE = ore("trans_copper_ore", ConstantInt.of(0), Blocks.COPPER_ORE);
+	public static final Block TRANS_DEEPSLATE_COPPER_ORE = ore("trans_deepslate_copper_ore", ConstantInt.of(0), Blocks.DEEPSLATE_COPPER_ORE);
+	public static final Block TRANS_GOLD_ORE = ore("trans_gold_ore", ConstantInt.of(0), Blocks.GOLD_ORE);
+	public static final Block TRANS_DEEPSLATE_GOLD_ORE = ore("trans_deepslate_gold_ore", ConstantInt.of(0), Blocks.DEEPSLATE_GOLD_ORE);
+	public static final Block TRANS_REDSTONE_ORE = register("trans_redstone_ore", RedStoneOreBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.REDSTONE_ORE));
+	public static final Block TRANS_DEEPSLATE_REDSTONE_ORE = register("trans_deepslate_redstone_ore", RedStoneOreBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_REDSTONE_ORE));
+	public static final Block TRANS_LAPIS_ORE = ore("trans_lapis_ore", UniformInt.of(2, 5), Blocks.LAPIS_ORE);
+	public static final Block TRANS_DEEPSLATE_LAPIS_ORE = ore("trans_deepslate_lapis_ore", UniformInt.of(2, 5), Blocks.DEEPSLATE_LAPIS_ORE);
+	public static final Block TRANS_DIAMOND_ORE = ore("trans_diamond_ore", UniformInt.of(3, 7), Blocks.DIAMOND_ORE);
+	public static final Block TRANS_DEEPSLATE_DIAMOND_ORE = ore("trans_deepslate_diamond_ore", UniformInt.of(3, 7), Blocks.DEEPSLATE_DIAMOND_ORE);
+	public static final Block TRANS_EMERALD_ORE = ore("trans_emerald_ore", UniformInt.of(3, 7), Blocks.EMERALD_ORE);
+	public static final Block TRANS_DEEPSLATE_EMERALD_ORE = ore("trans_deepslate_emerald_ore", UniformInt.of(3, 7), Blocks.DEEPSLATE_EMERALD_ORE);
+
 	// ---------------------------------------------------------------- crystals
 	public static final Block TRANS_CRYSTAL_ORE = register("trans_crystal_ore",
 			properties -> new DropExperienceBlock(UniformInt.of(3, 7), properties),
 			BlockBehaviour.Properties.ofFullCopy(Blocks.DIAMOND_ORE).lightLevel(state -> 3));
+	public static final Block TRANS_DEEPSLATE_CRYSTAL_ORE = register("trans_deepslate_crystal_ore",
+			properties -> new DropExperienceBlock(UniformInt.of(3, 7), properties),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_DIAMOND_ORE).lightLevel(state -> 3));
 	public static final Block TRANS_CRYSTAL_BLOCK = register("trans_crystal_block", Block::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK).strength(5.0F, 6.0F).requiresCorrectToolForDrops().lightLevel(state -> 6));
 	/** A glowing crystal cluster that grows on any face, like amethyst clusters (height 7, width 10). */
@@ -175,6 +252,11 @@ public final class ModBlocks {
 			BlockBehaviour.Properties.ofFullCopy(Blocks.POTTED_POPPY));
 
 	// ---------------------------------------------------------------- glass, wool and light
+	/** Clear glass with a pink and blue frame; what trans sand smelts into. */
+	public static final Block TRANS_GLASS = register("trans_glass", TransparentBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS));
+	public static final Block TRANS_GLASS_PANE = register("trans_glass_pane", IronBarsBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS_PANE));
 	public static final Block TRANS_STAINED_GLASS = glass("trans_stained_glass", DyeColor.PINK);
 	public static final Block TRANS_STAINED_GLASS_PANE = pane("trans_stained_glass_pane", DyeColor.PINK);
 	public static final Block TRANS_PINK_STAINED_GLASS = glass("trans_pink_stained_glass", DyeColor.PINK);
@@ -210,6 +292,14 @@ public final class ModBlocks {
 
 	private static ResourceKey<net.minecraft.world.level.levelgen.feature.ConfiguredFeature<?, ?>> configuredFeature(String name) {
 		return ResourceKey.create(Registries.CONFIGURED_FEATURE, TransDimension.id(name));
+	}
+
+	private static Block copy(String name, Block copyFrom) {
+		return register(name, Block::new, BlockBehaviour.Properties.ofFullCopy(copyFrom));
+	}
+
+	private static Block ore(String name, IntProvider experience, Block copyFrom) {
+		return register(name, properties -> new DropExperienceBlock(experience, properties), BlockBehaviour.Properties.ofFullCopy(copyFrom));
 	}
 
 	private static Block stairs(String name, Block base, Block copyFrom) {

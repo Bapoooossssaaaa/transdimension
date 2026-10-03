@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "transdimension:trans_deepslate_bricks",
+  "result": {
+    "count": 1,
+    "id": "transdimension:trans_deepslate_brick_wall"
+  }
+}
