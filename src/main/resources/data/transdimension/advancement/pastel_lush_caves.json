@@ -1,7 +1,7 @@
 {
-  "parent": "transdimension:goober",
+  "parent": "transdimension:crystal_caves",
   "criteria": {
-    "found_trans_village": {
+    "pastel_lush_caves": {
       "trigger": "minecraft:location",
       "conditions": {
         "player": [
@@ -10,7 +10,7 @@
             "entity": "this",
             "predicate": {
               "minecraft:location": {
-                "structures": "transdimension:trans_village"
+                "biomes": "transdimension:pastel_lush_caves"
               }
             }
           }
@@ -20,18 +20,18 @@
   },
   "display": {
     "icon": {
-      "id": "transdimension:trans_door"
+      "id": "transdimension:trans_moss_block"
     },
     "title": {
-      "translate": "advancements.transdimension.trans_village.title"
+      "translate": "advancements.transdimension.pastel_lush_caves.title"
     },
     "description": {
-      "translate": "advancements.transdimension.trans_village.description"
+      "translate": "advancements.transdimension.pastel_lush_caves.description"
     }
   },
   "requirements": [
     [
-      "found_trans_village"
+      "pastel_lush_caves"
     ]
   ]
 }

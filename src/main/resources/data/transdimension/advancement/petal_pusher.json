@@ -1,0 +1,42 @@
+{
+  "parent": "transdimension:goober",
+  "criteria": {
+    "flower": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "transdimension:pride_blossom",
+              "transdimension:trans_tulip",
+              "transdimension:pearl_daisy",
+              "transdimension:sky_bell",
+              "transdimension:flag_lily",
+              "transdimension:lavender_puff",
+              "transdimension:trans_orchid",
+              "transdimension:heart_bloom",
+              "transdimension:pride_peony",
+              "transdimension:trans_petals"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_tulip"
+    },
+    "title": {
+      "translate": "advancements.transdimension.petal_pusher.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.petal_pusher.description"
+    }
+  },
+  "requirements": [
+    [
+      "flower"
+    ]
+  ]
+}

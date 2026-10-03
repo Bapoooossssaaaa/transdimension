@@ -1,7 +1,7 @@
 {
   "parent": "transdimension:goober",
   "criteria": {
-    "found_trans_village": {
+    "crystal_caves": {
       "trigger": "minecraft:location",
       "conditions": {
         "player": [
@@ -10,7 +10,7 @@
             "entity": "this",
             "predicate": {
               "minecraft:location": {
-                "structures": "transdimension:trans_village"
+                "biomes": "transdimension:crystal_caves"
               }
             }
           }
@@ -20,18 +20,18 @@
   },
   "display": {
     "icon": {
-      "id": "transdimension:trans_door"
+      "id": "transdimension:trans_crystal_cluster"
     },
     "title": {
-      "translate": "advancements.transdimension.trans_village.title"
+      "translate": "advancements.transdimension.crystal_caves.title"
     },
     "description": {
-      "translate": "advancements.transdimension.trans_village.description"
+      "translate": "advancements.transdimension.crystal_caves.description"
     }
   },
   "requirements": [
     [
-      "found_trans_village"
+      "crystal_caves"
     ]
   ]
 }

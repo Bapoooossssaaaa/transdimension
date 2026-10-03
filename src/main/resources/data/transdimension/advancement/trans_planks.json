@@ -1,0 +1,31 @@
+{
+  "parent": "transdimension:goober",
+  "criteria": {
+    "planks": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_planks"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_planks"
+    },
+    "title": {
+      "translate": "advancements.transdimension.trans_planks.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.trans_planks.description"
+    }
+  },
+  "requirements": [
+    [
+      "planks"
+    ]
+  ]
+}

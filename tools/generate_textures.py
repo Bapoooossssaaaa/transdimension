@@ -2121,6 +2121,15 @@ def painting_plush_party():
     return framed(img)
 
 
+def advancement_background():
+    planks = trans_planks()
+    out = planks.copy()
+    for p in pixels(planks):
+        r, g, b, a = planks.getpixel(p)
+        out.putpixel(p, (*shade(mix((r, g, b), hexc("2A1B45"), 0.45), 0.8), 255))
+    return out
+
+
 # name: (blocks wide, blocks high, English title, author, texture maker)
 PAINTINGS = {
     "silly_cat_portrait": (3, 3, "Portrait of a Silly Cat", "Maddie", lambda: photo_painting("silly_cat_painting.png")),
@@ -2692,6 +2701,8 @@ def main():
     for i, frame in enumerate(saliva_frames()):
         save(frame, f"gui/saliva/saliva_{i}.png")
     save(heart_clouds(), "environment/heart_clouds.png")
+    # The advancement tab's background: trans planks, dimmed so the icons stand out.
+    save(advancement_background(), "gui/advancements/backgrounds/trans.png")
     for name, (pw, ph, _, _, make) in PAINTINGS.items():
         img = make()
         assert img.size == (16 * pw, 16 * ph), name

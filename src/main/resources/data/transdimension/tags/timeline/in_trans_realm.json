@@ -3,6 +3,7 @@
     "#minecraft:universal",
     "minecraft:moon",
     "minecraft:early_game",
-    "transdimension:trans_day"
+    "transdimension:trans_day",
+    "transdimension:trans_clouds"
   ]
 }

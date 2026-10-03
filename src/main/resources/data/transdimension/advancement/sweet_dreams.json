@@ -1,8 +1,8 @@
 {
-  "parent": "transdimension:goober",
+  "parent": "transdimension:trans_planks",
   "criteria": {
-    "found_trans_village": {
-      "trigger": "minecraft:location",
+    "slept": {
+      "trigger": "minecraft:slept_in_bed",
       "conditions": {
         "player": [
           {
@@ -10,7 +10,9 @@
             "entity": "this",
             "predicate": {
               "minecraft:location": {
-                "structures": "transdimension:trans_village"
+                "block": {
+                  "blocks": "transdimension:trans_bed"
+                }
               }
             }
           }
@@ -20,18 +22,18 @@
   },
   "display": {
     "icon": {
-      "id": "transdimension:trans_door"
+      "id": "transdimension:trans_bed"
     },
     "title": {
-      "translate": "advancements.transdimension.trans_village.title"
+      "translate": "advancements.transdimension.sweet_dreams.title"
     },
     "description": {
-      "translate": "advancements.transdimension.trans_village.description"
+      "translate": "advancements.transdimension.sweet_dreams.description"
     }
   },
   "requirements": [
     [
-      "found_trans_village"
+      "slept"
     ]
   ]
 }

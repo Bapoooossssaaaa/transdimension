@@ -1,0 +1,149 @@
+{
+  "parent": "transdimension:petal_pusher",
+  "criteria": {
+    "pride_blossom": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:pride_blossom"
+          }
+        ]
+      }
+    },
+    "trans_tulip": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_tulip"
+          }
+        ]
+      }
+    },
+    "pearl_daisy": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:pearl_daisy"
+          }
+        ]
+      }
+    },
+    "sky_bell": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:sky_bell"
+          }
+        ]
+      }
+    },
+    "flag_lily": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:flag_lily"
+          }
+        ]
+      }
+    },
+    "lavender_puff": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:lavender_puff"
+          }
+        ]
+      }
+    },
+    "trans_orchid": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_orchid"
+          }
+        ]
+      }
+    },
+    "heart_bloom": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:heart_bloom"
+          }
+        ]
+      }
+    },
+    "pride_peony": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:pride_peony"
+          }
+        ]
+      }
+    },
+    "trans_petals": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_petals"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:pride_peony"
+    },
+    "title": {
+      "translate": "advancements.transdimension.pastel_bouquet.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.pastel_bouquet.description"
+    },
+    "frame": "challenge"
+  },
+  "requirements": [
+    [
+      "pride_blossom"
+    ],
+    [
+      "trans_tulip"
+    ],
+    [
+      "pearl_daisy"
+    ],
+    [
+      "sky_bell"
+    ],
+    [
+      "flag_lily"
+    ],
+    [
+      "lavender_puff"
+    ],
+    [
+      "trans_orchid"
+    ],
+    [
+      "heart_bloom"
+    ],
+    [
+      "pride_peony"
+    ],
+    [
+      "trans_petals"
+    ]
+  ]
+}

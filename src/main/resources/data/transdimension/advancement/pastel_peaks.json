@@ -1,7 +1,7 @@
 {
   "parent": "transdimension:goober",
   "criteria": {
-    "found_trans_village": {
+    "peak": {
       "trigger": "minecraft:location",
       "conditions": {
         "player": [
@@ -10,7 +10,12 @@
             "entity": "this",
             "predicate": {
               "minecraft:location": {
-                "structures": "transdimension:trans_village"
+                "biomes": "transdimension:pastel_peaks",
+                "position": {
+                  "y": {
+                    "min": 160.0
+                  }
+                }
               }
             }
           }
@@ -20,18 +25,18 @@
   },
   "display": {
     "icon": {
-      "id": "transdimension:trans_door"
+      "id": "transdimension:trans_stone"
     },
     "title": {
-      "translate": "advancements.transdimension.trans_village.title"
+      "translate": "advancements.transdimension.pastel_peaks.title"
     },
     "description": {
-      "translate": "advancements.transdimension.trans_village.description"
+      "translate": "advancements.transdimension.pastel_peaks.description"
     }
   },
   "requirements": [
     [
-      "found_trans_village"
+      "peak"
     ]
   ]
 }

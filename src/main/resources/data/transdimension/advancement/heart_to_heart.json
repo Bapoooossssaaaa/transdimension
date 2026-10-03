@@ -1,0 +1,50 @@
+{
+  "parent": "transdimension:sweet_dreams",
+  "criteria": {
+    "left": {
+      "trigger": "minecraft:placed_block",
+      "conditions": {
+        "location": [
+          {
+            "condition": "minecraft:block_state_property",
+            "block": "transdimension:trans_bed",
+            "properties": {
+              "heart": "left"
+            }
+          }
+        ]
+      }
+    },
+    "right": {
+      "trigger": "minecraft:placed_block",
+      "conditions": {
+        "location": [
+          {
+            "condition": "minecraft:block_state_property",
+            "block": "transdimension:trans_bed",
+            "properties": {
+              "heart": "right"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_bed"
+    },
+    "title": {
+      "translate": "advancements.transdimension.heart_to_heart.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.heart_to_heart.description"
+    }
+  },
+  "requirements": [
+    [
+      "left",
+      "right"
+    ]
+  ]
+}

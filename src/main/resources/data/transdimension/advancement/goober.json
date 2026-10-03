@@ -1,24 +1,23 @@
 {
-  "parent": "minecraft:story/root",
   "criteria": {
     "entered_trans_realm": {
+      "trigger": "minecraft:changed_dimension",
       "conditions": {
         "to": "transdimension:trans_realm"
-      },
-      "trigger": "minecraft:changed_dimension"
+      }
     }
   },
   "display": {
-    "description": {
-      "translate": "advancements.transdimension.goober.description"
-    },
-    "frame": "goal",
     "icon": {
       "id": "transdimension:trans_crystal"
     },
     "title": {
       "translate": "advancements.transdimension.goober.title"
-    }
+    },
+    "description": {
+      "translate": "advancements.transdimension.goober.description"
+    },
+    "background": "transdimension:gui/advancements/backgrounds/trans"
   },
   "requirements": [
     [

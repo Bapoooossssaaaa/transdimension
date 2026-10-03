@@ -1,0 +1,136 @@
+{
+  "parent": "transdimension:first_plush",
+  "criteria": {
+    "silly_cat_plush": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:silly_cat_plush"
+          }
+        ]
+      }
+    },
+    "trans_cat_plush": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_cat_plush"
+          }
+        ]
+      }
+    },
+    "midnight_cat_plush": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:midnight_cat_plush"
+          }
+        ]
+      }
+    },
+    "biscuit_cat_plush": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:biscuit_cat_plush"
+          }
+        ]
+      }
+    },
+    "patches_cat_plush": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:patches_cat_plush"
+          }
+        ]
+      }
+    },
+    "mochi_cat_plush": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:mochi_cat_plush"
+          }
+        ]
+      }
+    },
+    "pearl_cat_plush": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:pearl_cat_plush"
+          }
+        ]
+      }
+    },
+    "bubblegum_cat_plush": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:bubblegum_cat_plush"
+          }
+        ]
+      }
+    },
+    "bluebell_cat_plush": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:bluebell_cat_plush"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_cat_plush"
+    },
+    "title": {
+      "translate": "advancements.transdimension.all_plushes.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.all_plushes.description"
+    },
+    "frame": "challenge"
+  },
+  "requirements": [
+    [
+      "silly_cat_plush"
+    ],
+    [
+      "trans_cat_plush"
+    ],
+    [
+      "midnight_cat_plush"
+    ],
+    [
+      "biscuit_cat_plush"
+    ],
+    [
+      "patches_cat_plush"
+    ],
+    [
+      "mochi_cat_plush"
+    ],
+    [
+      "pearl_cat_plush"
+    ],
+    [
+      "bubblegum_cat_plush"
+    ],
+    [
+      "bluebell_cat_plush"
+    ]
+  ]
+}

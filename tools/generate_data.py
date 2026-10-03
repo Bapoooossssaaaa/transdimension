@@ -1142,12 +1142,6 @@ def generate_misc():
         "subtitles.transdimension.entity.silly_cat.hurt": "Silly Cat hurts",
         "subtitles.transdimension.entity.silly_cat.death": "Silly Cat dies",
         "subtitles.transdimension.block.pride_oven.crackle": "Pride Oven crackles",
-        "advancements.transdimension.goober.title": "Goober!",
-        "advancements.transdimension.goober.description": "Say the magic word and enter the Trans Realm",
-        "advancements.transdimension.slobbered.title": "Big Smooch",
-        "advancements.transdimension.slobbered.description": "Get licked by a Silly Cat",
-        "advancements.transdimension.trans_village.title": "Home Sweet Home",
-        "advancements.transdimension.trans_village.description": "Find a Trans Village",
         "message.transdimension.welcome": "❤ Welcome to the Trans Realm! Say \"Goober\" again to go home. ❤",
         "message.transdimension.realm_missing": "The Trans Realm didn't load. Check the server log for data pack errors.",
     })
@@ -1161,6 +1155,153 @@ BIOMES = {
     "crystal_caves": "Crystal Caves", "pearlwood_forest": "Pearlwood Forest", "bluebell_woods": "Bluebell Woods",
     "twilight_thicket": "Twilight Thicket", "candy_floss_grove": "Candy Floss Grove", "pastel_lush_caves": "Pastel Lush Caves",
 }
+
+
+# ============================================================================================ advancements
+ADV_DIR = os.path.join(DATA, NS, "advancement")
+
+
+def has(*items):
+    """All of these items in the inventory at once."""
+    return {"trigger": "minecraft:inventory_changed", "conditions": {"items": [{"items": rid(i)} for i in items]}}
+
+
+def has_any(items):
+    return {"trigger": "minecraft:inventory_changed", "conditions": {"items": [{"items": [rid(i) for i in items]}]}}
+
+
+def player_is(**predicate):
+    """A location-trigger criterion on the player (keys are 26.2 entity sub-predicates without the namespace)."""
+    return {"trigger": "minecraft:location", "conditions": {"player": [{
+        "condition": "minecraft:entity_properties", "entity": "this",
+        "predicate": {f"minecraft:{k}": v for k, v in predicate.items()}}]}}
+
+
+def in_biome(biome):
+    return player_is(location={"biomes": rid(biome)})
+
+
+def interacted(entity):
+    return {"trigger": "minecraft:player_interacted_with_entity", "conditions": {"entity": [{
+        "condition": "minecraft:entity_properties", "entity": "this", "predicate": {"minecraft:entity_type": rid(entity)}}]}}
+
+
+def ate(item):
+    return {"trigger": "minecraft:consume_item", "conditions": {"item": {"items": rid(item)}}}
+
+
+def advancement(name, parent, icon, title, description, criteria, frame="task", any_of=False, display=None):
+    d = {}
+    if parent:
+        d["parent"] = rid(parent)
+    d["criteria"] = criteria
+    shown = {"icon": {"id": rid(icon)},
+             "title": {"translate": f"advancements.{NS}.{name}.title"},
+             "description": {"translate": f"advancements.{NS}.{name}.description"}}
+    if frame != "task":
+        shown["frame"] = frame
+    shown.update(display or {})
+    d["display"] = shown
+    d["requirements"] = [list(criteria)] if any_of else [[k] for k in criteria]
+    write(os.path.join(ADV_DIR, f"{name}.json"), d)
+    NAMES[f"advancements.{NS}.{name}.title"] = title
+    NAMES[f"advancements.{NS}.{name}.description"] = description
+
+
+def generate_advancements():
+    """The Trans Dimension advancement tab: exploring, Maddie and her gifts, Silly Cats, building, crystals, the bakery,
+    flowers, and collecting all nine cat plushes."""
+    if os.path.isdir(ADV_DIR):
+        for f in os.listdir(ADV_DIR):
+            os.remove(os.path.join(ADV_DIR, f))
+    A = advancement
+    A("goober", None, "trans_crystal", "Trans Dimension", "Say \"Goober\" and step into the Trans Realm",
+      {"entered_trans_realm": {"trigger": "minecraft:changed_dimension", "conditions": {"to": f"{NS}:trans_realm"}}},
+      display={"background": f"{NS}:gui/advancements/backgrounds/trans"})
+
+    # ---- exploring
+    A("trans_village", "goober", "trans_door", "Home Sweet Home", "Find a Trans Village",
+      {"found_trans_village": player_is(location={"structures": f"{NS}:trans_village"})})
+    A("first_plush", "trans_village", "silly_cat_plush", "Plushie Pal", "Find the cat plush hidden in a village house",
+      {"plush": {"trigger": "minecraft:inventory_changed", "conditions": {"items": [{"items": f"#{NS}:plushes"}]}}})
+    A("all_plushes", "first_plush", "trans_cat_plush", "Gotta Hug 'Em All", "Collect all nine cat plushes",
+      {plush: has(plush) for plush in PLUSH_NAMES}, frame="challenge")
+    A("crystal_caves", "goober", "trans_crystal_cluster", "Glitter Grotto", "Explore the Crystal Caves",
+      {"crystal_caves": in_biome("crystal_caves")})
+    A("pastel_lush_caves", "crystal_caves", "trans_moss_block", "Soft Spot", "Find the Pastel Lush Caves",
+      {"pastel_lush_caves": in_biome("pastel_lush_caves")})
+    A("pastel_peaks", "goober", "trans_stone", "Head in the Clouds", "Climb above Y 160 in the Pastel Peaks",
+      {"peak": player_is(location={"biomes": rid("pastel_peaks"), "position": {"y": {"min": 160.0}}})})
+    A("pastel_passport", "pastel_peaks", "minecraft:filled_map", "Pastel Passport", "Visit every biome of the Trans Realm",
+      {biome: in_biome(biome) for biome in BIOMES}, frame="challenge")
+    A("egg_house", "goober", "minecraft:egg", "Egg-cellent View", "Find Maddie's Egg House floating in the sky",
+      {"egg_house": player_is(location={"structures": f"{NS}:egg_house_island"})}, frame="goal")
+
+    # ---- Maddie and her gifts
+    A("meet_maddie", "egg_house", "maddie_spawn_egg", "Hi Hi!", "Say hello to Maddie", {"talked": interacted("maddie")})
+    A("trans_wand", "meet_maddie", "trans_wand", "Bibbidi-Bobbidi-Valid", "Receive the Trans Wand", {"wand": has("trans_wand")})
+    A("magic_missile", "trans_wand", "trans_magic_bolt", "Magic Missile", "Defeat a mob with the Trans Wand's magic",
+      {"zapped": {"trigger": "minecraft:player_killed_entity", "conditions": {
+          "killing_blow": {"direct_entity": {"minecraft:entity_type": rid("trans_magic_bolt")}}}}})
+    A("trans_wings", "meet_maddie", "trans_wings", "Earned Your Wings", "Receive the Trans Wings",
+      {"wings": has("trans_wings")}, frame="goal")
+    A("sky_dancer", "trans_wings", "minecraft:feather", "Sky Dancer", "Fly above Y 250 in the Trans Realm with your Trans Wings",
+      {"high": player_is(location={"dimension": f"{NS}:trans_realm", "position": {"y": {"min": 250.0}}},
+                         equipment={"chest": {"items": rid("trans_wings")}})}, frame="challenge")
+
+    # ---- Silly Cats
+    A("slobbered", "goober", "silly_cat_spawn_egg", "Big Smooch", "Get licked by a Silly Cat",
+      {"slobbered": {"trigger": "minecraft:effects_changed", "conditions": {"effects": {f"{NS}:slobbered": {}}}}})
+    A("pet_silly_cat", "slobbered", "trans_cookie", "Who's a Good Goober?", "Pet a Silly Cat",
+      {"petted": interacted("silly_cat")})
+
+    # ---- building
+    A("trans_planks", "goober", "trans_planks", "Pastel Carpentry", "Make Trans Planks from a trans log",
+      {"planks": has("trans_planks")})
+    A("sweet_dreams", "trans_planks", "trans_bed", "Sweet Dreams", "Sleep in a Trans Bed",
+      {"slept": {"trigger": "minecraft:slept_in_bed", "conditions": {"player": [{
+          "condition": "minecraft:entity_properties", "entity": "this",
+          "predicate": {"minecraft:location": {"block": {"blocks": rid("trans_bed")}}}}]}}})
+    heart = lambda half: {"trigger": "minecraft:placed_block", "conditions": {"location": [{
+        "condition": "minecraft:block_state_property", "block": rid("trans_bed"), "properties": {"heart": half}}]}}
+    A("heart_to_heart", "sweet_dreams", "trans_bed", "Heart to Heart", "Push two Trans Beds together to make a heart",
+      {"left": heart("left"), "right": heart("right")}, any_of=True)
+    A("trans_glass", "trans_planks", "trans_glass", "Rose-Tinted Glasses", "Smelt Trans Sand into Trans Glass",
+      {"glass": has("trans_glass")})
+    A("trans_boat", "trans_planks", "trans_boat", "Smooth Sailing", "Build a Trans Boat", {"boat": has("trans_boat")})
+    A("cozy_corner", "trans_planks", "trans_chair", "Cozy Corner", "Get a Trans Chair and a Trans Table",
+      {"chair": has("trans_chair"), "table": has("trans_table")})
+    A("flag_fluff", "goober", "trans_wool", "Flag Fluff", "Shear a trans flag sheep in the realm", {"wool": has("trans_wool")})
+
+    # ---- crystals and gear
+    A("trans_crystal", "goober", "trans_crystal", "Shiny!", "Mine a Trans Crystal", {"crystal": has("trans_crystal")})
+    A("crystal_clear", "trans_crystal", "trans_pickaxe", "Crystal Clear", "Make a Trans Crystal Pickaxe",
+      {"pickaxe": has("trans_pickaxe")})
+    A("armored_in_pride", "crystal_clear", "trans_chestplate", "Armored in Pride", "Wear a full set of Trans Crystal armor",
+      {"armor": player_is(equipment={"head": {"items": rid("trans_helmet")}, "chest": {"items": rid("trans_chestplate")},
+                                     "legs": {"items": rid("trans_leggings")}, "feet": {"items": rid("trans_boots")}})},
+      frame="goal")
+    A("deep_pastel", "trans_crystal", "trans_deepslate", "Deep Pastel", "Dig down to Trans Deepslate",
+      {"deepslate": has("cobbled_trans_deepslate")})
+
+    # ---- the bakery
+    treats = ["trans_cookie", "trans_donut", "trans_cupcake", "trans_macaron", "trans_boba"]
+    A("fresh_from_the_oven", "trans_village", "pride_oven", "Fresh From the Oven", "Buy a treat from a Trans Baker",
+      {"bought": {"trigger": "minecraft:villager_trade", "conditions": {
+          "item": {"items": [rid(t) for t in treats + ["trans_cake"]]}}}})
+    A("sprinkle_sprinkle", "fresh_from_the_oven", "trans_donut", "Sprinkle Sprinkle", "Eat a Trans Donut",
+      {"donut": ate("trans_donut")})
+    A("sweet_tooth", "sprinkle_sprinkle", "trans_cupcake", "Sweet Tooth", "Eat every treat the Trans Bakers make",
+      {t: ate(t) for t in treats}, frame="challenge")
+    A("let_them_eat_cake", "fresh_from_the_oven", "trans_cake", "Let Them Eat Cake", "Get a Trans Cake",
+      {"cake": has("trans_cake")})
+
+    # ---- flowers
+    flowers = ["pride_blossom", *FLOWERS, "pride_peony", "trans_petals"]
+    A("petal_pusher", "goober", "trans_tulip", "Petal Pusher", "Pick a flower of the Trans Realm",
+      {"flower": has_any(flowers)})
+    A("pastel_bouquet", "petal_pusher", "pride_peony", "Pastel Bouquet", "Collect every flower of the Trans Realm",
+      {f: has(f) for f in flowers}, frame="challenge")
 
 
 def generate_sounds():
@@ -1240,6 +1381,7 @@ def main():
     generate_recipes()
     generate_misc()
     generate_sounds()
+    generate_advancements()
     write_tags()
     write_lang()
     print(f"Wrote {len(TAGS)} tags and {len(NAMES)} names.")

@@ -1,0 +1,31 @@
+{
+  "parent": "transdimension:meet_maddie",
+  "criteria": {
+    "wand": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_wand"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_wand"
+    },
+    "title": {
+      "translate": "advancements.transdimension.trans_wand.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.trans_wand.description"
+    }
+  },
+  "requirements": [
+    [
+      "wand"
+    ]
+  ]
+}

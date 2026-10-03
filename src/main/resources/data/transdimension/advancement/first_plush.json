@@ -1,0 +1,31 @@
+{
+  "parent": "transdimension:trans_village",
+  "criteria": {
+    "plush": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#transdimension:plushes"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:silly_cat_plush"
+    },
+    "title": {
+      "translate": "advancements.transdimension.first_plush.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.first_plush.description"
+    }
+  },
+  "requirements": [
+    [
+      "plush"
+    ]
+  ]
+}

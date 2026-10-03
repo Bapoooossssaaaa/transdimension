@@ -1,0 +1,31 @@
+{
+  "parent": "transdimension:trans_wand",
+  "criteria": {
+    "zapped": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "killing_blow": {
+          "direct_entity": {
+            "minecraft:entity_type": "transdimension:trans_magic_bolt"
+          }
+        }
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_magic_bolt"
+    },
+    "title": {
+      "translate": "advancements.transdimension.magic_missile.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.magic_missile.description"
+    }
+  },
+  "requirements": [
+    [
+      "zapped"
+    ]
+  ]
+}

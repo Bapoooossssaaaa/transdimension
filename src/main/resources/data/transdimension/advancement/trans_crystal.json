@@ -1,0 +1,31 @@
+{
+  "parent": "transdimension:goober",
+  "criteria": {
+    "crystal": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_crystal"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_crystal"
+    },
+    "title": {
+      "translate": "advancements.transdimension.trans_crystal.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.trans_crystal.description"
+    }
+  },
+  "requirements": [
+    [
+      "crystal"
+    ]
+  ]
+}

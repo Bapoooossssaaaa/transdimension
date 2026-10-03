@@ -863,7 +863,7 @@ def generate_dimension_type():
     with open(path, encoding="utf-8") as f:
         dim = json.load(f)
     attrs = dim["attributes"]
-    attrs["minecraft:visual/cloud_color"] = "#f0ffd6e2"
+    attrs["minecraft:visual/cloud_color"] = "#f0ffffff"     # white; trans_clouds tints it through the flag
     attrs["minecraft:visual/cloud_height"] = 172.33
     attrs["minecraft:visual/fog_color"] = "#f5a9b8"
     attrs["minecraft:visual/sky_color"] = "#5bcefa"
@@ -927,8 +927,29 @@ def generate_timeline():
                 break
         k["value"] = "#%02x%06x" % (alpha, rgb)
     write(os.path.join(DATA, NS, "timeline", "trans_day.json"), day)
+    generate_cloud_timeline()
     write(os.path.join(DATA, NS, "tags", "timeline", "in_trans_realm.json"), {"values": [
-        "#minecraft:universal", "minecraft:moon", "minecraft:early_game", f"{NS}:trans_day"]})
+        "#minecraft:universal", "minecraft:moon", "minecraft:early_game", f"{NS}:trans_day", f"{NS}:trans_clouds"]})
+
+
+CLOUD_PERIOD = 6000     # five minutes for the whole flag
+
+
+def generate_cloud_timeline():
+    """The realm's clouds drift through the trans flag in order: blue, pink, white, pink, blue. Each colour holds for
+    about 38 seconds and blends into the next over another 38. (Since 1.21.6 the cloud renderer only takes shapes from its texture,
+    so the colour has to come from the cloud_color attribute; the day timeline still dims it at dusk and night.)"""
+    blue, pink, white = "#ff8fd8fb", "#fff7b3c4", "#ffffffff"
+    # Looping blue, pink, white, pink reads as the flag over and over: blue, pink, white, pink, blue, pink...
+    step = CLOUD_PERIOD // 4
+    keyframes = []
+    for i, colour in enumerate((blue, pink, white, pink)):
+        keyframes.append({"ticks": i * step, "value": colour})
+        keyframes.append({"ticks": i * step + step // 2, "value": colour})
+    write(os.path.join(DATA, NS, "timeline", "trans_clouds.json"), {
+        "clock": "minecraft:overworld",
+        "period_ticks": CLOUD_PERIOD,
+        "tracks": {"minecraft:visual/cloud_color": {"keyframes": keyframes, "modifier": "multiply"}}})
 
 
 def remove_stale():

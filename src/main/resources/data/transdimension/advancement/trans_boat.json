@@ -1,0 +1,31 @@
+{
+  "parent": "transdimension:trans_planks",
+  "criteria": {
+    "boat": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_boat"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_boat"
+    },
+    "title": {
+      "translate": "advancements.transdimension.trans_boat.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.trans_boat.description"
+    }
+  },
+  "requirements": [
+    [
+      "boat"
+    ]
+  ]
+}

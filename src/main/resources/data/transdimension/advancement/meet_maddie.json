@@ -1,0 +1,35 @@
+{
+  "parent": "transdimension:egg_house",
+  "criteria": {
+    "talked": {
+      "trigger": "minecraft:player_interacted_with_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:entity_type": "transdimension:maddie"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:maddie_spawn_egg"
+    },
+    "title": {
+      "translate": "advancements.transdimension.meet_maddie.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.meet_maddie.description"
+    }
+  },
+  "requirements": [
+    [
+      "talked"
+    ]
+  ]
+}

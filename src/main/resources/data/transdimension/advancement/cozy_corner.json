@@ -1,0 +1,44 @@
+{
+  "parent": "transdimension:trans_planks",
+  "criteria": {
+    "chair": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_chair"
+          }
+        ]
+      }
+    },
+    "table": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_table"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_chair"
+    },
+    "title": {
+      "translate": "advancements.transdimension.cozy_corner.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.cozy_corner.description"
+    }
+  },
+  "requirements": [
+    [
+      "chair"
+    ],
+    [
+      "table"
+    ]
+  ]
+}
