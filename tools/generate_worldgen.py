@@ -48,6 +48,11 @@ def simple(st):
 
 LEAVES = state("trans_leaves", distance=7, persistent=False, waterlogged=False)
 LOG = state("trans_log", axis="y")
+PINK_LOG = state("stripped_trans_log", axis="y")
+
+
+def leaves_of(name):
+    return state(name, distance=7, persistent=False, waterlogged=False)
 BELOW_TRUNK = {"type": "minecraft:rule_based_state_provider", "rules": [{
     "if_true": {"type": "minecraft:not", "predicate": {"type": "minecraft:matching_block_tag", "tag": "minecraft:cannot_replace_below_tree_trunk"}},
     "then": simple(state("trans_dirt"))}]}
@@ -178,6 +183,72 @@ def generate_features():
         {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"}, SAPLING_CHECK, {"type": "minecraft:biome"}])
     pf("trans_bushes", f"{NS}:trans_bush", surface_trees(weighted_count([(0, 3), (1, 2), (2, 1)])))
 
+    # ---- themed forest trees
+    pearl, sky, blush, twilight = (leaves_of(n) for n in ("pearl_leaves", "sky_leaves", "blush_leaves", "twilight_leaves"))
+    small_blob = {"type": "minecraft:blob_foliage_placer", "height": 3, "offset": 0, "radius": 2}
+    two_layers = {"type": "minecraft:two_layers_feature_size", "limit": 1, "lower_size": 0, "upper_size": 1}
+    # Pearlwood: tall slender white trees (vanilla's tall birch shape).
+    cf("pearlwood_tree", tree(straight(5, 2, 6), small_blob, two_layers, [BEEHIVE], foliage=pearl))
+    cf("pearlwood_tree_short", tree(straight(5, 2, 0), small_blob, two_layers, foliage=pearl))
+    # Bluebell Woods: oaks and big fancy oaks in sky-blue leaves.
+    cf("bluebell_tree", tree(straight(4, 2, 0), small_blob, two_layers, foliage=sky))
+    cf("fancy_bluebell_tree", tree({"type": "minecraft:fancy_trunk_placer", "base_height": 3, "height_rand_a": 11, "height_rand_b": 0},
+                                   {"type": "minecraft:fancy_foliage_placer", "height": 4, "offset": 4, "radius": 2},
+                                   {"type": "minecraft:two_layers_feature_size", "limit": 0, "min_clipped_height": 4, "upper_size": 0},
+                                   foliage=sky))
+    # Twilight Thicket: dark oak canopies of twilight leaves, hung with glowing crystals.
+    cf("twilight_tree", tree({"type": "minecraft:dark_oak_trunk_placer", "base_height": 6, "height_rand_a": 2, "height_rand_b": 1},
+                             {"type": "minecraft:dark_oak_foliage_placer", "offset": 0, "radius": 0},
+                             {"type": "minecraft:three_layers_feature_size", "upper_size": 2}, [HANGING_CRYSTALS], foliage=twilight))
+    # Candy Floss Grove: round, fluffy puffs of pink or blue leaves on pink trunks.
+    puff = {"type": "minecraft:blob_foliage_placer", "height": 4, "offset": 0, "radius": 3}
+    cf("candy_floss_tree_pink", tree(straight(4, 2, 0), puff, two_layers, [PETALS], foliage=blush, trunk=PINK_LOG))
+    cf("candy_floss_tree_blue", tree(straight(4, 2, 0), puff, two_layers, [PETALS], foliage=sky, trunk=PINK_LOG))
+    for name in ("pearlwood_tree", "pearlwood_tree_short", "bluebell_tree", "fancy_bluebell_tree", "twilight_tree",
+                 "candy_floss_tree_pink", "candy_floss_tree_blue"):
+        checked(name)
+    selector("trees_pearlwood_forest", "pearlwood_tree", [("pearlwood_tree_short", 0.3)])
+    selector("trees_bluebell_woods", "bluebell_tree", [("fancy_bluebell_tree", 0.25), ("trans_bush", 0.1)])
+    selector("trees_twilight_thicket", "twilight_tree", [("trans_bush", 0.15)])
+    selector("trees_candy_floss_grove", "candy_floss_tree_pink", [("candy_floss_tree_blue", 0.5)])
+    pf("trees_pearlwood_forest", f"{NS}:trees_pearlwood_forest", surface_trees(weighted_count([(7, 9), (9, 1)])))
+    pf("trees_bluebell_woods", f"{NS}:trees_bluebell_woods", surface_trees(weighted_count([(6, 9), (8, 1)])))
+    pf("trees_twilight_thicket", f"{NS}:trees_twilight_thicket", surface_trees(weighted_count([(12, 9), (14, 1)])))
+    pf("trees_candy_floss_grove", f"{NS}:trees_candy_floss_grove", surface_trees(weighted_count([(2, 6), (3, 3), (4, 1)])))
+
+    # ---- pastel lush caves: vanilla's lush cave patches grown in trans moss
+    cf("trans_moss_vegetation", {"type": "minecraft:simple_block", "config": {"to_place": {"type": "minecraft:weighted_state_provider", "entries": [
+        {"data": state("minecraft:flowering_azalea"), "weight": 4}, {"data": state("trans_moss_carpet"), "weight": 25},
+        {"data": state("minecraft:short_grass"), "weight": 40}, {"data": state("minecraft:tall_grass", half="lower"), "weight": 6},
+        {"data": state("pride_blossom"), "weight": 4}, {"data": state("sky_bell"), "weight": 3}, {"data": state("pearl_daisy"), "weight": 3},
+        {"data": state("heart_bloom"), "weight": 1}]}}})
+
+    def moss_patch(surface, depth, vegetation, chance, radius, edge=0.3):
+        return {"type": "minecraft:vegetation_patch", "config": {
+            "depth": depth, "extra_bottom_block_chance": 0.0, "extra_edge_column_chance": edge,
+            "ground_state": simple(state("trans_moss_block")), "replaceable": f"#{NS}:trans_moss_replaceable",
+            "surface": surface, "vegetation_chance": chance, "vegetation_feature": {"feature": vegetation, "placement": []},
+            "vertical_range": 5, "xz_radius": radius}}
+
+    cf("trans_moss_patch", moss_patch("floor", 1, f"{NS}:trans_moss_vegetation", 0.8,
+                                      {"type": "minecraft:uniform", "max_inclusive": 7, "min_inclusive": 4}))
+    cf("trans_moss_patch_ceiling", moss_patch("ceiling", {"type": "minecraft:uniform", "max_inclusive": 2, "min_inclusive": 1},
+                                              "minecraft:cave_vine_in_moss", 0.08, {"type": "minecraft:uniform", "max_inclusive": 7, "min_inclusive": 4}))
+    # What bone meal on trans moss does.
+    cf("trans_moss_patch_bonemeal", moss_patch("floor", 1, f"{NS}:trans_moss_vegetation", 0.6,
+                                               {"type": "minecraft:uniform", "max_inclusive": 2, "min_inclusive": 1}, edge=0.75))
+
+    def cave_scan(count, direction, y_spread):
+        return [{"type": "minecraft:count", "count": count}, {"type": "minecraft:in_square"},
+                {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "max_inclusive": {"absolute": 256},
+                                                              "min_inclusive": {"above_bottom": 0}}},
+                {"type": "minecraft:environment_scan", "allowed_search_condition": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"},
+                 "direction_of_search": direction, "max_steps": 12, "target_condition": {"type": "minecraft:solid"}},
+                {"type": "minecraft:random_offset", "xz_spread": 0, "y_spread": y_spread}, {"type": "minecraft:biome"}]
+
+    pf("trans_lush_caves_vegetation", f"{NS}:trans_moss_patch", cave_scan(125, "down", 1))
+    pf("trans_lush_caves_ceiling_vegetation", f"{NS}:trans_moss_patch_ceiling", cave_scan(125, "up", -1))
+
     # ---- flowers and ground cover
     cf("pride_blossom_patch", {"type": "minecraft:simple_block", "config": {"to_place": simple(state("pride_blossom"))}})
     blossoms = [{"type": "minecraft:in_square"}, {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"}, {"type": "minecraft:biome"}]
@@ -203,6 +274,11 @@ def generate_features():
                                           "noise_level": -0.8}] + blossoms
     pf("trans_petals_meadow", f"{NS}:trans_petals", petal_spots(2, 5) + patch(8))
     pf("trans_petals_forest", f"{NS}:trans_petals", petal_spots(5, 10) + patch(48))
+    # Bluebell Woods' carpets of Sky Bells and the Candy Floss Grove's Heart Blooms.
+    cf("sky_bell_patch", {"type": "minecraft:simple_block", "config": {"to_place": simple(state("sky_bell"))}})
+    pf("sky_bell_carpets", f"{NS}:sky_bell_patch", [{"type": "minecraft:count", "count": 4}] + blossoms + patch(48))
+    cf("heart_bloom_patch", {"type": "minecraft:simple_block", "config": {"to_place": simple(state("heart_bloom"))}})
+    pf("heart_blooms", f"{NS}:heart_bloom_patch", [{"type": "minecraft:count", "count": 2}] + blossoms + patch(24))
     # Tall Pride Peonies (simple_block places both halves of a double plant).
     cf("pride_peony_patch", {"type": "minecraft:simple_block", "config": {"to_place": simple(state("pride_peony", half="lower"))}})
     pf("pride_peonies", f"{NS}:pride_peony_patch", [{"type": "minecraft:rarity_filter", "chance": 4}] + blossoms + patch(24, xz=5))
@@ -351,7 +427,7 @@ CAVE_DECOR = ["minecraft:glow_lichen"]
 
 def biome(name, *, temperature, downfall, grass, foliage, water, water_fog, sky, fog, music_sound,
           features, creatures=(), monsters=MONSTERS, water_creatures=(), water_ambient=(), underground_water=(),
-          particles=None, precipitation=True, frozen=False, extra_attributes=None, underwater_music=False):
+          particles=None, precipitation=True, frozen=False, extra_attributes=None, underwater_music=False, axolotls=()):
     attributes = {
         "minecraft:audio/background_music": music(music_sound, underwater_music),
         "minecraft:visual/fog_color": fog,
@@ -374,7 +450,7 @@ def biome(name, *, temperature, downfall, grass, foliage, water, water_fog, sky,
         "has_precipitation": precipitation,
         "spawn_costs": {},
         "spawners": {
-            "ambient": BATS, "axolotls": [], "creature": list(creatures), "misc": [], "monster": list(monsters),
+            "ambient": BATS, "axolotls": list(axolotls), "creature": list(creatures), "misc": [], "monster": list(monsters),
             "underground_water_creature": list(underground_water), "water_ambient": list(water_ambient),
             "water_creature": list(water_creatures)},
         "temperature": temperature,
@@ -492,6 +568,42 @@ def generate_biomes():
           features={**ocean_floor, 9: ["minecraft:seagrass_river", "minecraft:patch_sugar_cane", "minecraft:patch_waterlily"]},
           creatures=[], water_creatures=[spawn("minecraft:squid", 2, 1, 4)], water_ambient=[spawn("minecraft:salmon", 5, 1, 5)])
 
+    # ---- themed forests
+    biome("pearlwood_forest", temperature=0.3, downfall=0.6, grass="#eef0ff", foliage="#ffffff", water="#a6e1fa", water_fog="#4a8fc0",
+          sky="#d8ecff", fog="#f4f2ff", music_sound="minecraft:music.overworld.forest",
+          particles=particles("minecraft:white_ash", 0.004),
+          features=land(f"{NS}:trees_pearlwood_forest", f"{NS}:frost_flowers", f"{NS}:pride_blossoms", "minecraft:patch_grass_forest"),
+          creatures=[spawn("minecraft:rabbit", 6, 2, 3), spawn("minecraft:fox", 4, 2, 4), spawn("minecraft:wolf", 3, 2, 4),
+                     spawn("minecraft:chicken", 6, 4, 4), spawn("silly_cat", 8, 1, 2)])
+    biome("bluebell_woods", temperature=0.6, downfall=0.7, grass="#bfe3ff", foliage="#8fd0ff", water="#5bcefa", water_fog="#1f6fa8",
+          sky="#9ad6ff", fog="#d6ecff", music_sound="minecraft:music.overworld.flower_forest",
+          features=land(f"{NS}:trees_bluebell_woods", f"{NS}:sky_bell_carpets", f"{NS}:pride_blossoms", "minecraft:patch_grass_forest"),
+          creatures=[spawn("minecraft:pig", 8, 4, 4), spawn("minecraft:rabbit", 6, 2, 3), spawn("minecraft:wolf", 4, 2, 4),
+                     spawn("minecraft:sheep", 6, 4, 4), spawn("silly_cat", 8, 1, 2)])
+    biome("twilight_thicket", temperature=0.7, downfall=0.9, grass="#8e7ab8", foliage="#7d6aa8", water="#6a7fd8", water_fog="#2a2f6e",
+          sky="#6c6aa8", fog="#8b7cb8", music_sound="minecraft:music.overworld.old_growth_taiga",
+          particles=particles("minecraft:firefly", 0.006),
+          features=land(f"{NS}:trees_twilight_thicket", f"{NS}:trans_crystal_clusters_surface", f"{NS}:lavender_flowers",
+                        "minecraft:patch_grass_forest", "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_swamp"),
+          creatures=[spawn("minecraft:rabbit", 4, 2, 3), spawn("minecraft:fox", 3, 2, 3), spawn("silly_cat", 6, 1, 2)])
+    biome("candy_floss_grove", temperature=0.8, downfall=0.6, grass="#ffc8dc", foliage="#ffc0d8", water="#9fe3ff", water_fog="#3a8fc8",
+          sky="#bfe8ff", fog="#ffe0ee", music_sound="minecraft:music.overworld.cherry_grove",
+          particles=particles("minecraft:cherry_leaves", 0.002),
+          features=land(f"{NS}:trees_candy_floss_grove", f"{NS}:heart_blooms", f"{NS}:trans_flowers", f"{NS}:trans_petals_forest",
+                        "minecraft:patch_grass_plain"),
+          creatures=common_creatures + [spawn("minecraft:rabbit", 6, 2, 3), spawn("silly_cat", 14, 1, 3)])
+
+    # ---- pastel lush caves
+    biome("pastel_lush_caves", temperature=0.5, downfall=0.5, grass="#f0b5c8", foliage="#f5a9b8", water="#7fd6ff", water_fog="#2e7fb0",
+          sky="#9fb8ff", fog="#d9c8ff", music_sound="minecraft:music.overworld.lush_caves",
+          particles=particles("minecraft:spore_blossom_air", 0.003),
+          features={3: UNDERGROUND, 6: ORES + [f"{NS}:trans_ore_clay"], 7: CAVE_DECOR, 8: SPRINGS,
+                    9: ["minecraft:patch_tall_grass_2", f"{NS}:trans_lush_caves_ceiling_vegetation", "minecraft:cave_vines",
+                        "minecraft:lush_caves_clay", f"{NS}:trans_lush_caves_vegetation", "minecraft:spore_blossom",
+                        "minecraft:classic_vines_cave_feature"]},
+          creatures=[], axolotls=[spawn("minecraft:axolotl", 10, 4, 6)],
+          water_ambient=[spawn("minecraft:tropical_fish", 25, 8, 8)], underground_water=[spawn("minecraft:glow_squid", 10, 4, 6)])
+
     biome("crystal_caves", temperature=0.5, downfall=0.5, grass="#8ed8f8", foliage="#f5a9b8", water="#a88cf5", water_fog="#4a3a8f",
           sky="#9fb8ff", fog="#d9c8ff", music_sound="minecraft:music.overworld.lush_caves",
           particles=particles("minecraft:end_rod", 0.003),
@@ -509,7 +621,7 @@ FEATURE_RANK = [
     "minecraft:fossil_upper", f"{NS}:trans_crystal_geode_common", f"{NS}:trans_crystal_geode",
     "minecraft:monster_room", "minecraft:monster_room_deep",
     # ores
-    *TRANS_ORES, f"{NS}:trans_ore_copper_large", f"{NS}:trans_ore_emerald",
+    *TRANS_ORES, f"{NS}:trans_ore_copper_large", f"{NS}:trans_ore_emerald", f"{NS}:trans_ore_clay",
     f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_extra", "minecraft:disk_clay", "minecraft:disk_sand",
     # underground decoration
     "minecraft:glow_lichen", f"{NS}:trans_crystal_clusters_cave_floor", f"{NS}:trans_crystal_clusters_cave_ceiling",
@@ -519,12 +631,16 @@ FEATURE_RANK = [
     f"{NS}:trans_crystal_spikes", f"{NS}:frosted_ice_spikes", f"{NS}:trans_crystal_spikes_rare",
     f"{NS}:trees_trans_meadow", f"{NS}:trees_blossom_forest", f"{NS}:trees_heartwood_grove", f"{NS}:trees_crystal_grove",
     f"{NS}:trees_frosted_fields", f"{NS}:trees_lavender_marsh", f"{NS}:trans_bushes",
+    f"{NS}:trees_pearlwood_forest", f"{NS}:trees_bluebell_woods", f"{NS}:trees_twilight_thicket", f"{NS}:trees_candy_floss_grove",
+    "minecraft:patch_tall_grass_2", f"{NS}:trans_lush_caves_ceiling_vegetation", "minecraft:cave_vines", "minecraft:lush_caves_clay",
+    f"{NS}:trans_lush_caves_vegetation", "minecraft:spore_blossom", "minecraft:classic_vines_cave_feature",
     "minecraft:warm_ocean_vegetation", "minecraft:seagrass_warm", "minecraft:seagrass_deep", "minecraft:seagrass_river",
     "minecraft:seagrass_swamp", "minecraft:sea_pickle", "minecraft:kelp_warm", "minecraft:kelp_cold",
     f"{NS}:pride_blossoms_dense", f"{NS}:pride_blossoms", f"{NS}:trans_flowers", f"{NS}:lavender_flowers", f"{NS}:frost_flowers",
-    f"{NS}:pride_peonies", f"{NS}:trans_petals_forest", f"{NS}:trans_petals_meadow", f"{NS}:trans_crystal_clusters_surface",
+    f"{NS}:pride_peonies", f"{NS}:sky_bell_carpets", f"{NS}:heart_blooms", f"{NS}:trans_petals_forest", f"{NS}:trans_petals_meadow",
+    f"{NS}:trans_crystal_clusters_surface",
     "minecraft:patch_grass_meadow", "minecraft:patch_grass_forest", "minecraft:patch_grass_jungle", "minecraft:patch_grass_plain",
-    "minecraft:patch_grass_normal", "minecraft:patch_grass_taiga", "minecraft:patch_tall_grass_2", "minecraft:patch_large_fern",
+    "minecraft:patch_grass_normal", "minecraft:patch_grass_taiga", "minecraft:patch_large_fern",
     "minecraft:patch_cactus_desert", "minecraft:patch_dead_bush_2", "minecraft:patch_dry_grass_desert",
     "minecraft:patch_waterlily", "minecraft:patch_sugar_cane", "minecraft:patch_sugar_cane_swamp",
     "minecraft:brown_mushroom_normal", "minecraft:brown_mushroom_swamp", "minecraft:red_mushroom_swamp",
@@ -672,14 +788,16 @@ def land_biome(c, t, h, e, w):
     if c >= 1 and e == 0:
         return "pastel_peaks"
     if t == 0:
-        return "frosted_fields"
+        return "pearlwood_forest" if h >= 2 else "frosted_fields"
     if t == 3:
         return "sugar_dunes" if h <= 1 else "heartwood_grove"
     if h == 3:
-        return "lavender_marsh" if (t == 1 or e == 2) else "heartwood_grove"
+        return "twilight_thicket" if (t == 2 and e != 2) else "lavender_marsh"
     if h == 2:
-        return "trans_forest"
-    return "crystal_grove" if w == 4 else "trans_meadow"
+        return "bluebell_woods" if (t == 1 and w <= 2) else "trans_forest"
+    if w == 4:
+        return "crystal_grove"
+    return "candy_floss_grove" if (t == 2 and w <= 1) else "trans_meadow"
 
 
 def merge_cells(cells):
@@ -729,8 +847,9 @@ def generate_dimension():
         for lo, hi in merge_cells(by_biome[name]):
             rng = [(bands[a][lo[a]][0], bands[a][hi[a]][1]) for a in range(5)]
             entries.append(entry(name, rng[1], rng[2], rng[0], rng[3], rng[4]))
-    # Crystal Caves deep under the wetter, more inland parts of the realm.
-    entries.append(entry("crystal_caves", full, (0.3, 1.0), (0.0, 1.0), full, full, depth=[0.2, 0.9]))
+    # Cave biomes deep under the wetter, more inland parts of the realm: crystal caves, and lush caves where it's wettest.
+    entries.append(entry("crystal_caves", full, (0.3, 0.65), (0.0, 1.0), full, full, depth=[0.2, 0.9]))
+    entries.append(entry("pastel_lush_caves", full, (0.65, 1.0), (0.0, 1.0), full, full, depth=[0.2, 0.9]))
     dimension = {"type": f"{NS}:trans_realm", "generator": {
         "type": "minecraft:noise", "settings": f"{NS}:trans_realm",
         "biome_source": {"type": "minecraft:multi_noise", "biomes": entries}}}

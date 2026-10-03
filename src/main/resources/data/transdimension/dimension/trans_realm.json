@@ -88,6 +88,141 @@
           }
         },
         {
+          "biome": "transdimension:bluebell_woods",
+          "parameters": {
+            "temperature": [
+              -0.45,
+              0.2
+            ],
+            "humidity": [
+              0.1,
+              0.3
+            ],
+            "continentalness": [
+              -0.11,
+              0.3
+            ],
+            "erosion": [
+              -1.0,
+              1.0
+            ],
+            "weirdness": [
+              -1.0,
+              -0.05
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "transdimension:bluebell_woods",
+          "parameters": {
+            "temperature": [
+              -0.45,
+              0.2
+            ],
+            "humidity": [
+              0.1,
+              0.3
+            ],
+            "continentalness": [
+              0.3,
+              1.0
+            ],
+            "erosion": [
+              -0.375,
+              1.0
+            ],
+            "weirdness": [
+              -1.0,
+              -0.05
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "transdimension:bluebell_woods",
+          "parameters": {
+            "temperature": [
+              -0.45,
+              0.2
+            ],
+            "humidity": [
+              0.1,
+              0.3
+            ],
+            "continentalness": [
+              0.55,
+              1.0
+            ],
+            "erosion": [
+              -0.375,
+              1.0
+            ],
+            "weirdness": [
+              -0.05,
+              0.05
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "transdimension:candy_floss_grove",
+          "parameters": {
+            "temperature": [
+              0.2,
+              0.55
+            ],
+            "humidity": [
+              -1.0,
+              0.1
+            ],
+            "continentalness": [
+              -0.11,
+              0.3
+            ],
+            "erosion": [
+              -1.0,
+              1.0
+            ],
+            "weirdness": [
+              -1.0,
+              -0.05
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "transdimension:candy_floss_grove",
+          "parameters": {
+            "temperature": [
+              0.2,
+              0.55
+            ],
+            "humidity": [
+              -1.0,
+              0.1
+            ],
+            "continentalness": [
+              0.3,
+              1.0
+            ],
+            "erosion": [
+              -0.375,
+              1.0
+            ],
+            "weirdness": [
+              -1.0,
+              -0.05
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
           "biome": "transdimension:crystal_grove",
           "parameters": {
             "temperature": [
@@ -150,7 +285,7 @@
             ],
             "humidity": [
               -1.0,
-              1.0
+              0.1
             ],
             "continentalness": [
               -0.11,
@@ -177,7 +312,7 @@
             ],
             "humidity": [
               -1.0,
-              1.0
+              0.1
             ],
             "continentalness": [
               -0.11,
@@ -204,7 +339,7 @@
             ],
             "humidity": [
               -1.0,
-              1.0
+              0.1
             ],
             "continentalness": [
               0.3,
@@ -231,7 +366,7 @@
             ],
             "humidity": [
               -1.0,
-              1.0
+              0.1
             ],
             "continentalness": [
               0.3,
@@ -258,331 +393,7 @@
             ],
             "humidity": [
               -1.0,
-              1.0
-            ],
-            "continentalness": [
-              0.55,
-              1.0
-            ],
-            "erosion": [
-              -0.375,
-              1.0
-            ],
-            "weirdness": [
-              -0.05,
-              0.05
-            ],
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "transdimension:heartwood_grove",
-          "parameters": {
-            "temperature": [
-              0.2,
-              1.0
-            ],
-            "humidity": [
-              0.3,
-              1.0
-            ],
-            "continentalness": [
-              -0.11,
-              0.3
-            ],
-            "erosion": [
-              -1.0,
-              0.45
-            ],
-            "weirdness": [
-              -1.0,
-              -0.05
-            ],
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "transdimension:heartwood_grove",
-          "parameters": {
-            "temperature": [
-              0.2,
-              1.0
-            ],
-            "humidity": [
-              0.3,
-              1.0
-            ],
-            "continentalness": [
-              -0.11,
-              0.3
-            ],
-            "erosion": [
-              -1.0,
-              0.45
-            ],
-            "weirdness": [
-              0.05,
-              1.0
-            ],
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "transdimension:heartwood_grove",
-          "parameters": {
-            "temperature": [
-              0.55,
-              1.0
-            ],
-            "humidity": [
-              0.1,
-              0.3
-            ],
-            "continentalness": [
-              -0.11,
-              0.3
-            ],
-            "erosion": [
-              -1.0,
-              1.0
-            ],
-            "weirdness": [
-              -1.0,
-              -0.05
-            ],
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "transdimension:heartwood_grove",
-          "parameters": {
-            "temperature": [
-              0.55,
-              1.0
-            ],
-            "humidity": [
-              0.1,
-              0.3
-            ],
-            "continentalness": [
-              -0.11,
-              0.3
-            ],
-            "erosion": [
-              -1.0,
-              1.0
-            ],
-            "weirdness": [
-              0.05,
-              1.0
-            ],
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "transdimension:heartwood_grove",
-          "parameters": {
-            "temperature": [
-              0.55,
-              1.0
-            ],
-            "humidity": [
-              0.3,
-              1.0
-            ],
-            "continentalness": [
-              -0.11,
-              1.0
-            ],
-            "erosion": [
-              0.45,
-              1.0
-            ],
-            "weirdness": [
-              -1.0,
-              -0.05
-            ],
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "transdimension:heartwood_grove",
-          "parameters": {
-            "temperature": [
-              0.55,
-              1.0
-            ],
-            "humidity": [
-              0.3,
-              1.0
-            ],
-            "continentalness": [
-              -0.11,
-              1.0
-            ],
-            "erosion": [
-              0.45,
-              1.0
-            ],
-            "weirdness": [
-              0.05,
-              1.0
-            ],
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "transdimension:heartwood_grove",
-          "parameters": {
-            "temperature": [
-              0.2,
-              1.0
-            ],
-            "humidity": [
-              0.3,
-              1.0
-            ],
-            "continentalness": [
-              0.3,
-              1.0
-            ],
-            "erosion": [
-              -0.375,
-              0.45
-            ],
-            "weirdness": [
-              -1.0,
-              -0.05
-            ],
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "transdimension:heartwood_grove",
-          "parameters": {
-            "temperature": [
-              0.2,
-              1.0
-            ],
-            "humidity": [
-              0.3,
-              1.0
-            ],
-            "continentalness": [
-              0.3,
-              1.0
-            ],
-            "erosion": [
-              -0.375,
-              0.45
-            ],
-            "weirdness": [
-              0.05,
-              1.0
-            ],
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "transdimension:heartwood_grove",
-          "parameters": {
-            "temperature": [
-              0.55,
-              1.0
-            ],
-            "humidity": [
-              0.1,
-              0.3
-            ],
-            "continentalness": [
-              0.3,
-              1.0
-            ],
-            "erosion": [
-              -0.375,
-              1.0
-            ],
-            "weirdness": [
-              -1.0,
-              -0.05
-            ],
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "transdimension:heartwood_grove",
-          "parameters": {
-            "temperature": [
-              0.55,
-              1.0
-            ],
-            "humidity": [
-              0.1,
-              0.3
-            ],
-            "continentalness": [
-              0.3,
-              1.0
-            ],
-            "erosion": [
-              -0.375,
-              1.0
-            ],
-            "weirdness": [
-              0.05,
-              1.0
-            ],
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "transdimension:heartwood_grove",
-          "parameters": {
-            "temperature": [
-              0.2,
-              1.0
-            ],
-            "humidity": [
-              0.3,
-              1.0
-            ],
-            "continentalness": [
-              0.55,
-              1.0
-            ],
-            "erosion": [
-              -0.375,
-              0.45
-            ],
-            "weirdness": [
-              -0.05,
-              0.05
-            ],
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "transdimension:heartwood_grove",
-          "parameters": {
-            "temperature": [
-              0.55,
-              1.0
-            ],
-            "humidity": [
-              0.1,
-              0.3
+              0.1
             ],
             "continentalness": [
               0.55,
@@ -608,7 +419,115 @@
               1.0
             ],
             "humidity": [
+              0.1,
+              1.0
+            ],
+            "continentalness": [
+              -0.11,
+              0.3
+            ],
+            "erosion": [
+              -1.0,
+              1.0
+            ],
+            "weirdness": [
+              -1.0,
+              -0.05
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "transdimension:heartwood_grove",
+          "parameters": {
+            "temperature": [
+              0.55,
+              1.0
+            ],
+            "humidity": [
+              0.1,
+              1.0
+            ],
+            "continentalness": [
+              -0.11,
+              0.3
+            ],
+            "erosion": [
+              -1.0,
+              1.0
+            ],
+            "weirdness": [
+              0.05,
+              1.0
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "transdimension:heartwood_grove",
+          "parameters": {
+            "temperature": [
+              0.55,
+              1.0
+            ],
+            "humidity": [
+              0.1,
+              1.0
+            ],
+            "continentalness": [
               0.3,
+              1.0
+            ],
+            "erosion": [
+              -0.375,
+              1.0
+            ],
+            "weirdness": [
+              -1.0,
+              -0.05
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "transdimension:heartwood_grove",
+          "parameters": {
+            "temperature": [
+              0.55,
+              1.0
+            ],
+            "humidity": [
+              0.1,
+              1.0
+            ],
+            "continentalness": [
+              0.3,
+              1.0
+            ],
+            "erosion": [
+              -0.375,
+              1.0
+            ],
+            "weirdness": [
+              0.05,
+              1.0
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "transdimension:heartwood_grove",
+          "parameters": {
+            "temperature": [
+              0.55,
+              1.0
+            ],
+            "humidity": [
+              0.1,
               1.0
             ],
             "continentalness": [
@@ -616,7 +535,7 @@
               1.0
             ],
             "erosion": [
-              0.45,
+              -0.375,
               1.0
             ],
             "weirdness": [
@@ -871,6 +790,141 @@
           }
         },
         {
+          "biome": "transdimension:pearlwood_forest",
+          "parameters": {
+            "temperature": [
+              -1.0,
+              -0.45
+            ],
+            "humidity": [
+              0.1,
+              1.0
+            ],
+            "continentalness": [
+              -0.11,
+              0.3
+            ],
+            "erosion": [
+              -1.0,
+              1.0
+            ],
+            "weirdness": [
+              -1.0,
+              -0.05
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "transdimension:pearlwood_forest",
+          "parameters": {
+            "temperature": [
+              -1.0,
+              -0.45
+            ],
+            "humidity": [
+              0.1,
+              1.0
+            ],
+            "continentalness": [
+              -0.11,
+              0.3
+            ],
+            "erosion": [
+              -1.0,
+              1.0
+            ],
+            "weirdness": [
+              0.05,
+              1.0
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "transdimension:pearlwood_forest",
+          "parameters": {
+            "temperature": [
+              -1.0,
+              -0.45
+            ],
+            "humidity": [
+              0.1,
+              1.0
+            ],
+            "continentalness": [
+              0.3,
+              1.0
+            ],
+            "erosion": [
+              -0.375,
+              1.0
+            ],
+            "weirdness": [
+              -1.0,
+              -0.05
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "transdimension:pearlwood_forest",
+          "parameters": {
+            "temperature": [
+              -1.0,
+              -0.45
+            ],
+            "humidity": [
+              0.1,
+              1.0
+            ],
+            "continentalness": [
+              0.3,
+              1.0
+            ],
+            "erosion": [
+              -0.375,
+              1.0
+            ],
+            "weirdness": [
+              0.05,
+              1.0
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "transdimension:pearlwood_forest",
+          "parameters": {
+            "temperature": [
+              -1.0,
+              -0.45
+            ],
+            "humidity": [
+              0.1,
+              1.0
+            ],
+            "continentalness": [
+              0.55,
+              1.0
+            ],
+            "erosion": [
+              -0.375,
+              1.0
+            ],
+            "weirdness": [
+              -0.05,
+              0.05
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
           "biome": "transdimension:sugar_dunes",
           "parameters": {
             "temperature": [
@@ -1025,8 +1079,8 @@
               1.0
             ],
             "weirdness": [
-              -1.0,
-              -0.05
+              0.05,
+              1.0
             ],
             "depth": 0.0,
             "offset": 0.0
@@ -1036,7 +1090,7 @@
           "biome": "transdimension:trans_forest",
           "parameters": {
             "temperature": [
-              -0.45,
+              0.2,
               0.55
             ],
             "humidity": [
@@ -1052,33 +1106,6 @@
               1.0
             ],
             "weirdness": [
-              0.05,
-              1.0
-            ],
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "transdimension:trans_forest",
-          "parameters": {
-            "temperature": [
-              -0.45,
-              0.55
-            ],
-            "humidity": [
-              0.1,
-              0.3
-            ],
-            "continentalness": [
-              0.3,
-              1.0
-            ],
-            "erosion": [
-              -0.375,
-              1.0
-            ],
-            "weirdness": [
               -1.0,
               -0.05
             ],
@@ -1117,7 +1144,34 @@
           "biome": "transdimension:trans_forest",
           "parameters": {
             "temperature": [
-              -0.45,
+              0.2,
+              0.55
+            ],
+            "humidity": [
+              0.1,
+              0.3
+            ],
+            "continentalness": [
+              0.3,
+              1.0
+            ],
+            "erosion": [
+              -0.375,
+              1.0
+            ],
+            "weirdness": [
+              -1.0,
+              -0.05
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "transdimension:trans_forest",
+          "parameters": {
+            "temperature": [
+              0.2,
               0.55
             ],
             "humidity": [
@@ -1145,7 +1199,7 @@
           "parameters": {
             "temperature": [
               -0.45,
-              0.55
+              0.2
             ],
             "humidity": [
               -1.0,
@@ -1199,7 +1253,7 @@
           "parameters": {
             "temperature": [
               -0.45,
-              0.55
+              0.2
             ],
             "humidity": [
               -1.0,
@@ -1320,6 +1374,141 @@
             "erosion": [
               -0.375,
               1.0
+            ],
+            "weirdness": [
+              -0.05,
+              0.05
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "transdimension:twilight_thicket",
+          "parameters": {
+            "temperature": [
+              0.2,
+              0.55
+            ],
+            "humidity": [
+              0.3,
+              1.0
+            ],
+            "continentalness": [
+              -0.11,
+              0.3
+            ],
+            "erosion": [
+              -1.0,
+              0.45
+            ],
+            "weirdness": [
+              -1.0,
+              -0.05
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "transdimension:twilight_thicket",
+          "parameters": {
+            "temperature": [
+              0.2,
+              0.55
+            ],
+            "humidity": [
+              0.3,
+              1.0
+            ],
+            "continentalness": [
+              -0.11,
+              0.3
+            ],
+            "erosion": [
+              -1.0,
+              0.45
+            ],
+            "weirdness": [
+              0.05,
+              1.0
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "transdimension:twilight_thicket",
+          "parameters": {
+            "temperature": [
+              0.2,
+              0.55
+            ],
+            "humidity": [
+              0.3,
+              1.0
+            ],
+            "continentalness": [
+              0.3,
+              1.0
+            ],
+            "erosion": [
+              -0.375,
+              0.45
+            ],
+            "weirdness": [
+              -1.0,
+              -0.05
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "transdimension:twilight_thicket",
+          "parameters": {
+            "temperature": [
+              0.2,
+              0.55
+            ],
+            "humidity": [
+              0.3,
+              1.0
+            ],
+            "continentalness": [
+              0.3,
+              1.0
+            ],
+            "erosion": [
+              -0.375,
+              0.45
+            ],
+            "weirdness": [
+              0.05,
+              1.0
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "transdimension:twilight_thicket",
+          "parameters": {
+            "temperature": [
+              0.2,
+              0.55
+            ],
+            "humidity": [
+              0.3,
+              1.0
+            ],
+            "continentalness": [
+              0.55,
+              1.0
+            ],
+            "erosion": [
+              -0.375,
+              0.45
             ],
             "weirdness": [
               -0.05,
@@ -1338,6 +1527,36 @@
             ],
             "humidity": [
               0.3,
+              0.65
+            ],
+            "continentalness": [
+              0.0,
+              1.0
+            ],
+            "erosion": [
+              -1.0,
+              1.0
+            ],
+            "weirdness": [
+              -1.0,
+              1.0
+            ],
+            "depth": [
+              0.2,
+              0.9
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "transdimension:pastel_lush_caves",
+          "parameters": {
+            "temperature": [
+              -1.0,
+              1.0
+            ],
+            "humidity": [
+              0.65,
               1.0
             ],
             "continentalness": [

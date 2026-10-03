@@ -4,18 +4,18 @@
       "default": {
         "max_delay": 24000,
         "min_delay": 12000,
-        "sound": "minecraft:music.overworld.meadow"
+        "sound": "minecraft:music.overworld.cherry_grove"
       }
     },
-    "minecraft:visual/fog_color": "#f7c4cf",
-    "minecraft:visual/sky_color": "#8ed8fa",
-    "minecraft:visual/water_fog_color": "#1f6fa8",
+    "minecraft:visual/fog_color": "#ffe0ee",
+    "minecraft:visual/sky_color": "#bfe8ff",
+    "minecraft:visual/water_fog_color": "#3a8fc8",
     "minecraft:visual/ambient_particles": [
       {
         "particle": {
           "type": "minecraft:cherry_leaves"
         },
-        "probability": 0.0008
+        "probability": 0.002
       }
     ]
   },
@@ -26,9 +26,9 @@
   ],
   "downfall": 0.6,
   "effects": {
-    "foliage_color": "#f5a9b8",
-    "grass_color": "#f5a9b8",
-    "water_color": "#5bcefa"
+    "foliage_color": "#ffc0d8",
+    "grass_color": "#ffc8dc",
+    "water_color": "#9fe3ff"
   },
   "features": [
     [],
@@ -77,14 +77,11 @@
       "minecraft:spring_lava"
     ],
     [
-      "transdimension:trees_trans_meadow",
-      "minecraft:patch_tall_grass_2",
-      "transdimension:pride_blossoms",
+      "transdimension:trees_candy_floss_grove",
       "transdimension:trans_flowers",
-      "transdimension:pride_peonies",
-      "transdimension:trans_petals_meadow",
-      "minecraft:patch_grass_meadow",
-      "transdimension:trans_boulders"
+      "transdimension:heart_blooms",
+      "transdimension:trans_petals_forest",
+      "minecraft:patch_grass_plain"
     ],
     []
   ],
@@ -132,16 +129,10 @@
         "weight": 6
       },
       {
-        "type": "minecraft:horse",
-        "maxCount": 4,
-        "minCount": 2,
-        "weight": 4
-      },
-      {
         "type": "transdimension:silly_cat",
-        "maxCount": 2,
+        "maxCount": 3,
         "minCount": 1,
-        "weight": 8
+        "weight": 14
       }
     ],
     "misc": [],
@@ -199,5 +190,5 @@
     "water_ambient": [],
     "water_creature": []
   },
-  "temperature": 0.7
+  "temperature": 0.8
 }

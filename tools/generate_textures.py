@@ -1169,6 +1169,54 @@ def trans_petals_stem():
 FLOWERS = ("trans_tulip", "pearl_daisy", "sky_bell", "flag_lily", "lavender_puff", "trans_orchid", "heart_bloom")
 
 
+# ============================================================================================ lush caves and forests
+def trans_moss():
+    """Soft pink moss with patches of trans blue."""
+    img = vblock("moss_block")
+    cells = voronoi_patches(16, 16, 5, random.Random(12))
+    blue_cells = {1, 3}
+    lo, hi = lum_range(img)
+    out = img.copy()
+    for p in pixels(img):
+        px = img.getpixel(p)
+        t = (lum(px) - lo) / (hi - lo)
+        ramp = R_PETAL_BLUE if cells[p] in blue_cells else R_PETAL_PINK
+        out.putpixel(p, (*sample(ramp, 0.2 + 0.7 * t), px[3]))
+    return out
+
+
+def leaves_from(name, ramp, sparkle=None, lo_t=0.1):
+    """Vanilla leaves re-coloured onto `ramp` (keeping their holes), optionally with a few glowing specks."""
+    img = vblock(name)
+    out = gradient_map(img, ramp, curve=lambda t: lo_t + (1 - lo_t) * t)
+    if sparkle:
+        rng = random.Random(len(name))
+        for p in pixels(img):
+            if img.getpixel(p)[3] > 0 and rng.random() < 0.05:
+                out.putpixel(p, (*sparkle, 255))
+    return out
+
+
+def pearl_leaves():
+    return leaves_from("birch_leaves", [hexc("A8A3BE"), hexc("CFCBE0"), hexc("EAE8F3"), hexc("FBF7FB"), WHITE], sparkle=hexc("FCE2EA"))
+
+
+def sky_leaves():
+    return leaves_from("oak_leaves", R_PETAL_BLUE, lo_t=0.15)
+
+
+def blush_leaves():
+    return leaves_from("azalea_leaves", R_PETAL_PINK, lo_t=0.15)
+
+
+def twilight_leaves():
+    return leaves_from("dark_oak_leaves", [hexc("261C4A"), hexc("3B2E6E"), hexc("574694"), hexc("7A68B6"), hexc("A795D8")],
+                       sparkle=hexc("F7B9CC"))
+
+
+LEAVES = ("pearl_leaves", "sky_leaves", "blush_leaves", "twilight_leaves")
+
+
 # ============================================================================================ pride oven
 def oven_recolor(img):
     """Smoker -> Pride Oven: pink wood, pearly stone and iron, and pink-and-white flames."""
@@ -1740,6 +1788,8 @@ def main():
         **{name: globals()[name]() for name in FLOWERS},
         "pride_peony_top": pride_peony("top"), "pride_peony_bottom": pride_peony("bottom"),
         "trans_petals": trans_petals(), "trans_petals_stem": trans_petals_stem(),
+        # lush caves and forests
+        "trans_moss_block": trans_moss(), **{name: globals()[name]() for name in LEAVES},
         # glass, wool, light
         "trans_stained_glass": trans_stained_glass(), "trans_stained_glass_pane_top": trans_stained_glass_pane_top(),
         "trans_pink_stained_glass": trans_pink_stained_glass(),
@@ -1757,7 +1807,8 @@ def main():
     for name in ("trans_crystal_cluster", "trans_sapling", "pride_blossom", *FLOWERS, "pride_peony_top", "pride_peony_bottom",
                  "trans_petals", "trans_petals_stem"):
         save_mcmeta(f"block/{name}.png", CUTOUT)
-    save_mcmeta("block/trans_leaves.png", LEAVES_META)
+    for name in ("trans_leaves", *LEAVES):
+        save_mcmeta(f"block/{name}.png", LEAVES_META)
     for name in ("trans_stained_glass", "trans_pink_stained_glass", "trans_blue_stained_glass", "trans_glass"):
         save_mcmeta(f"block/{name}.png", GLASS_META)
     save_mcmeta("block/trans_lantern.png", {"animation": {"frametime": 8}})

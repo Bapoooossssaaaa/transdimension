@@ -625,14 +625,16 @@ def generate_blocks():
     button("trans_button", "Trans Button", "trans_planks", "axe", wooden=True)
     pressure_plate("trans_pressure_plate", "Trans Pressure Plate", "trans_planks", "axe", wooden=True)
 
-    blockstate("trans_leaves", {"variants": {"": {"model": f"{NS}:block/trans_leaves"}}})
-    model("trans_leaves", {"parent": "minecraft:block/leaves", "textures": {"all": block_tex("trans_leaves")}})
-    item_def("trans_leaves", f"{NS}:block/trans_leaves")
-    name("trans_leaves", "Trans Leaves")
-    mine("trans_leaves", "hoe")
-    loot("trans_leaves", loot_leaves("trans_leaves", "trans_sapling"))
-    tag("block", "leaves", "trans_leaves")
-    tag("item", "leaves", "trans_leaves")
+    for leaves_id, english in (("trans_leaves", "Trans Leaves"), ("pearl_leaves", "Pearl Leaves"), ("sky_leaves", "Sky Leaves"),
+                               ("blush_leaves", "Blush Leaves"), ("twilight_leaves", "Twilight Leaves")):
+        blockstate(leaves_id, {"variants": {"": {"model": f"{NS}:block/{leaves_id}"}}})
+        model(leaves_id, {"parent": "minecraft:block/leaves", "textures": {"all": block_tex(leaves_id)}})
+        item_def(leaves_id, f"{NS}:block/{leaves_id}")
+        name(leaves_id, english)
+        mine(leaves_id, "hoe")
+        loot(leaves_id, loot_leaves(leaves_id, "trans_sapling"))
+        tag("block", "leaves", leaves_id)
+        tag("item", "leaves", leaves_id)
 
     cross_plant("trans_sapling", "Trans Sapling", "potted_trans_sapling", "Potted Trans Sapling")
     tag("block", "saplings", "trans_sapling")
@@ -670,6 +672,20 @@ def generate_blocks():
     for t in ("flowers", "inside_step_sound_blocks", "bee_attractive"):
         tag("block", t, "trans_petals")
     tag("item", "flowers", "trans_petals")
+
+    # ---- pastel lush caves
+    cube("trans_moss_block", "Trans Moss Block", tool="hoe")
+    tag("block", "moss_blocks", "trans_moss_block")
+    tag("item", "moss_blocks", "trans_moss_block")
+    blockstate("trans_moss_carpet", {"variants": {"": {"model": f"{NS}:block/trans_moss_carpet"}}})
+    model("trans_moss_carpet", {"parent": "minecraft:block/carpet", "textures": {"wool": block_tex("trans_moss_block")}})
+    item_def("trans_moss_carpet", f"{NS}:block/trans_moss_carpet")
+    name("trans_moss_carpet", "Trans Moss Carpet")
+    mine("trans_moss_carpet", "hoe")
+    loot("trans_moss_carpet", loot_self("trans_moss_carpet"))
+    # What the realm's moss patches may grow over.
+    tag("block", "trans_moss_replaceable", "#transdimension:trans_base_stone", "#minecraft:dirt", "#minecraft:cave_vines",
+        "trans_grass_block", ns=NS)
 
     # ---- glass, wool and light
     glass("trans_glass", "Trans Glass")
@@ -874,6 +890,7 @@ def generate_recipes():
                                   ("flag_lily", "white_dye", 1), ("lavender_puff", "purple_dye", 1), ("trans_orchid", "pink_dye", 1),
                                   ("heart_bloom", "pink_dye", 2), ("pride_peony", "pink_dye", 2), ("trans_petals", "pink_dye", 1)):
         R(f"{dye}_from_{flower_id}", shapeless(f"minecraft:{dye}", [flower_id], count, category="misc", group=dye))
+    R("trans_moss_carpet", shaped("trans_moss_carpet", ["##"], {"#": "trans_moss_block"}, 3, category="misc", group="carpet"))
     R("trans_sapling_from_blossoms", shapeless("trans_sapling", ["minecraft:cherry_sapling", "transdimension:pride_blossom", "transdimension:trans_crystal"], 1, category="misc"))
 
 
@@ -968,7 +985,8 @@ BIOMES = {
     "trans_ocean": "Trans Ocean", "deep_trans_ocean": "Deep Trans Ocean", "trans_river": "Pastel River",
     "sugar_dunes": "Sugar Dunes", "lavender_marsh": "Lavender Marsh", "frosted_fields": "Frosted Fields",
     "crystal_grove": "Crystal Grove", "pastel_peaks": "Pastel Peaks", "heartwood_grove": "Heartwood Grove",
-    "crystal_caves": "Crystal Caves",
+    "crystal_caves": "Crystal Caves", "pearlwood_forest": "Pearlwood Forest", "bluebell_woods": "Bluebell Woods",
+    "twilight_thicket": "Twilight Thicket", "candy_floss_grove": "Candy Floss Grove", "pastel_lush_caves": "Pastel Lush Caves",
 }
 
 

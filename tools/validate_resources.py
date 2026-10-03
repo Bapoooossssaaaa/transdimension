@@ -66,7 +66,7 @@ def vanilla_has(registry, ident):
 def java_names():
     blocks, items, no_item = set(), set(), set()
     src = open(os.path.join(JAVA, "registry", "ModBlocks.java"), encoding="utf-8").read()
-    for m in re.finditer(r'\b(?:register|stairs|slab|wall|glass|pane|copy|ore|flower)\("([a-z0-9_]+)"', src):
+    for m in re.finditer(r'\b(?:register|stairs|slab|wall|glass|pane|copy|ore|flower|leaves)\("([a-z0-9_]+)"', src):
         blocks.add(m.group(1))
     for m in re.finditer(r'\b(?:registerWithoutItem|potted)\("([a-z0-9_]+)"', src):
         no_item.add(m.group(1))
@@ -272,6 +272,7 @@ TWINS = {
     "trans_cake": "cake", "pride_oven": "smoker", "trans_chair": "smoker", "trans_table": "smoker",
     "trans_deepslate": "deepslate", "trans_redstone_ore": "redstone_ore", "trans_deepslate_redstone_ore": "redstone_ore",
     "trans_glass_pane": "glass_pane", "trans_petals": "pink_petals", "pride_peony": "peony",
+    "pearl_leaves": "cherry_leaves", "sky_leaves": "cherry_leaves", "blush_leaves": "cherry_leaves", "twilight_leaves": "cherry_leaves",
 }
 for b in BLOCKS:
     if b.endswith("_stairs"):

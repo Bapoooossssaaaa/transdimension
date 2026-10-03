@@ -176,7 +176,13 @@ public final class ModItems {
 		}
 		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_PETALS, 0.3F);
 		FlammableBlockRegistry.getDefaultInstance().add(ModBlocks.TRANS_PETALS, 60, 100);
-		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_LEAVES, 0.3F);
+		for (Block leaves : List.of(ModBlocks.TRANS_LEAVES, ModBlocks.PEARL_LEAVES, ModBlocks.SKY_LEAVES, ModBlocks.BLUSH_LEAVES,
+				ModBlocks.TWILIGHT_LEAVES)) {
+			CompostableRegistry.INSTANCE.add(leaves, 0.3F);
+			FlammableBlockRegistry.getDefaultInstance().add(leaves, 30, 60);
+		}
+		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_MOSS_BLOCK, 0.65F);
+		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_MOSS_CARPET, 0.3F);
 		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_SAPLING, 0.3F);
 		CompostableRegistry.INSTANCE.add(TRANS_COOKIE, 0.85F);
 		CompostableRegistry.INSTANCE.add(TRANS_CUPCAKE, 0.85F);

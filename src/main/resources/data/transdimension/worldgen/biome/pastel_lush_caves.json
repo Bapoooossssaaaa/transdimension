@@ -4,18 +4,18 @@
       "default": {
         "max_delay": 24000,
         "min_delay": 12000,
-        "sound": "minecraft:music.overworld.meadow"
+        "sound": "minecraft:music.overworld.lush_caves"
       }
     },
-    "minecraft:visual/fog_color": "#f7c4cf",
-    "minecraft:visual/sky_color": "#8ed8fa",
-    "minecraft:visual/water_fog_color": "#1f6fa8",
+    "minecraft:visual/fog_color": "#d9c8ff",
+    "minecraft:visual/sky_color": "#9fb8ff",
+    "minecraft:visual/water_fog_color": "#2e7fb0",
     "minecraft:visual/ambient_particles": [
       {
         "particle": {
-          "type": "minecraft:cherry_leaves"
+          "type": "minecraft:spore_blossom_air"
         },
-        "probability": 0.0008
+        "probability": 0.003
       }
     ]
   },
@@ -24,11 +24,11 @@
     "minecraft:cave_extra_underground",
     "minecraft:canyon"
   ],
-  "downfall": 0.6,
+  "downfall": 0.5,
   "effects": {
     "foliage_color": "#f5a9b8",
-    "grass_color": "#f5a9b8",
-    "water_color": "#5bcefa"
+    "grass_color": "#f0b5c8",
+    "water_color": "#7fd6ff"
   },
   "features": [
     [],
@@ -65,6 +65,7 @@
       "transdimension:trans_ore_lapis",
       "transdimension:trans_ore_lapis_buried",
       "transdimension:trans_ore_copper",
+      "transdimension:trans_ore_clay",
       "transdimension:ore_trans_crystal",
       "transdimension:ore_trans_crystal_deep",
       "minecraft:disk_clay"
@@ -77,14 +78,13 @@
       "minecraft:spring_lava"
     ],
     [
-      "transdimension:trees_trans_meadow",
       "minecraft:patch_tall_grass_2",
-      "transdimension:pride_blossoms",
-      "transdimension:trans_flowers",
-      "transdimension:pride_peonies",
-      "transdimension:trans_petals_meadow",
-      "minecraft:patch_grass_meadow",
-      "transdimension:trans_boulders"
+      "transdimension:trans_lush_caves_ceiling_vegetation",
+      "minecraft:cave_vines",
+      "minecraft:lush_caves_clay",
+      "transdimension:trans_lush_caves_vegetation",
+      "minecraft:spore_blossom",
+      "minecraft:classic_vines_cave_feature"
     ],
     []
   ],
@@ -99,51 +99,15 @@
         "weight": 10
       }
     ],
-    "axolotls": [],
-    "creature": [
+    "axolotls": [
       {
-        "type": "minecraft:sheep",
-        "maxCount": 4,
-        "minCount": 4,
-        "weight": 12
-      },
-      {
-        "type": "minecraft:pig",
-        "maxCount": 4,
+        "type": "minecraft:axolotl",
+        "maxCount": 6,
         "minCount": 4,
         "weight": 10
-      },
-      {
-        "type": "minecraft:chicken",
-        "maxCount": 4,
-        "minCount": 4,
-        "weight": 10
-      },
-      {
-        "type": "minecraft:cow",
-        "maxCount": 4,
-        "minCount": 4,
-        "weight": 8
-      },
-      {
-        "type": "minecraft:rabbit",
-        "maxCount": 3,
-        "minCount": 2,
-        "weight": 6
-      },
-      {
-        "type": "minecraft:horse",
-        "maxCount": 4,
-        "minCount": 2,
-        "weight": 4
-      },
-      {
-        "type": "transdimension:silly_cat",
-        "maxCount": 2,
-        "minCount": 1,
-        "weight": 8
       }
     ],
+    "creature": [],
     "misc": [],
     "monster": [
       {
@@ -195,9 +159,23 @@
         "weight": 5
       }
     ],
-    "underground_water_creature": [],
-    "water_ambient": [],
+    "underground_water_creature": [
+      {
+        "type": "minecraft:glow_squid",
+        "maxCount": 6,
+        "minCount": 4,
+        "weight": 10
+      }
+    ],
+    "water_ambient": [
+      {
+        "type": "minecraft:tropical_fish",
+        "maxCount": 8,
+        "minCount": 8,
+        "weight": 25
+      }
+    ],
     "water_creature": []
   },
-  "temperature": 0.7
+  "temperature": 0.5
 }

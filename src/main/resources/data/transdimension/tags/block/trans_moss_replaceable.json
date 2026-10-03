@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:cave_vines",
+    "#minecraft:dirt",
+    "#transdimension:trans_base_stone",
+    "transdimension:trans_grass_block"
+  ]
+}

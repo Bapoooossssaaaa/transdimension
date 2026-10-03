@@ -23,6 +23,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BonemealableFeaturePlacerBlock;
 import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.CakeBlock;
 import net.minecraft.world.level.block.CarpetBlock;
@@ -240,6 +241,11 @@ public final class ModBlocks {
 	public static final Block TRANS_LEAVES = register("trans_leaves",
 			properties -> new UntintedParticleLeavesBlock(0.02F, ParticleTypes.CHERRY_LEAVES, properties),
 			BlockBehaviour.Properties.ofFullCopy(Blocks.CHERRY_LEAVES));
+	// Leaves of the themed forests (their trees use trans logs; all of them drop trans saplings).
+	public static final Block PEARL_LEAVES = leaves("pearl_leaves");
+	public static final Block SKY_LEAVES = leaves("sky_leaves");
+	public static final Block BLUSH_LEAVES = leaves("blush_leaves");
+	public static final Block TWILIGHT_LEAVES = leaves("twilight_leaves");
 	public static final Block TRANS_SAPLING = register("trans_sapling",
 			properties -> new SaplingBlock(TRANS_TREE_GROWER, properties),
 			BlockBehaviour.Properties.ofFullCopy(Blocks.CHERRY_SAPLING));
@@ -270,6 +276,14 @@ public final class ModBlocks {
 			BlockBehaviour.Properties.ofFullCopy(Blocks.PEONY));
 	public static final Block TRANS_PETALS = register("trans_petals", FlowerBedBlock::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.PINK_PETALS));
+
+	// ---------------------------------------------------------------- pastel lush caves
+	/** Pink and blue moss; bone meal spreads it (and flowers) around, like vanilla moss. */
+	public static final Block TRANS_MOSS_BLOCK = register("trans_moss_block",
+			properties -> new BonemealableFeaturePlacerBlock(configuredFeature("trans_moss_patch_bonemeal"), properties),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.MOSS_BLOCK));
+	public static final Block TRANS_MOSS_CARPET = register("trans_moss_carpet", CarpetBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.MOSS_CARPET));
 
 	// ---------------------------------------------------------------- glass, wool and light
 	/** Clear glass with a pink and blue frame; what trans sand smelts into. */
@@ -312,6 +326,11 @@ public final class ModBlocks {
 
 	private static ResourceKey<net.minecraft.world.level.levelgen.feature.ConfiguredFeature<?, ?>> configuredFeature(String name) {
 		return ResourceKey.create(Registries.CONFIGURED_FEATURE, TransDimension.id(name));
+	}
+
+	private static Block leaves(String name) {
+		return register(name, properties -> new UntintedParticleLeavesBlock(0.01F, ParticleTypes.CHERRY_LEAVES, properties),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.CHERRY_LEAVES));
 	}
 
 	private static Block flower(String name, Holder<MobEffect> stewEffect, float stewSeconds) {
