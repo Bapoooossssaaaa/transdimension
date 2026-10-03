@@ -787,6 +787,8 @@ def generate_misc():
         "advancements.transdimension.goober.description": "Say the magic word and enter the Trans Realm",
         "advancements.transdimension.slobbered.title": "Big Smooch",
         "advancements.transdimension.slobbered.description": "Get licked by a Silly Cat",
+        "advancements.transdimension.trans_village.title": "Home Sweet Home",
+        "advancements.transdimension.trans_village.description": "Find a Trans Village",
         "message.transdimension.welcome": "❤ Welcome to the Trans Realm! Say \"Goober\" again to go home. ❤",
         "message.transdimension.realm_missing": "The Trans Realm didn't load. Check the server log for data pack errors.",
     })

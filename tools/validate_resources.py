@@ -506,6 +506,38 @@ if nbtlib:
                 if not entity_exists(str(e["nbt"]["id"])):
                     err(f"{rel}: unknown entity {e['nbt']['id']}")
 
+# ------------------------------------------------------------------ sounds.json
+for event, spec in (load(os.path.join(ASSETS, "sounds.json")) or {}).items():
+    for s in spec["sounds"]:
+        name = s if isinstance(s, str) else s["name"]
+        is_event = isinstance(s, dict) and s.get("type") == "event"
+        ok = vanilla_has("sound_event", name) if is_event else vanilla_has("sound", name)
+        if not ok:
+            err(f"sounds.json {event}: unknown {'sound event' if is_event else 'sound file'} {name}")
+
+# ------------------------------------------------------------------ advancements
+LANG = load(os.path.join(ASSETS, "lang", "en_us.json")) or {}
+for f in walk_json(os.path.join(DATA, NS, "advancement")):
+    d = load(f) or {}
+    rel = os.path.relpath(f, ROOT)
+    parent = d.get("parent")
+    if parent and not ours_or_vanilla(parent, "advancement", "advancement"):
+        err(f"{rel}: unknown parent {parent}")
+    display = d.get("display", {})
+    if display and not item_exists(display["icon"]["id"]):
+        err(f"{rel}: unknown icon {display['icon']['id']}")
+    for part in ("title", "description"):
+        key = display.get(part, {}).get("translate")
+        if key and key not in LANG:
+            err(f"{rel}: no translation for {key}")
+    for name, c in d.get("criteria", {}).items():
+        if not vanilla_has("trigger_type", c["trigger"]):
+            err(f"{rel}: unknown trigger {c['trigger']}")
+        # 26.2 entity predicates are lists of loot conditions / "minecraft:" keyed maps, not the old objects.
+        player = c.get("conditions", {}).get("player")
+        if isinstance(player, dict) and any(":" not in k for k in player):
+            err(f"{rel}: criterion {name} uses the pre-26.2 entity predicate format")
+
 # ------------------------------------------------------------------ villager trades
 for f in walk_json(os.path.join(DATA, NS, "villager_trade")):
     d = load(f) or {}

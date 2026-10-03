@@ -32,6 +32,8 @@ Outputs (under src/main/resources/data):
     python3 tools/generate_villages.py      (needs: pip install nbtlib)
 """
 import copy
+import gzip
+import io
 import json
 import os
 import shutil
@@ -218,7 +220,11 @@ class Template:
         self.file["size"] = List[Int]([Int(c) for c in self.size])
         path = os.path.join(OUT_STRUCT, out_rel + ".nbt")
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        self.file.save(path, gzipped=True)
+        # Gzip with a fixed timestamp so that rerunning the script doesn't change every file.
+        raw = io.BytesIO()
+        self.file.write(raw, "big")
+        with open(path, "wb") as out, gzip.GzipFile(filename="", mode="wb", fileobj=out, mtime=0) as gz:
+            gz.write(raw.getvalue())
 
 
 def add_furniture(t):
