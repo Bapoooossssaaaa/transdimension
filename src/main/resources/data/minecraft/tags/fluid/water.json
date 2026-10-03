@@ -1,7 +1,0 @@
-{
-  "replace": false,
-  "values": [
-    "transdimension:trans_water",
-    "transdimension:flowing_trans_water"
-  ]
-}

@@ -2,14 +2,15 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
-    "X": "transdimension:trans_crystal"
+    "#": "transdimension:trans_crystal"
   },
   "pattern": [
-    "XXX",
-    "XXX",
-    "XXX"
+    "###",
+    "###",
+    "###"
   ],
   "result": {
+    "count": 1,
     "id": "transdimension:trans_crystal_block"
   }
 }

@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:chiseled_trans_stone_bricks",
+    "transdimension:cracked_trans_stone_bricks",
+    "transdimension:trans_stone_bricks"
+  ]
+}

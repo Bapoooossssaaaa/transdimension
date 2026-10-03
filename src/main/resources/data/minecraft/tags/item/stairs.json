@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:trans_cobblestone_stairs",
+    "transdimension:trans_sandstone_stairs",
+    "transdimension:trans_stairs",
+    "transdimension:trans_stone_brick_stairs",
+    "transdimension:trans_stone_stairs"
+  ]
+}

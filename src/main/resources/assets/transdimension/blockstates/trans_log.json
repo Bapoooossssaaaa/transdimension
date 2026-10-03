@@ -1,16 +1,13 @@
 {
   "variants": {
     "axis=x": {
-      "model": "transdimension:block/trans_log_horizontal",
-      "x": 90,
-      "y": 90
+      "model": "transdimension:block/trans_log_x"
     },
     "axis=y": {
-      "model": "transdimension:block/trans_log"
+      "model": "transdimension:block/trans_log_y"
     },
     "axis=z": {
-      "model": "transdimension:block/trans_log_horizontal",
-      "x": 90
+      "model": "transdimension:block/trans_log_z"
     }
   }
 }

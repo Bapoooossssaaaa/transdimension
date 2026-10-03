@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "wool",
+  "key": {
+    "L": "minecraft:light_blue_wool",
+    "P": "minecraft:pink_wool",
+    "W": "minecraft:white_wool"
+  },
+  "pattern": [
+    "L",
+    "P",
+    "W"
+  ],
+  "result": {
+    "count": 3,
+    "id": "transdimension:trans_wool"
+  }
+}

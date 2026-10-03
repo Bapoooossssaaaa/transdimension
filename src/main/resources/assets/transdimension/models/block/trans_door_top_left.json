@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/door_top_left",
+  "textures": {
+    "bottom": "transdimension:block/trans_door_bottom",
+    "top": "transdimension:block/trans_door_top"
+  }
+}

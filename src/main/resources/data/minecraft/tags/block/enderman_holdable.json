@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:pride_blossom",
+    "transdimension:trans_dirt",
+    "transdimension:trans_grass_block",
+    "transdimension:trans_sand"
+  ]
+}

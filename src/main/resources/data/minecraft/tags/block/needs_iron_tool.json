@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "transdimension:trans_crystal_ore",
-    "transdimension:trans_crystal_block"
+    "transdimension:trans_crystal_block",
+    "transdimension:trans_crystal_ore"
   ]
 }

@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "stained_glass",
+  "key": {
+    "#": "minecraft:glass",
+    "P": "minecraft:pink_dye",
+    "B": "minecraft:light_blue_dye",
+    "W": "minecraft:white_dye"
+  },
+  "pattern": [
+    "PBW",
+    "B#B",
+    "WBP"
+  ],
+  "result": {
+    "count": 5,
+    "id": "transdimension:trans_stained_glass"
+  }
+}

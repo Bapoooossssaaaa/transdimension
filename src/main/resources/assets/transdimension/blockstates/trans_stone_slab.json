@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "transdimension:block/trans_stone_slab"
+    },
+    "type=double": {
+      "model": "transdimension:block/trans_stone"
+    },
+    "type=top": {
+      "model": "transdimension:block/trans_stone_slab_top"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:trans_blue_stained_glass",
+    "transdimension:trans_pink_stained_glass",
+    "transdimension:trans_stained_glass"
+  ]
+}

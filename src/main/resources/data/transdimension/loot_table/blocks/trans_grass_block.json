@@ -29,12 +29,12 @@
             },
             {
               "type": "minecraft:item",
-              "name": "transdimension:trans_dirt",
               "conditions": [
                 {
                   "condition": "minecraft:survives_explosion"
                 }
-              ]
+              ],
+              "name": "transdimension:trans_dirt"
             }
           ]
         }

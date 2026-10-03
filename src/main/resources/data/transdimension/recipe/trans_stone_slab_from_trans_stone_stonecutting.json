@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "transdimension:trans_stone",
+  "result": {
+    "count": 2,
+    "id": "transdimension:trans_stone_slab"
+  }
+}

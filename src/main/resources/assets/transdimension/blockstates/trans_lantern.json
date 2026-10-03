@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "hanging=false": {
+      "model": "transdimension:block/trans_lantern"
+    },
+    "hanging=true": {
+      "model": "transdimension:block/trans_lantern_hanging"
+    }
+  }
+}

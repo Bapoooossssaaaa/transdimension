@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": "transdimension:trans_planks",
+    "W": "transdimension:trans_wool",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    "P  ",
+    "PWP",
+    "S S"
+  ],
+  "result": {
+    "count": 2,
+    "id": "transdimension:trans_chair"
+  }
+}

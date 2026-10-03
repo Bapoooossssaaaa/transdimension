@@ -528,6 +528,10 @@ def trans_trapdoor():
     return recolor_door(vblock("cherry_trapdoor"))
 
 
+def trans_door_item():
+    return recolor_door(vitem("cherry_door"))
+
+
 # ============================================================================================ crystals
 def trans_crystal_block():
     return gradient_map(vblock("amethyst_block"), R_TRANS)
@@ -605,6 +609,13 @@ def trans_wool():
 def trans_lantern():
     """A navy metal lantern with a pink-and-white glow (three animated frames, like vanilla)."""
     img = vblock("lantern")
+    glow = lambda p, px: hsv(px)[1] > 0.35 and hsv(px)[0] < 0.2 and lum(px) > 0.35
+    out = gradient_map(img, [hexc("141A3A"), hexc("2B3F7A"), hexc("4E79B8"), hexc("8FC3EA")], mask=lambda p, px: not glow(p, px))
+    return gradient_map(img, [hexc("E06A92"), hexc("F5A9B8"), hexc("FFE3EC"), WHITE], mask=glow, out=out)
+
+
+def trans_lantern_item():
+    img = vitem("lantern")
     glow = lambda p, px: hsv(px)[1] > 0.35 and hsv(px)[0] < 0.2 and lum(px) > 0.35
     out = gradient_map(img, [hexc("141A3A"), hexc("2B3F7A"), hexc("4E79B8"), hexc("8FC3EA")], mask=lambda p, px: not glow(p, px))
     return gradient_map(img, [hexc("E06A92"), hexc("F5A9B8"), hexc("FFE3EC"), WHITE], mask=glow, out=out)
@@ -1365,7 +1376,7 @@ def main():
         "trans_leggings": trans_armor_item("leggings"), "trans_boots": trans_armor_item("boots"),
         "trans_donut": trans_donut(), "trans_cookie": trans_cookie(), "trans_cupcake": trans_cupcake(),
         "trans_macaron": trans_macaron(), "trans_boba": trans_boba(), "trans_cake": trans_cake_item(),
-        "silly_cat_spawn_egg": silly_cat_spawn_egg(),
+        "silly_cat_spawn_egg": silly_cat_spawn_egg(), "trans_door": trans_door_item(), "trans_lantern": trans_lantern_item(),
     }
     for name, img in items.items():
         save(img, f"item/{name}.png")

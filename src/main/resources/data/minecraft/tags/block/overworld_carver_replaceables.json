@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:trans_dirt",
+    "transdimension:trans_grass_block",
+    "transdimension:trans_sand",
+    "transdimension:trans_sandstone",
+    "transdimension:trans_stone"
+  ]
+}

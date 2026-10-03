@@ -1,0 +1,108 @@
+{
+  "entity.silly_cat.ambient": {
+    "subtitle": "subtitles.transdimension.entity.silly_cat.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.cat.ambient",
+        "type": "event",
+        "volume": 1.0,
+        "pitch": 1.15
+      },
+      {
+        "name": "minecraft:entity.cat.purreow",
+        "type": "event",
+        "volume": 1.0,
+        "pitch": 1.1
+      }
+    ]
+  },
+  "entity.silly_cat.purr": {
+    "subtitle": "subtitles.transdimension.entity.silly_cat.purr",
+    "sounds": [
+      {
+        "name": "minecraft:entity.cat.purr",
+        "type": "event",
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "entity.silly_cat.lick": {
+    "subtitle": "subtitles.transdimension.entity.silly_cat.lick",
+    "sounds": [
+      {
+        "name": "minecraft:random/drink",
+        "volume": 0.7,
+        "pitch": 1.6
+      },
+      {
+        "name": "minecraft:mob/cat/eat1",
+        "volume": 0.8,
+        "pitch": 1.3
+      },
+      {
+        "name": "minecraft:mob/cat/eat2",
+        "volume": 0.8,
+        "pitch": 1.3
+      }
+    ]
+  },
+  "entity.silly_cat.hurt": {
+    "subtitle": "subtitles.transdimension.entity.silly_cat.hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.cat.hurt",
+        "type": "event",
+        "volume": 1.0,
+        "pitch": 1.1
+      }
+    ]
+  },
+  "entity.silly_cat.death": {
+    "subtitle": "subtitles.transdimension.entity.silly_cat.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.cat.death",
+        "type": "event",
+        "volume": 1.0,
+        "pitch": 1.1
+      }
+    ]
+  },
+  "block.pride_oven.crackle": {
+    "subtitle": "subtitles.transdimension.block.pride_oven.crackle",
+    "sounds": [
+      {
+        "name": "minecraft:block.smoker.smoke",
+        "type": "event",
+        "volume": 0.8,
+        "pitch": 1.1
+      }
+    ]
+  },
+  "ui.intro.bell": {
+    "sounds": [
+      {
+        "name": "minecraft:note/bell"
+      }
+    ]
+  },
+  "ui.intro.chime": {
+    "sounds": [
+      {
+        "name": "minecraft:block/amethyst/shimmer",
+        "volume": 0.9
+      }
+    ]
+  },
+  "ui.intro.whoosh": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.player.attack.sweep",
+        "type": "event",
+        "volume": 0.8,
+        "pitch": 0.6
+      }
+    ]
+  }
+}

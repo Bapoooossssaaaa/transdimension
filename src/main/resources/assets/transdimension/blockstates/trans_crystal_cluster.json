@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "transdimension:block/trans_crystal_cluster",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "transdimension:block/trans_crystal_cluster",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "transdimension:block/trans_crystal_cluster",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "transdimension:block/trans_crystal_cluster",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "transdimension:block/trans_crystal_cluster"
+    },
+    "facing=west": {
+      "model": "transdimension:block/trans_crystal_cluster",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

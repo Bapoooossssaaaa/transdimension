@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "transdimension:block/trans_log",
+    "side": "transdimension:block/trans_log"
+  }
+}

@@ -5,7 +5,7 @@
     "transdimension:trans_crystal_block"
   ],
   "result": {
-    "id": "transdimension:trans_crystal",
-    "count": 9
+    "count": 9,
+    "id": "transdimension:trans_crystal"
   }
 }

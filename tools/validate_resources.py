@@ -1,0 +1,263 @@
+#!/usr/bin/env python3
+"""
+Sanity-checks the mod's resources without launching the game:
+
+* every block/item registered in Java has its blockstate, item definition, name and (for blocks) loot table,
+* every model, parent, texture, item model, loot entry, recipe ingredient and tag entry points at
+  something that exists (in this mod, or in vanilla 26.2 when a vanilla registry dump is available),
+* every JSON file parses.
+
+    python3 tools/validate_resources.py [path/to/mcmeta-summary/registries/data.json]
+
+The optional argument is misode/mcmeta's 26.2 "summary" registries file; with it, vanilla ids are
+checked too. Exit code 1 if anything is wrong.
+"""
+import json
+import os
+import re
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.normpath(os.path.join(HERE, ".."))
+RES = os.path.join(ROOT, "src", "main", "resources")
+ASSETS = os.path.join(RES, "assets", "transdimension")
+DATA = os.path.join(RES, "data")
+JAVA = os.path.join(ROOT, "src", "main", "java", "dev", "goober", "transdimension")
+NS = "transdimension"
+
+errors = []
+warnings = []
+
+
+def err(msg):
+    errors.append(msg)
+
+
+def load(path):
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:  # noqa: BLE001
+        err(f"bad JSON {os.path.relpath(path, ROOT)}: {e}")
+        return None
+
+
+def walk_json(base):
+    for root, _, files in os.walk(base):
+        for f in files:
+            if f.endswith(".json") or f.endswith(".mcmeta"):
+                yield os.path.join(root, f)
+
+
+# ------------------------------------------------------------------ vanilla registries (optional)
+vanilla = {}
+if len(sys.argv) > 1 and os.path.exists(sys.argv[1]):
+    vanilla = json.load(open(sys.argv[1], encoding="utf-8"))
+
+
+def vanilla_has(registry, ident):
+    if not vanilla:
+        return True
+    ns, path = ident.split(":", 1) if ":" in ident else ("minecraft", ident)
+    return ns == "minecraft" and path in set(vanilla.get(registry, []))
+
+
+# ------------------------------------------------------------------ Java registrations
+def java_names():
+    blocks, items, no_item = set(), set(), set()
+    src = open(os.path.join(JAVA, "registry", "ModBlocks.java"), encoding="utf-8").read()
+    for m in re.finditer(r'(?:register|stairs|slab|wall|glass|pane)\("([a-z0-9_]+)"', src):
+        blocks.add(m.group(1))
+    for m in re.finditer(r'registerWithoutItem\("([a-z0-9_]+)"', src):
+        no_item.add(m.group(1))
+        blocks.add(m.group(1))
+    items |= blocks - no_item
+    src = open(os.path.join(JAVA, "registry", "ModItems.java"), encoding="utf-8").read()
+    for m in re.finditer(r'register\("([a-z0-9_]+)"', src):
+        items.add(m.group(1))
+    return blocks, items, no_item
+
+
+BLOCKS, ITEMS, NO_ITEM = java_names()
+
+
+def is_ours(ident):
+    return ident.startswith(NS + ":")
+
+
+def path_of(ident):
+    return ident.split(":", 1)[1]
+
+
+def item_exists(ident):
+    if ident.startswith("#"):
+        return tag_exists("item", ident[1:])
+    if is_ours(ident):
+        return path_of(ident) in ITEMS
+    return vanilla_has("item", ident)
+
+
+def block_exists(ident):
+    if ident.startswith("#"):
+        return tag_exists("block", ident[1:])
+    if is_ours(ident):
+        return path_of(ident) in BLOCKS
+    return vanilla_has("block", ident)
+
+
+def tag_exists(kind, ident):
+    ns, path = ident.split(":", 1)
+    if os.path.exists(os.path.join(DATA, ns, "tags", kind, path + ".json")):
+        return True
+    if ns == "minecraft":
+        return vanilla_has(f"tag/{kind}", ident)
+    return False
+
+
+# ------------------------------------------------------------------ assets
+def model_exists(ident):
+    ns, path = ident.split(":", 1) if ":" in ident else ("minecraft", ident)
+    if ns == NS:
+        return os.path.exists(os.path.join(ASSETS, "models", path + ".json"))
+    return vanilla_has("model", f"minecraft:{path}") or path.startswith("builtin/")
+
+
+def texture_exists(ident):
+    if isinstance(ident, dict):
+        ident = ident.get("sprite", "")
+    if ident.startswith("#"):
+        return True
+    ns, path = ident.split(":", 1) if ":" in ident else ("minecraft", ident)
+    if ns == NS:
+        return os.path.exists(os.path.join(ASSETS, "textures", path + ".png"))
+    return vanilla_has("texture", f"minecraft:{path}")
+
+
+def check_models_in(obj, where):
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if k == "model" and isinstance(v, str):
+                if not model_exists(v):
+                    err(f"{where}: missing model {v}")
+            else:
+                check_models_in(v, where)
+    elif isinstance(obj, list):
+        for v in obj:
+            check_models_in(v, where)
+
+
+for f in walk_json(os.path.join(ASSETS, "blockstates")):
+    bs = load(f)
+    if bs:
+        check_models_in(bs, os.path.relpath(f, ROOT))
+
+for f in walk_json(os.path.join(ASSETS, "models")):
+    m = load(f)
+    if not m:
+        continue
+    where = os.path.relpath(f, ROOT)
+    if "parent" in m and not model_exists(m["parent"]):
+        err(f"{where}: missing parent {m['parent']}")
+    for key, tex in m.get("textures", {}).items():
+        if not texture_exists(tex):
+            err(f"{where}: missing texture {key}={tex}")
+
+for f in walk_json(os.path.join(ASSETS, "items")):
+    d = load(f)
+    if d:
+        check_models_in(d, os.path.relpath(f, ROOT))
+
+for f in walk_json(os.path.join(ASSETS, "textures")):
+    load(f)  # mcmeta must parse
+
+lang = load(os.path.join(ASSETS, "lang", "en_us.json")) or {}
+for b in BLOCKS:
+    if not os.path.exists(os.path.join(ASSETS, "blockstates", b + ".json")):
+        err(f"block {b}: no blockstate")
+    if f"block.{NS}.{b}" not in lang:
+        err(f"block {b}: no name in en_us.json")
+for i in ITEMS:
+    if not os.path.exists(os.path.join(ASSETS, "items", i + ".json")):
+        err(f"item {i}: no item definition")
+    if i not in BLOCKS and f"item.{NS}.{i}" not in lang:
+        err(f"item {i}: no name in en_us.json")
+
+# ------------------------------------------------------------------ data
+for b in BLOCKS - {"trans_cake"}:
+    if not os.path.exists(os.path.join(DATA, NS, "loot_table", "blocks", b + ".json")):
+        err(f"block {b}: no loot table")
+
+
+def check_loot(obj, where):
+    if isinstance(obj, dict):
+        if obj.get("type") == "minecraft:item" and "name" in obj and not item_exists(obj["name"]):
+            err(f"{where}: loot item {obj['name']} doesn't exist")
+        if obj.get("type") == "minecraft:loot_table" and isinstance(obj.get("value"), str):
+            pass
+        for v in obj.values():
+            check_loot(v, where)
+    elif isinstance(obj, list):
+        for v in obj:
+            check_loot(v, where)
+
+
+for f in walk_json(os.path.join(DATA, NS, "loot_table")):
+    d = load(f)
+    if d:
+        check_loot(d, os.path.relpath(f, ROOT))
+
+
+def ingredient_ok(value):
+    if isinstance(value, list):
+        return all(ingredient_ok(v) for v in value)
+    return item_exists(value)
+
+
+for f in walk_json(os.path.join(DATA, NS, "recipe")):
+    r = load(f)
+    if not r:
+        continue
+    where = os.path.relpath(f, ROOT)
+    for v in r.get("key", {}).values():
+        if not ingredient_ok(v):
+            err(f"{where}: unknown ingredient {v}")
+    for v in r.get("ingredients", []):
+        if not ingredient_ok(v):
+            err(f"{where}: unknown ingredient {v}")
+    if "ingredient" in r and not ingredient_ok(r["ingredient"]):
+        err(f"{where}: unknown ingredient {r['ingredient']}")
+    res = r.get("result", {})
+    if isinstance(res, dict) and "id" in res and not item_exists(res["id"]):
+        err(f"{where}: unknown result {res['id']}")
+    if "pattern" in r:
+        widths = {len(row) for row in r["pattern"]}
+        if len(widths) != 1:
+            err(f"{where}: pattern rows have different widths {r['pattern']}")
+        used = set("".join(r["pattern"])) - {" "}
+        if used - set(r.get("key", {})):
+            err(f"{where}: pattern uses undefined keys {used - set(r['key'])}")
+
+for ns in os.listdir(DATA):
+    for kind in ("block", "item"):
+        base = os.path.join(DATA, ns, "tags", kind)
+        for f in walk_json(base):
+            t = load(f)
+            if not t:
+                continue
+            for v in t.get("values", []):
+                v = v["id"] if isinstance(v, dict) else v
+                ok = block_exists(v) if kind == "block" else item_exists(v)
+                if not ok:
+                    err(f"{os.path.relpath(f, ROOT)}: unknown entry {v}")
+
+# every JSON under data parses
+for f in walk_json(DATA):
+    load(f)
+
+for w in warnings:
+    print("warning:", w)
+for e in errors:
+    print("ERROR:", e)
+print(f"{len(BLOCKS)} blocks, {len(ITEMS)} items checked; {len(errors)} errors, {len(warnings)} warnings"
+      + ("" if vanilla else " (vanilla ids not checked: pass the mcmeta summary registries file)"))
+sys.exit(1 if errors else 0)

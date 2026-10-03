@@ -1,11 +1,31 @@
 {
   "replace": false,
   "values": [
-    "transdimension:trans_stone",
+    "transdimension:chiseled_trans_sandstone",
+    "transdimension:chiseled_trans_stone_bricks",
+    "transdimension:cracked_trans_stone_bricks",
+    "transdimension:cut_trans_sandstone",
+    "transdimension:pride_oven",
     "transdimension:trans_cobblestone",
-    "transdimension:trans_stone_bricks",
-    "transdimension:trans_crystal_ore",
+    "transdimension:trans_cobblestone_slab",
+    "transdimension:trans_cobblestone_stairs",
+    "transdimension:trans_cobblestone_wall",
     "transdimension:trans_crystal_block",
-    "transdimension:pride_oven"
+    "transdimension:trans_crystal_cluster",
+    "transdimension:trans_crystal_ore",
+    "transdimension:trans_lantern",
+    "transdimension:trans_sandstone",
+    "transdimension:trans_sandstone_slab",
+    "transdimension:trans_sandstone_stairs",
+    "transdimension:trans_sandstone_wall",
+    "transdimension:trans_stone",
+    "transdimension:trans_stone_brick_slab",
+    "transdimension:trans_stone_brick_stairs",
+    "transdimension:trans_stone_brick_wall",
+    "transdimension:trans_stone_bricks",
+    "transdimension:trans_stone_button",
+    "transdimension:trans_stone_pressure_plate",
+    "transdimension:trans_stone_slab",
+    "transdimension:trans_stone_stairs"
   ]
 }
