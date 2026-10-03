@@ -6,19 +6,19 @@
       "entries": [
         {
           "data": {
-            "Name": "minecraft:lily_of_the_valley"
+            "Name": "transdimension:flag_lily"
           },
           "weight": 2
         },
         {
           "data": {
-            "Name": "minecraft:white_tulip"
+            "Name": "transdimension:pearl_daisy"
           },
           "weight": 2
         },
         {
           "data": {
-            "Name": "minecraft:cornflower"
+            "Name": "transdimension:sky_bell"
           },
           "weight": 1
         }

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "half=lower": {
+      "model": "transdimension:block/pride_peony_bottom"
+    },
+    "half=upper": {
+      "model": "transdimension:block/pride_peony_top"
+    }
+  }
+}

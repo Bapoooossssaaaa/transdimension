@@ -79,7 +79,9 @@
     [
       "transdimension:trees_blossom_forest",
       "transdimension:pride_blossoms_dense",
-      "minecraft:flower_cherry",
+      "transdimension:trans_flowers",
+      "transdimension:pride_peonies",
+      "transdimension:trans_petals_forest",
       "minecraft:patch_grass_forest",
       "minecraft:brown_mushroom_normal"
     ],

@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
-    "transdimension:pride_blossom"
+    "transdimension:pride_blossom",
+    "transdimension:pride_peony",
+    "transdimension:trans_petals"
   ]
 }

@@ -55,7 +55,7 @@ BELOW_TRUNK = {"type": "minecraft:rule_based_state_provider", "rules": [{
 
 def petals_provider():
     return {"type": "minecraft:weighted_state_provider", "entries": [
-        {"data": state("minecraft:pink_petals", facing=f, flower_amount=n), "weight": 1}
+        {"data": state("trans_petals", facing=f, flower_amount=n), "weight": 1}
         for n in (1, 2, 3, 4) for f in ("north", "east", "south", "west")]}
 
 
@@ -183,20 +183,29 @@ def generate_features():
     blossoms = [{"type": "minecraft:in_square"}, {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"}, {"type": "minecraft:biome"}]
     pf("pride_blossoms", f"{NS}:pride_blossom_patch", [{"type": "minecraft:rarity_filter", "chance": 2}] + blossoms + patch(32))
     pf("pride_blossoms_dense", f"{NS}:pride_blossom_patch", [{"type": "minecraft:count", "count": 3}] + blossoms + patch(48))
+    # The realm grows its own flowers; no vanilla ones.
     cf("trans_flowers", {"type": "minecraft:simple_block", "config": {"to_place": {
         "type": "minecraft:noise_provider", "noise": {"amplitudes": [1.0], "firstOctave": 0}, "scale": 0.02, "seed": 7171,
-        "states": [state(f"{NS}:pride_blossom"), state("minecraft:pink_tulip"), state("minecraft:white_tulip"),
-                   state("minecraft:cornflower"), state("minecraft:azure_bluet"), state("minecraft:lily_of_the_valley"),
-                   state(f"{NS}:pride_blossom")]}}})
+        "states": [state("pride_blossom"), state("trans_tulip"), state("pearl_daisy"), state("sky_bell"),
+                   state("heart_bloom"), state("flag_lily"), state("trans_orchid"), state("pride_blossom")]}}})
     pf("trans_flowers", f"{NS}:trans_flowers", [{"type": "minecraft:count", "count": 2}] + blossoms + patch(40))
     cf("lavender_flowers", {"type": "minecraft:simple_block", "config": {"to_place": {"type": "minecraft:weighted_state_provider", "entries": [
-        {"data": state("minecraft:allium"), "weight": 3}, {"data": state("minecraft:blue_orchid"), "weight": 2},
-        {"data": state(f"{NS}:pride_blossom"), "weight": 1}]}}})
+        {"data": state("lavender_puff"), "weight": 3}, {"data": state("trans_orchid"), "weight": 2},
+        {"data": state("pride_blossom"), "weight": 1}]}}})
     pf("lavender_flowers", f"{NS}:lavender_flowers", [{"type": "minecraft:count", "count": 2}] + blossoms + patch(40))
     cf("frost_flowers", {"type": "minecraft:simple_block", "config": {"to_place": {"type": "minecraft:weighted_state_provider", "entries": [
-        {"data": state("minecraft:lily_of_the_valley"), "weight": 2}, {"data": state("minecraft:white_tulip"), "weight": 2},
-        {"data": state("minecraft:cornflower"), "weight": 1}]}}})
+        {"data": state("flag_lily"), "weight": 2}, {"data": state("pearl_daisy"), "weight": 2},
+        {"data": state("sky_bell"), "weight": 1}]}}})
     pf("frost_flowers", f"{NS}:frost_flowers", [{"type": "minecraft:rarity_filter", "chance": 2}] + blossoms + patch(24))
+    # Trans petals carpet meadows lightly and forests thickly (vanilla's wildflowers and cherry petals, re-coloured).
+    cf("trans_petals", {"type": "minecraft:simple_block", "config": {"to_place": petals_provider()}})
+    petal_spots = lambda below, above: [{"type": "minecraft:noise_threshold_count", "above_noise": above, "below_noise": below,
+                                          "noise_level": -0.8}] + blossoms
+    pf("trans_petals_meadow", f"{NS}:trans_petals", petal_spots(2, 5) + patch(8))
+    pf("trans_petals_forest", f"{NS}:trans_petals", petal_spots(5, 10) + patch(48))
+    # Tall Pride Peonies (simple_block places both halves of a double plant).
+    cf("pride_peony_patch", {"type": "minecraft:simple_block", "config": {"to_place": simple(state("pride_peony", half="lower"))}})
+    pf("pride_peonies", f"{NS}:pride_peony_patch", [{"type": "minecraft:rarity_filter", "chance": 4}] + blossoms + patch(24, xz=5))
 
     # ---- crystals
     cf("trans_crystal_spike", {"type": "minecraft:spike", "config": {
@@ -392,15 +401,15 @@ def generate_biomes():
     biome("trans_meadow", temperature=0.7, downfall=0.6, grass="#f5a9b8", foliage="#f5a9b8", water="#5bcefa", water_fog="#1f6fa8",
           sky="#8ed8fa", fog="#f7c4cf", music_sound="minecraft:music.overworld.meadow",
           particles=particles("minecraft:cherry_leaves", 0.0008),
-          features=land(f"{NS}:trees_trans_meadow", f"{NS}:pride_blossoms", f"{NS}:trans_flowers", "minecraft:wildflowers_meadow",
-                        "minecraft:patch_grass_meadow", "minecraft:patch_tall_grass_2", f"{NS}:trans_boulders"),
+          features=land(f"{NS}:trees_trans_meadow", f"{NS}:pride_blossoms", f"{NS}:trans_flowers", f"{NS}:pride_peonies",
+                        f"{NS}:trans_petals_meadow", "minecraft:patch_grass_meadow", "minecraft:patch_tall_grass_2", f"{NS}:trans_boulders"),
           creatures=common_creatures + [spawn("minecraft:rabbit", 6, 2, 3), spawn("minecraft:horse", 4, 2, 4), spawn("silly_cat", 8, 1, 2)])
 
     biome("trans_forest", temperature=0.6, downfall=0.8, grass="#f0a3c0", foliage="#f5a9b8", water="#6fcbf5", water_fog="#2a74a8",
           sky="#9cd3fa", fog="#f5b8d0", music_sound="minecraft:music.overworld.cherry_grove",
           particles=particles("minecraft:cherry_leaves", 0.004),
-          features=land(f"{NS}:trees_blossom_forest", f"{NS}:pride_blossoms_dense", "minecraft:flower_cherry",
-                        "minecraft:patch_grass_forest", "minecraft:brown_mushroom_normal"),
+          features=land(f"{NS}:trees_blossom_forest", f"{NS}:pride_blossoms_dense", f"{NS}:trans_flowers", f"{NS}:pride_peonies",
+                        f"{NS}:trans_petals_forest", "minecraft:patch_grass_forest", "minecraft:brown_mushroom_normal"),
           creatures=[spawn("minecraft:sheep", 10, 4, 4), spawn("minecraft:pig", 8, 4, 4), spawn("minecraft:chicken", 8, 4, 4),
                      spawn("minecraft:wolf", 5, 2, 4), spawn("minecraft:fox", 4, 2, 4), spawn("minecraft:rabbit", 4, 2, 3),
                      spawn("silly_cat", 10, 1, 3)])
@@ -408,7 +417,8 @@ def generate_biomes():
     biome("heartwood_grove", temperature=0.9, downfall=0.9, grass="#e890a8", foliage="#f08caa", water="#8aa8f5", water_fog="#36468f",
           sky="#b3c4fa", fog="#e6b0d8", music_sound="minecraft:music.overworld.jungle",
           particles=particles("minecraft:firefly", 0.002),
-          features=land(f"{NS}:trees_heartwood_grove", f"{NS}:trans_bushes", f"{NS}:pride_blossoms", "minecraft:patch_large_fern",
+          features=land(f"{NS}:trees_heartwood_grove", f"{NS}:trans_bushes", f"{NS}:pride_blossoms", f"{NS}:trans_flowers",
+                        "minecraft:patch_large_fern",
                         "minecraft:patch_grass_jungle", "minecraft:patch_firefly_bush_near_water", "minecraft:vines"),
           creatures=[spawn("minecraft:parrot", 8, 1, 2), spawn("minecraft:chicken", 6, 4, 4), spawn("minecraft:rabbit", 4, 2, 3),
                      spawn("minecraft:ocelot", 2, 1, 1), spawn("silly_cat", 12, 1, 3)])
@@ -512,7 +522,7 @@ FEATURE_RANK = [
     "minecraft:warm_ocean_vegetation", "minecraft:seagrass_warm", "minecraft:seagrass_deep", "minecraft:seagrass_river",
     "minecraft:seagrass_swamp", "minecraft:sea_pickle", "minecraft:kelp_warm", "minecraft:kelp_cold",
     f"{NS}:pride_blossoms_dense", f"{NS}:pride_blossoms", f"{NS}:trans_flowers", f"{NS}:lavender_flowers", f"{NS}:frost_flowers",
-    "minecraft:flower_cherry", "minecraft:wildflowers_meadow", f"{NS}:trans_crystal_clusters_surface",
+    f"{NS}:pride_peonies", f"{NS}:trans_petals_forest", f"{NS}:trans_petals_meadow", f"{NS}:trans_crystal_clusters_surface",
     "minecraft:patch_grass_meadow", "minecraft:patch_grass_forest", "minecraft:patch_grass_jungle", "minecraft:patch_grass_plain",
     "minecraft:patch_grass_normal", "minecraft:patch_grass_taiga", "minecraft:patch_tall_grass_2", "minecraft:patch_large_fern",
     "minecraft:patch_cactus_desert", "minecraft:patch_dead_bush_2", "minecraft:patch_dry_grass_desert",

@@ -1056,7 +1056,117 @@ def pride_blossom():
             out.putpixel(p, (*shade(colour, 0.8 + 0.25 * lum(px)), 255))
         elif centre(p, px):
             out.putpixel(p, (*mix(WHITE, PINK, 0.15 * (1 - lum(px))), 255))
+    return gradient_map(img, R_STEM, mask=lambda p, px: is_green(px), out=out)
+
+
+# ============================================================================================ trans flowers
+# Soft mint for stems and leaves, so flowers sit nicely on pastel grass instead of looking like dark litter.
+R_STEM = [hexc(c) for c in ("2C5A47", "3B7660", "4F937A", "6DB095", "93CBB3")]
+R_PETAL_PINK = [hexc(c) for c in ("A8466C", "D26F91", "F09CB3", "F9C6D4", "FFE9F0")]
+R_PETAL_BLUE = [hexc(c) for c in ("2A6DA8", "3E9BD8", "6CC6F2", "A6E1FA", "DDF5FE")]
+R_PETAL_WHITE = [hexc(c) for c in ("A9A6C0", "CAC7DA", "E4E2EE", "F4F3F9", "FFFFFF")]
+R_PETAL_LAVENDER = [hexc(c) for c in ("6C5AA6", "927FCC", "B9A8E6", "DACFF6", "F4EFFE")]
+
+
+def is_green(px):
+    h, s, v = hsv(px)
+    return px[3] > 0 and 0.17 < h < 0.5 and s > 0.18
+
+
+def flower(img, petal_ramp_at, stem_ramp=R_STEM):
+    """Mint stems, and petals coloured by `petal_ramp_at(pos, label)` (label = which petal blob it is,
+    numbered top to bottom)."""
+    out = gradient_map(img, stem_ramp, mask=lambda p, px: is_green(px))
+    petal = lambda p, px: px[3] > 0 and not is_green(px)
+    labels, count = components(img, petal, wrap=False)
+    # Number the blobs from the top of the texture down.
+    tops = {}
+    for p, label in labels.items():
+        tops[label] = min(tops.get(label, 99), p[1])
+    order = {label: i for i, label in enumerate(sorted(tops, key=lambda k: (tops[k], k)))}
+    lo, hi = lum_range(img, petal)
+    for p, label in labels.items():
+        px = img.getpixel(p)
+        c = sample(petal_ramp_at(p, order[label]), (lum(px) - lo) / (hi - lo))
+        out.putpixel(p, (*c, px[3]))
     return out
+
+
+def trans_tulip():
+    """A blue tulip with a pink heart."""
+    return flower(vblock("pink_tulip"), lambda p, i: R_PETAL_PINK if p[0] in (7, 8) else R_PETAL_BLUE)
+
+
+def pearl_daisy():
+    """A pearly white daisy with a pink centre."""
+    img = vblock("oxeye_daisy")
+    centre = lambda p, px: 0.03 < hsv(px)[0] < 0.2 and hsv(px)[1] > 0.4
+    return flower(img, lambda p, i: R_PETAL_PINK if centre(p, img.getpixel(p)) else R_PETAL_WHITE)
+
+
+def sky_bell():
+    """Cornflower bells in trans blue."""
+    return flower(vblock("cornflower"), lambda p, i: R_PETAL_BLUE)
+
+
+def flag_lily():
+    """Lily of the valley whose bells go pink, white, blue from top to bottom."""
+    return flower(vblock("lily_of_the_valley"), lambda p, i: (R_PETAL_PINK, R_PETAL_WHITE, R_PETAL_BLUE)[i % 3])
+
+
+def lavender_puff():
+    """An allium puffball in lavender with pink highlights."""
+    return flower(vblock("allium"), lambda p, i: mix_ramp(R_PETAL_LAVENDER, R_PETAL_PINK, 0.25))
+
+
+def trans_orchid():
+    """Blue orchid blooms in alternating pink and blue."""
+    return flower(vblock("blue_orchid"), lambda p, i: (R_PETAL_PINK, R_PETAL_BLUE)[i % 2])
+
+
+def heart_bloom():
+    """A little pink heart in bloom on a mint stem."""
+    base = vblock("pink_tulip")
+    out = gradient_map(base, R_STEM, mask=lambda p, px: is_green(px))
+    # Clear the tulip head and draw a heart in its place.
+    for p in pixels(base):
+        px = base.getpixel(p)
+        if px[3] > 0 and not is_green(px):
+            out.putpixel(p, CLEAR)
+    heart = [".##.##.", "#######", "#######", ".#####.", "..###..", "...#..."]
+    ox, oy = 4, 1
+    for dy, row in enumerate(heart):
+        for dx, ch in enumerate(row):
+            if ch != "#":
+                continue
+            light = (dx + dy) / 10.0
+            c = sample(R_PETAL_PINK, 0.85 - light * 0.6)
+            out.putpixel((ox + dx, oy + dy), (*c, 255))
+    out.putpixel((ox + 1, oy + 1), (*WHITE, 255))
+    out.putpixel((ox + 2, oy + 1), (*R_PETAL_PINK[4], 255))
+    return out
+
+
+def pride_peony(half):
+    """Peony blossoms in pink, blue and white."""
+    return flower(vblock(f"peony_{half}"), lambda p, i: (R_PETAL_PINK, R_PETAL_BLUE, R_PETAL_WHITE)[i % 3],
+                  stem_ramp=mix_ramp(R_STEM, [shade(c, 0.75) for c in R_STEM], 0.4))
+
+
+def trans_petals():
+    """Fallen petals in pink, blue and white clusters."""
+    return flower(vblock("pink_petals"), lambda p, i: (R_PETAL_PINK, R_PETAL_BLUE, R_PETAL_WHITE)[i % 3])
+
+
+def trans_petals_item():
+    return flower(vitem("pink_petals"), lambda p, i: (R_PETAL_PINK, R_PETAL_BLUE, R_PETAL_WHITE)[i % 3])
+
+
+def trans_petals_stem():
+    return gradient_map(vblock("pink_petals_stem"), R_STEM)
+
+
+FLOWERS = ("trans_tulip", "pearl_daisy", "sky_bell", "flag_lily", "lavender_puff", "trans_orchid", "heart_bloom")
 
 
 # ============================================================================================ pride oven
@@ -1530,6 +1640,10 @@ def main():
         "stripped_trans_log_top": stripped_trans_log_top(), "trans_planks": trans_planks(), "trans_leaves": trans_leaves(),
         "trans_sapling": trans_sapling(), "trans_door_top": trans_door_top(), "trans_door_bottom": trans_door_bottom(),
         "trans_trapdoor": trans_trapdoor(), "pride_blossom": pride_blossom(),
+        # flowers
+        **{name: globals()[name]() for name in FLOWERS},
+        "pride_peony_top": pride_peony("top"), "pride_peony_bottom": pride_peony("bottom"),
+        "trans_petals": trans_petals(), "trans_petals_stem": trans_petals_stem(),
         # glass, wool, light
         "trans_stained_glass": trans_stained_glass(), "trans_stained_glass_pane_top": trans_stained_glass_pane_top(),
         "trans_pink_stained_glass": trans_pink_stained_glass(),
@@ -1544,7 +1658,8 @@ def main():
     }
     for name, img in blocks.items():
         save(img, f"block/{name}.png")
-    for name in ("trans_crystal_cluster", "trans_sapling", "pride_blossom"):
+    for name in ("trans_crystal_cluster", "trans_sapling", "pride_blossom", *FLOWERS, "pride_peony_top", "pride_peony_bottom",
+                 "trans_petals", "trans_petals_stem"):
         save_mcmeta(f"block/{name}.png", CUTOUT)
     save_mcmeta("block/trans_leaves.png", LEAVES_META)
     for name in ("trans_stained_glass", "trans_pink_stained_glass", "trans_blue_stained_glass", "trans_glass"):
@@ -1561,6 +1676,7 @@ def main():
         "trans_donut": trans_donut(), "trans_cookie": trans_cookie(), "trans_cupcake": trans_cupcake(),
         "trans_macaron": trans_macaron(), "trans_boba": trans_boba(), "trans_cake": trans_cake_item(),
         "silly_cat_spawn_egg": silly_cat_spawn_egg(), "trans_door": trans_door_item(), "trans_lantern": trans_lantern_item(),
+        "trans_petals": trans_petals_item(),
     }
     for name, img in items.items():
         save(img, f"item/{name}.png")

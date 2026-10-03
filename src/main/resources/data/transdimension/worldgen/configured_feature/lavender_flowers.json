@@ -6,13 +6,13 @@
       "entries": [
         {
           "data": {
-            "Name": "minecraft:allium"
+            "Name": "transdimension:lavender_puff"
           },
           "weight": 3
         },
         {
           "data": {
-            "Name": "minecraft:blue_orchid"
+            "Name": "transdimension:trans_orchid"
           },
           "weight": 2
         },

@@ -3,6 +3,7 @@ package dev.goober.transdimension.registry;
 import java.util.Optional;
 import java.util.function.Function;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -14,6 +15,7 @@ import net.minecraft.util.ColorRGBA;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
@@ -29,6 +31,7 @@ import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.FlowerBedBlock;
 import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.IronBarsBlock;
@@ -42,6 +45,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.StainedGlassBlock;
 import net.minecraft.world.level.block.StainedGlassPaneBlock;
 import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.TallFlowerBlock;
 import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.UntintedParticleLeavesBlock;
@@ -247,9 +251,25 @@ public final class ModBlocks {
 	public static final Block PRIDE_BLOSSOM = register("pride_blossom",
 			properties -> new FlowerBlock(MobEffects.REGENERATION, 8.0F, properties),
 			BlockBehaviour.Properties.ofFullCopy(Blocks.POPPY));
-	public static final Block POTTED_PRIDE_BLOSSOM = registerWithoutItem("potted_pride_blossom",
-			properties -> new FlowerPotBlock(PRIDE_BLOSSOM, properties),
-			BlockBehaviour.Properties.ofFullCopy(Blocks.POTTED_POPPY));
+	public static final Block POTTED_PRIDE_BLOSSOM = potted("potted_pride_blossom", PRIDE_BLOSSOM);
+	public static final Block TRANS_TULIP = flower("trans_tulip", MobEffects.SPEED, 5.0F);
+	public static final Block POTTED_TRANS_TULIP = potted("potted_trans_tulip", TRANS_TULIP);
+	public static final Block PEARL_DAISY = flower("pearl_daisy", MobEffects.REGENERATION, 8.0F);
+	public static final Block POTTED_PEARL_DAISY = potted("potted_pearl_daisy", PEARL_DAISY);
+	public static final Block SKY_BELL = flower("sky_bell", MobEffects.SLOW_FALLING, 8.0F);
+	public static final Block POTTED_SKY_BELL = potted("potted_sky_bell", SKY_BELL);
+	public static final Block FLAG_LILY = flower("flag_lily", MobEffects.LUCK, 10.0F);
+	public static final Block POTTED_FLAG_LILY = potted("potted_flag_lily", FLAG_LILY);
+	public static final Block LAVENDER_PUFF = flower("lavender_puff", MobEffects.NIGHT_VISION, 8.0F);
+	public static final Block POTTED_LAVENDER_PUFF = potted("potted_lavender_puff", LAVENDER_PUFF);
+	public static final Block TRANS_ORCHID = flower("trans_orchid", MobEffects.JUMP_BOOST, 6.0F);
+	public static final Block POTTED_TRANS_ORCHID = potted("potted_trans_orchid", TRANS_ORCHID);
+	public static final Block HEART_BLOOM = flower("heart_bloom", MobEffects.ABSORPTION, 8.0F);
+	public static final Block POTTED_HEART_BLOOM = potted("potted_heart_bloom", HEART_BLOOM);
+	public static final Block PRIDE_PEONY = register("pride_peony", TallFlowerBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.PEONY));
+	public static final Block TRANS_PETALS = register("trans_petals", FlowerBedBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.PINK_PETALS));
 
 	// ---------------------------------------------------------------- glass, wool and light
 	/** Clear glass with a pink and blue frame; what trans sand smelts into. */
@@ -292,6 +312,16 @@ public final class ModBlocks {
 
 	private static ResourceKey<net.minecraft.world.level.levelgen.feature.ConfiguredFeature<?, ?>> configuredFeature(String name) {
 		return ResourceKey.create(Registries.CONFIGURED_FEATURE, TransDimension.id(name));
+	}
+
+	private static Block flower(String name, Holder<MobEffect> stewEffect, float stewSeconds) {
+		return register(name, properties -> new FlowerBlock(stewEffect, stewSeconds, properties),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.POPPY));
+	}
+
+	private static Block potted(String name, Block plant) {
+		return registerWithoutItem(name, properties -> new FlowerPotBlock(plant, properties),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.POTTED_POPPY));
 	}
 
 	private static Block copy(String name, Block copyFrom) {

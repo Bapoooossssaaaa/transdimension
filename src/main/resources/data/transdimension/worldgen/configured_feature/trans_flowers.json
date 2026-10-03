@@ -16,19 +16,22 @@
           "Name": "transdimension:pride_blossom"
         },
         {
-          "Name": "minecraft:pink_tulip"
+          "Name": "transdimension:trans_tulip"
         },
         {
-          "Name": "minecraft:white_tulip"
+          "Name": "transdimension:pearl_daisy"
         },
         {
-          "Name": "minecraft:cornflower"
+          "Name": "transdimension:sky_bell"
         },
         {
-          "Name": "minecraft:azure_bluet"
+          "Name": "transdimension:heart_bloom"
         },
         {
-          "Name": "minecraft:lily_of_the_valley"
+          "Name": "transdimension:flag_lily"
+        },
+        {
+          "Name": "transdimension:trans_orchid"
         },
         {
           "Name": "transdimension:pride_blossom"

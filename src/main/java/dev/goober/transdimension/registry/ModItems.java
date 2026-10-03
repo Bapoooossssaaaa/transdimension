@@ -169,6 +169,13 @@ public final class ModItems {
 		Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, CREATIVE_TAB_KEY, CREATIVE_TAB);
 
 		CompostableRegistry.INSTANCE.add(ModBlocks.PRIDE_BLOSSOM, 0.65F);
+		for (Block flower : List.of(ModBlocks.TRANS_TULIP, ModBlocks.PEARL_DAISY, ModBlocks.SKY_BELL, ModBlocks.FLAG_LILY,
+				ModBlocks.LAVENDER_PUFF, ModBlocks.TRANS_ORCHID, ModBlocks.HEART_BLOOM, ModBlocks.PRIDE_PEONY)) {
+			CompostableRegistry.INSTANCE.add(flower, 0.65F);
+			FlammableBlockRegistry.getDefaultInstance().add(flower, 60, 100);
+		}
+		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_PETALS, 0.3F);
+		FlammableBlockRegistry.getDefaultInstance().add(ModBlocks.TRANS_PETALS, 60, 100);
 		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_LEAVES, 0.3F);
 		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_SAPLING, 0.3F);
 		CompostableRegistry.INSTANCE.add(TRANS_COOKIE, 0.85F);

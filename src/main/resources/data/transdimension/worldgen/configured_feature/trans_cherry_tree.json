@@ -29,7 +29,7 @@
           "entries": [
             {
               "data": {
-                "Name": "minecraft:pink_petals",
+                "Name": "transdimension:trans_petals",
                 "Properties": {
                   "facing": "north",
                   "flower_amount": "1"
@@ -39,7 +39,7 @@
             },
             {
               "data": {
-                "Name": "minecraft:pink_petals",
+                "Name": "transdimension:trans_petals",
                 "Properties": {
                   "facing": "east",
                   "flower_amount": "1"
@@ -49,7 +49,7 @@
             },
             {
               "data": {
-                "Name": "minecraft:pink_petals",
+                "Name": "transdimension:trans_petals",
                 "Properties": {
                   "facing": "south",
                   "flower_amount": "1"
@@ -59,7 +59,7 @@
             },
             {
               "data": {
-                "Name": "minecraft:pink_petals",
+                "Name": "transdimension:trans_petals",
                 "Properties": {
                   "facing": "west",
                   "flower_amount": "1"
@@ -69,7 +69,7 @@
             },
             {
               "data": {
-                "Name": "minecraft:pink_petals",
+                "Name": "transdimension:trans_petals",
                 "Properties": {
                   "facing": "north",
                   "flower_amount": "2"
@@ -79,7 +79,7 @@
             },
             {
               "data": {
-                "Name": "minecraft:pink_petals",
+                "Name": "transdimension:trans_petals",
                 "Properties": {
                   "facing": "east",
                   "flower_amount": "2"
@@ -89,7 +89,7 @@
             },
             {
               "data": {
-                "Name": "minecraft:pink_petals",
+                "Name": "transdimension:trans_petals",
                 "Properties": {
                   "facing": "south",
                   "flower_amount": "2"
@@ -99,7 +99,7 @@
             },
             {
               "data": {
-                "Name": "minecraft:pink_petals",
+                "Name": "transdimension:trans_petals",
                 "Properties": {
                   "facing": "west",
                   "flower_amount": "2"
@@ -109,7 +109,7 @@
             },
             {
               "data": {
-                "Name": "minecraft:pink_petals",
+                "Name": "transdimension:trans_petals",
                 "Properties": {
                   "facing": "north",
                   "flower_amount": "3"
@@ -119,7 +119,7 @@
             },
             {
               "data": {
-                "Name": "minecraft:pink_petals",
+                "Name": "transdimension:trans_petals",
                 "Properties": {
                   "facing": "east",
                   "flower_amount": "3"
@@ -129,7 +129,7 @@
             },
             {
               "data": {
-                "Name": "minecraft:pink_petals",
+                "Name": "transdimension:trans_petals",
                 "Properties": {
                   "facing": "south",
                   "flower_amount": "3"
@@ -139,7 +139,7 @@
             },
             {
               "data": {
-                "Name": "minecraft:pink_petals",
+                "Name": "transdimension:trans_petals",
                 "Properties": {
                   "facing": "west",
                   "flower_amount": "3"
@@ -149,7 +149,7 @@
             },
             {
               "data": {
-                "Name": "minecraft:pink_petals",
+                "Name": "transdimension:trans_petals",
                 "Properties": {
                   "facing": "north",
                   "flower_amount": "4"
@@ -159,7 +159,7 @@
             },
             {
               "data": {
-                "Name": "minecraft:pink_petals",
+                "Name": "transdimension:trans_petals",
                 "Properties": {
                   "facing": "east",
                   "flower_amount": "4"
@@ -169,7 +169,7 @@
             },
             {
               "data": {
-                "Name": "minecraft:pink_petals",
+                "Name": "transdimension:trans_petals",
                 "Properties": {
                   "facing": "south",
                   "flower_amount": "4"
@@ -179,7 +179,7 @@
             },
             {
               "data": {
-                "Name": "minecraft:pink_petals",
+                "Name": "transdimension:trans_petals",
                 "Properties": {
                   "facing": "west",
                   "flower_amount": "4"

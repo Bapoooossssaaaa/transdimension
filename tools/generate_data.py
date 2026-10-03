@@ -210,6 +210,10 @@ def stonecutting(result, ingredient, count=1):
     return {"type": "minecraft:stonecutting", "ingredient": rid(ingredient), "result": {"count": count, "id": rid(result)}}
 
 
+# Small flowers that grow in the realm instead of vanilla's.
+FLOWERS = {"trans_tulip": "Trans Tulip", "pearl_daisy": "Pearl Daisy", "sky_bell": "Sky Bell", "flag_lily": "Flag Lily",
+           "lavender_puff": "Lavender Puff", "trans_orchid": "Trans Orchid", "heart_bloom": "Heart Bloom"}
+
 # Vanilla ores re-made in trans rock: (name, English name, mining tier); ORE_SMELTING has what they smelt into.
 ORE_INFO = [("coal", "Coal", "stone"), ("iron", "Iron", "stone"), ("copper", "Copper", "stone"), ("gold", "Gold", "iron"),
             ("redstone", "Redstone", "iron"), ("lapis", "Lapis Lazuli", "stone"), ("diamond", "Diamond", "iron"),
@@ -636,6 +640,36 @@ def generate_blocks():
     cross_plant("pride_blossom", "Pride Blossom", "potted_pride_blossom", "Potted Pride Blossom")
     tag("block", "small_flowers", "pride_blossom")
     tag("item", "small_flowers", "pride_blossom")
+    for flower_id, english in FLOWERS.items():
+        cross_plant(flower_id, english, f"potted_{flower_id}", f"Potted {english}")
+        tag("block", "small_flowers", flower_id)
+        tag("item", "small_flowers", flower_id)
+        tag("block", "bee_attractive", flower_id)
+        tag("item", "bee_food", flower_id)
+    # A tall flower (two blocks high, like the peony).
+    blockstate("pride_peony", from_template("peony", "peony", "pride_peony"))
+    for half in ("top", "bottom"):
+        model(f"pride_peony_{half}", {"parent": "minecraft:block/cross", "textures": {"cross": block_tex(f"pride_peony_{half}")}})
+    model("pride_peony", {"parent": "minecraft:item/generated", "textures": {"layer0": block_tex("pride_peony_top")}}, kind="item")
+    item_def("pride_peony", f"{NS}:item/pride_peony")
+    name("pride_peony", "Pride Peony")
+    loot_like_vanilla("pride_peony", "peony")
+    for t in ("flowers", "bee_attractive", "replaceable_by_trees"):
+        tag("block", t, "pride_peony")
+    tag("item", "flowers", "pride_peony")
+    tag("item", "bee_food", "pride_peony")
+    # Ground cover petals, like pink petals (one to four per block, facing any way).
+    blockstate("trans_petals", from_template("pink_petals", "pink_petals", "trans_petals"))
+    for n in (1, 2, 3, 4):
+        model(f"trans_petals_{n}", {"parent": f"minecraft:block/flowerbed_{n}", "textures": {
+            "flowerbed": block_tex("trans_petals"), "stem": block_tex("trans_petals_stem")}})
+    model("trans_petals", {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/trans_petals"}}, kind="item")
+    item_def("trans_petals", f"{NS}:item/trans_petals")
+    name("trans_petals", "Trans Petals")
+    loot_like_vanilla("trans_petals", "pink_petals")
+    for t in ("flowers", "inside_step_sound_blocks", "bee_attractive"):
+        tag("block", t, "trans_petals")
+    tag("item", "flowers", "trans_petals")
 
     # ---- glass, wool and light
     glass("trans_glass", "Trans Glass")
@@ -836,6 +870,10 @@ def generate_recipes():
     # crystal
     R("trans_crystal_block", shaped("trans_crystal_block", ["###", "###", "###"], {"#": "trans_crystal"}, 1))
     R("trans_crystal_from_block", shapeless("trans_crystal", ["trans_crystal_block"], 9, category="misc"))
+    for flower_id, dye, count in (("trans_tulip", "light_blue_dye", 1), ("pearl_daisy", "white_dye", 1), ("sky_bell", "light_blue_dye", 1),
+                                  ("flag_lily", "white_dye", 1), ("lavender_puff", "purple_dye", 1), ("trans_orchid", "pink_dye", 1),
+                                  ("heart_bloom", "pink_dye", 2), ("pride_peony", "pink_dye", 2), ("trans_petals", "pink_dye", 1)):
+        R(f"{dye}_from_{flower_id}", shapeless(f"minecraft:{dye}", [flower_id], count, category="misc", group=dye))
     R("trans_sapling_from_blossoms", shapeless("trans_sapling", ["minecraft:cherry_sapling", "transdimension:pride_blossom", "transdimension:trans_crystal"], 1, category="misc"))
 
 
