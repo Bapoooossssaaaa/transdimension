@@ -1,14 +1,21 @@
 {
   "attributes": {
-    "minecraft:visual/sky_color": "#5bcefa",
-    "minecraft:visual/fog_color": "#f5a9b8",
-    "minecraft:visual/water_fog_color": "#f5a9b8",
+    "minecraft:audio/background_music": {
+      "default": {
+        "max_delay": 24000,
+        "min_delay": 12000,
+        "sound": "minecraft:music.overworld.cherry_grove"
+      }
+    },
+    "minecraft:visual/fog_color": "#f5b8d0",
+    "minecraft:visual/sky_color": "#9cd3fa",
+    "minecraft:visual/water_fog_color": "#2a74a8",
     "minecraft:visual/ambient_particles": [
       {
         "particle": {
           "type": "minecraft:cherry_leaves"
         },
-        "probability": 0.0025
+        "probability": 0.004
       }
     ]
   },
@@ -19,27 +26,38 @@
   ],
   "downfall": 0.8,
   "effects": {
-    "water_color": "#f5a9b8",
-    "grass_color": "#f5a9b8",
-    "foliage_color": "#5bcefa"
+    "foliage_color": "#f5a9b8",
+    "grass_color": "#f0a3c0",
+    "water_color": "#6fcbf5"
   },
   "features": [
     [],
     [],
     [],
-    [],
-    [],
-    [],
     [
-      "transdimension:ore_trans_crystal",
-      "transdimension:ore_trans_crystal_deep"
+      "minecraft:monster_room",
+      "minecraft:monster_room_deep"
     ],
     [],
     [],
     [
-      "transdimension:trans_trees_dense",
-      "transdimension:trans_cherry_trees",
-      "transdimension:pride_blossoms_dense"
+      "transdimension:ore_trans_crystal",
+      "transdimension:ore_trans_crystal_deep",
+      "minecraft:disk_clay"
+    ],
+    [
+      "minecraft:glow_lichen"
+    ],
+    [
+      "minecraft:spring_water",
+      "minecraft:spring_lava"
+    ],
+    [
+      "transdimension:trees_blossom_forest",
+      "transdimension:pride_blossoms_dense",
+      "minecraft:flower_cherry",
+      "minecraft:patch_grass_forest",
+      "minecraft:brown_mushroom_normal"
     ],
     []
   ],
@@ -60,25 +78,31 @@
         "type": "minecraft:sheep",
         "maxCount": 4,
         "minCount": 4,
-        "weight": 12
+        "weight": 10
       },
       {
         "type": "minecraft:pig",
         "maxCount": 4,
         "minCount": 4,
-        "weight": 10
+        "weight": 8
       },
       {
         "type": "minecraft:chicken",
         "maxCount": 4,
         "minCount": 4,
-        "weight": 10
+        "weight": 8
       },
       {
-        "type": "minecraft:cow",
+        "type": "minecraft:wolf",
         "maxCount": 4,
-        "minCount": 4,
-        "weight": 8
+        "minCount": 2,
+        "weight": 5
+      },
+      {
+        "type": "minecraft:fox",
+        "maxCount": 4,
+        "minCount": 2,
+        "weight": 4
       },
       {
         "type": "minecraft:rabbit",
@@ -87,16 +111,10 @@
         "weight": 4
       },
       {
-        "type": "minecraft:horse",
-        "maxCount": 4,
-        "minCount": 2,
-        "weight": 4
-      },
-      {
-        "type": "minecraft:wolf",
-        "maxCount": 4,
-        "minCount": 2,
-        "weight": 3
+        "type": "transdimension:silly_cat",
+        "maxCount": 3,
+        "minCount": 1,
+        "weight": 10
       }
     ],
     "misc": [],
@@ -111,16 +129,10 @@
         "type": "minecraft:zombie",
         "maxCount": 4,
         "minCount": 4,
-        "weight": 90
+        "weight": 95
       },
       {
         "type": "minecraft:zombie_villager",
-        "maxCount": 1,
-        "minCount": 1,
-        "weight": 5
-      },
-      {
-        "type": "minecraft:zombie_horse",
         "maxCount": 1,
         "minCount": 1,
         "weight": 5

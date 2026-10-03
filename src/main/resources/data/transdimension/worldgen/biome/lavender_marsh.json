@@ -4,28 +4,35 @@
       "default": {
         "max_delay": 24000,
         "min_delay": 12000,
-        "sound": "minecraft:music.game"
-      },
-      "underwater": {
-        "max_delay": 24000,
-        "min_delay": 12000,
-        "sound": "minecraft:music.under_water"
+        "sound": "minecraft:music.overworld.swamp"
       }
     },
-    "minecraft:visual/fog_color": "#f7d0d8",
-    "minecraft:visual/sky_color": "#7fd4fa",
-    "minecraft:visual/water_fog_color": "#1e7fb8"
+    "minecraft:visual/fog_color": "#c8b8f0",
+    "minecraft:visual/sky_color": "#afa6f0",
+    "minecraft:visual/water_fog_color": "#3a4a80",
+    "minecraft:visual/ambient_particles": [
+      {
+        "particle": {
+          "type": "minecraft:spore_blossom_air"
+        },
+        "probability": 0.002
+      }
+    ],
+    "minecraft:visual/water_fog_end_distance": {
+      "argument": 0.85,
+      "modifier": "multiply"
+    }
   },
   "carvers": [
     "minecraft:cave",
     "minecraft:cave_extra_underground",
     "minecraft:canyon"
   ],
-  "downfall": 0.5,
+  "downfall": 0.9,
   "effects": {
-    "foliage_color": "#f5a9b8",
-    "grass_color": "#f5a9b8",
-    "water_color": "#5bcefa"
+    "foliage_color": "#a898d8",
+    "grass_color": "#b9a8e0",
+    "water_color": "#7aa8e8"
   },
   "features": [
     [],
@@ -40,8 +47,7 @@
     [
       "transdimension:ore_trans_crystal",
       "transdimension:ore_trans_crystal_deep",
-      "minecraft:disk_clay",
-      "minecraft:disk_sand"
+      "minecraft:disk_clay"
     ],
     [
       "minecraft:glow_lichen"
@@ -51,10 +57,15 @@
       "minecraft:spring_lava"
     ],
     [
-      "minecraft:warm_ocean_vegetation",
-      "minecraft:seagrass_warm",
-      "minecraft:sea_pickle",
-      "minecraft:kelp_warm"
+      "transdimension:trees_lavender_marsh",
+      "minecraft:seagrass_swamp",
+      "transdimension:lavender_flowers",
+      "minecraft:patch_grass_normal",
+      "minecraft:patch_waterlily",
+      "minecraft:patch_sugar_cane_swamp",
+      "minecraft:brown_mushroom_swamp",
+      "minecraft:red_mushroom_swamp",
+      "minecraft:patch_firefly_bush_swamp"
     ],
     []
   ],
@@ -70,15 +81,22 @@
       }
     ],
     "axolotls": [],
-    "creature": [],
+    "creature": [
+      {
+        "type": "minecraft:frog",
+        "maxCount": 5,
+        "minCount": 2,
+        "weight": 10
+      },
+      {
+        "type": "transdimension:silly_cat",
+        "maxCount": 2,
+        "minCount": 1,
+        "weight": 4
+      }
+    ],
     "misc": [],
     "monster": [
-      {
-        "type": "minecraft:drowned",
-        "maxCount": 1,
-        "minCount": 1,
-        "weight": 100
-      },
       {
         "type": "minecraft:spider",
         "maxCount": 4,
@@ -110,6 +128,12 @@
         "weight": 100
       },
       {
+        "type": "minecraft:slime",
+        "maxCount": 4,
+        "minCount": 4,
+        "weight": 100
+      },
+      {
         "type": "minecraft:enderman",
         "maxCount": 4,
         "minCount": 1,
@@ -126,37 +150,12 @@
     "water_ambient": [
       {
         "type": "minecraft:tropical_fish",
-        "maxCount": 8,
-        "minCount": 8,
-        "weight": 25
-      },
-      {
-        "type": "minecraft:cod",
-        "maxCount": 6,
-        "minCount": 3,
-        "weight": 10
-      },
-      {
-        "type": "minecraft:pufferfish",
         "maxCount": 3,
         "minCount": 1,
-        "weight": 5
+        "weight": 4
       }
     ],
-    "water_creature": [
-      {
-        "type": "minecraft:squid",
-        "maxCount": 4,
-        "minCount": 1,
-        "weight": 4
-      },
-      {
-        "type": "minecraft:dolphin",
-        "maxCount": 2,
-        "minCount": 1,
-        "weight": 2
-      }
-    ]
+    "water_creature": []
   },
-  "temperature": 0.5
+  "temperature": 0.8
 }

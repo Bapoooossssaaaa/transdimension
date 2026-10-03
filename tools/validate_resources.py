@@ -254,6 +254,140 @@ for ns in os.listdir(DATA):
 for f in walk_json(DATA):
     load(f)
 
+# ------------------------------------------------------------------ worldgen and other data packs
+VANILLA_BLOCKS = {}
+blocks_file = os.path.join(os.path.dirname(os.path.dirname(sys.argv[1])), "blocks", "data.json") if len(sys.argv) > 1 else ""
+if blocks_file and os.path.exists(blocks_file):
+    VANILLA_BLOCKS = json.load(open(blocks_file, encoding="utf-8"))
+
+# Our blocks share their block-state properties with a vanilla "twin".
+TWINS = {
+    "trans_grass_block": "grass_block", "trans_leaves": "cherry_leaves", "trans_log": "cherry_log", "stripped_trans_log": "cherry_log",
+    "trans_wood": "cherry_wood", "stripped_trans_wood": "cherry_wood", "trans_sapling": "cherry_sapling",
+    "trans_crystal_cluster": "amethyst_cluster", "trans_lantern": "lantern", "trans_door": "cherry_door",
+    "trans_trapdoor": "cherry_trapdoor", "trans_fence": "cherry_fence", "trans_fence_gate": "cherry_fence_gate",
+    "trans_button": "cherry_button", "trans_stone_button": "stone_button", "trans_pressure_plate": "cherry_pressure_plate",
+    "trans_stone_pressure_plate": "stone_pressure_plate", "trans_stained_glass_pane": "pink_stained_glass_pane",
+    "trans_pink_stained_glass_pane": "pink_stained_glass_pane", "trans_blue_stained_glass_pane": "pink_stained_glass_pane",
+    "trans_cake": "cake", "pride_oven": "smoker", "trans_chair": "smoker", "trans_table": "smoker",
+}
+for b in BLOCKS:
+    if b.endswith("_stairs"):
+        TWINS.setdefault(b, "oak_stairs")
+    elif b.endswith("_slab"):
+        TWINS.setdefault(b, "oak_slab")
+    elif b.endswith("_wall"):
+        TWINS.setdefault(b, "cobblestone_wall")
+
+
+def block_props(ident):
+    ns, path = ident.split(":", 1) if ":" in ident else ("minecraft", ident)
+    if ns == NS:
+        twin = TWINS.get(path)
+        if twin is None:
+            return {}
+        props = dict(VANILLA_BLOCKS.get(twin, [{}])[0])
+        if path in ("pride_oven", "trans_chair", "trans_table"):
+            props = {"facing": props.get("facing", [])}
+        return props
+    return VANILLA_BLOCKS.get(path, [None])[0]
+
+
+def check_states(obj, where):
+    if isinstance(obj, dict):
+        if "Name" in obj and isinstance(obj["Name"], str):
+            ident = obj["Name"]
+            if not block_exists(ident):
+                err(f"{where}: unknown block {ident}")
+            elif VANILLA_BLOCKS:
+                props = block_props(ident)
+                for k, v in obj.get("Properties", {}).items():
+                    if props is not None and (k not in props or v not in props[k]):
+                        err(f"{where}: {ident} has no property {k}={v}")
+        for v in obj.values():
+            check_states(v, where)
+    elif isinstance(obj, list):
+        for v in obj:
+            check_states(v, where)
+
+
+def placed_exists(ident):
+    ns, path = ident.split(":", 1)
+    if ns == NS:
+        return os.path.exists(os.path.join(DATA, NS, "worldgen", "placed_feature", path + ".json"))
+    return vanilla_has("worldgen/placed_feature", ident)
+
+
+def configured_exists(ident):
+    ns, path = ident.split(":", 1)
+    if ns == NS:
+        return os.path.exists(os.path.join(DATA, NS, "worldgen", "configured_feature", path + ".json"))
+    return vanilla_has("worldgen/configured_feature", ident)
+
+
+WG = os.path.join(DATA, NS, "worldgen")
+for f in walk_json(DATA):
+    rel = os.path.relpath(f, ROOT)
+    if "/tags/" in f or "/loot_table/" in f or "/recipe/" in f:
+        continue
+    d = load(f)
+    if d is not None:
+        check_states(d, rel)
+
+for f in walk_json(os.path.join(WG, "placed_feature")):
+    d = load(f)
+    if d and isinstance(d.get("feature"), str) and not configured_exists(d["feature"]):
+        err(f"{os.path.relpath(f, ROOT)}: unknown configured feature {d['feature']}")
+
+for f in walk_json(os.path.join(WG, "configured_feature")):
+    d = load(f)
+    if d and d.get("type") == "minecraft:random_selector":
+        refs = [d["config"]["default"]] + [x["feature"] for x in d["config"]["features"]]
+        for r in refs:
+            if isinstance(r, str) and not placed_exists(r):
+                err(f"{os.path.relpath(f, ROOT)}: unknown placed feature {r}")
+
+for f in walk_json(os.path.join(WG, "biome")):
+    d = load(f)
+    if not d:
+        continue
+    rel = os.path.relpath(f, ROOT)
+    if len(d["features"]) != 11:
+        err(f"{rel}: needs 11 feature steps")
+    for step in d["features"]:
+        for feat in step:
+            if not placed_exists(feat):
+                err(f"{rel}: unknown placed feature {feat}")
+    for group in d["spawners"].values():
+        for sp in group:
+            t = sp["type"]
+            if not (is_ours(t) and path_of(t) == "silly_cat") and not vanilla_has("entity_type", t):
+                err(f"{rel}: unknown entity {t}")
+    for part in d["attributes"].get("minecraft:visual/ambient_particles", []):
+        if not vanilla_has("particle_type", part["particle"]["type"]):
+            err(f"{rel}: unknown particle {part['particle']['type']}")
+    for m in d["attributes"].get("minecraft:audio/background_music", {}).values():
+        if not vanilla_has("sound_event", m["sound"]):
+            err(f"{rel}: unknown music {m['sound']}")
+
+dim = load(os.path.join(DATA, NS, "dimension", "trans_realm.json"))
+if dim:
+    for e in dim["generator"]["biome_source"]["biomes"]:
+        b = e["biome"]
+        if not os.path.exists(os.path.join(WG, "biome", path_of(b) + ".json")):
+            err(f"dimension: unknown biome {b}")
+
+tl = load(os.path.join(DATA, NS, "tags", "timeline", "in_trans_realm.json"))
+if tl:
+    for v in tl["values"]:
+        if v.startswith("#"):
+            continue
+        ns, path = v.split(":", 1)
+        if ns == NS and not os.path.exists(os.path.join(DATA, NS, "timeline", path + ".json")):
+            err(f"timeline tag: unknown timeline {v}")
+        if ns == "minecraft" and not vanilla_has("timeline", v):
+            err(f"timeline tag: unknown timeline {v}")
+
 for w in warnings:
     print("warning:", w)
 for e in errors:

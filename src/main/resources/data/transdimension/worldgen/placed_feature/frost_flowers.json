@@ -1,5 +1,5 @@
 {
-  "feature": "transdimension:pride_blossom_patch",
+  "feature": "transdimension:frost_flowers",
   "placement": [
     {
       "type": "minecraft:rarity_filter",
@@ -17,7 +17,7 @@
     },
     {
       "type": "minecraft:count",
-      "count": 32
+      "count": 24
     },
     {
       "type": "minecraft:random_offset",

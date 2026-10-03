@@ -4,28 +4,23 @@
       "default": {
         "max_delay": 24000,
         "min_delay": 12000,
-        "sound": "minecraft:music.game"
-      },
-      "underwater": {
-        "max_delay": 24000,
-        "min_delay": 12000,
-        "sound": "minecraft:music.under_water"
+        "sound": "minecraft:music.overworld.meadow"
       }
     },
-    "minecraft:visual/fog_color": "#f7d0d8",
-    "minecraft:visual/sky_color": "#7fd4fa",
-    "minecraft:visual/water_fog_color": "#1e7fb8"
+    "minecraft:visual/fog_color": "#f7c4cf",
+    "minecraft:visual/sky_color": "#8ed8fa",
+    "minecraft:visual/water_fog_color": "#c86a88"
   },
   "carvers": [
     "minecraft:cave",
     "minecraft:cave_extra_underground",
     "minecraft:canyon"
   ],
-  "downfall": 0.5,
+  "downfall": 0.6,
   "effects": {
     "foliage_color": "#f5a9b8",
     "grass_color": "#f5a9b8",
-    "water_color": "#5bcefa"
+    "water_color": "#f5a9b8"
   },
   "features": [
     [],
@@ -51,10 +46,9 @@
       "minecraft:spring_lava"
     ],
     [
-      "minecraft:warm_ocean_vegetation",
-      "minecraft:seagrass_warm",
-      "minecraft:sea_pickle",
-      "minecraft:kelp_warm"
+      "minecraft:seagrass_river",
+      "minecraft:patch_waterlily",
+      "minecraft:patch_sugar_cane"
     ],
     []
   ],
@@ -73,12 +67,6 @@
     "creature": [],
     "misc": [],
     "monster": [
-      {
-        "type": "minecraft:drowned",
-        "maxCount": 1,
-        "minCount": 1,
-        "weight": 100
-      },
       {
         "type": "minecraft:spider",
         "maxCount": 4,
@@ -110,6 +98,12 @@
         "weight": 100
       },
       {
+        "type": "minecraft:slime",
+        "maxCount": 4,
+        "minCount": 4,
+        "weight": 100
+      },
+      {
         "type": "minecraft:enderman",
         "maxCount": 4,
         "minCount": 1,
@@ -125,20 +119,8 @@
     "underground_water_creature": [],
     "water_ambient": [
       {
-        "type": "minecraft:tropical_fish",
-        "maxCount": 8,
-        "minCount": 8,
-        "weight": 25
-      },
-      {
-        "type": "minecraft:cod",
-        "maxCount": 6,
-        "minCount": 3,
-        "weight": 10
-      },
-      {
-        "type": "minecraft:pufferfish",
-        "maxCount": 3,
+        "type": "minecraft:salmon",
+        "maxCount": 5,
         "minCount": 1,
         "weight": 5
       }
@@ -148,15 +130,9 @@
         "type": "minecraft:squid",
         "maxCount": 4,
         "minCount": 1,
-        "weight": 4
-      },
-      {
-        "type": "minecraft:dolphin",
-        "maxCount": 2,
-        "minCount": 1,
         "weight": 2
       }
     ]
   },
-  "temperature": 0.5
+  "temperature": 0.6
 }

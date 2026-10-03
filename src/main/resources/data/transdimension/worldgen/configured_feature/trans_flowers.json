@@ -1,0 +1,39 @@
+{
+  "type": "minecraft:simple_block",
+  "config": {
+    "to_place": {
+      "type": "minecraft:noise_provider",
+      "noise": {
+        "amplitudes": [
+          1.0
+        ],
+        "firstOctave": 0
+      },
+      "scale": 0.02,
+      "seed": 7171,
+      "states": [
+        {
+          "Name": "transdimension:pride_blossom"
+        },
+        {
+          "Name": "minecraft:pink_tulip"
+        },
+        {
+          "Name": "minecraft:white_tulip"
+        },
+        {
+          "Name": "minecraft:cornflower"
+        },
+        {
+          "Name": "minecraft:azure_bluet"
+        },
+        {
+          "Name": "minecraft:lily_of_the_valley"
+        },
+        {
+          "Name": "transdimension:pride_blossom"
+        }
+      ]
+    }
+  }
+}

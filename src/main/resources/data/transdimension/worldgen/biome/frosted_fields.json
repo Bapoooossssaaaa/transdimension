@@ -4,17 +4,20 @@
       "default": {
         "max_delay": 24000,
         "min_delay": 12000,
-        "sound": "minecraft:music.game"
-      },
-      "underwater": {
-        "max_delay": 24000,
-        "min_delay": 12000,
-        "sound": "minecraft:music.under_water"
+        "sound": "minecraft:music.overworld.grove"
       }
     },
-    "minecraft:visual/fog_color": "#f7d0d8",
-    "minecraft:visual/sky_color": "#7fd4fa",
-    "minecraft:visual/water_fog_color": "#1e7fb8"
+    "minecraft:visual/fog_color": "#eaf4ff",
+    "minecraft:visual/sky_color": "#cde8ff",
+    "minecraft:visual/water_fog_color": "#3d8fc0",
+    "minecraft:visual/ambient_particles": [
+      {
+        "particle": {
+          "type": "minecraft:snowflake"
+        },
+        "probability": 0.002
+      }
+    ]
   },
   "carvers": [
     "minecraft:cave",
@@ -23,9 +26,9 @@
   ],
   "downfall": 0.5,
   "effects": {
-    "foliage_color": "#f5a9b8",
-    "grass_color": "#f5a9b8",
-    "water_color": "#5bcefa"
+    "foliage_color": "#cfe8ff",
+    "grass_color": "#d6eeff",
+    "water_color": "#9be3fc"
   },
   "features": [
     [],
@@ -40,8 +43,7 @@
     [
       "transdimension:ore_trans_crystal",
       "transdimension:ore_trans_crystal_deep",
-      "minecraft:disk_clay",
-      "minecraft:disk_sand"
+      "minecraft:disk_clay"
     ],
     [
       "minecraft:glow_lichen"
@@ -51,12 +53,14 @@
       "minecraft:spring_lava"
     ],
     [
-      "minecraft:warm_ocean_vegetation",
-      "minecraft:seagrass_warm",
-      "minecraft:sea_pickle",
-      "minecraft:kelp_warm"
+      "transdimension:frosted_ice_spikes",
+      "transdimension:trees_frosted_fields",
+      "transdimension:frost_flowers",
+      "minecraft:patch_grass_taiga"
     ],
-    []
+    [
+      "minecraft:freeze_top_layer"
+    ]
   ],
   "has_precipitation": true,
   "spawn_costs": {},
@@ -70,15 +74,40 @@
       }
     ],
     "axolotls": [],
-    "creature": [],
-    "misc": [],
-    "monster": [
+    "creature": [
       {
-        "type": "minecraft:drowned",
+        "type": "minecraft:rabbit",
+        "maxCount": 3,
+        "minCount": 2,
+        "weight": 8
+      },
+      {
+        "type": "minecraft:fox",
+        "maxCount": 4,
+        "minCount": 2,
+        "weight": 6
+      },
+      {
+        "type": "minecraft:polar_bear",
+        "maxCount": 2,
+        "minCount": 1,
+        "weight": 1
+      },
+      {
+        "type": "minecraft:wolf",
+        "maxCount": 4,
+        "minCount": 2,
+        "weight": 2
+      },
+      {
+        "type": "transdimension:silly_cat",
         "maxCount": 1,
         "minCount": 1,
-        "weight": 100
-      },
+        "weight": 3
+      }
+    ],
+    "misc": [],
+    "monster": [
       {
         "type": "minecraft:spider",
         "maxCount": 4,
@@ -98,13 +127,19 @@
         "weight": 5
       },
       {
-        "type": "minecraft:skeleton",
+        "type": "minecraft:stray",
+        "maxCount": 4,
+        "minCount": 4,
+        "weight": 80
+      },
+      {
+        "type": "minecraft:creeper",
         "maxCount": 4,
         "minCount": 4,
         "weight": 100
       },
       {
-        "type": "minecraft:creeper",
+        "type": "minecraft:slime",
         "maxCount": 4,
         "minCount": 4,
         "weight": 100
@@ -120,43 +155,17 @@
         "maxCount": 1,
         "minCount": 1,
         "weight": 5
+      },
+      {
+        "type": "minecraft:skeleton",
+        "maxCount": 4,
+        "minCount": 4,
+        "weight": 20
       }
     ],
     "underground_water_creature": [],
-    "water_ambient": [
-      {
-        "type": "minecraft:tropical_fish",
-        "maxCount": 8,
-        "minCount": 8,
-        "weight": 25
-      },
-      {
-        "type": "minecraft:cod",
-        "maxCount": 6,
-        "minCount": 3,
-        "weight": 10
-      },
-      {
-        "type": "minecraft:pufferfish",
-        "maxCount": 3,
-        "minCount": 1,
-        "weight": 5
-      }
-    ],
-    "water_creature": [
-      {
-        "type": "minecraft:squid",
-        "maxCount": 4,
-        "minCount": 1,
-        "weight": 4
-      },
-      {
-        "type": "minecraft:dolphin",
-        "maxCount": 2,
-        "minCount": 1,
-        "weight": 2
-      }
-    ]
+    "water_ambient": [],
+    "water_creature": []
   },
-  "temperature": 0.5
+  "temperature": -0.3
 }

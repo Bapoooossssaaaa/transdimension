@@ -14,7 +14,7 @@
     },
     "minecraft:visual/fog_color": "#f7d0d8",
     "minecraft:visual/sky_color": "#7fd4fa",
-    "minecraft:visual/water_fog_color": "#1e7fb8"
+    "minecraft:visual/water_fog_color": "#0f3f78"
   },
   "carvers": [
     "minecraft:cave",
@@ -25,7 +25,7 @@
   "effects": {
     "foliage_color": "#f5a9b8",
     "grass_color": "#f5a9b8",
-    "water_color": "#5bcefa"
+    "water_color": "#3e9fd8"
   },
   "features": [
     [],
@@ -51,10 +51,8 @@
       "minecraft:spring_lava"
     ],
     [
-      "minecraft:warm_ocean_vegetation",
-      "minecraft:seagrass_warm",
-      "minecraft:sea_pickle",
-      "minecraft:kelp_warm"
+      "minecraft:seagrass_deep",
+      "minecraft:kelp_cold"
     ],
     []
   ],
@@ -122,14 +120,15 @@
         "weight": 5
       }
     ],
-    "underground_water_creature": [],
-    "water_ambient": [
+    "underground_water_creature": [
       {
-        "type": "minecraft:tropical_fish",
-        "maxCount": 8,
-        "minCount": 8,
-        "weight": 25
-      },
+        "type": "minecraft:glow_squid",
+        "maxCount": 6,
+        "minCount": 4,
+        "weight": 10
+      }
+    ],
+    "water_ambient": [
       {
         "type": "minecraft:cod",
         "maxCount": 6,
@@ -137,8 +136,8 @@
         "weight": 10
       },
       {
-        "type": "minecraft:pufferfish",
-        "maxCount": 3,
+        "type": "minecraft:salmon",
+        "maxCount": 5,
         "minCount": 1,
         "weight": 5
       }
@@ -148,13 +147,13 @@
         "type": "minecraft:squid",
         "maxCount": 4,
         "minCount": 1,
-        "weight": 4
+        "weight": 6
       },
       {
         "type": "minecraft:dolphin",
         "maxCount": 2,
         "minCount": 1,
-        "weight": 2
+        "weight": 1
       }
     ]
   },

@@ -23,6 +23,26 @@
     },
     "decorators": [
       {
+        "type": "minecraft:attached_to_leaves",
+        "block_provider": {
+          "type": "minecraft:simple_state_provider",
+          "state": {
+            "Name": "transdimension:trans_lantern",
+            "Properties": {
+              "hanging": "true",
+              "waterlogged": "false"
+            }
+          }
+        },
+        "directions": [
+          "down"
+        ],
+        "exclusion_radius_xz": 3,
+        "exclusion_radius_y": 1,
+        "probability": 0.06,
+        "required_empty_blocks": 2
+      },
+      {
         "type": "minecraft:place_on_ground",
         "block_state_provider": {
           "type": "minecraft:weighted_state_provider",
@@ -195,14 +215,9 @@
       }
     ],
     "foliage_placer": {
-      "type": "minecraft:cherry_foliage_placer",
-      "corner_hole_chance": 0.25,
-      "hanging_leaves_chance": 0.16666667,
-      "hanging_leaves_extension_chance": 0.33333334,
-      "height": 5,
+      "type": "minecraft:dark_oak_foliage_placer",
       "offset": 0,
-      "radius": 4,
-      "wide_bottom_layer_hole_chance": 0.25
+      "radius": 0
     },
     "foliage_provider": {
       "type": "minecraft:simple_state_provider",
@@ -217,47 +232,14 @@
     },
     "ignore_vines": true,
     "minimum_size": {
-      "type": "minecraft:two_layers_feature_size",
-      "limit": 1,
-      "lower_size": 0,
+      "type": "minecraft:three_layers_feature_size",
       "upper_size": 2
     },
     "trunk_placer": {
-      "type": "minecraft:cherry_trunk_placer",
+      "type": "minecraft:dark_oak_trunk_placer",
       "base_height": 7,
-      "height_rand_a": 1,
-      "height_rand_b": 0,
-      "branch_count": {
-        "type": "minecraft:weighted_list",
-        "distribution": [
-          {
-            "data": 1,
-            "weight": 1
-          },
-          {
-            "data": 2,
-            "weight": 1
-          },
-          {
-            "data": 3,
-            "weight": 1
-          }
-        ]
-      },
-      "branch_end_offset_from_top": {
-        "type": "minecraft:uniform",
-        "max_inclusive": 0,
-        "min_inclusive": -1
-      },
-      "branch_horizontal_length": {
-        "type": "minecraft:uniform",
-        "max_inclusive": 4,
-        "min_inclusive": 2
-      },
-      "branch_start_offset_from_top": {
-        "max_inclusive": -3,
-        "min_inclusive": -4
-      }
+      "height_rand_a": 3,
+      "height_rand_b": 1
     },
     "trunk_provider": {
       "type": "minecraft:simple_state_provider",

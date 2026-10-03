@@ -1,9 +1,9 @@
 {
-  "feature": "transdimension:pride_blossom_patch",
+  "feature": "transdimension:trans_crystal_cluster",
   "placement": [
     {
-      "type": "minecraft:rarity_filter",
-      "chance": 2
+      "type": "minecraft:count",
+      "count": 2
     },
     {
       "type": "minecraft:in_square"
@@ -17,20 +17,20 @@
     },
     {
       "type": "minecraft:count",
-      "count": 32
+      "count": 12
     },
     {
       "type": "minecraft:random_offset",
       "xz_spread": {
         "type": "minecraft:trapezoid",
-        "max": 6,
-        "min": -6,
+        "max": 4,
+        "min": -4,
         "plateau": 0
       },
       "y_spread": {
         "type": "minecraft:trapezoid",
-        "max": 2,
-        "min": -2,
+        "max": 1,
+        "min": -1,
         "plateau": 0
       }
     },

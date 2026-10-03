@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:random_selector",
+  "config": {
+    "default": "transdimension:heartwood_tree_checked",
+    "features": [
+      {
+        "chance": 0.15,
+        "feature": "transdimension:trans_cherry_tree_checked"
+      },
+      {
+        "chance": 0.1,
+        "feature": "transdimension:trans_bush_checked"
+      }
+    ]
+  }
+}

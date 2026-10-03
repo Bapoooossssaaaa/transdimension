@@ -1,15 +1,11 @@
 {
-  "feature": "transdimension:trans_tree",
+  "feature": "transdimension:trees_crystal_grove",
   "placement": [
     {
       "type": "minecraft:count",
       "count": {
         "type": "minecraft:weighted_list",
         "distribution": [
-          {
-            "data": 0,
-            "weight": 6
-          },
           {
             "data": 1,
             "weight": 3
@@ -35,16 +31,13 @@
     {
       "type": "minecraft:block_predicate_filter",
       "predicate": {
-        "type": "minecraft:matching_blocks",
-        "blocks": [
-          "transdimension:trans_grass_block",
-          "transdimension:trans_dirt"
-        ],
-        "offset": [
-          0,
-          -1,
-          0
-        ]
+        "type": "minecraft:would_survive",
+        "state": {
+          "Name": "transdimension:trans_sapling",
+          "Properties": {
+            "stage": "0"
+          }
+        }
       }
     },
     {

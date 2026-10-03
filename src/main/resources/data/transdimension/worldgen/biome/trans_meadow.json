@@ -1,14 +1,21 @@
 {
   "attributes": {
-    "minecraft:visual/sky_color": "#5bcefa",
-    "minecraft:visual/fog_color": "#f5a9b8",
-    "minecraft:visual/water_fog_color": "#f5a9b8",
+    "minecraft:audio/background_music": {
+      "default": {
+        "max_delay": 24000,
+        "min_delay": 12000,
+        "sound": "minecraft:music.overworld.meadow"
+      }
+    },
+    "minecraft:visual/fog_color": "#f7c4cf",
+    "minecraft:visual/sky_color": "#8ed8fa",
+    "minecraft:visual/water_fog_color": "#1f6fa8",
     "minecraft:visual/ambient_particles": [
       {
         "particle": {
           "type": "minecraft:cherry_leaves"
         },
-        "probability": 0.0025
+        "probability": 0.0008
       }
     ]
   },
@@ -17,30 +24,42 @@
     "minecraft:cave_extra_underground",
     "minecraft:canyon"
   ],
-  "downfall": 0.5,
+  "downfall": 0.6,
   "effects": {
-    "water_color": "#f5a9b8",
+    "foliage_color": "#f5a9b8",
     "grass_color": "#f5a9b8",
-    "foliage_color": "#5bcefa"
+    "water_color": "#5bcefa"
   },
   "features": [
     [],
     [],
     [],
-    [],
     [
-      "transdimension:trans_village"
+      "minecraft:monster_room",
+      "minecraft:monster_room_deep"
     ],
+    [],
     [],
     [
       "transdimension:ore_trans_crystal",
-      "transdimension:ore_trans_crystal_deep"
+      "transdimension:ore_trans_crystal_deep",
+      "minecraft:disk_clay"
     ],
-    [],
-    [],
     [
-      "transdimension:trans_trees_sparse",
-      "transdimension:pride_blossoms"
+      "minecraft:glow_lichen"
+    ],
+    [
+      "minecraft:spring_water",
+      "minecraft:spring_lava"
+    ],
+    [
+      "transdimension:trees_trans_meadow",
+      "transdimension:pride_blossoms",
+      "transdimension:trans_flowers",
+      "minecraft:wildflowers_meadow",
+      "minecraft:patch_grass_meadow",
+      "minecraft:patch_tall_grass_2",
+      "transdimension:trans_boulders"
     ],
     []
   ],
@@ -85,13 +104,19 @@
         "type": "minecraft:rabbit",
         "maxCount": 3,
         "minCount": 2,
-        "weight": 4
+        "weight": 6
       },
       {
         "type": "minecraft:horse",
         "maxCount": 4,
         "minCount": 2,
         "weight": 4
+      },
+      {
+        "type": "transdimension:silly_cat",
+        "maxCount": 2,
+        "minCount": 1,
+        "weight": 8
       }
     ],
     "misc": [],
@@ -106,16 +131,10 @@
         "type": "minecraft:zombie",
         "maxCount": 4,
         "minCount": 4,
-        "weight": 90
+        "weight": 95
       },
       {
         "type": "minecraft:zombie_villager",
-        "maxCount": 1,
-        "minCount": 1,
-        "weight": 5
-      },
-      {
-        "type": "minecraft:zombie_horse",
         "maxCount": 1,
         "minCount": 1,
         "weight": 5

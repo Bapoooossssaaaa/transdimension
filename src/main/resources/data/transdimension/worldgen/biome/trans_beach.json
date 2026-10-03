@@ -1,8 +1,15 @@
 {
   "attributes": {
-    "minecraft:visual/sky_color": "#5bcefa",
-    "minecraft:visual/fog_color": "#f5a9b8",
-    "minecraft:visual/water_fog_color": "#f5a9b8"
+    "minecraft:audio/background_music": {
+      "default": {
+        "max_delay": 24000,
+        "min_delay": 12000,
+        "sound": "minecraft:music.overworld.meadow"
+      }
+    },
+    "minecraft:visual/fog_color": "#f7d0d8",
+    "minecraft:visual/sky_color": "#7fd4fa",
+    "minecraft:visual/water_fog_color": "#1f6fa8"
   },
   "carvers": [
     "minecraft:cave",
@@ -11,24 +18,35 @@
   ],
   "downfall": 0.4,
   "effects": {
-    "water_color": "#f5a9b8",
+    "foliage_color": "#f5a9b8",
     "grass_color": "#f5a9b8",
-    "foliage_color": "#5bcefa"
+    "water_color": "#5bcefa"
   },
   "features": [
     [],
     [],
     [],
-    [],
+    [
+      "minecraft:monster_room",
+      "minecraft:monster_room_deep"
+    ],
     [],
     [],
     [
       "transdimension:ore_trans_crystal",
-      "transdimension:ore_trans_crystal_deep"
+      "transdimension:ore_trans_crystal_deep",
+      "minecraft:disk_clay"
     ],
-    [],
-    [],
-    [],
+    [
+      "minecraft:glow_lichen"
+    ],
+    [
+      "minecraft:spring_water",
+      "minecraft:spring_lava"
+    ],
+    [
+      "minecraft:patch_sugar_cane"
+    ],
     []
   ],
   "has_precipitation": true,
@@ -45,10 +63,16 @@
     "axolotls": [],
     "creature": [
       {
-        "type": "minecraft:rabbit",
-        "maxCount": 3,
+        "type": "minecraft:turtle",
+        "maxCount": 5,
         "minCount": 2,
-        "weight": 4
+        "weight": 5
+      },
+      {
+        "type": "transdimension:silly_cat",
+        "maxCount": 1,
+        "minCount": 1,
+        "weight": 2
       }
     ],
     "misc": [],
@@ -63,16 +87,10 @@
         "type": "minecraft:zombie",
         "maxCount": 4,
         "minCount": 4,
-        "weight": 90
+        "weight": 95
       },
       {
         "type": "minecraft:zombie_villager",
-        "maxCount": 1,
-        "minCount": 1,
-        "weight": 5
-      },
-      {
-        "type": "minecraft:zombie_horse",
         "maxCount": 1,
         "minCount": 1,
         "weight": 5
