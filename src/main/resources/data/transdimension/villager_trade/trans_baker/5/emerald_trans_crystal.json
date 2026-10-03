@@ -1,0 +1,12 @@
+{
+  "gives": {
+    "id": "transdimension:trans_crystal"
+  },
+  "max_uses": 8.0,
+  "reputation_discount": 0.05,
+  "wants": {
+    "count": 6.0,
+    "id": "minecraft:emerald"
+  },
+  "xp": 30.0
+}

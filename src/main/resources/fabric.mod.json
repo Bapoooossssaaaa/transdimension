@@ -1,0 +1,33 @@
+{
+	"schemaVersion": 1,
+	"id": "transdimension",
+	"version": "${version}",
+	"name": "Trans Dimension",
+	"description": "Say \"Goober\" in chat to visit the Trans Realm: a trans-flag dimension with pride terrain, trans-water oceans, a gradient sky, heart-shaped clouds, trans villages with bakeries, crystal gear and sweet treats. You are valid. You are loved.",
+	"authors": [
+		"You!"
+	],
+	"license": "MIT",
+	"icon": "assets/transdimension/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"dev.goober.transdimension.TransDimension"
+		],
+		"client": [
+			"dev.goober.transdimension.client.TransDimensionClient"
+		]
+	},
+	"mixins": [
+		{
+			"config": "transdimension.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

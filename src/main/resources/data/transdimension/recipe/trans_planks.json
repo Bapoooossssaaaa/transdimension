@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "transdimension:trans_log"
+  ],
+  "result": {
+    "id": "transdimension:trans_planks",
+    "count": 4
+  }
+}

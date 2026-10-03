@@ -1,0 +1,12 @@
+{
+  "gives": {
+    "count": 6,
+    "id": "transdimension:trans_cookie"
+  },
+  "max_uses": 16.0,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "minecraft:emerald"
+  },
+  "xp": 1.0
+}

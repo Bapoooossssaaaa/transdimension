@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:trans_stone",
+    "transdimension:trans_cobblestone",
+    "transdimension:trans_stone_bricks",
+    "transdimension:trans_crystal_ore",
+    "transdimension:trans_crystal_block",
+    "transdimension:pride_oven"
+  ]
+}

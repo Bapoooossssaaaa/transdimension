@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "transdimension:trans_crystal_block"
+  ],
+  "result": {
+    "id": "transdimension:trans_crystal",
+    "count": 9
+  }
+}

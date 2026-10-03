@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:trans_log",
+    "transdimension:trans_planks"
+  ]
+}

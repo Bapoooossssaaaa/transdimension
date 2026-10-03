@@ -1,0 +1,14 @@
+{
+	"required": true,
+	"package": "dev.goober.transdimension.client.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"TextureManagerMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}

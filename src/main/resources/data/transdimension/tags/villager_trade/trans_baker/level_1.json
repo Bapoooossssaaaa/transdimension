@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:trans_baker/1/wheat_emerald",
+    "transdimension:trans_baker/1/emerald_cookies",
+    "transdimension:trans_baker/1/emerald_donuts"
+  ]
+}

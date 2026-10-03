@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "transdimension:block/pride_oven_top",
+    "side": "transdimension:block/pride_oven_front",
+    "bottom": "transdimension:block/trans_stone_bricks"
+  }
+}

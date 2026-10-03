@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:sugar",
+    "#minecraft:eggs",
+    "transdimension:pride_blossom"
+  ],
+  "result": {
+    "id": "transdimension:trans_macaron",
+    "count": 2
+  }
+}

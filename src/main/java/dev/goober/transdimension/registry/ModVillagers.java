@@ -1,0 +1,49 @@
+package dev.goober.transdimension.registry;
+
+import com.google.common.collect.ImmutableSet;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
+import net.minecraft.world.item.trading.TradeSet;
+
+import net.fabricmc.fabric.api.object.builder.v1.world.poi.PoiHelper;
+
+import dev.goober.transdimension.TransDimension;
+
+/**
+ * The Trans Baker: a villager profession whose job site is the Pride Oven.
+ * Its trades are pure data: data/transdimension/trade_set/trans_baker/level_N.json.
+ */
+public final class ModVillagers {
+	public static final ResourceKey<PoiType> PRIDE_OVEN_POI = ResourceKey.create(Registries.POINT_OF_INTEREST_TYPE, TransDimension.id("pride_oven"));
+	public static final ResourceKey<VillagerProfession> TRANS_BAKER = ResourceKey.create(Registries.VILLAGER_PROFESSION, TransDimension.id("trans_baker"));
+
+	private ModVillagers() {
+	}
+
+	public static void initialize() {
+		PoiHelper.register(PRIDE_OVEN_POI.identifier(), 1, 1, ModBlocks.PRIDE_OVEN);
+
+		Int2ObjectOpenHashMap<ResourceKey<TradeSet>> tradeSets = new Int2ObjectOpenHashMap<>();
+		for (int level = 1; level <= 5; level++) {
+			tradeSets.put(level, ResourceKey.create(Registries.TRADE_SET, TransDimension.id("trans_baker/level_" + level)));
+		}
+
+		Registry.register(BuiltInRegistries.VILLAGER_PROFESSION, TRANS_BAKER, new VillagerProfession(
+				Component.translatable("entity.transdimension.villager.trans_baker"),
+				poi -> poi.is(PRIDE_OVEN_POI),
+				poi -> poi.is(PRIDE_OVEN_POI),
+				ImmutableSet.of(),
+				ImmutableSet.of(),
+				SoundEvents.VILLAGER_WORK_BUTCHER,
+				tradeSets
+		));
+	}
+}

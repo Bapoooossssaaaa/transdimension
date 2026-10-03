@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": "transdimension:trans_stone_bricks",
+    "C": "transdimension:trans_crystal"
+  },
+  "pattern": [
+    "BBB",
+    "BCB",
+    "BBB"
+  ],
+  "result": {
+    "id": "transdimension:pride_oven"
+  }
+}

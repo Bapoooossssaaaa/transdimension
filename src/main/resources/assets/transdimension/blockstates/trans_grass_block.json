@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "transdimension:block/trans_grass_block"
+      },
+      {
+        "model": "transdimension:block/trans_grass_block",
+        "y": 90
+      },
+      {
+        "model": "transdimension:block/trans_grass_block",
+        "y": 180
+      },
+      {
+        "model": "transdimension:block/trans_grass_block",
+        "y": 270
+      }
+    ]
+  }
+}
