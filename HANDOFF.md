@@ -5,7 +5,8 @@ State of the mod for whoever picks it up next (person or AI). The README covers 
 ## Status
 
 - Target: Minecraft Java **26.2**, Fabric Loader 0.19.5, Fabric API 0.161.0+26.2, Java 25. Mod id `transdimension`, package `dev.goober.transdimension`.
-- **The mod has never been compiled or run.** The cloud environment it was written in can't download Gradle, Fabric's maven, Mojang's game files or a JDK 25 (see "Building in the cloud" below). Everything was checked by hand against Fabric API's source, the fabric-docs reference mod for 26.2, the NeoForge 26.x porting primers and vanilla 26.2 data from misode/mcmeta.
+- **It compiles and loads.** The owner built it and ran it on 26.2 with Fabric Loader 0.19.5, next to Sodium, Iris and Xaero's maps. The first run hung on "Preparing for world creation" because the sky timeline repeated vanilla's time markers; commit 2e490ee fixes that. Nothing inside a world (realm terrain, villages, Silly Cat, overlays) has been seen in game yet.
+- The cloud environment it was written in can't download Gradle, Fabric's maven, Mojang's game files or a JDK 25 (see "Building in the cloud" below), so everything was checked by hand against Fabric API's source, the fabric-docs reference mod for 26.2, the NeoForge 26.x porting primers and vanilla 26.2 data from misode/mcmeta.
 - `python3 tools/validate_resources.py <mcmeta-summary>/registries/data.json` passes with 0 errors. That run covers resources and data, not Java.
 
 ## What changed in this round
@@ -44,9 +45,9 @@ Inputs copied out of vanilla 26.2 live in `tools/vanilla_extra/`: entity texture
 - Every block needs a blockstate, an item definition (unless registered without an item), a model, a name, a loot table, mining tags and a texture made by the texture script. The validator reports any that are missing.
 - Hooks into game internals fail safe: mixins use `require = 0`, and reflection is wrapped in try/catch with a disable flag.
 
-## Compile risks (check these first)
+## Formerly unverified APIs
 
-All of these were inferred from 26.2 data codecs, primers or older versions rather than read in 26.2 source:
+These were inferred from 26.2 data codecs, primers or older versions rather than read in 26.2 source. The mod has since compiled, so the signatures are right; the list stays as a map of where to look if behaviour is off:
 
 | Where | API | If it doesn't compile |
 | --- | --- | --- |

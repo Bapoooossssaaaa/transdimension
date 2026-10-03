@@ -99,7 +99,7 @@ To restyle the mod, edit the palettes at the top of `generate_textures.py`, the 
 
 ## Notes and troubleshooting
 
-This was written against the real 26.2 APIs and checked against Fabric API 0.161.0's source, the Fabric docs reference mod, the 26.x porting primers and vanilla 26.2 data. **It has not been compiled yet.** If the first build fails, it will most likely be one of these names, which I couldn't check against code (`HANDOFF.md` lists the fixes to try):
+This was written against the real 26.2 APIs and checked against Fabric API 0.161.0's source, the Fabric docs reference mod, the 26.x porting primers and vanilla 26.2 data. It compiles and loads on 26.2; what happens inside the realm hasn't been play-tested much yet. If something misbehaves, these are the names that were the least certain while writing it (`HANDOFF.md` has notes on each):
 
 - `SnowyBlock` (trans grass), `UntintedParticleLeavesBlock` (leaves), `AmethystClusterBlock(height, width, …)` (crystal cluster), `ColoredFallingBlock` / `ColorRGBA` (trans sand), `FlowerBlock(Holder<MobEffect>, float, …)` (Pride Blossom)
 - `Consumables.defaultDrink()` and `Item.Properties#usingConvertsTo` (boba)
