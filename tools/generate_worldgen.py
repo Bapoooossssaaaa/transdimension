@@ -939,7 +939,8 @@ def generate_cloud_timeline():
     """The realm's clouds drift through the trans flag in order: blue, pink, white, pink, blue. Each colour holds for
     about 38 seconds and blends into the next over another 38. (Since 1.21.6 the cloud renderer only takes shapes from its texture,
     so the colour has to come from the cloud_color attribute; the day timeline still dims it at dusk and night.)"""
-    blue, pink, white = "#ff8fd8fb", "#fff7b3c4", "#ffffffff"
+    # Integers, like vanilla's own cloud_color keyframes (the multiply modifier's argument).
+    blue, pink, white = argb(255, 0x8FD8FB), argb(255, 0xF7B3C4), argb(255, 0xFFFFFF)
     # Looping blue, pink, white, pink reads as the flag over and over: blue, pink, white, pink, blue, pink...
     step = CLOUD_PERIOD // 4
     keyframes = []
