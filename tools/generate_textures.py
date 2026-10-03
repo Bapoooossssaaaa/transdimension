@@ -1522,6 +1522,102 @@ def trans_baker():
     return out
 
 
+# ============================================================================================ trans mobs
+# Every vanilla mob gets a trans version of its texture, worn only inside the Trans Realm (TransRecolor swaps
+# them in). Colours are mapped by family, not brightness, so mobs come out pink, blue AND white instead of
+# mostly blue: warm colours (browns, reds, oranges) turn pink with their darkest tones blue, yellows and
+# greens turn blue, blues turn pink, purples lavender, and greys white, lavender or navy depending on lightness.
+ENTITY_ZIP = os.path.join(ROOT, "base entity textures.zip")
+MOB_PINK = [hexc(c) for c in ("6E2945", "A84A6E", "D9779A", "F5A9B8", "FAD0DA", "FFF0F4")]
+MOB_BLUE = [hexc(c) for c in ("173A63", "2A6DA8", "3E9BD8", "6CC6F2", "A6E1FA", "E3F7FF")]
+MOB_WHITE = [hexc(c) for c in ("8E8AA6", "B3B0C8", "D2D0E2", "E8E7F2", "F6F5FB", "FFFFFF")]
+MOB_NAVY = [hexc(c) for c in ("0E1230", "1B2350", "2D3872", "434F8F", "5E6AA8", "7C86BC")]
+MOB_LAVENDER = [hexc(c) for c in ("3F3170", "65559E", "8E7EC8", "B5A8E3", "D9D0F5", "F3EFFE")]
+MOB_TARGET = {"warm": MOB_PINK, "yellow": MOB_BLUE, "green": MOB_BLUE, "blue": MOB_PINK, "purple": MOB_LAVENDER,
+              "white": MOB_WHITE, "navy": MOB_NAVY, "gray": MOB_LAVENDER}
+# Not mobs, or textures the game tints at runtime (collars, fish patterns, dyed overlays): left alone.
+MOB_SKIP_FOLDERS = {"banner", "beacon", "bell", "boat", "chest", "chest_boat", "conduit", "decorated_pot", "enchantment",
+                    "end_crystal", "end_portal", "equipment", "experience", "fishing", "lead_knot", "minecart", "player",
+                    "projectiles", "shield", "trident", "armorstand", "creeper"}
+MOB_SKIP_WORDS = ("collar", "pattern", "overlay", "crackiness", "tropical", "sheep_wool")
+AXOLOTL_COLOURS = {"lucy": (MOB_PINK, MOB_BLUE), "wild": (MOB_LAVENDER, MOB_PINK), "gold": (MOB_WHITE, MOB_PINK),
+                   "cyan": (MOB_BLUE, MOB_PINK), "blue": (MOB_WHITE, MOB_BLUE)}
+
+
+def colour_family(px):
+    h, s, v = hsv(px)
+    if s < 0.16 or v < 0.12:
+        l = lum(px)
+        return "white" if l > 0.62 else "navy" if l < 0.22 else "gray"
+    if h < 0.11 or h >= 0.9:
+        return "warm"
+    if h < 0.19:
+        return "yellow"
+    if h < 0.47:
+        return "green"
+    return "blue" if h < 0.75 else "purple"
+
+
+def trans_mob(img):
+    families = {p: colour_family(img.getpixel(p)) for p in pixels(img) if img.getpixel(p)[3] > 0}
+    span = {}
+    for p, f in families.items():
+        l = lum(img.getpixel(p))
+        lo, hi = span.get(f, (9.0, -9.0))
+        span[f] = (min(lo, l), max(hi, l))
+    # The darkest 30% of the warm pixels (fur shadows, manes, dark patches) turn blue.
+    warm = sorted(lum(img.getpixel(p)) for p, f in families.items() if f == "warm")
+    warm_cut = warm[int(0.3 * (len(warm) - 1))] if len(warm) > 12 else -1.0
+    out = img.copy()
+    for p, f in families.items():
+        px = img.getpixel(p)
+        l = lum(px)
+        lo, hi = span[f]
+        norm = (l - lo) / (hi - lo) if hi > lo else 0.5
+        ramp, t = MOB_TARGET[f], 0.55 * l + 0.45 * norm
+        if f == "gray":
+            t = l
+        elif f == "warm" and l <= warm_cut:
+            ramp, t = MOB_BLUE, 0.3 + 0.5 * norm
+        out.putpixel(p, (*sample(ramp, t), px[3]))
+    return out
+
+
+def trans_axolotl(img, variant):
+    main, accent = AXOLOTL_COLOURS[variant]
+    lo, hi = lum_range(img)
+    out = img.copy()
+    for p in pixels(img):
+        px = img.getpixel(p)
+        if px[3] == 0:
+            continue
+        t = (lum(px) - lo) / (hi - lo)
+        if lum(px) < 0.12:
+            c = sample(MOB_NAVY, 0.3)
+        elif t < 0.45:
+            c = sample(accent, 0.25 + t)
+        else:
+            c = sample(main, 0.35 + 0.65 * t)
+        out.putpixel(p, (*c, px[3]))
+    return out
+
+
+def trans_mob_textures():
+    """Yields (path under textures/entity/, trans texture) for every vanilla mob texture in the reference zip."""
+    zf = _zip(ENTITY_ZIP)
+    for entry in sorted(zf.namelist()):
+        if not entry.endswith(".png"):
+            continue
+        rel = entry.split("/", 1)[1]
+        folder, filename = rel.split("/", 1)[0], rel.rsplit("/", 1)[-1]
+        if folder in MOB_SKIP_FOLDERS or any(word in filename for word in MOB_SKIP_WORDS):
+            continue
+        with zf.open(entry) as f:
+            img = Image.open(f).convert("RGBA")
+        variant = filename[len("axolotl_"):-4].replace("_baby", "") if filename.startswith("axolotl_") else None
+        yield rel, (trans_axolotl(img, variant) if variant in AXOLOTL_COLOURS else trans_mob(img))
+
+
 # ============================================================================================ sky + icon
 HEARTS = {
     5: [".#.#.", "#####", "#####", ".###.", "..#.."],
@@ -1693,6 +1789,13 @@ def main():
     save(trans_sheep_wool("entity/sheep/sheep_wool.png"), "entity/sheep/trans_sheep_wool.png")
     save(trans_sheep_wool("entity/sheep/sheep_wool_undercoat.png"), "entity/sheep/trans_sheep_wool_undercoat.png")
     save(trans_sheep_wool("entity/sheep/sheep_wool_baby.png", generic=True), "entity/sheep/trans_sheep_wool_baby.png")
+
+    trans_mobs = os.path.join(OUT, "textures", "entity", "trans")
+    if os.path.isdir(trans_mobs):
+        import shutil
+        shutil.rmtree(trans_mobs)
+    for rel, img in trans_mob_textures():
+        save(img, f"entity/trans/{rel}")
 
     save(slobbered_icon(), "mob_effect/slobbered.png")
     for i, frame in enumerate(saliva_frames()):

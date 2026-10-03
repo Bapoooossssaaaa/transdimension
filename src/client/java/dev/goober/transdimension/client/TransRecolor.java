@@ -24,8 +24,10 @@ import dev.goober.transdimension.TransDimension;
  * files the first time it is drawn in the realm and gradient-mapped onto the trans flag palette
  * (shadows deep blue, mid-tones pink, highlights white), which keeps eyes, faces and details readable.
  *
- * <p>A few textures are swapped for hand-made ones instead of being recoloured: sheep wool becomes
- * trans flag wool (blue, pink, white, pink, blue stripes along the body).
+ * <p>Most vanilla mobs have a pre-made trans texture in {@code textures/entity/trans/} (made by
+ * tools/generate_textures.py, mixing pink, blue and white), which is used instead of recolouring. Sheep wool
+ * becomes trans flag wool (blue, pink, white, pink, blue stripes along the body). Anything without a pre-made
+ * texture (the creeper, mobs added by other mods) is gradient-mapped at runtime as described above.
  */
 public final class TransRecolor {
 	private static final Map<Identifier, AbstractTexture> CACHE = new HashMap<>();
@@ -95,6 +97,12 @@ public final class TransRecolor {
 	private static AbstractTexture create(Identifier id) {
 		Minecraft minecraft = Minecraft.getInstance();
 		Identifier replacement = REPLACEMENTS.get(id);
+		if (replacement == null && id.getNamespace().equals("minecraft")) {
+			Identifier premade = TransDimension.id("textures/entity/trans/" + id.getPath().substring("textures/entity/".length()));
+			if (minecraft.getResourceManager().getResource(premade).isPresent()) {
+				replacement = premade;
+			}
+		}
 		Optional<Resource> resource = minecraft.getResourceManager().getResource(replacement != null ? replacement : id);
 		if (resource.isEmpty()) {
 			return null;
