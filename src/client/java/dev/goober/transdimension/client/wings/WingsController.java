@@ -160,7 +160,7 @@ public final class WingsController {
 	public static void extractHud(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
 		Minecraft client = Minecraft.getInstance();
 		LocalPlayer player = client.player;
-		if (player == null || client.options.hideGui || !TransWings.isWearing(player)) {
+		if (player == null || !TransWings.isWearing(player)) {
 			return;
 		}
 		int cx = graphics.guiWidth() / 2;
