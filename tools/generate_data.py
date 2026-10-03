@@ -240,6 +240,29 @@ PAINTINGS = {
     "plush_party": (2, 1, "Plush Party", "The Silly Cat"),
 }
 
+# Everything Maddie says (MaddieDialogueScreen picks the lines; "option.*" are the player's answers).
+MADDIE_DIALOGUE = {
+    "greeting": "Oh! A visitor! Hi hi, I'm Maddie! Welcome to the Egg House, way up here in the clouds. "
+                "Watch your step, it's a long way down!",
+    "greeting_again": "Hey, it's you again! How are the wings treating you? Not too many crash landings, I hope!",
+    "who": "I'm Maddie! I live up here with my garden, a whole lot of pink and way too many eggs. I made this place so "
+           "anyone who finds it has somewhere cozy to rest. You're valid, you know that? Just checking!",
+    "place": "This is the Trans Realm! Pink skies, heart-shaped clouds and Silly Cats who lick you better. My house "
+             "floats so I see the sunrise first. Down below, every village hides a little cat plush in one of its "
+             "houses. Can you find all nine?",
+    "gifts": "Actually... yes! I made these for travelers like you. A Trans Wand: it shoots sparkly hearts at anything "
+             "mean. And Trans Wings! Crouch to charge, jump to launch, then tap jump to flap. Promise you'll fly safe?",
+    "gifts_given": "I already gave you my wand and wings, silly! Crouch on the ground to charge, jump to launch, tap "
+                   "jump while gliding to flap, and crouch in the air to hover down gently.",
+    "thanks": "Yay! Come back and visit whenever you like. And remember: you are loved, just the way you are!",
+    "option.who": "Who are you?",
+    "option.place": "What is this place?",
+    "option.gifts": "Do you have anything for me?",
+    "option.accept": "I promise! Thank you, Maddie!",
+    "option.back": "Maybe later.",
+    "option.bye": "Bye, Maddie!",
+}
+
 # Vanilla ores re-made in trans rock: (name, English name, mining tier); ORE_SMELTING has what they smelt into.
 ORE_INFO = [("coal", "Coal", "stone"), ("iron", "Iron", "stone"), ("copper", "Copper", "stone"), ("gold", "Gold", "iron"),
             ("redstone", "Redstone", "iron"), ("lapis", "Lapis Lazuli", "stone"), ("diamond", "Diamond", "iron"),
@@ -1075,6 +1098,25 @@ def generate_misc():
         NAMES[f"painting.{NS}.{painting}.title"] = title
         NAMES[f"painting.{NS}.{painting}.author"] = author
         tag("painting_variant", "placeable", painting)
+
+    # Maddie and her gifts
+    simple_item("trans_wings", "Trans Wings")
+    simple_item("trans_magic_bolt", "Trans Magic")
+    simple_item("maddie_spawn_egg", "Maddie Spawn Egg")
+    model("trans_wand", {"parent": "minecraft:item/handheld", "textures": {"layer0": f"{NS}:item/trans_wand"}}, kind="item")
+    item_def("trans_wand", f"{NS}:item/trans_wand")
+    name("trans_wand", "Trans Wand", kind="item")
+    NAMES.update({
+        "entity.transdimension.maddie": "Maddie",
+        "entity.transdimension.trans_magic_bolt": "Trans Magic",
+        "item.transdimension.trans_wand.lore": "Shoots sparkly hearts of trans magic",
+        "filled_map.transdimension.egg_house": "Map to Maddie's Egg House",
+        "item.transdimension.trans_wings.lore": "Crouch to charge, jump to launch",
+        "item.transdimension.trans_wings.lore2": "Jump while gliding to flap",
+        "item.transdimension.trans_wings.lore3": "Crouch while gliding to hover",
+    })
+    for key, line in MADDIE_DIALOGUE.items():
+        NAMES[f"dialogue.transdimension.maddie.{key}"] = line
 
     # Names that aren't blocks.
     items = {

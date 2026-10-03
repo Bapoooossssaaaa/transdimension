@@ -1,11 +1,13 @@
 package dev.goober.transdimension.registry;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -13,8 +15,10 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.Unit;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BoatItem;
@@ -22,17 +26,20 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.equipment.EquipmentAsset;
 import net.minecraft.world.item.equipment.EquipmentAssets;
+import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -45,6 +52,8 @@ import net.fabricmc.fabric.api.registry.StrippableBlockRegistry;
 import net.fabricmc.fabric.api.registry.TillableBlockRegistry;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.item.TransWandItem;
+import dev.goober.transdimension.item.TransWings;
 
 /** Trans Crystal gear, bakery treats, the Silly Cat spawn egg and the creative tab. */
 public final class ModItems {
@@ -129,6 +138,29 @@ public final class ModItems {
 	public static final Item TRANS_CHEST_BOAT = register("trans_chest_boat",
 			properties -> new BoatItem(ModEntities.TRANS_CHEST_BOAT, properties), new Item.Properties().stacksTo(1));
 
+	// ---------------------------------------------------------------- Maddie and her gifts
+	public static final Item MADDIE_SPAWN_EGG = register("maddie_spawn_egg", SpawnEggItem::new,
+			new Item.Properties().spawnEgg(ModEntities.MADDIE));
+	/** Shoots a sparkling heart of trans magic; see {@link TransWandItem}. */
+	public static final Item TRANS_WAND = register("trans_wand", TransWandItem::new, new Item.Properties()
+			.stacksTo(1)
+			.rarity(Rarity.EPIC)
+			.useCooldown(0.6F)
+			.component(DataComponents.LORE, lore("item.transdimension.trans_wand.lore")));
+	/** An elytra-like glider with extra moves; see {@link TransWings}. No durability: they are a gift. */
+	public static final Item TRANS_WINGS = register("trans_wings", Item::new, new Item.Properties()
+			.stacksTo(1)
+			.rarity(Rarity.EPIC)
+			.component(DataComponents.GLIDER, Unit.INSTANCE)
+			.component(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.CHEST)
+					.setEquipSound(SoundEvents.ARMOR_EQUIP_ELYTRA)
+					.setDamageOnHurt(false)
+					.build())
+			.component(DataComponents.LORE, lore("item.transdimension.trans_wings.lore", "item.transdimension.trans_wings.lore2",
+					"item.transdimension.trans_wings.lore3")));
+	/** Only used to draw the wand's projectile. */
+	public static final Item TRANS_MAGIC_BOLT = register("trans_magic_bolt", Item::new, new Item.Properties());
+
 	// ---------------------------------------------------------------- creative tab
 	public static final ResourceKey<CreativeModeTab> CREATIVE_TAB_KEY = ResourceKey.create(
 			BuiltInRegistries.CREATIVE_MODE_TAB.key(), TransDimension.id("trans_dimension"));
@@ -151,6 +183,14 @@ public final class ModItems {
 			.build();
 
 	private ModItems() {
+	}
+
+	private static ItemLore lore(String... keys) {
+		List<Component> lines = new ArrayList<>();
+		for (String key : keys) {
+			lines.add(Component.translatable(key));
+		}
+		return new ItemLore(lines);
 	}
 
 	private static FoodProperties food(int nutrition, float saturation, boolean alwaysEdible) {

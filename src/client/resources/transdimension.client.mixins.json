@@ -3,6 +3,7 @@
 	"package": "dev.goober.transdimension.client.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
+		"AvatarRendererMixin",
 		"TextureManagerMixin"
 	],
 	"injectors": {

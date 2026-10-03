@@ -1,14 +1,18 @@
 package dev.goober.transdimension.event;
 
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootTable;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.item.TransWings;
 import dev.goober.transdimension.registry.ModBlocks;
 
 /**
@@ -30,5 +34,9 @@ public final class RealmEvents {
 			}
 			drops.replaceAll(stack -> stack.is(ItemTags.WOOL) ? new ItemStack(ModBlocks.TRANS_WOOL, stack.getCount()) : stack);
 		});
+
+		// Trans Wings catch you: no fall damage and no bumps from flying into walls while you wear them.
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
+				!(TransWings.isWearing(entity) && (source.is(DamageTypeTags.IS_FALL) || source.is(DamageTypes.FLY_INTO_WALL))));
 	}
 }

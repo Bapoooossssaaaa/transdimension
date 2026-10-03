@@ -15,7 +15,9 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityType;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.entity.Maddie;
 import dev.goober.transdimension.entity.SillyCat;
+import dev.goober.transdimension.entity.TransMagicBolt;
 
 /** Entity types. The Silly Cat spawns naturally through the biome JSON spawn lists. */
 public final class ModEntities {
@@ -47,6 +49,24 @@ public final class ModEntities {
 					.eyeHeight(0.5625F)
 					.clientTrackingRange(10)
 					.build(TRANS_CHEST_BOAT_KEY));
+
+	public static final ResourceKey<EntityType<?>> MADDIE_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("maddie"));
+	public static final ResourceKey<EntityType<?>> TRANS_MAGIC_BOLT_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("trans_magic_bolt"));
+
+	/** Maddie of the Egg House; she is placed by the island's structure template and never spawns on her own. */
+	public static final EntityType<Maddie> MADDIE = Registry.register(BuiltInRegistries.ENTITY_TYPE, MADDIE_KEY,
+			FabricEntityType.Builder.createMob(Maddie::new, MobCategory.MISC, mob -> mob.defaultAttributes(Maddie::createAttributes))
+					.sized(0.6F, 1.8F)
+					.eyeHeight(1.62F)
+					.clientTrackingRange(10)
+					.build(MADDIE_KEY));
+	/** The Trans Wand's spell. */
+	public static final EntityType<TransMagicBolt> TRANS_MAGIC_BOLT = Registry.register(BuiltInRegistries.ENTITY_TYPE, TRANS_MAGIC_BOLT_KEY,
+			EntityType.Builder.<TransMagicBolt>of(TransMagicBolt::new, MobCategory.MISC)
+					.sized(0.3F, 0.3F)
+					.clientTrackingRange(6)
+					.updateInterval(5)
+					.build(TRANS_MAGIC_BOLT_KEY));
 
 	private ModEntities() {
 	}

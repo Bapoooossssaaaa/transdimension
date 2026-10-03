@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.goober.transdimension.event.RealmEvents;
+import dev.goober.transdimension.network.ModNetworking;
 import dev.goober.transdimension.registry.ModAttachments;
 import dev.goober.transdimension.registry.ModBlockEntities;
 import dev.goober.transdimension.registry.ModBlocks;
@@ -42,6 +43,7 @@ public class TransDimension implements ModInitializer {
 		ModItems.initialize();
 		ModEffects.initialize();
 		ModVillagers.initialize();
+		ModNetworking.initialize();
 		GooberTeleporter.initialize();
 		RealmEvents.initialize();
 

@@ -4,14 +4,46 @@
     {
       "rolls": {
         "type": "minecraft:uniform",
-        "min": 3.0,
-        "max": 6.0
+        "min": 2.0,
+        "max": 5.0
       },
       "entries": [
         {
           "type": "minecraft:item",
           "name": "transdimension:trans_cookie",
           "weight": 10,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "add": false,
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2.0,
+                "max": 6.0
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "transdimension:trans_cupcake",
+          "weight": 6,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "add": false,
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1.0,
+                "max": 3.0
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "transdimension:trans_macaron",
+          "weight": 6,
           "functions": [
             {
               "function": "minecraft:set_count",
@@ -27,7 +59,7 @@
         {
           "type": "minecraft:item",
           "name": "transdimension:trans_donut",
-          "weight": 6,
+          "weight": 5,
           "functions": [
             {
               "function": "minecraft:set_count",
@@ -42,8 +74,13 @@
         },
         {
           "type": "minecraft:item",
-          "name": "transdimension:pride_blossom",
-          "weight": 8,
+          "name": "transdimension:trans_boba",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "transdimension:trans_crystal",
+          "weight": 4,
           "functions": [
             {
               "function": "minecraft:set_count",
@@ -58,23 +95,23 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:bread",
-          "weight": 8,
+          "name": "transdimension:trans_wool",
+          "weight": 5,
           "functions": [
             {
               "function": "minecraft:set_count",
               "add": false,
               "count": {
                 "type": "minecraft:uniform",
-                "min": 1.0,
-                "max": 4.0
+                "min": 2.0,
+                "max": 6.0
               }
             }
           ]
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:pink_dye",
+          "name": "transdimension:pride_blossom",
           "weight": 5,
           "functions": [
             {
@@ -83,15 +120,31 @@
               "count": {
                 "type": "minecraft:uniform",
                 "min": 1.0,
-                "max": 4.0
+                "max": 3.0
               }
             }
           ]
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:light_blue_dye",
-          "weight": 5,
+          "name": "transdimension:heart_bloom",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "add": false,
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1.0,
+                "max": 3.0
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:egg",
+          "weight": 6,
           "functions": [
             {
               "function": "minecraft:set_count",
@@ -106,8 +159,8 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:white_dye",
-          "weight": 5,
+          "name": "minecraft:feather",
+          "weight": 4,
           "functions": [
             {
               "function": "minecraft:set_count",
@@ -115,14 +168,14 @@
               "count": {
                 "type": "minecraft:uniform",
                 "min": 1.0,
-                "max": 4.0
+                "max": 5.0
               }
             }
           ]
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:emerald",
+          "name": "minecraft:book",
           "weight": 3,
           "functions": [
             {
@@ -131,15 +184,10 @@
               "count": {
                 "type": "minecraft:uniform",
                 "min": 1.0,
-                "max": 3.0
+                "max": 2.0
               }
             }
           ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "transdimension:trans_crystal",
-          "weight": 2
         }
       ]
     },
@@ -148,32 +196,47 @@
       "entries": [
         {
           "type": "minecraft:empty",
-          "weight": 9
+          "weight": 4
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:map",
+          "name": "transdimension:trans_lantern",
           "weight": 1,
           "functions": [
             {
-              "function": "minecraft:exploration_map",
-              "destination": "#transdimension:on_egg_house_maps",
-              "decoration": "minecraft:red_x",
-              "zoom": 2,
-              "search_radius": 100,
-              "skip_existing_chunks": false
-            },
-            {
-              "function": "minecraft:set_name",
-              "name": {
-                "translate": "filled_map.transdimension.egg_house"
-              },
-              "target": "item_name"
+              "function": "minecraft:set_count",
+              "add": false,
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1.0,
+                "max": 2.0
+              }
             }
           ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:emerald",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "add": false,
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1.0,
+                "max": 3.0
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "transdimension:trans_bed",
+          "weight": 1
         }
       ]
     }
   ],
-  "random_sequence": "transdimension:chests/trans_house"
+  "random_sequence": "transdimension:chests/egg_house"
 }
