@@ -556,6 +556,20 @@ for f in walk_json(os.path.join(DATA, NS, "trade_set")):
         if not os.path.exists(os.path.join(DATA, ns, "tags", "villager_trade", path + ".json")):
             err(f"{os.path.relpath(f, ROOT)}: unknown villager trade tag {trades}")
 
+# A time marker may be defined only once per clock. Vanilla's own timelines own every minecraft: marker
+# (wake_up_from_sleep, noon, ...), so a copied vanilla timeline must not keep them.
+markers = {}
+for f in walk_json(os.path.join(DATA, NS, "timeline")):
+    d = load(f) or {}
+    rel = os.path.relpath(f, ROOT)
+    for marker in d.get("time_markers", {}):
+        if marker.startswith("minecraft:"):
+            err(f"{rel}: time marker {marker} is already defined by vanilla's timelines")
+        key = (d.get("clock"), marker)
+        if key in markers:
+            err(f"{rel}: time marker {marker} is also defined by {markers[key]}")
+        markers[key] = rel
+
 tl = load(os.path.join(DATA, NS, "tags", "timeline", "in_trans_realm.json"))
 if tl:
     for v in tl["values"]:

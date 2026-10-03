@@ -707,6 +707,9 @@ def generate_timeline():
     vanilla_path = os.path.join(HERE, "vanilla_extra", "templates", "timeline_day.json")
     with open(vanilla_path, encoding="utf-8") as f:
         day = json.load(f)
+    # Time markers (wake_up_from_sleep, noon, ...) may only be defined once per clock, and vanilla's day
+    # timeline already defines them for minecraft:overworld, which this realm shares.
+    day.pop("time_markers", None)
     tracks = day["tracks"]
     tracks["minecraft:visual/sky_color"]["keyframes"] = [
         {"ticks": 133, "value": "#ffffff"}, {"ticks": 11867, "value": "#ffffff"},
