@@ -21,7 +21,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * Decorative trans furniture (chairs and tables) for the village houses and your own builds.
+ * Decorative trans furniture (chairs, tables and cat plushes) for the village houses and your own builds.
  *
  * <p>The shape is given as boxes for a block facing north (pixel coordinates, like {@link Block#box});
  * the other three directions are rotated from it. Rotation and mirroring are implemented so the
@@ -40,6 +40,12 @@ public class FurnitureBlock extends Block {
 			{0, 13, 0, 16, 16, 16},
 			{6, 1, 6, 10, 13, 10},
 			{3, 0, 3, 13, 1, 13},
+	};
+
+	/** A sitting cat plush looking north: the body and big head, plus the tail curled along its east side. */
+	public static final double[][] PLUSH_SHAPE = {
+			{4, 0, 3.5, 12, 12, 12},
+			{12, 0, 7, 13, 2, 12},
 	};
 
 	private final Map<Direction, VoxelShape> shapes = new EnumMap<>(Direction.class);

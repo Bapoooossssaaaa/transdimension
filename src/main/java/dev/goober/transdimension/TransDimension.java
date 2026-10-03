@@ -8,6 +8,9 @@ import net.minecraft.world.level.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.goober.transdimension.event.RealmEvents;
+import dev.goober.transdimension.registry.ModAttachments;
+import dev.goober.transdimension.registry.ModBlockEntities;
 import dev.goober.transdimension.registry.ModBlocks;
 import dev.goober.transdimension.registry.ModEffects;
 import dev.goober.transdimension.registry.ModEntities;
@@ -28,15 +31,19 @@ public class TransDimension implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		// Order matters: sounds -> blocks (the oven uses a sound) -> entities -> items (the spawn egg needs
-		// the entity type, the creative tab needs every block) -> effects -> villagers (the oven POI).
+		// Order matters: sounds -> blocks (the oven uses a sound) -> block entities (need their blocks) -> entities ->
+		// items (the spawn egg and boats need their entity types, the creative tab needs every block) -> effects ->
+		// villagers (the oven POI).
 		ModSounds.initialize();
 		ModBlocks.initialize();
+		ModBlockEntities.initialize();
+		ModAttachments.initialize();
 		ModEntities.initialize();
 		ModItems.initialize();
 		ModEffects.initialize();
 		ModVillagers.initialize();
 		GooberTeleporter.initialize();
+		RealmEvents.initialize();
 
 		LOGGER.info("Trans Dimension loaded. Say \"Goober\" in chat to visit the Trans Realm. You are valid!");
 	}

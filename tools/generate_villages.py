@@ -12,7 +12,9 @@ Every vanilla piece is rebuilt with trans blocks (planks, logs, cobblestone, gla
   * the bigger rooms get a trans flag rug,
   * both butcher shops become bakeries (Pride Oven, Trans Cake, a bakery chest),
   * house chests use the trans house loot table, standing torches become Trans Lanterns,
-  * village cats are (mostly) Silly Cats.
+  * village cats are (mostly) Silly Cats,
+  * each house hides an invisible plush spot in a corner; the first one of a village to load turns into that
+    village's cat plush and the others vanish (PlushSpotBlockEntity), so every village has exactly one plush.
 New pieces: a flag plaza town centre, lantern posts and trans flag banner posts.
 
 Villages are placed by a random_spread structure set whose separation keeps the centres of two villages at
@@ -252,8 +254,8 @@ def add_furniture(t):
     return len(tables)
 
 
-def lay_rug(t):
-    """Puts a trans flag rug (up to 3x3) on the biggest open patch of indoor floor."""
+def room_tests(t):
+    """Returns (solid, free): free(x, y, z) is an empty indoor cell with a wooden or stone floor, a roof and walls."""
     sx, sy, sz = t.size
     jigsaw_columns = {(p[0], p[2]) for p, b in t.blocks.items() if b[0] == "minecraft:jigsaw"}
 
@@ -279,6 +281,13 @@ def lay_rug(t):
                 and any(solid((x, yy, z)) for yy in range(y + 2, min(sy, y + 8)))
                 and enclosed(x, y, z))
 
+    return solid, free
+
+
+def lay_rug(t):
+    """Puts a trans flag rug (up to 3x3) on the biggest open patch of indoor floor."""
+    sx, sy, sz = t.size
+    solid, free = room_tests(t)
     best = None
     for y in range(1, sy):
         cells = [[free(x, y, z) for z in range(sz)] for x in range(sx)]
@@ -301,6 +310,44 @@ def lay_rug(t):
     return w * h
 
 
+def place_plush_spot(t):
+    """Puts the invisible plush marker (see PlushSpotBlock) against an indoor wall, in a corner if there is one, as far
+    from the entrance as possible and looking into the room. In every village, the first marker to load becomes the
+    village's cat plush."""
+    sx, sy, sz = t.size
+    solid, free = room_tests(t)
+    entrances = [p for p, b in t.blocks.items() if b[0] == "minecraft:jigsaw" and b[2] is not None
+                 and str(b[2].get("name", "")) == "minecraft:building_entrance"]
+    ex, _, ez = entrances[0] if entrances else (sx // 2, 0, 0)
+    best = None
+    for (x, y, z) in [(x, y, z) for y in range(1, sy) for z in range(sz) for x in range(sx)]:
+        if not free(x, y, z):
+            continue
+        near = [t.name_at((x + dx, y, z + dz)) or "" for dx, dz in DIRS.values()]
+        if any("door" in n for n in near):
+            continue
+        walls = {d for d, (dx, dz) in DIRS.items() if solid((x + dx, y, z + dz))}
+        if not walls or len(walls) > 2:
+            continue
+        corner = bool({"north", "south"} & walls and {"east", "west"} & walls)
+
+        def room_ahead(d):
+            dx, dz = DIRS[d]
+            n, cx, cz = 0, x + dx, z + dz
+            while 0 <= cx < sx and 0 <= cz < sz and not solid((cx, y, cz)):
+                n, cx, cz = n + 1, cx + dx, cz + dz
+            return n
+
+        facing = max((d for d in DIRS if d not in walls), key=room_ahead)
+        score = (corner, abs(x - ex) + abs(z - ez), -y)
+        if best is None or score > best[0]:
+            best = (score, (x, y, z), facing)
+    if best is None:
+        return False
+    t.put(best[1], T + "plush_spot", {"facing": best[2]})
+    return True
+
+
 def trans_piece(rel, glass):
     t = Template(rel)
     furniture = add_furniture(t)
@@ -321,7 +368,10 @@ def trans_piece(rel, glass):
             nbt = copy.deepcopy(nbt)
             nbt["LootTable"] = String(LOOT.get(str(nbt["LootTable"]), str(nbt["LootTable"])))
         t.blocks[pos] = [name, props, nbt]
-    rug = lay_rug(t) if any(k in rel.split("/")[-1] for k in RUG_PIECES) else 0
+    house = any(k in rel.split("/")[-1] for k in RUG_PIECES)
+    rug = lay_rug(t) if house else 0
+    if house and "/houses/" in "/" + rel and not place_plush_spot(t):
+        print(f"  (no corner for a plush in {rel})")
     return t, furniture, rug
 
 

@@ -1,5 +1,6 @@
 package dev.goober.transdimension.registry;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -56,10 +57,13 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 
 import dev.goober.transdimension.TransDimension;
 import dev.goober.transdimension.block.FurnitureBlock;
+import dev.goober.transdimension.block.PlushSpotBlock;
 import dev.goober.transdimension.block.PrideOvenBlock;
+import dev.goober.transdimension.block.TransBedBlock;
 import dev.goober.transdimension.block.TransGrassBlock;
 
 /**
@@ -302,6 +306,11 @@ public final class ModBlocks {
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(0.8F).sound(SoundType.WOOL).ignitedByLava());
 	public static final Block TRANS_CARPET = register("trans_carpet", CarpetBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(0.1F).sound(SoundType.WOOL).ignitedByLava());
+	/** Two side by side make a double bed with one heart across both blankets; see {@link TransBedBlock}. */
+	public static final Block TRANS_BED = register("trans_bed", TransBedBlock::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).sound(SoundType.WOOD).strength(0.2F).noOcclusion()
+					.ignitedByLava().pushReaction(PushReaction.DESTROY),
+			new Item.Properties().stacksTo(1));
 	public static final Block TRANS_LANTERN = register("trans_lantern", LanternBlock::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.LANTERN));
 
@@ -312,6 +321,23 @@ public final class ModBlocks {
 	public static final Block TRANS_TABLE = register("trans_table",
 			properties -> new FurnitureBlock(FurnitureBlock.TABLE_SHAPE, properties),
 			BlockBehaviour.Properties.ofFullCopy(Blocks.CHERRY_PLANKS).noOcclusion());
+
+	// ---------------------------------------------------------------- cat plushes (one waits in a house of every village)
+	public static final Block PLUSH_SILLY = plush("silly_cat_plush");
+	public static final Block PLUSH_TRANS = plush("trans_cat_plush");
+	public static final Block PLUSH_MIDNIGHT = plush("midnight_cat_plush");
+	public static final Block PLUSH_BISCUIT = plush("biscuit_cat_plush");
+	public static final Block PLUSH_PATCHES = plush("patches_cat_plush");
+	public static final Block PLUSH_MOCHI = plush("mochi_cat_plush");
+	public static final Block PLUSH_PEARL = plush("pearl_cat_plush");
+	public static final Block PLUSH_BUBBLEGUM = plush("bubblegum_cat_plush");
+	public static final Block PLUSH_BLUEBELL = plush("bluebell_cat_plush");
+	/** Every plush, in a fixed order (the plush ledger stores indices into this list, so only ever append). */
+	public static final List<Block> PLUSHES = List.of(PLUSH_SILLY, PLUSH_TRANS, PLUSH_MIDNIGHT, PLUSH_BISCUIT, PLUSH_PATCHES,
+			PLUSH_MOCHI, PLUSH_PEARL, PLUSH_BUBBLEGUM, PLUSH_BLUEBELL);
+	/** The invisible marker in village houses that becomes the village's plush; see {@link PlushSpotBlock}. */
+	public static final Block PLUSH_SPOT = registerWithoutItem("plush_spot", PlushSpotBlock::new,
+			BlockBehaviour.Properties.of().noCollision().noLootTable().strength(-1.0F, 3600000.0F).noOcclusion());
 
 	// ---------------------------------------------------------------- bakery
 	public static final Block TRANS_CAKE = register("trans_cake", CakeBlock::new,
@@ -326,6 +352,12 @@ public final class ModBlocks {
 
 	private static ResourceKey<net.minecraft.world.level.levelgen.feature.ConfiguredFeature<?, ?>> configuredFeature(String name) {
 		return ResourceKey.create(Registries.CONFIGURED_FEATURE, TransDimension.id(name));
+	}
+
+	private static Block plush(String name) {
+		return register(name, properties -> new FurnitureBlock(FurnitureBlock.PLUSH_SHAPE, properties),
+				BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(0.5F).sound(SoundType.WOOL).noOcclusion()
+						.ignitedByLava());
 	}
 
 	private static Block leaves(String name) {

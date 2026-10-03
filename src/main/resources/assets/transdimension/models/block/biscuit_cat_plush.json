@@ -1,0 +1,6 @@
+{
+  "parent": "transdimension:block/cat_plush",
+  "textures": {
+    "cat": "transdimension:block/biscuit_cat_plush"
+  }
+}

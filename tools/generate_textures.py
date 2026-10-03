@@ -1570,6 +1570,570 @@ def trans_baker():
     return out
 
 
+# ============================================================================================ trans bed
+def bed_recolor(img, stripe_of=None):
+    """White bed texture -> trans flag blanket (stripes chosen by `stripe_of(x, y)`) on a pink wooden frame.
+    The blanket is the pale, unsaturated part of the vanilla white bed; the frame is the brown wood."""
+    out = img.copy()
+    lo, hi = lum_range(img)
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))
+        if px[3] == 0:
+            continue
+        t = (lum(px) - lo) / (hi - lo)
+        if hsv(px)[1] < 0.15 and stripe_of is not None:
+            c = sample(FLAG_RAMPS[stripe_of(x, y)], 0.2 + 0.8 * t)
+        elif hsv(px)[1] < 0.15:
+            c = sample(R_PETAL_WHITE, 0.3 + 0.7 * t)     # pillow
+        else:
+            c = sample(R_WOOD_PINK, t * 1.2)
+        out.putpixel((x, y), (*c, px[3]))
+    return out
+
+
+BED_STRIPES = stripes5(16)
+
+
+def trans_bed_textures():
+    """All faces of the trans bed. The top of the foot comes in three versions: plain, and the left or right half
+    of a heart, shown when two trans beds stand side by side (TransBedBlock picks which)."""
+    across = lambda x, y: BED_STRIPES[x]                   # stripes run along the bed
+    out = {
+        "trans_bed_foot_up": bed_recolor(vblock("white_bed_foot_up"), across),
+        "trans_bed_foot_south": bed_recolor(vblock("white_bed_foot_south"), across),
+        "trans_bed_foot_east": bed_recolor(vblock("white_bed_foot_east"), lambda x, y: 4),
+        "trans_bed_foot_west": bed_recolor(vblock("white_bed_foot_west"), lambda x, y: 0),
+        "trans_bed_head_east": bed_recolor(vblock("white_bed_head_east"), lambda x, y: 4),
+        "trans_bed_head_west": bed_recolor(vblock("white_bed_head_west"), lambda x, y: 0),
+        "trans_bed_head_north": bed_recolor(vblock("bed_head_north")),
+        "trans_bed_down": bed_recolor(vblock("bed_down")),
+    }
+    # The head: a pearly pillow at the top (north) end, blanket below it.
+    head = vblock("white_bed_head_up")
+    pillow_rows = range(0, 7)
+    out["trans_bed_head_up"] = bed_recolor(head, None)
+    blanket = bed_recolor(head, across)
+    for (x, y) in pixels(head):
+        if y not in pillow_rows:
+            out["trans_bed_head_up"].putpixel((x, y), blanket.getpixel((x, y)))
+    # A heart across two foot tops, centred on the seam between the beds.
+    pair = Image.new("RGBA", (32, 16))
+    pair.paste(out["trans_bed_foot_up"], (0, 0))
+    pair.paste(out["trans_bed_foot_up"], (16, 0))
+    heart = HEARTS[11]
+    ox, oy = 16 - 11 // 2 - 0, 3
+    for dy, row in enumerate(heart):
+        for dx, ch in enumerate(row):
+            if ch != "#":
+                continue
+            x, y = ox + dx, oy + dy
+            edge = any(not (0 <= dy + ny < 11 and 0 <= dx + nx < 11 and heart[dy + ny][dx + nx] == "#")
+                       for nx, ny in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+            c = hexc("B4406E") if edge else sample(R_PETAL_PINK, 0.85 - (dx + dy) / 30.0)
+            pair.putpixel((x, y), (*c, 255))
+    pair.putpixel((ox + 2, oy + 2), (*WHITE, 255))
+    pair.putpixel((ox + 3, oy + 2), (*WHITE, 255))
+    pair.putpixel((ox + 2, oy + 3), (*WHITE, 255))
+    out["trans_bed_foot_up_left"] = pair.crop((0, 0, 16, 16))
+    out["trans_bed_foot_up_right"] = pair.crop((16, 0, 32, 16))
+    return out
+
+
+# ============================================================================================ trans boat
+def trans_boat(img):
+    """Vanilla birch boat (or chest boat) -> trans boat. Seen from inside, the floor and walls read as the flag: blue
+    rims, pink and white planks. The paddles have blue shafts and pink blades; a chest boat's chest turns pink with a
+    navy frame and a pearly latch."""
+    out = img.copy()
+    lo, hi = lum_range(img.crop((0, 0, 128, 51)))
+    chest = img.crop((0, 58, 48, 96)) if img.height > 64 else None
+    clo, chi = lum_range(chest) if chest else (0.0, 1.0)
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))
+        if px[3] == 0:
+            continue
+        t = (lum(px) - lo) / (hi - lo)
+        if y >= 58:                                              # the chest
+            if lum(px) < 0.2:
+                c = sample(MOB_NAVY, 0.15 + lum(px) * 2)
+            elif hsv(px)[1] < 0.15:
+                c = sample(R_PEARL, 0.3 + 0.7 * lum(px))
+            else:
+                c = sample(R_WOOD_PINK, (lum(px) - clo) / (chi - clo))
+        elif x >= 62:                                            # paddles
+            blade = x < 78 and (7 <= y < 13 or 27 <= y < 33)
+            c = sample(R_WOOD_PINK if blade else R_WOOD_BLUE, t)
+        elif y < 3:                                              # thin edges of the floor
+            c = sample(R_WOOD_BLUE, t)
+        elif y < 19:                                             # floor planks: pink, white, pink
+            c = sample(R_WOOD_WHITE if 8 <= y < 13 else R_WOOD_PINK, t)
+        else:                                                    # walls: blue rim, pink board, white board
+            row = (y - 19) % 8
+            c = sample(R_WOOD_BLUE if row < 2 else R_WOOD_PINK if row < 5 else R_WOOD_WHITE, t)
+        out.putpixel((x, y), (*c, px[3]))
+    return out
+
+
+def trans_boat_item(vanilla):
+    """The birch boat sprites in trans wood: pink hull with a white stripe and a blue rim, navy outline. In the chest
+    boat, the pixels that differ from the plain boat are the chest: pink with a navy frame, like the chest boat's."""
+    img = vitem(vanilla)
+    plain = vitem("birch_boat")
+    lo, hi = lum_range(plain)
+    out = img.copy()
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))
+        if px[3] == 0:
+            continue
+        t = (lum(px) - lo) / (hi - lo)
+        if px != plain.getpixel((x, y)):                         # the chest
+            c = sample(MOB_NAVY, 0.4 + t) if lum(px) < 0.3 else sample(R_PINK, 0.25 + 0.6 * t)
+        elif t < 0.2:
+            c = sample(MOB_NAVY, 0.45 + t)
+        elif y + x // 4 <= 6:                                    # rim along the far edge
+            c = sample(R_WOOD_BLUE, 0.2 + 0.8 * t)
+        elif 9 <= y <= 10:
+            c = sample(R_WOOD_WHITE, t)
+        else:
+            c = sample(R_WOOD_PINK, t)
+        out.putpixel((x, y), (*c, px[3]))
+    return out
+
+
+# ============================================================================================ cat plushes
+# One 32x32 texture per plush, for the shared block model "cat_plush" (generate_data.py), at one texel per model
+# pixel. Texel regions (x0, y0, x1, y1) of each face; the face of the cat looks north.
+PLUSH_UV = {
+    "head": {"up": (6, 0, 14, 6), "down": (14, 0, 22, 6), "west": (0, 6, 6, 12), "north": (6, 6, 14, 12),
+             "east": (14, 6, 20, 12), "south": (20, 6, 28, 12)},
+    "body": {"up": (5, 12, 11, 17), "down": (11, 12, 17, 17), "west": (0, 17, 5, 22), "north": (5, 17, 11, 22),
+             "east": (11, 17, 16, 22), "south": (16, 17, 22, 22)},
+    "tail": {"up": (22, 12, 24, 17), "down": (24, 12, 26, 17), "north": (26, 12, 28, 14), "south": (28, 12, 30, 14),
+             "east": (22, 17, 27, 19), "west": (27, 17, 32, 19)},
+    "ear": (0, 22, 2, 24), "ear_inner": (2, 22, 4, 24), "muzzle": (4, 22, 7, 24), "paw": (8, 22, 10, 24),
+}
+
+# name: (English name, base, pattern colour, belly, eyes, nose, pattern)
+PLUSHES = {
+    "silly_cat_plush": ("Silly Cat Plush", "A29A93", "5E5650", "F4F1EE", "3B4A2E", "E8A0A8", "tabby"),
+    "trans_cat_plush": ("Trans Cat Plush", "F5A9B8", "5BCEFA", "FFFFFF", "2C6FB0", "E06C8C", "flag"),
+    "midnight_cat_plush": ("Midnight Cat Plush", "2E2A3A", "1C1926", "4A4459", "E8E04A", "F08FB0", "solid"),
+    "biscuit_cat_plush": ("Biscuit Cat Plush", "E8A15A", "C06A2C", "FBEBD4", "4E8A3A", "E58C8C", "tabby"),
+    "patches_cat_plush": ("Patches Cat Plush", "F7F3EE", "E58A3C", "F7F3EE", "6B5A2A", "E8A0A8", "calico"),
+    "mochi_cat_plush": ("Mochi Cat Plush", "F1E5CF", "5A4032", "FBF6EC", "3E8FD8", "7A5A50", "points"),
+    "pearl_cat_plush": ("Pearl Cat Plush", "F4F3FA", "D8D3EA", "FFFFFF", "4FA6E8", "F5A9B8", "fluffy"),
+    "bubblegum_cat_plush": ("Bubblegum Cat Plush", "F7A8C8", "E37AA5", "FFF2F7", "2C6FB0", "D9577F", "tabby"),
+    "bluebell_cat_plush": ("Bluebell Cat Plush", "8ED3F5", "5DB4E6", "F4FBFF", "E0607E", "F5A9B8", "solid"),
+}
+
+
+def cat_plush(name):
+    _, base, pattern, belly, eyes, nose, kind = PLUSHES[name]
+    base, pattern, belly, eyes, nose = (hexc(c) for c in (base, pattern, belly, eyes, nose))
+    rng = random.Random(name)
+    img = new(32, 32)
+
+    def fill(box, colour, jitter=0.06):
+        x0, y0, x1, y1 = box
+        for y in range(y0, y1):
+            for x in range(x0, x1):
+                img.putpixel((x, y), (*shade(colour, 1 + rng.uniform(-jitter, jitter)), 255))
+
+    def put(x, y, colour):
+        img.putpixel((x, y), (*colour, 255))
+
+    for part in ("head", "body", "tail"):
+        for box in PLUSH_UV[part].values():
+            fill(box, base)
+    for key in ("ear", "paw"):
+        fill(PLUSH_UV[key], base)
+    fill(PLUSH_UV["ear_inner"], mix(nose, (255, 255, 255), 0.35), 0.03)
+    fill(PLUSH_UV["muzzle"], belly, 0.03)
+
+    head, body, tail = PLUSH_UV["head"], PLUSH_UV["body"], PLUSH_UV["tail"]
+    dark = shade(pattern, 1.0)
+    if kind == "tabby":
+        # Stripes run over the head front to back, around the body and tail; an "M" on the forehead.
+        x0, y0, x1, y1 = head["up"]
+        for x in (x0 + 1, x0 + 3, x0 + 4, x0 + 6):
+            for y in range(y0, y1, 1):
+                if (x + y) % 3 != 0:
+                    put(x, y, dark)
+        for side in ("west", "east", "south"):
+            x0, y0, x1, y1 = head[side]
+            for x in range(x0 + 1, x1, 2):
+                for y in range(y0, y0 + 3):
+                    put(x, y, dark)
+        x0, y0, _, _ = head["north"]
+        for dx in (1, 3, 4, 6):
+            put(x0 + dx, y0, dark)
+        for side in ("west", "east", "south", "up"):
+            x0, y0, x1, y1 = body[side]
+            for x in range(x0, x1):
+                for y in range(y0, y1):
+                    if (x - x0) % 3 == 1 and side != "up" or side == "up" and (y - y0) % 2 == 0 and x not in (x0, x1 - 1):
+                        put(x, y, dark)
+        for side in ("up", "east", "west"):
+            x0, y0, x1, y1 = tail[side]
+            long_axis_x = (x1 - x0) > (y1 - y0)
+            for x in range(x0, x1):
+                for y in range(y0, y1):
+                    if ((x - x0) if long_axis_x else (y - y0)) % 2 == 1:
+                        put(x, y, dark)
+        x0, y0, x1, y1 = tail["south"]
+        fill((x0, y0, x1, y1), dark, 0.03)
+    elif kind == "flag":
+        # Trans flag stripes around the body (top to bottom) and on the tail; blue ears and paws.
+        stripes = [BLUE, PINK, WHITE, PINK, BLUE]
+        for side in ("north", "south", "west", "east"):
+            x0, y0, x1, y1 = body[side]
+            for y in range(y0, y1):
+                for x in range(x0, x1):
+                    put(x, y, shade(stripes[(y - y0) * 5 // (y1 - y0)], 1 + rng.uniform(-0.04, 0.04)))
+        for i, side in enumerate(("up", "east", "west")):
+            x0, y0, x1, y1 = tail[side]
+            for y in range(y0, y1):
+                for x in range(x0, x1):
+                    k = (y - y0) if (y1 - y0) > (x1 - x0) else (x - x0)
+                    put(x, y, stripes[k % 5])
+        fill(PLUSH_UV["ear"], BLUE, 0.04)
+        fill(PLUSH_UV["paw"], WHITE, 0.03)
+        fill(tail["south"], WHITE, 0.03)
+    elif kind == "calico":
+        # Orange and black patches on a white coat.
+        black = hexc("2E2A30")
+        for part, boxes in (("head", head), ("body", body), ("tail", tail)):
+            for side, (x0, y0, x1, y1) in boxes.items():
+                if side == "down" or part == "head" and side == "north":
+                    continue
+                for _ in range(2 if part != "tail" else 1):
+                    colour = pattern if rng.random() < 0.6 else black
+                    cx, cy = rng.randrange(x0, x1), rng.randrange(y0, y1)
+                    r = rng.choice((1.2, 1.6, 2.2))
+                    for y in range(y0, y1):
+                        for x in range(x0, x1):
+                            if (x - cx) ** 2 + (y - cy) ** 2 <= r * r:
+                                put(x, y, shade(colour, 1 + rng.uniform(-0.05, 0.05)))
+        fill(PLUSH_UV["ear"], pattern, 0.05)
+    elif kind == "points":
+        # Siamese: dark ears, paws, tail and a soft mask around the eyes.
+        fill(PLUSH_UV["ear"], dark, 0.04)
+        fill(PLUSH_UV["paw"], dark, 0.04)
+        for box in tail.values():
+            fill(box, dark, 0.05)
+        x0, y0, x1, y1 = head["north"]
+        for y in range(y0 + 1, y1):
+            for x in range(x0 + 1, x1 - 1):
+                d = abs(x - (x0 + x1 - 1) / 2) / 4 + abs(y - (y0 + 3)) / 4
+                if d < 1:
+                    put(x, y, mix(dark, base, d * 0.9))
+    elif kind == "fluffy":
+        # Soft lavender shading at the edges of every face, like long fur.
+        for part in ("head", "body"):
+            for side, (x0, y0, x1, y1) in PLUSH_UV[part].items():
+                for y in range(y0, y1):
+                    for x in range(x0, x1):
+                        if x in (x0, x1 - 1) or y == y1 - 1:
+                            put(x, y, shade(pattern, 1 + rng.uniform(-0.04, 0.04)))
+
+    # Belly patch on the chest, and the face.
+    x0, y0, x1, y1 = body["north"]
+    for y in range(y0, y1):
+        for x in range(x0 + 1, x1 - 1):
+            if kind != "flag" and not (y == y0 and x in (x0 + 1, x1 - 2)):
+                put(x, y, shade(belly, 1 + rng.uniform(-0.03, 0.03)))
+    x0, y0, _, _ = head["north"]
+    for ex in (1, 5):
+        put(x0 + ex, y0 + 1, hexc("FFFFFF"))
+        put(x0 + ex + 1, y0 + 1, shade(eyes, 0.55))
+        put(x0 + ex, y0 + 2, eyes)
+        put(x0 + ex + 1, y0 + 2, shade(eyes, 0.75))
+    blush = mix(nose, base, 0.35)
+    put(x0, y0 + 3, blush)
+    put(x0 + 7, y0 + 3, blush)
+    mx0, my0, _, _ = PLUSH_UV["muzzle"]
+    put(mx0 + 1, my0, nose)
+    mouth = shade(mix(belly, nose, 0.5), 0.6)
+    put(mx0, my0 + 1, mouth)
+    put(mx0 + 2, my0 + 1, mouth)
+    if name == "silly_cat_plush":
+        put(mx0 + 1, my0 + 1, hexc("E86A88"))       # the blep
+    # Toe lines on the paws.
+    px0, py0, px1, py1 = PLUSH_UV["paw"]
+    for x in range(px0, px1):
+        put(x, py1 - 1, shade(img.getpixel((x, py1 - 1))[:3], 0.8))
+    return img
+
+
+# ============================================================================================ paintings
+# Paintings are 16 pixels per block with a one-pixel frame, like vanilla's. The two cat portraits come from the
+# owner's photos of the Silly Cat, pixelated to 48x48 (tools/art/; the photos themselves aren't in the repository).
+ART = os.path.join(HERE, "art")
+FRAME = [hexc("3A1D2C"), hexc("4A2638"), hexc("2E1622"), hexc("55304A")]
+BAYER4 = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]
+
+
+def framed(img):
+    out = img.copy()
+    w, h = out.size
+    rng = random.Random(w * 31 + h)
+    for x in range(w):
+        for y in range(h):
+            if x in (0, w - 1) or y in (0, h - 1):
+                out.putpixel((x, y), (*FRAME[rng.randrange(len(FRAME))], 255))
+    return out
+
+
+def dithered_gradient(w, h, stops, y0=0, y1=None):
+    """Vertical gradient through `stops` (top to bottom), split into many close bands that are ordered-dithered
+    into each other, so it reads as a soft painted sky rather than a checkerboard."""
+    y1 = h if y1 is None else y1
+    levels = max(len(stops), (y1 - y0) // 2)
+    colours = [sample(stops, i / (levels - 1)) for i in range(levels)]
+    img = new(w, h)
+    for y in range(h):
+        t = min(1.0, max(0.0, (y - y0) / max(1, y1 - y0 - 1)))
+        pos = t * (levels - 1)
+        i = min(levels - 2, int(pos))
+        f = pos - i
+        for x in range(w):
+            c = colours[i + 1] if f * 16 > BAYER4[y % 4][x % 4] + 0.5 else colours[i]
+            img.putpixel((x, y), (*c, 255))
+    return img
+
+
+def pixel_heart(scale=1):
+    """The 11x11 pixel heart (HEARTS[11]), optionally scaled up: set of (x, y)."""
+    return {(x * scale + i, y * scale + j) for y, row in enumerate(HEARTS[11]) for x, ch in enumerate(row) if ch == "#"
+            for i in range(scale) for j in range(scale)}
+
+
+def heart_mask(w, h):
+    """A smooth heart filling a w x h box: set of (x, y)."""
+    cells = set()
+    for y in range(h):
+        for x in range(w):
+            u = (x + 0.5) / w * 2.6 - 1.3
+            v = 1.25 - (y + 0.5) / h * 2.5
+            if (u * u + v * v - 1) ** 3 - u * u * v ** 3 <= 0:
+                cells.add((x, y))
+    return cells
+
+
+def sparkle(img, x, y, colour, big=False):
+    w, h = img.size
+    pts = [(0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)] if big else [(0, 0)]
+    for dx, dy in pts:
+        if 0 < x + dx < w - 1 and 0 < y + dy < h - 1:
+            img.putpixel((x + dx, y + dy), (*colour, 255))
+
+
+def cloud(img, x, y, width, colour=WHITE, shadow=hexc("E6DDF0")):
+    rows = [(1, width - 1), (0, width)]
+    for dy, (a, b) in enumerate(rows):
+        for dx in range(a, b):
+            img.putpixel((x + dx, y + dy), (*(colour if dy == 0 else shadow), 255))
+    for dx in range(width // 3, width // 3 + max(2, width // 3)):
+        img.putpixel((x + dx, y - 1), (*colour, 255))
+
+
+def photo_painting(name):
+    img = Image.open(os.path.join(ART, name)).convert("RGB")
+    img = img.quantize(colors=30, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).convert("RGBA")
+    out = img.copy()
+    for p in pixels(img):
+        r, g, b, a = img.getpixel(p)
+        out.putpixel(p, (*mix((r, g, b), hexc("F7C9D4"), 0.08), 255))   # a faint pink glaze
+    return framed(out)
+
+
+def painting_trans_heart():
+    w = h = 32
+    img = dithered_gradient(w, h, [hexc("221B45"), hexc("3A2E6E"), hexc("6A4C93"), hexc("9A6FB0")])
+    rng = random.Random(5)
+    for _ in range(14):
+        sparkle(img, rng.randrange(2, 30), rng.randrange(2, 30), rng.choice((WHITE, PINK, BLUE)), big=rng.random() < 0.25)
+    cells = pixel_heart(2)
+    ys = sorted({y for _, y in cells})
+    stripe_of = {y: stripes5(len(ys))[i] for i, y in enumerate(ys)}
+    ox, oy = 5, 5
+    for (x, y) in cells:
+        edge = any((x + dx, y + dy) not in cells for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+        base = FLAG[stripe_of[y]]
+        c = shade(base, 0.62) if edge else shade(base, 1.0 - 0.14 * (x / 22))
+        img.putpixel((ox + x, oy + y), (*c, 255))
+    for dx, dy in ((4, 3), (5, 3), (3, 4), (3, 5), (4, 4)):
+        img.putpixel((ox + dx, oy + dy), (*WHITE, 255))
+    return framed(img)
+
+
+def painting_trans_flag():
+    w, h = 48, 32
+    img = dithered_gradient(w, h, [hexc("8FD0F2"), hexc("BFE6F8"), hexc("F7D6E0"), hexc("FCE8EE")])
+    for x, y, cw in ((30, 6, 9), (40, 11, 6), (4, 13, 7)):
+        cloud(img, x, y, cw)
+    rng = random.Random(8)
+    for x in range(w):                                   # a pink meadow on a rolling hill
+        top = 25 + round(1.6 * math.sin(x / 7.0) + 0.8 * math.sin(x / 3.1))
+        for y in range(top, h):
+            c = sample(R_PINK, 0.62 - (y - top) * 0.05 + rng.uniform(-0.04, 0.04))
+            img.putpixel((x, y), (*c, 255))
+        if rng.random() < 0.3:
+            img.putpixel((x, top), (*rng.choice((WHITE, BLUE, hexc("FFF3A8"))), 255))
+    for y in range(4, 28):                               # the pole
+        img.putpixel((9, y), (*hexc("D8D4E4"), 255))
+        img.putpixel((10, y), (*hexc("A9A4BC"), 255))
+    for dx, dy in ((0, 0), (1, 0), (0, -1), (1, -1)):
+        img.putpixel((9 + dx, 3 + dy), (*hexc("F4D35E"), 255))
+    bands = stripes5(15)
+    for x in range(11, 40):
+        k = x - 11
+        dy = round(1.8 * math.sin(k / 4.5))
+        light = 1.0 + 0.12 * math.cos(k / 4.5)
+        for y in range(15):
+            c = shade(FLAG[bands[y]], light)
+            img.putpixel((x, 5 + y + dy), (*c, 255))
+    return framed(img)
+
+
+def painting_realm_sunrise():
+    w, h = 64, 32
+    img = dithered_gradient(w, h, [hexc("4FB6EC"), hexc("8DD2F4"), hexc("F2B3C6"), hexc("FBD9E2"), hexc("FFF4EC")], 0, 22)
+    sun = pixel_heart()                                  # a heart-shaped sun above the mountains
+    for (x, y) in sun:
+        edge = any((x + dx, y + dy) not in sun for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+        img.putpixel((26 + x, 5 + y), (*(hexc("FFC7A0") if edge else hexc("FFEFB8")), 255))
+    for x, y in ((28, 7), (29, 7), (28, 8)):
+        img.putpixel((x, y), (*WHITE, 255))
+    for x, y, cw in ((6, 6, 8), (44, 4, 10), (53, 10, 6), (14, 12, 5)):
+        cloud(img, x, y, cw)
+    rng = random.Random(21)
+    for x in range(1, w - 1):                            # far lavender mountains
+        top = 17 + round(2.5 * math.sin(x / 6.0) + 1.5 * math.sin(x / 2.7 + 1))
+        for y in range(top, 23):
+            img.putpixel((x, y), (*sample(R_LAVENDER, 0.55 + (y - top) * 0.02), 255))
+    for x in range(1, w - 1):                            # near pink hills
+        top = 22 + round(1.5 * math.sin(x / 9.0 + 2) + math.sin(x / 4.0))
+        for y in range(top, h - 1):
+            img.putpixel((x, y), (*sample(R_PINK, 0.7 - (y - top) * 0.045 + rng.uniform(-0.03, 0.03)), 255))
+    for tx, crown in ((7, R_PINK), (15, R_BLUE), (47, R_PINK), (56, R_BLUE)):   # trans trees
+        base = 23 + round(1.5 * math.sin(tx / 9.0 + 2) + math.sin(tx / 4.0))
+        for y in range(base - 4, base):
+            img.putpixel((tx, y), (*hexc("8E5A6E"), 255))
+        for dy in range(-3, 2):
+            for dx in range(-2, 3):
+                if dx * dx + dy * dy <= 5:
+                    img.putpixel((tx + dx, base - 6 + dy), (*sample(crown, 0.55 + 0.1 * dy - 0.05 * dx), 255))
+    return framed(img)
+
+
+def painting_crystal_bloom():
+    img = dithered_gradient(16, 16, [hexc("2B2350"), hexc("4A3A7A")])
+    pot = [(5, 11), (6, 11), (7, 11), (8, 11), (9, 11), (10, 11), (6, 12), (7, 12), (8, 12), (9, 12), (6, 13), (7, 13),
+           (8, 13), (9, 13)]
+    for x, y in pot:
+        img.putpixel((x, y), (*sample(R_PINK, 0.45 if y == 11 else 0.3 + 0.05 * x / 4), 255))
+    crystals = [((7, 4), 6, R_BLUE), ((5, 7), 4, R_PINK), ((10, 6), 5, R_TRANS), ((9, 8), 3, R_PEARL)]
+    for (cx, top), height, ramp in crystals:
+        for y in range(top, 11):
+            for dx in (0, 1):
+                t = 0.85 - (y - top) / (11 - top) * 0.5 - dx * 0.15
+                img.putpixel((cx + dx, y), (*sample(ramp, t), 255))
+        img.putpixel((cx, top - 1), (*sample(ramp, 0.95), 255))
+    sparkle(img, 3, 3, WHITE, big=True)
+    sparkle(img, 12, 3, PINK)
+    return framed(img)
+
+
+def painting_floating_isle():
+    w = h = 32
+    img = dithered_gradient(w, h, [hexc("7CC8F0"), hexc("A9DCF6"), hexc("F4C4D2"), hexc("FBE2EA")])
+    cloud(img, 3, 6, 7)
+    cloud(img, 22, 23, 8)
+    rng = random.Random(3)
+    # The island: grass on top, then an upside-down cone of pink earth and stone.
+    for x in range(5, 27):
+        depth = round(10 * (1 - abs(x - 15.5) / 11.5) ** 0.8) + rng.randrange(0, 2)
+        for y in range(18, 18 + max(1, depth)):
+            t = (y - 18) / 10
+            c = sample(R_PINK, 0.62 - 0.1 * (y == 18)) if y == 18 else sample(R_DIRT if t < 0.5 else R_STONE, 0.6 - t * 0.4)
+            img.putpixel((x, y), (*c, 255))
+    for x in range(6, 26):
+        img.putpixel((x, 17), (*sample(R_PINK, 0.75 + rng.uniform(-0.05, 0.05)), 255))
+    # The egg house: a white egg-shaped dome with a pink door and a round window.
+    for y in range(7, 17):
+        # An egg: narrower at the top, widest a little below the middle, cut flat where it sits on the grass.
+        v = (y - 12.5) / 6.0
+        half = 6.0 * math.sqrt(max(0.0, 1 - v * v)) * (0.78 + 0.22 * (y - 7) / 10)
+        for x in range(round(16 - half), round(16 + half)):
+            shade_t = 0.92 - 0.25 * (x - 16 + half) / (2 * half) ** 1 + 0.1 * (y < 10)
+            img.putpixel((x, y), (*sample(R_PEARL, shade_t), 255))
+    for y in range(13, 17):
+        for x in (15, 16):
+            img.putpixel((x, y), (*sample(R_PINK, 0.4 if y > 13 else 0.5), 255))
+    for x, y in ((18, 10), (19, 10), (18, 11), (19, 11)):
+        img.putpixel((x, y), (*sample(R_BLUE, 0.7), 255))
+    for x, y in ((15, 6), (16, 6), (15, 5), (16, 5), (16, 4)):            # a little trans flag on top
+        img.putpixel((x, y), (*hexc("A9A4BC"), 255))
+    for x, colour in ((17, BLUE), (18, PINK)):
+        img.putpixel((x, 4), (*colour, 255))
+        img.putpixel((x, 5), (*(WHITE if colour == BLUE else colour), 255))
+    for tx, crown in ((8, R_BLUE), (23, R_PINK)):                       # little trees
+        for y in (15, 16):
+            img.putpixel((tx, y), (*hexc("8E5A6E"), 255))
+        for dx, dy in ((0, -1), (-1, -1), (1, -1), (0, -2), (-1, -2), (1, -2), (0, -3)):
+            img.putpixel((tx + dx, 16 + dy - 1), (*sample(crown, 0.5 + 0.1 * dy * -1), 255))
+    for y in range(18, 29):                                              # a thin waterfall off the edge
+        if 6 <= y - 18 + 2:
+            img.putpixel((24, y), (*sample(R_BLUE, 0.8 - (y % 2) * 0.1), 255))
+    return framed(img)
+
+
+def painting_plush_party():
+    w, h = 32, 16
+    img = new(w, h)
+    for y in range(h):
+        for x in range(w):
+            c = hexc("FAD3DE") if (x // 2) % 2 == 0 else hexc("F6C2D2")
+            img.putpixel((x, y), (*c, 255))
+    for x in range(w):                                   # the shelf
+        img.putpixel((x, 13), (*sample(R_WOOD_PINK, 0.75), 255))
+        img.putpixel((x, 14), (*sample(R_WOOD_PINK, 0.45), 255))
+    for i, (name, x0) in enumerate((("trans_cat_plush", 2), ("silly_cat_plush", 12), ("bluebell_cat_plush", 22))):
+        tex = cat_plush(name)
+        hx, hy, hx1, hy1 = PLUSH_UV["head"]["north"]
+        bx, by, bx1, by1 = PLUSH_UV["body"]["north"]
+        for dy in range(by1 - by):                        # body under the head
+            for dx in range(bx1 - bx):
+                img.putpixel((x0 + 1 + dx, 8 + dy), tex.getpixel((bx + dx, by + dy)))
+        for dy in range(hy1 - hy):
+            for dx in range(hx1 - hx):
+                img.putpixel((x0 + dx, 3 + dy), tex.getpixel((hx + dx, hy + dy)))
+        ex, ey, _, _ = PLUSH_UV["ear_inner"]
+        for ear_x in (x0 + 1, x0 + 5):
+            for dx in (0, 1):
+                img.putpixel((ear_x + dx, 2), tex.getpixel((ex + dx, ey)))
+                img.putpixel((ear_x + dx, 1), tex.getpixel((PLUSH_UV["ear"][0] + dx, PLUSH_UV["ear"][1])))
+        mx, my, _, _ = PLUSH_UV["muzzle"]
+        for dx in range(3):
+            for dy in range(2):
+                img.putpixel((x0 + 2 + dx + (dx > 0) * 0, 6 + dy), tex.getpixel((mx + dx, my + dy)))
+    return framed(img)
+
+
+# name: (blocks wide, blocks high, English title, author, texture maker)
+PAINTINGS = {
+    "silly_cat_portrait": (3, 3, "Portrait of a Silly Cat", "Maddie", lambda: photo_painting("silly_cat_painting.png")),
+    "big_lick": (3, 3, "The Big Lick", "Maddie", lambda: photo_painting("big_lick_painting.png")),
+    "trans_heart": (2, 2, "Trans Heart", "Maddie", painting_trans_heart),
+    "flag_of_the_realm": (3, 2, "Flag of the Realm", "Maddie", painting_trans_flag),
+    "pastel_sunrise": (4, 2, "Pastel Sunrise", "Maddie", painting_realm_sunrise),
+    "crystal_bloom": (1, 1, "Crystal Bloom", "The Silly Cat", painting_crystal_bloom),
+    "the_egg_house": (2, 2, "The Egg House", "Maddie", painting_floating_isle),
+    "plush_party": (2, 1, "Plush Party", "The Silly Cat", painting_plush_party),
+}
+
+
 # ============================================================================================ trans mobs
 # Every vanilla mob gets a trans version of its texture, worn only inside the Trans Realm (TransRecolor swaps
 # them in). Colours are mapped by family, not brightness, so mobs come out pink, blue AND white instead of
@@ -1790,6 +2354,7 @@ def main():
         "trans_petals": trans_petals(), "trans_petals_stem": trans_petals_stem(),
         # lush caves and forests
         "trans_moss_block": trans_moss(), **{name: globals()[name]() for name in LEAVES},
+        **trans_bed_textures(),
         # glass, wool, light
         "trans_stained_glass": trans_stained_glass(), "trans_stained_glass_pane_top": trans_stained_glass_pane_top(),
         "trans_pink_stained_glass": trans_pink_stained_glass(),
@@ -1802,6 +2367,7 @@ def main():
         "trans_cake_bottom": trans_cake_bottom(), "pride_oven_front": pride_oven_front(), "pride_oven_side": pride_oven_side(),
         "pride_oven_top": pride_oven_top(), "pride_oven_bottom": pride_oven_bottom(),
     }
+    blocks.update({name: cat_plush(name) for name in PLUSHES})
     for name, img in blocks.items():
         save(img, f"block/{name}.png")
     for name in ("trans_crystal_cluster", "trans_sapling", "pride_blossom", *FLOWERS, "pride_peony_top", "pride_peony_bottom",
@@ -1824,6 +2390,7 @@ def main():
         "trans_macaron": trans_macaron(), "trans_boba": trans_boba(), "trans_cake": trans_cake_item(),
         "silly_cat_spawn_egg": silly_cat_spawn_egg(), "trans_door": trans_door_item(), "trans_lantern": trans_lantern_item(),
         "trans_petals": trans_petals_item(),
+        "trans_boat": trans_boat_item("birch_boat"), "trans_chest_boat": trans_boat_item("birch_chest_boat"),
     }
     for name, img in items.items():
         save(img, f"item/{name}.png")
@@ -1837,6 +2404,9 @@ def main():
         save_mcmeta(f"entity/{kind}/profession/trans_baker.png", {"villager": {"hat": "full"}})
 
     save(silly_cat(), "entity/silly_cat/silly_cat.png")
+    for kind in ("boat", "chest_boat"):
+        with _zip(ENTITY_ZIP).open(f"base entity textures/{kind}/birch.png") as f:
+            save(trans_boat(Image.open(f).convert("RGBA")), f"entity/{kind}/trans.png")
     save(trans_sheep_wool("entity/sheep/sheep_wool.png"), "entity/sheep/trans_sheep_wool.png")
     save(trans_sheep_wool("entity/sheep/sheep_wool_undercoat.png"), "entity/sheep/trans_sheep_wool_undercoat.png")
     save(trans_sheep_wool("entity/sheep/sheep_wool_baby.png", generic=True), "entity/sheep/trans_sheep_wool_baby.png")
@@ -1852,6 +2422,10 @@ def main():
     for i, frame in enumerate(saliva_frames()):
         save(frame, f"gui/saliva/saliva_{i}.png")
     save(heart_clouds(), "environment/heart_clouds.png")
+    for name, (pw, ph, _, _, make) in PAINTINGS.items():
+        img = make()
+        assert img.size == (16 * pw, 16 * ph), name
+        save(img, f"painting/{name}.png")
 
     icon_path = os.path.join(OUT, "icon.png")
     icon().save(icon_path)

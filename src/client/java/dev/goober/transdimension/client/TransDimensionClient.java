@@ -4,8 +4,11 @@ import java.util.List;
 import java.util.Objects;
 
 import net.minecraft.client.color.block.BlockTintSource;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.object.boat.BoatModel;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.entity.BoatRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
@@ -47,6 +50,10 @@ public class TransDimensionClient implements ClientModInitializer {
 		}
 	};
 
+	/** Boat model layers; BoatRenderer reads the texture from the layer id (textures/entity/boat/trans.png and so on). */
+	public static final ModelLayerLocation TRANS_BOAT_LAYER = new ModelLayerLocation(TransDimension.id("boat/trans"), "main");
+	public static final ModelLayerLocation TRANS_CHEST_BOAT_LAYER = new ModelLayerLocation(TransDimension.id("chest_boat/trans"), "main");
+
 	private static ResourceKey<Level> lastDimension;
 
 	@Override
@@ -58,6 +65,12 @@ public class TransDimensionClient implements ClientModInitializer {
 		// The Silly Cat.
 		ModelLayerRegistry.registerModelLayer(SillyCatRenderer.LAYER, SillyCatModel::createBodyLayer);
 		EntityRenderers.register(ModEntities.SILLY_CAT, SillyCatRenderer::new);
+
+		// Trans boats use vanilla's boat models with our textures.
+		ModelLayerRegistry.registerModelLayer(TRANS_BOAT_LAYER, BoatModel::createBoatModel);
+		ModelLayerRegistry.registerModelLayer(TRANS_CHEST_BOAT_LAYER, BoatModel::createChestBoatModel);
+		EntityRenderers.register(ModEntities.TRANS_BOAT, context -> new BoatRenderer(context, TRANS_BOAT_LAYER));
+		EntityRenderers.register(ModEntities.TRANS_CHEST_BOAT, context -> new BoatRenderer(context, TRANS_CHEST_BOAT_LAYER));
 
 		// Cat spit sits under the hotbar like the pumpkin overlay; the dimension intro draws on top of everything.
 		HudElementRegistry.attachElementBefore(VanillaHudElements.HOTBAR, TransDimension.id("saliva"), SalivaOverlay::extract);

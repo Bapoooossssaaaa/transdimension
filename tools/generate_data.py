@@ -52,6 +52,13 @@ def item_def(name, model_id, tints=None):
     write(os.path.join(ASSETS, "items", f"{name}.json"), {"model": m})
 
 
+def simple_item(item, english):
+    """A flat item sprite (textures/item/<item>.png) with its model, item definition and name."""
+    model(item, {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/{item}"}}, kind="item")
+    item_def(item, f"{NS}:item/{item}")
+    name(item, english, kind="item")
+
+
 def loot(name, obj):
     write(os.path.join(DATA, NS, "loot_table", "blocks", f"{name}.json"), obj)
 
@@ -213,6 +220,25 @@ def stonecutting(result, ingredient, count=1):
 # Small flowers that grow in the realm instead of vanilla's.
 FLOWERS = {"trans_tulip": "Trans Tulip", "pearl_daisy": "Pearl Daisy", "sky_bell": "Sky Bell", "flag_lily": "Flag Lily",
            "lavender_puff": "Lavender Puff", "trans_orchid": "Trans Orchid", "heart_bloom": "Heart Bloom"}
+
+# The nine village cat plushes (textures: PLUSHES in generate_textures.py; order matches ModBlocks.PLUSHES).
+PLUSH_NAMES = {"silly_cat_plush": "Silly Cat Plush", "trans_cat_plush": "Trans Cat Plush",
+               "midnight_cat_plush": "Midnight Cat Plush", "biscuit_cat_plush": "Biscuit Cat Plush",
+               "patches_cat_plush": "Patches Cat Plush", "mochi_cat_plush": "Mochi Cat Plush",
+               "pearl_cat_plush": "Pearl Cat Plush", "bubblegum_cat_plush": "Bubblegum Cat Plush",
+               "bluebell_cat_plush": "Bluebell Cat Plush"}
+
+# Paintings (textures: PAINTINGS in generate_textures.py): name -> (width, height, title, author).
+PAINTINGS = {
+    "silly_cat_portrait": (3, 3, "Portrait of a Silly Cat", "Maddie"),
+    "big_lick": (3, 3, "The Big Lick", "Maddie"),
+    "trans_heart": (2, 2, "Trans Heart", "Maddie"),
+    "flag_of_the_realm": (3, 2, "Flag of the Realm", "Maddie"),
+    "pastel_sunrise": (4, 2, "Pastel Sunrise", "Maddie"),
+    "crystal_bloom": (1, 1, "Crystal Bloom", "The Silly Cat"),
+    "the_egg_house": (2, 2, "The Egg House", "Maddie"),
+    "plush_party": (2, 1, "Plush Party", "The Silly Cat"),
+}
 
 # Vanilla ores re-made in trans rock: (name, English name, mining tier); ORE_SMELTING has what they smelt into.
 ORE_INFO = [("coal", "Coal", "stone"), ("iron", "Iron", "stone"), ("copper", "Copper", "stone"), ("gold", "Gold", "iron"),
@@ -708,6 +734,35 @@ def generate_blocks():
     tag("block", "wool_carpets", "trans_carpet")
     tag("item", "wool_carpets", "trans_carpet")
 
+    # The trans bed is built from block models, like every bed in 26.2. The foot has three tops: plain, and the left or
+    # right half of the heart that two trans beds side by side share (TransBedBlock sets the "heart" property).
+    head_textures = {"particle": block_tex("trans_planks"), "north": block_tex("trans_bed_head_north"),
+                     "down": block_tex("trans_bed_down"), "up": block_tex("trans_bed_head_up"),
+                     "east": block_tex("trans_bed_head_east"), "west": block_tex("trans_bed_head_west")}
+    model("trans_bed_head", {"parent": "minecraft:block/template_bed_head", "textures": head_textures})
+    foot_textures = {"particle": block_tex("trans_planks"), "south": block_tex("trans_bed_foot_south"),
+                     "down": block_tex("trans_bed_down"), "east": block_tex("trans_bed_foot_east"),
+                     "west": block_tex("trans_bed_foot_west")}
+    for suffix in ("", "_left", "_right"):
+        model(f"trans_bed_foot{suffix}", {"parent": "minecraft:block/template_bed_foot",
+                                          "textures": {**foot_textures, "up": block_tex(f"trans_bed_foot_up{suffix}")}})
+    bed_variants = {}
+    for facing, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
+        turn = {"y": y} if y else {}
+        bed_variants[f"facing={facing},part=head"] = {"model": f"{NS}:block/trans_bed_head", **turn}
+        for heart, suffix in (("none", ""), ("left", "_left"), ("right", "_right")):
+            bed_variants[f"facing={facing},heart={heart},part=foot"] = {"model": f"{NS}:block/trans_bed_foot{suffix}", **turn}
+    blockstate("trans_bed", {"variants": bed_variants})
+    identity = [0.0, 0.0, 0.0, 1.0]
+    write(os.path.join(ASSETS, "items", "trans_bed.json"), {"model": {"type": "minecraft:composite", "models": [
+        {"type": "minecraft:model", "model": f"{NS}:block/trans_bed_head"},
+        {"type": "minecraft:model", "model": f"{NS}:block/trans_bed_foot", "transformation": {
+            "left_rotation": identity, "right_rotation": identity, "scale": [1.0, 1.0, 1.0], "translation": [0.0, 0.0, 1.0]}}]}})
+    name("trans_bed", "Trans Bed")
+    loot_like_vanilla("trans_bed", "pink_bed")
+    tag("block", "beds", "trans_bed")
+    tag("item", "beds", "trans_bed")
+
     blockstate("trans_lantern", from_template("lantern", "lantern", "trans_lantern"))
     model("trans_lantern", {"parent": "minecraft:block/template_lantern", "textures": {"lantern": block_tex("trans_lantern")}})
     model("trans_lantern_hanging", {"parent": "minecraft:block/template_hanging_lantern", "textures": {"lantern": block_tex("trans_lantern")}})
@@ -732,6 +787,19 @@ def generate_blocks():
     name("trans_table", "Trans Table")
     mine("trans_table", "axe")
     loot("trans_table", loot_self("trans_table"))
+
+    # ---- cat plushes: one shared model, a texture each; the plush spot marker is invisible
+    model("cat_plush", plush_model())
+    for plush, english in PLUSH_NAMES.items():
+        furniture_blockstate(plush)
+        model(plush, {"parent": f"{NS}:block/cat_plush", "textures": {"cat": block_tex(plush)}})
+        item_def(plush, f"{NS}:block/{plush}")
+        name(plush, english)
+        loot(plush, loot_self(plush))
+        tag("block", "plushes", plush, ns=NS)
+        tag("item", "plushes", plush, ns=NS)
+    blockstate("plush_spot", {"variants": {"": {"model": "minecraft:block/air"}}})
+    name("plush_spot", "Plush Spot")
 
     # ---- bakery
     bs = from_template("smoker", "smoker", "pride_oven")
@@ -788,6 +856,48 @@ def table_model():
     return {"parent": "minecraft:block/block", "textures": {
         "particle": block_tex("trans_planks"), "planks": block_tex("trans_planks"), "log": block_tex("stripped_trans_log")},
         "elements": [top, post, foot]}
+
+
+def plush_model():
+    """The shared cat plush model (it looks north). UVs follow PLUSH_UV in generate_textures.py: 32x32 textures at one
+    texel per model pixel, so a UV unit (1/16 of the texture) is two texels."""
+    def uv(box):
+        return [c / 2 for c in box]
+
+    head_uv = {"up": (6, 0, 14, 6), "down": (14, 0, 22, 6), "west": (0, 6, 6, 12), "north": (6, 6, 14, 12),
+               "east": (14, 6, 20, 12), "south": (20, 6, 28, 12)}
+    body_uv = {"up": (5, 12, 11, 17), "down": (11, 12, 17, 17), "west": (0, 17, 5, 22), "north": (5, 17, 11, 22),
+               "east": (11, 17, 16, 22), "south": (16, 17, 22, 22)}
+    tail_uv = {"up": (22, 12, 24, 17), "down": (24, 12, 26, 17), "north": (26, 12, 28, 14), "south": (28, 12, 30, 14),
+               "east": (22, 17, 27, 19), "west": (27, 17, 32, 19)}
+    ear, ear_inner, muzzle, paw = (0, 22, 2, 24), (2, 22, 4, 24), (4, 22, 7, 24), (8, 22, 10, 24)
+
+    def box(frm, to, faces):
+        return {"from": frm, "to": to, "faces": {
+            f: {"uv": uv(b), "texture": "#cat", **({"cullface": "down"} if f == "down" and frm[1] == 0 else {})}
+            for f, b in faces.items()}}
+
+    elements = [
+        box([5, 0, 6], [11, 5, 11], body_uv),
+        box([4, 4, 4], [12, 10, 10], head_uv),
+        box([11, 0, 7], [13, 2, 12], tail_uv),
+    ]
+    for x in (4.5, 9.5):
+        elements.append(box([x, 10, 6], [x + 2, 12, 8], {f: (ear_inner if f == "north" else ear) for f in ALL}))
+    elements.append(box([6.5, 4.5, 3.5], [9.5, 6.5, 4], {f: muzzle for f in ALL if f != "south"}))
+    for x in (5.5, 8.5):
+        elements.append(box([x, 0, 4.5], [x + 2, 1.5, 6.5], {f: paw for f in ALL}))
+    return {
+        "parent": "minecraft:block/block",
+        "textures": {"particle": "#cat"},
+        "display": {
+            "gui": {"rotation": [25, 200, 0], "translation": [0, 1.5, 0], "scale": [0.95, 0.95, 0.95]},
+            "ground": {"rotation": [0, 0, 0], "translation": [0, 3, 0], "scale": [0.5, 0.5, 0.5]},
+            "fixed": {"rotation": [0, 180, 0], "translation": [0, 1.5, 0], "scale": [0.85, 0.85, 0.85]},
+            "head": {"rotation": [0, 180, 0], "translation": [0, 9.5, 0], "scale": [1, 1, 1]},
+        },
+        "elements": elements,
+    }
 
 
 def argb_int(rgb):
@@ -850,6 +960,9 @@ def generate_recipes():
         R(f"{glass_block}_pane", shaped(f"{glass_block}_pane", ["###", "###"], {"#": glass_block}, 16, category="misc", group="stained_glass_pane"))
     R("trans_wool", shaped("trans_wool", ["L", "P", "W"], {"L": "minecraft:light_blue_wool", "P": "minecraft:pink_wool", "W": "minecraft:white_wool"}, 3, group="wool"))
     R("trans_carpet", shaped("trans_carpet", ["##"], {"#": "trans_wool"}, 3, category="misc", group="carpet"))
+    R("trans_boat", shaped("trans_boat", ["# #", "###"], {"#": "trans_planks"}, category="misc", group="boat"))
+    R("trans_chest_boat", shapeless("trans_chest_boat", ["minecraft:chest", "trans_boat"], category="misc", group="chest_boat"))
+    R("trans_bed", shaped("trans_bed", ["###", "XXX"], {"#": "trans_wool", "X": "#minecraft:planks"}, category="misc", group="bed"))
     R("trans_lantern", shaped("trans_lantern", ["XXX", "X#X", "XXX"], {"#": "minecraft:torch", "X": "transdimension:trans_crystal"}, 2, category="misc"))
     # deepslate: cobbled -> polished -> bricks -> tiles, like vanilla
     R("trans_deepslate", smelting("trans_deepslate", "cobbled_trans_deepslate"))
@@ -944,6 +1057,24 @@ def generate_misc():
     tag("block", "incorrect_for_trans_tool", "#minecraft:incorrect_for_diamond_tool", ns=NS)
     # The Pride Oven is a job site villagers can claim.
     tag("point_of_interest_type", "acquirable_job_site", "transdimension:pride_oven")
+
+    # boats: vanilla boat entities with trans textures (see TransDimensionClient)
+    for item, english in (("trans_boat", "Trans Boat"), ("trans_chest_boat", "Trans Boat with Chest")):
+        simple_item(item, english)
+        NAMES[f"entity.{NS}.{item}"] = english
+    tag("item", "boats", "trans_boat")
+    tag("item", "chest_boats", "trans_chest_boat")
+    tag("entity_type", "boat", "trans_boat")
+
+    # paintings: data-driven variants; the placeable tag lets a placed painting pick them at random
+    for painting, (pw, ph, title, author) in PAINTINGS.items():
+        write(os.path.join(DATA, NS, "painting_variant", f"{painting}.json"), {
+            "asset_id": rid(painting), "width": pw, "height": ph,
+            "title": {"color": "yellow", "translate": f"painting.{NS}.{painting}.title"},
+            "author": {"color": "gray", "translate": f"painting.{NS}.{painting}.author"}})
+        NAMES[f"painting.{NS}.{painting}.title"] = title
+        NAMES[f"painting.{NS}.{painting}.author"] = author
+        tag("painting_variant", "placeable", painting)
 
     # Names that aren't blocks.
     items = {

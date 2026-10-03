@@ -1,0 +1,11 @@
+{
+  "parent": "minecraft:block/template_bed_foot",
+  "textures": {
+    "particle": "transdimension:block/trans_planks",
+    "south": "transdimension:block/trans_bed_foot_south",
+    "down": "transdimension:block/trans_bed_down",
+    "east": "transdimension:block/trans_bed_foot_east",
+    "west": "transdimension:block/trans_bed_foot_west",
+    "up": "transdimension:block/trans_bed_foot_up_right"
+  }
+}

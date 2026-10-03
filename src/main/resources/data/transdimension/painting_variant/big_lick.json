@@ -1,0 +1,13 @@
+{
+  "asset_id": "transdimension:big_lick",
+  "width": 3,
+  "height": 3,
+  "title": {
+    "color": "yellow",
+    "translate": "painting.transdimension.big_lick.title"
+  },
+  "author": {
+    "color": "gray",
+    "translate": "painting.transdimension.big_lick.author"
+  }
+}

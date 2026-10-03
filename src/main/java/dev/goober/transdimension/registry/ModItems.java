@@ -17,6 +17,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.BoatItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
@@ -121,6 +122,12 @@ public final class ModItems {
 	// ---------------------------------------------------------------- mobs
 	public static final Item SILLY_CAT_SPAWN_EGG = register("silly_cat_spawn_egg", SpawnEggItem::new,
 			new Item.Properties().spawnEgg(ModEntities.SILLY_CAT));
+
+	// ---------------------------------------------------------------- boats
+	public static final Item TRANS_BOAT = register("trans_boat",
+			properties -> new BoatItem(ModEntities.TRANS_BOAT, properties), new Item.Properties().stacksTo(1));
+	public static final Item TRANS_CHEST_BOAT = register("trans_chest_boat",
+			properties -> new BoatItem(ModEntities.TRANS_CHEST_BOAT, properties), new Item.Properties().stacksTo(1));
 
 	// ---------------------------------------------------------------- creative tab
 	public static final ResourceKey<CreativeModeTab> CREATIVE_TAB_KEY = ResourceKey.create(

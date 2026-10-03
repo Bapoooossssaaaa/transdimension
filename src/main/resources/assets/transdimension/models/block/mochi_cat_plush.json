@@ -1,0 +1,6 @@
+{
+  "parent": "transdimension:block/cat_plush",
+  "textures": {
+    "cat": "transdimension:block/mochi_cat_plush"
+  }
+}

@@ -66,7 +66,7 @@ def vanilla_has(registry, ident):
 def java_names():
     blocks, items, no_item = set(), set(), set()
     src = open(os.path.join(JAVA, "registry", "ModBlocks.java"), encoding="utf-8").read()
-    for m in re.finditer(r'\b(?:register|stairs|slab|wall|glass|pane|copy|ore|flower|leaves)\("([a-z0-9_]+)"', src):
+    for m in re.finditer(r'\b(?:register|stairs|slab|wall|glass|pane|copy|ore|flower|leaves|plush)\("([a-z0-9_]+)"', src):
         blocks.add(m.group(1))
     for m in re.finditer(r'\b(?:registerWithoutItem|potted)\("([a-z0-9_]+)"', src):
         no_item.add(m.group(1))
@@ -183,7 +183,7 @@ for i in ITEMS:
         err(f"item {i}: no name in en_us.json")
 
 # ------------------------------------------------------------------ data
-for b in BLOCKS - {"trans_cake"}:
+for b in BLOCKS - {"trans_cake", "plush_spot"}:   # these two have no loot table (Java says so)
     if not os.path.exists(os.path.join(DATA, NS, "loot_table", "blocks", b + ".json")):
         err(f"block {b}: no loot table")
 
@@ -273,7 +273,15 @@ TWINS = {
     "trans_deepslate": "deepslate", "trans_redstone_ore": "redstone_ore", "trans_deepslate_redstone_ore": "redstone_ore",
     "trans_glass_pane": "glass_pane", "trans_petals": "pink_petals", "pride_peony": "peony",
     "pearl_leaves": "cherry_leaves", "sky_leaves": "cherry_leaves", "blush_leaves": "cherry_leaves", "twilight_leaves": "cherry_leaves",
+    "trans_bed": "red_bed", "plush_spot": "smoker",
 }
+# Furniture-like blocks only have a horizontal "facing" (borrowed from the smoker); the bed adds a "heart" property.
+FACING_ONLY = {"pride_oven", "trans_chair", "trans_table", "plush_spot"}
+EXTRA_PROPS = {"trans_bed": {"heart": ["none", "left", "right"]}}
+for b in BLOCKS:
+    if b.endswith("_plush"):
+        TWINS[b] = "smoker"
+        FACING_ONLY.add(b)
 for b in BLOCKS:
     if b.endswith("_stairs"):
         TWINS.setdefault(b, "oak_stairs")
@@ -290,8 +298,9 @@ def block_props(ident):
         if twin is None:
             return {}
         props = dict(VANILLA_BLOCKS.get(twin, [{}])[0])
-        if path in ("pride_oven", "trans_chair", "trans_table"):
+        if path in FACING_ONLY:
             props = {"facing": props.get("facing", [])}
+        props.update(EXTRA_PROPS.get(path, {}))
         return props
     return VANILLA_BLOCKS.get(path, [None])[0]
 
@@ -583,6 +592,36 @@ if tl:
             err(f"timeline tag: unknown timeline {v}")
         if ns == "minecraft" and not vanilla_has("timeline", v):
             err(f"timeline tag: unknown timeline {v}")
+
+# ------------------------------------------------------------------ entity tags and paintings
+for ns in os.listdir(DATA):
+    for f in walk_json(os.path.join(DATA, ns, "tags", "entity_type")):
+        for v in (load(f) or {}).get("values", []):
+            if not v.startswith("#") and not entity_exists(v):
+                err(f"{os.path.relpath(f, ROOT)}: unknown entity {v}")
+
+# paintings: a texture per variant, and the placeable tag only lists variants that exist
+for f in walk_json(os.path.join(DATA, NS, "painting_variant")):
+    d = load(f) or {}
+    rel = os.path.relpath(f, ROOT)
+    asset = d.get("asset_id", "")
+    if is_ours(asset):
+        tex = os.path.join(ASSETS, "textures", "painting", path_of(asset) + ".png")
+        if not os.path.exists(tex):
+            err(f"{rel}: no texture for {asset}")
+        else:
+            from PIL import Image
+            w, h = Image.open(tex).size
+            if (w, h) != (16 * d["width"], 16 * d["height"]):
+                err(f"{rel}: texture is {w}x{h}, expected {16 * d['width']}x{16 * d['height']}")
+    for part in ("title", "author"):
+        key = d.get(part, {}).get("translate")
+        if key and key not in lang:
+            err(f"{rel}: no translation for {key}")
+for f in walk_json(os.path.join(DATA, "minecraft", "tags", "painting_variant")):
+    for v in (load(f) or {}).get("values", []):
+        if is_ours(v) and not os.path.exists(os.path.join(DATA, NS, "painting_variant", path_of(v) + ".json")):
+            err(f"{os.path.relpath(f, ROOT)}: unknown painting {v}")
 
 for w in warnings:
     print("warning:", w)

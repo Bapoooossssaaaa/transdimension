@@ -8,6 +8,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.SpawnPlacementTypes;
+import net.minecraft.world.entity.vehicle.boat.Boat;
+import net.minecraft.world.entity.vehicle.boat.ChestBoat;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityType;
@@ -26,6 +28,25 @@ public final class ModEntities {
 					.sized(0.6F, 0.7F)
 					.clientTrackingRange(8)
 					.build(SILLY_CAT_KEY));
+
+	public static final ResourceKey<EntityType<?>> TRANS_BOAT_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("trans_boat"));
+	public static final ResourceKey<EntityType<?>> TRANS_CHEST_BOAT_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("trans_chest_boat"));
+
+	/** Boats of trans planks, sized like vanilla's; breaking one gives back its item (looked up lazily, items come later). */
+	public static final EntityType<Boat> TRANS_BOAT = Registry.register(BuiltInRegistries.ENTITY_TYPE, TRANS_BOAT_KEY,
+			EntityType.Builder.<Boat>of((type, level) -> new Boat(type, level, () -> ModItems.TRANS_BOAT), MobCategory.MISC)
+					.noLootTable()
+					.sized(1.375F, 0.5625F)
+					.eyeHeight(0.5625F)
+					.clientTrackingRange(10)
+					.build(TRANS_BOAT_KEY));
+	public static final EntityType<ChestBoat> TRANS_CHEST_BOAT = Registry.register(BuiltInRegistries.ENTITY_TYPE, TRANS_CHEST_BOAT_KEY,
+			EntityType.Builder.<ChestBoat>of((type, level) -> new ChestBoat(type, level, () -> ModItems.TRANS_CHEST_BOAT), MobCategory.MISC)
+					.noLootTable()
+					.sized(1.375F, 0.5625F)
+					.eyeHeight(0.5625F)
+					.clientTrackingRange(10)
+					.build(TRANS_CHEST_BOAT_KEY));
 
 	private ModEntities() {
 	}
