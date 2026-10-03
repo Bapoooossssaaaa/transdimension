@@ -1,0 +1,52 @@
+{
+  "elements": [
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "transdimension:village/trans/town_centers/trans_fountain_01",
+        "processors": "transdimension:trans_weathering",
+        "projection": "rigid"
+      },
+      "weight": 50
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "transdimension:village/trans/town_centers/trans_meeting_point_1",
+        "processors": "transdimension:trans_weathering",
+        "projection": "rigid"
+      },
+      "weight": 50
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "transdimension:village/trans/town_centers/trans_meeting_point_2",
+        "processors": {
+          "processors": []
+        },
+        "projection": "rigid"
+      },
+      "weight": 50
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "transdimension:village/trans/town_centers/trans_meeting_point_3",
+        "processors": "transdimension:trans_weathering",
+        "projection": "rigid"
+      },
+      "weight": 50
+    },
+    {
+      "element": {
+        "element_type": "minecraft:legacy_single_pool_element",
+        "location": "transdimension:village/trans/town_centers/trans_flag_plaza",
+        "processors": "transdimension:trans_weathering",
+        "projection": "rigid"
+      },
+      "weight": 100
+    }
+  ],
+  "fallback": "minecraft:empty"
+}

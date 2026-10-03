@@ -377,6 +377,153 @@ if dim:
         if not os.path.exists(os.path.join(WG, "biome", path_of(b) + ".json")):
             err(f"dimension: unknown biome {b}")
 
+# ------------------------------------------------------------------ villages: structures, pools, templates
+ENTITIES = set(re.findall(r'TransDimension\.id\("([a-z0-9_]+)"\)',
+                          open(os.path.join(JAVA, "registry", "ModEntities.java"), encoding="utf-8").read()))
+
+
+def ours_or_vanilla(ident, folder, registry, ext=".json"):
+    ns, path = ident.split(":", 1) if ":" in ident else ("minecraft", ident)
+    if ns == NS:
+        return os.path.exists(os.path.join(DATA, NS, folder, path + ext))
+    return vanilla_has(registry, f"minecraft:{path}")
+
+
+def pool_exists(ident):
+    return ident == "minecraft:empty" or ours_or_vanilla(ident, "worldgen/template_pool", "worldgen/template_pool")
+
+
+def entity_exists(ident):
+    return path_of(ident) in ENTITIES if is_ours(ident) else vanilla_has("entity_type", ident)
+
+
+def biome_tag_ok(tag):
+    ns, path = tag.split(":", 1)
+    return os.path.exists(os.path.join(DATA, ns, "tags", "worldgen", "biome", path + ".json")) \
+        or (ns == "minecraft" and vanilla_has("tag/worldgen/biome", tag))
+
+
+for f in walk_json(os.path.join(WG, "template_pool")):
+    d = load(f)
+    if not d:
+        continue
+    rel = os.path.relpath(f, ROOT)
+    if not pool_exists(d["fallback"]):
+        err(f"{rel}: unknown fallback pool {d['fallback']}")
+    for e in d["elements"]:
+        el = e["element"]
+        kind = el["element_type"]
+        if kind in ("minecraft:single_pool_element", "minecraft:legacy_single_pool_element"):
+            if not ours_or_vanilla(el["location"], "structure", "structure", ".nbt"):
+                err(f"{rel}: unknown structure template {el['location']}")
+            p = el.get("processors")
+            if isinstance(p, str) and not ours_or_vanilla(p, "worldgen/processor_list", "worldgen/processor_list"):
+                err(f"{rel}: unknown processor list {p}")
+        elif kind == "minecraft:feature_pool_element":
+            if not placed_exists(el["feature"]):
+                err(f"{rel}: unknown placed feature {el['feature']}")
+        elif kind != "minecraft:empty_pool_element":
+            err(f"{rel}: unexpected element type {kind}")
+
+
+def check_rule_blocks(obj, where):
+    if isinstance(obj, dict):
+        if isinstance(obj.get("block"), str) and not block_exists(obj["block"]):
+            err(f"{where}: unknown block {obj['block']}")
+        for v in obj.values():
+            check_rule_blocks(v, where)
+    elif isinstance(obj, list):
+        for v in obj:
+            check_rule_blocks(v, where)
+
+
+for f in walk_json(os.path.join(WG, "processor_list")):
+    d = load(f)
+    if d:
+        check_rule_blocks(d, os.path.relpath(f, ROOT))
+
+for f in walk_json(os.path.join(WG, "structure")):
+    d = load(f)
+    if not d:
+        continue
+    rel = os.path.relpath(f, ROOT)
+    if d.get("type") == "minecraft:jigsaw" and not pool_exists(d["start_pool"]):
+        err(f"{rel}: unknown start pool {d['start_pool']}")
+    if isinstance(d.get("biomes"), str) and d["biomes"].startswith("#") and not biome_tag_ok(d["biomes"][1:]):
+        err(f"{rel}: unknown biome tag {d['biomes']}")
+
+for f in walk_json(os.path.join(WG, "structure_set")):
+    d = load(f)
+    for s in (d or {}).get("structures", []):
+        if not ours_or_vanilla(s["structure"], "worldgen/structure", "worldgen/structure"):
+            err(f"{os.path.relpath(f, ROOT)}: unknown structure {s['structure']}")
+
+for ns in os.listdir(DATA):
+    for f in walk_json(os.path.join(DATA, ns, "tags", "worldgen", "biome")):
+        for v in (load(f) or {}).get("values", []):
+            if not (biome_tag_ok(v[1:]) if v.startswith("#") else ours_or_vanilla(v, "worldgen/biome", "worldgen/biome")):
+                err(f"{os.path.relpath(f, ROOT)}: unknown biome {v}")
+    for f in walk_json(os.path.join(DATA, ns, "tags", "worldgen", "structure")):
+        for v in (load(f) or {}).get("values", []):
+            if not v.startswith("#") and not ours_or_vanilla(v, "worldgen/structure", "worldgen/structure"):
+                err(f"{os.path.relpath(f, ROOT)}: unknown structure {v}")
+
+try:
+    import nbtlib
+except ImportError:
+    nbtlib = None
+    warnings.append("nbtlib isn't installed (pip install nbtlib): structure templates weren't checked")
+
+if nbtlib:
+    for root, _, files in os.walk(os.path.join(DATA, NS, "structure")):
+        for fn in files:
+            path = os.path.join(root, fn)
+            rel = os.path.relpath(path, ROOT)
+            nbt = nbtlib.load(path)
+            palette = [(str(e["Name"]), {str(k): str(v) for k, v in e.get("Properties", {}).items()})
+                       for e in nbt["palette"]]
+            for name, props in palette:
+                check_states({"Name": name, "Properties": props}, rel)
+            size = [int(v) for v in nbt["size"]]
+            for b in nbt["blocks"]:
+                pos = [int(v) for v in b["pos"]]
+                if not all(0 <= c < s for c, s in zip(pos, size)):
+                    err(f"{rel}: block at {pos} is outside the template size {size}")
+                name = palette[int(b["state"])][0]
+                data = b.get("nbt")
+                if data is None:
+                    continue
+                if name == "minecraft:jigsaw":
+                    if not pool_exists(str(data["pool"])):
+                        err(f"{rel}: jigsaw at {pos} uses unknown pool {data['pool']}")
+                    state = str(data["final_state"])
+                    fname, _, rest = state.partition("[")
+                    fprops = dict(kv.split("=", 1) for kv in rest.rstrip("]").split(",") if kv)
+                    check_states({"Name": fname, "Properties": fprops}, f"{rel} jigsaw at {pos}")
+                if "LootTable" in data and not ours_or_vanilla(str(data["LootTable"]), "loot_table", "loot_table"):
+                    err(f"{rel}: unknown loot table {data['LootTable']}")
+            for e in nbt["entities"]:
+                if not entity_exists(str(e["nbt"]["id"])):
+                    err(f"{rel}: unknown entity {e['nbt']['id']}")
+
+# ------------------------------------------------------------------ villager trades
+for f in walk_json(os.path.join(DATA, NS, "villager_trade")):
+    d = load(f) or {}
+    for key in ("gives", "wants", "additional_wants"):
+        v = d.get(key)
+        if isinstance(v, dict) and "id" in v and not item_exists(v["id"]):
+            err(f"{os.path.relpath(f, ROOT)}: unknown {key} item {v['id']}")
+for f in walk_json(os.path.join(DATA, NS, "tags", "villager_trade")):
+    for v in (load(f) or {}).get("values", []):
+        if not v.startswith("#") and not ours_or_vanilla(v, "villager_trade", "villager_trade"):
+            err(f"{os.path.relpath(f, ROOT)}: unknown villager trade {v}")
+for f in walk_json(os.path.join(DATA, NS, "trade_set")):
+    trades = (load(f) or {}).get("trades", "")
+    if isinstance(trades, str) and trades.startswith("#"):
+        ns, path = trades[1:].split(":", 1)
+        if not os.path.exists(os.path.join(DATA, ns, "tags", "villager_trade", path + ".json")):
+            err(f"{os.path.relpath(f, ROOT)}: unknown villager trade tag {trades}")
+
 tl = load(os.path.join(DATA, NS, "tags", "timeline", "in_trans_realm.json"))
 if tl:
     for v in tl["values"]:

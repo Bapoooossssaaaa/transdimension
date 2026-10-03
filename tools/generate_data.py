@@ -857,8 +857,10 @@ def remove_stale():
     for p in stale:
         if os.path.exists(p):
             os.remove(p)
-    # Old tag files are regenerated from scratch.
+    # Old tag files are regenerated from scratch (worldgen tags belong to generate_villages.py).
     for root, _, files in os.walk(os.path.join(DATA, "minecraft", "tags")):
+        if os.sep + "worldgen" in root:
+            continue
         for f in files:
             os.remove(os.path.join(root, f))
     for sub in ("block", "item"):
