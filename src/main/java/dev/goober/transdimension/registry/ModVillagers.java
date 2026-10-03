@@ -8,7 +8,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.item.trading.TradeSet;
@@ -29,6 +28,7 @@ public final class ModVillagers {
 	}
 
 	public static void initialize() {
+		// Every facing of the oven counts as the job site.
 		PoiHelper.register(PRIDE_OVEN_POI.identifier(), 1, 1, ModBlocks.PRIDE_OVEN);
 
 		Int2ObjectOpenHashMap<ResourceKey<TradeSet>> tradeSets = new Int2ObjectOpenHashMap<>();
@@ -42,7 +42,7 @@ public final class ModVillagers {
 				poi -> poi.is(PRIDE_OVEN_POI),
 				ImmutableSet.of(),
 				ImmutableSet.of(),
-				SoundEvents.VILLAGER_WORK_BUTCHER,
+				ModSounds.PRIDE_OVEN_CRACKLE,
 				tradeSets
 		));
 	}

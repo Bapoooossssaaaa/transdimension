@@ -1,33 +1,66 @@
 #!/usr/bin/env python3
 """
-Generates every texture of the Trans Dimension mod as original pixel art.
+Generates every texture of the Trans Dimension mod.
+
+Most textures are *recoloured vanilla textures*: they are read from the two reference zips in the
+repository root ("base block textures.zip" and "Base Sprite Images.zip") plus a few extra vanilla
+entity textures in tools/vanilla_extra/, and gradient-mapped onto trans palettes. Mapping the
+brightness of every pixel onto a colour ramp keeps Minecraft's own shading, texture and "feel"
+while changing the colours, so the mod looks like it belongs in the game.
+
+Textures with no vanilla counterpart (donut, cupcake, macaron, boba, the Silly Cat, the cat-spit
+overlay...) are drawn here as pixel art in the same style.
 
     pip install pillow
     python3 tools/generate_textures.py
 
-Tweak the palette below and re-run to restyle the whole mod.
+Re-running overwrites every PNG under src/main/resources/assets/transdimension/textures/, so edit
+this script (not the PNGs) to change a texture.
 """
+import colorsys
 import json
 import math
 import os
 import random
+import zipfile
 
-from PIL import Image
+from PIL import Image, ImageFilter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "..", "src", "main", "resources", "assets", "transdimension")
+ROOT = os.path.normpath(os.path.join(HERE, ".."))
+OUT = os.path.join(ROOT, "src", "main", "resources", "assets", "transdimension")
+BLOCK_ZIP = os.path.join(ROOT, "base block textures.zip")
+ITEM_ZIP = os.path.join(ROOT, "Base Sprite Images.zip")
+EXTRA = os.path.join(HERE, "vanilla_extra")
 
-# --------------------------------------------------------------------------------------------- palette
-BLUE = (91, 206, 250)
-PINK = (245, 169, 184)
+
+# ============================================================================================ palette
+def hexc(value):
+    value = value.lstrip("#")
+    return tuple(int(value[i:i + 2], 16) for i in (0, 2, 4))
+
+
+BLUE = hexc("5BCEFA")
+PINK = hexc("F5A9B8")
 WHITE = (255, 255, 255)
 FLAG = [BLUE, PINK, WHITE, PINK, BLUE]
-NAVY = (34, 44, 92)
-OUTLINE = (52, 38, 74)
-WOOD = (139, 97, 66)
-WOOD_D = (101, 68, 45)
-GREEN = (104, 178, 104)
-GREEN_D = (66, 128, 76)
+
+# Colour ramps, dark -> light. A pixel's brightness picks its colour along the ramp.
+R_BLUE = [hexc(c) for c in ("0F2A4D", "1F5288", "3487C2", "5BCEFA", "93DEFB", "CFF2FE")]
+R_PINK = [hexc(c) for c in ("4D1A33", "87395A", "C26683", "F5A9B8", "F9C8D2", "FDE6EB")]
+R_PEARL = [hexc(c) for c in ("4E4A66", "7D7A96", "A9A7C0", "D2D1E3", "EEEEF6", "FFFFFF")]
+R_LAVENDER = [hexc(c) for c in ("2F2652", "4E4382", "7468B4", "A096D8", "C9C1EF", "ECE8FB")]
+R_STONE = [hexc(c) for c in ("5A5170", "786E90", "978DAE", "B5ABC8", "D1C9DE", "E9E4F1")]
+R_DIRT = [hexc(c) for c in ("3E2235", "5C364D", "7B4C66", "996581", "B5819C")]
+R_SAND = [hexc(c) for c in ("C27C92", "D896A8", "E8B2C0", "F4CBD5", "FCE3EA")]
+R_SANDSTONE = [hexc(c) for c in ("9C5370", "BE7590", "D898AD", "EAB6C7", "F7D5E0")]
+R_WOOD_PINK = [hexc(c) for c in ("6E3050", "9C5073", "C77596", "E59EB9", "F6C7D8")]
+R_WOOD_BLUE = [hexc(c) for c in ("24476F", "37699B", "5596C6", "86C3E6", "BCE3F6")]
+R_WOOD_WHITE = [hexc(c) for c in ("7F7A93", "A6A2BA", "C9C6D9", "E6E4EF", "FAF9FD")]
+# Blue -> lavender -> pink -> white: crystals, crystal gear.
+R_TRANS = [hexc(c) for c in ("17396B", "2C6FB0", "4FB3EA", "93D9F8", "C8B9EC", "F2A6BF", "F9CCD7", "FFFFFF")]
+R_DOUGH = [hexc(c) for c in ("6B3A1E", "94572C", "B97A3F", "D69E58", "EDC27E")]
+NAVY = hexc("1B2650")
 CLEAR = (0, 0, 0, 0)
 
 
@@ -35,12 +68,55 @@ def mix(a, b, t):
     return tuple(round(a[i] + (b[i] - a[i]) * t) for i in range(3))
 
 
+def mix_ramp(ramp_a, ramp_b, t):
+    """Blends two ramps stop by stop (resampled to the longer one)."""
+    n = max(len(ramp_a), len(ramp_b))
+    return [mix(sample(ramp_a, i / (n - 1)), sample(ramp_b, i / (n - 1)), t) for i in range(n)]
+
+
 def shade(c, f):
     return tuple(max(0, min(255, round(v * f))) for v in c[:3])
 
 
-def rgba(c, a=255):
-    return (c[0], c[1], c[2], a)
+def sample(ramp, t):
+    t = min(1.0, max(0.0, t))
+    pos = t * (len(ramp) - 1)
+    i = min(len(ramp) - 2, int(pos))
+    return mix(ramp[i], ramp[i + 1], pos - i)
+
+
+def lum(px):
+    return (0.299 * px[0] + 0.587 * px[1] + 0.114 * px[2]) / 255.0
+
+
+def hsv(px):
+    return colorsys.rgb_to_hsv(px[0] / 255.0, px[1] / 255.0, px[2] / 255.0)
+
+
+# ============================================================================================ I/O
+_zip_cache = {}
+
+
+def _zip(path):
+    if path not in _zip_cache:
+        _zip_cache[path] = zipfile.ZipFile(path)
+    return _zip_cache[path]
+
+
+def vblock(name):
+    """A vanilla block texture (from 'base block textures.zip')."""
+    with _zip(BLOCK_ZIP).open(f"base block textures/{name}.png") as f:
+        return Image.open(f).convert("RGBA")
+
+
+def vitem(name):
+    """A vanilla item sprite (from 'Base Sprite Images.zip')."""
+    with _zip(ITEM_ZIP).open(f"Base Sprite Images/{name}.png") as f:
+        return Image.open(f).convert("RGBA")
+
+
+def vextra(rel):
+    return Image.open(os.path.join(EXTRA, rel)).convert("RGBA")
 
 
 def save(img, rel):
@@ -61,750 +137,1104 @@ def new(w=16, h=16):
     return Image.new("RGBA", (w, h), CLEAR)
 
 
-def band5(i, n):
-    """Index 0..4 of the flag stripe for position i of n."""
-    return min(4, i * 5 // n)
+CUTOUT = {"texture": {"mipmap_strategy": "strict_cutout"}}
+LEAVES_META = {"texture": {"mipmap_strategy": "dark_cutout"}}
+GLASS_META = {"texture": {"mipmap_strategy": "mean"}}
+
+
+# ============================================================================================ core tools
+def pixels(img):
+    w, h = img.size
+    return [(x, y) for y in range(h) for x in range(w)]
+
+
+def lum_range(img, mask=None, lo_pct=0.02, hi_pct=0.98):
+    values = sorted(lum(img.getpixel(p)) for p in pixels(img)
+                    if img.getpixel(p)[3] > 0 and (mask is None or mask(p, img.getpixel(p))))
+    if not values:
+        return 0.0, 1.0
+    lo = values[int(lo_pct * (len(values) - 1))]
+    hi = values[int(hi_pct * (len(values) - 1))]
+    return lo, max(hi, lo + 1e-3)
+
+
+def gradient_map(img, ramp, mask=None, lo=None, hi=None, curve=lambda t: t, out=None, frame_height=None):
+    """
+    Recolours `img` (or only the pixels selected by `mask(pos, px)`) by mapping each pixel's
+    brightness, normalised over the selected pixels, onto `ramp`. Alpha is kept.
+    """
+    src = img
+    dst = out if out is not None else img.copy()
+    if lo is None or hi is None:
+        lo2, hi2 = lum_range(src, mask)
+        lo = lo2 if lo is None else lo
+        hi = hi2 if hi is None else hi
+    for p in pixels(src):
+        px = src.getpixel(p)
+        if px[3] == 0 or (mask is not None and not mask(p, px)):
+            continue
+        t = curve((lum(px) - lo) / (hi - lo))
+        c = sample(ramp, t)
+        dst.putpixel(p, (c[0], c[1], c[2], px[3]))
+    return dst
+
+
+def components(img, pred, wrap=True):
+    """Labels 4-connected regions of pixels for which pred(pos, px) is true (wrapping at the edges,
+    so tileable textures keep consistent regions). Returns {pos: label} and the label count."""
+    w, h = img.size
+    labels = {}
+    count = 0
+    for start in pixels(img):
+        if start in labels:
+            continue
+        if not pred(start, img.getpixel(start)):
+            continue
+        stack = [start]
+        labels[start] = count
+        while stack:
+            x, y = stack.pop()
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                nx, ny = x + dx, y + dy
+                if wrap:
+                    nx %= w
+                    ny %= h
+                elif not (0 <= nx < w and 0 <= ny < h):
+                    continue
+                q = (nx, ny)
+                if q not in labels and pred(q, img.getpixel(q)):
+                    labels[q] = count
+                    stack.append(q)
+        count += 1
+    return labels, count
+
+
+def stripes5(n):
+    """Splits n rows into the five flag stripes as evenly as possible, widest in the middle."""
+    base = [n // 5] * 5
+    for i in (2, 1, 3, 0, 4)[: n - sum(base)]:
+        base[i] += 1
+    bands = []
+    for i, size in enumerate(base):
+        bands += [i] * size
+    return bands
+
+
+def flag_rows(img, ramp_for_stripe, rows=None, lo=None, hi=None, curve=lambda t: t):
+    """Gradient-maps each row with the ramp of the flag stripe it falls in."""
+    w, h = img.size
+    bands = rows if rows is not None else stripes5(h)
+    out = img.copy()
+    if lo is None or hi is None:
+        lo, hi = lum_range(img)
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))
+        if px[3] == 0:
+            continue
+        t = curve((lum(px) - lo) / (hi - lo))
+        c = sample(ramp_for_stripe(bands[y]), t)
+        out.putpixel((x, y), (c[0], c[1], c[2], px[3]))
+    return out
+
+
+def light_ramp(color, dark=0.62, light=1.0):
+    """A ramp that keeps a colour pastel: from a slightly darkened version up to the colour itself."""
+    return [shade(color, dark), shade(color, (dark + light) / 2), shade(color, light), mix(color, WHITE, 0.25)]
+
+
+FLAG_RAMPS = [light_ramp(BLUE, 0.7), light_ramp(PINK, 0.72), light_ramp((246, 246, 252), 0.78),
+              light_ramp(PINK, 0.72), light_ramp(BLUE, 0.7)]
+
+
+def paste_heart(img, cx, cy, fill, outline=None, size=5):
+    shapes = {
+        5: [".#.#.", "#####", "#####", ".###.", "..#.."],
+        7: [".##.##.", "#######", "#######", ".#####.", "..###..", "...#..."],
+    }
+    rows = shapes[size]
+    ox = cx - len(rows[0]) // 2
+    oy = cy - len(rows) // 2
+    for dy, row in enumerate(rows):
+        for dx, ch in enumerate(row):
+            if ch == "#":
+                img.putpixel((ox + dx, oy + dy), (*fill, 255))
+    if outline:
+        for dy, row in enumerate(rows):
+            for dx, ch in enumerate(row):
+                if ch != "#":
+                    continue
+                for ndx, ndy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                    nx, ny = dx + ndx, dy + ndy
+                    inside = 0 <= ny < len(rows) and 0 <= nx < len(row) and rows[ny][nx] == "#"
+                    if not inside:
+                        px, py = ox + nx, oy + ny
+                        if 0 <= px < img.width and 0 <= py < img.height and img.getpixel((px, py))[3] > 0:
+                            img.putpixel((px, py), (*outline, 255))
+    return img
+
+
+# ============================================================================================ terrain
+def grass_gray(img, low=0.66):
+    """Turns a vanilla grass texture into a light grayscale one; the game tints it with the biome's
+    grass colour, so keeping it bright gives pastel colours instead of muddy ones."""
+    lo, hi = lum_range(img)
+    out = img.copy()
+    for p in pixels(img):
+        px = img.getpixel(p)
+        if px[3] == 0:
+            continue
+        t = min(1.0, max(0.0, (lum(px) - lo) / (hi - lo)))
+        g = round(255 * (low + (1.0 - low) * t))
+        out.putpixel(p, (g, g, g, px[3]))
+    return out
+
+
+def trans_dirt():
+    return gradient_map(vblock("dirt"), R_DIRT)
+
+
+def trans_grass_block_top():
+    return grass_gray(vblock("grass_block_top"))
+
+
+def trans_grass_block_side_overlay():
+    return grass_gray(vblock("grass_block_side_overlay"), low=0.68)
+
+
+def trans_grass_block_side():
+    """Dirt with the grass fringe pre-tinted trans pink (what you see with the overlay off or far away)."""
+    side = trans_dirt()
+    overlay = trans_grass_block_side_overlay()
+    for p in pixels(overlay):
+        px = overlay.getpixel(p)
+        if px[3] > 0:
+            g = px[0] / 255.0
+            side.putpixel(p, (*shade(PINK, g), 255))
+    return side
+
+
+def trans_grass_block_snow():
+    img = vblock("grass_block_snow")
+    snow = lambda p, px: hsv(px)[1] < 0.18 and lum(px) > 0.55
+    out = gradient_map(img, R_DIRT, mask=lambda p, px: not snow(p, px))
+    return gradient_map(img, [hexc("B9CBE6"), hexc("DCE8F7"), hexc("F4F8FE"), WHITE], mask=snow, out=out)
+
+
+def trans_stone():
+    return gradient_map(vblock("stone"), R_STONE)
+
+
+def trans_cobblestone():
+    """Every cobble gets its own pastel trans colour; the mortar between them is soft lavender."""
+    img = vblock("cobblestone")
+    lo, hi = lum_range(img)
+    norm = lambda px: (lum(px) - lo) / (hi - lo)
+    stone_px = lambda p, px: norm(px) > 0.3
+    labels, count = components(img, stone_px)
+    rng = random.Random(7)
+    ramps = [mix_ramp(R_STONE, light_ramp(PINK, 0.55), 0.45), mix_ramp(R_STONE, light_ramp(BLUE, 0.55), 0.4),
+             mix_ramp(R_STONE, R_PEARL, 0.6)]
+    choice = [ramps[(i + rng.randrange(3)) % 3] for i in range(count)]
+    out = img.copy()
+    for p in pixels(img):
+        px = img.getpixel(p)
+        t = norm(px)
+        if p in labels:
+            c = sample(choice[labels[p]], 0.15 + 0.85 * t)
+        else:
+            c = sample(R_LAVENDER, 0.1 + t * 1.2)
+        out.putpixel(p, (*c, px[3]))
+    return out
+
+
+def bricks_from(img, seed=11, accent=None):
+    """Pearl-white bricks with a whisper of pink or blue per brick, separated by lavender mortar."""
+    lo, hi = lum_range(img)
+    norm = lambda px: (lum(px) - lo) / (hi - lo)
+    brick = lambda p, px: norm(px) > 0.28
+    labels, count = components(img, brick)
+    tints = [mix_ramp(R_PEARL, light_ramp(PINK, 0.6), 0.3), mix_ramp(R_PEARL, light_ramp(BLUE, 0.6), 0.3)]
+    out = img.copy()
+    for p in pixels(img):
+        px = img.getpixel(p)
+        t = norm(px)
+        if p in labels:
+            c = sample(tints[(labels[p] + seed) % 2], 0.12 + 0.88 * t)
+        else:
+            c = sample(R_LAVENDER, 0.05 + t * 1.4)
+        out.putpixel(p, (*c, px[3]))
+    return out
+
+
+def trans_stone_bricks():
+    return bricks_from(vblock("stone_bricks"))
+
+
+def cracked_trans_stone_bricks():
+    return bricks_from(vblock("cracked_stone_bricks"))
+
+
+def chiseled_trans_stone_bricks():
+    img = gradient_map(vblock("chiseled_stone_bricks"), mix_ramp(R_PEARL, R_LAVENDER, 0.25))
+    # A little heart carved into the centre panel.
+    return paste_heart(img, 7, 7, shade(PINK, 0.95), outline=hexc("9E4C6B"))
+
+
+def trans_sand():
+    return gradient_map(vblock("sand"), R_SAND)
+
+
+def sandstone(name):
+    return gradient_map(vblock(name), R_SANDSTONE)
+
+
+def chiseled_trans_sandstone():
+    img = sandstone("chiseled_sandstone")
+    # Replace the creeper face with a heart.
+    for y in range(4, 12):
+        for x in range(4, 12):
+            px = img.getpixel((x, y))
+            img.putpixel((x, y), (*shade(px[:3], 1.04), 255))
+    return paste_heart(img, 7, 7, hexc("F7B9C8"), outline=hexc("8E3E60"), size=7)
+
+
+# ============================================================================================ trans wood
+def trans_log():
+    """Pearly birch-style bark whose dark knots are alternately trans pink and trans blue."""
+    img = vblock("birch_log")
+    dark = lambda p, px: lum(px) < 0.35
+    labels, count = components(img, dark)
+    out = gradient_map(img, mix_ramp(R_PEARL, R_PINK, 0.12), mask=lambda p, px: not dark(p, px), lo=0.45, hi=0.95)
+    knot_ramps = [[hexc("3B1830"), hexc("8E3E60"), hexc("D97A97")], [hexc("10284A"), hexc("2F6FA8"), hexc("4FB3EA")]]
+    for p, label in labels.items():
+        px = img.getpixel(p)
+        c = sample(knot_ramps[label % 2], lum(px) / 0.35)
+        out.putpixel(p, (*c, px[3]))
+    return out
+
+
+def trans_log_top():
+    img = vblock("birch_log_top")
+    # The outer ring of bark stays pearly; the rings inside become pink wood.
+    w, h = img.size
+    bark = lambda p, px: min(p[0], p[1], w - 1 - p[0], h - 1 - p[1]) == 0
+    out = gradient_map(img, R_PEARL, mask=bark)
+    return gradient_map(img, R_WOOD_PINK, mask=lambda p, px: not bark(p, px), out=out)
+
+
+def stripped_trans_log():
+    return gradient_map(vblock("stripped_birch_log"), R_WOOD_PINK)
+
+
+def stripped_trans_log_top():
+    return gradient_map(vblock("stripped_birch_log_top"), R_WOOD_PINK)
+
+
+def trans_planks():
+    """Soft pink boards; the middle two are washed with white and blue so walls show gentle trans stripes."""
+    img = vblock("birch_planks")
+    board_ramps = [R_WOOD_PINK, mix_ramp(R_WOOD_PINK, R_WOOD_WHITE, 0.55), mix_ramp(R_WOOD_PINK, R_WOOD_BLUE, 0.45), R_WOOD_PINK]
+    lo, hi = lum_range(img)
+    out = img.copy()
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))
+        c = sample(board_ramps[y // 4], (lum(px) - lo) / (hi - lo))
+        out.putpixel((x, y), (*c, px[3]))
+    return out
+
+
+def voronoi_patches(w, h, seeds, rng):
+    """Splits a tileable w x h texture into patches around random seed points (wrapping at the edges)."""
+    points = [(rng.uniform(0, w), rng.uniform(0, h)) for _ in range(seeds)]
+    cells = {}
+    for y in range(h):
+        for x in range(w):
+            best, best_d = 0, 1e9
+            for i, (px, py) in enumerate(points):
+                dx = min(abs(x - px), w - abs(x - px))
+                dy = min(abs(y - py), h - abs(y - py))
+                d = dx * dx + dy * dy
+                if d < best_d:
+                    best, best_d = i, d
+            cells[(x, y)] = best
+    return cells
+
+
+def trans_leaves():
+    """Cherry-blossom leaves in patches of trans pink and trans blue; the green bits become pearly white."""
+    img = vblock("cherry_leaves")
+    blossom = lambda p, px: px[3] > 0 and (hsv(px)[0] > 0.8 or hsv(px)[0] < 0.08) and hsv(px)[1] > 0.12
+    rng = random.Random(9)
+    cells = voronoi_patches(16, 16, 6, rng)
+    colours = [0, 1, 0, 1, 0, 1]
+    out = gradient_map(img, R_PEARL, mask=lambda p, px: not blossom(p, px), lo=0.2, hi=0.8,
+                       curve=lambda t: 0.3 + 0.7 * t)
+    pink = [hexc("B4557A"), hexc("E58AA4"), PINK, hexc("FCE2EA")]
+    blue = [hexc("2F7BBB"), hexc("46A8E2"), BLUE, hexc("D6F4FE")]
+    lo, hi = lum_range(img, blossom)
+    for p in pixels(img):
+        px = img.getpixel(p)
+        if not blossom(p, px):
+            continue
+        ramp = pink if colours[cells[p]] == 0 else blue
+        c = sample(ramp, (lum(px) - lo) / (hi - lo))
+        out.putpixel(p, (*c, px[3]))
+    return out
+
+
+def trans_sapling():
+    img = vblock("cherry_sapling")
+    trunk = lambda p, px: hsv(px)[1] < 0.45 and lum(px) < 0.35
+    blossom = lambda p, px: not trunk(p, px) and (hsv(px)[0] > 0.8 or hsv(px)[0] < 0.08)
+    out = gradient_map(img, [hexc("6E6A86"), hexc("B9B6CB"), hexc("F4F3F9")], mask=trunk)
+    labels, count = components(img, blossom, wrap=False)
+    out = gradient_map(img, R_PEARL, mask=lambda p, px: not trunk(p, px) and not blossom(p, px), out=out)
+    pink = [hexc("A84A6E"), hexc("E58AA4"), PINK, hexc("FCE2EA")]
+    blue = [hexc("2D73B0"), hexc("46A8E2"), BLUE, hexc("D6F4FE")]
+    lo, hi = lum_range(img, blossom)
+    for p, label in labels.items():
+        px = img.getpixel(p)
+        c = sample(pink if label % 2 == 0 else blue, (lum(px) - lo) / (hi - lo))
+        out.putpixel(p, (*c, px[3]))
+    return out
+
+
+def recolor_door(img):
+    """Cherry door/trapdoor: the frame becomes pink wood, the panels white wood with blue trim."""
+    lo, hi = lum_range(img)
+    out = img.copy()
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))
+        if px[3] == 0:
+            continue
+        t = (lum(px) - lo) / (hi - lo)
+        if t < 0.33:
+            c = sample(R_WOOD_BLUE, t * 1.6)
+        else:
+            c = sample(R_WOOD_PINK, t)
+        out.putpixel((x, y), (*c, px[3]))
+    return out
+
+
+def trans_door_top():
+    return recolor_door(vblock("cherry_door_top"))
+
+
+def trans_door_bottom():
+    return recolor_door(vblock("cherry_door_bottom"))
+
+
+def trans_trapdoor():
+    return recolor_door(vblock("cherry_trapdoor"))
+
+
+# ============================================================================================ crystals
+def trans_crystal_block():
+    return gradient_map(vblock("amethyst_block"), R_TRANS)
+
+
+def trans_crystal_cluster():
+    return gradient_map(vblock("amethyst_cluster"), R_TRANS, curve=lambda t: 0.1 + 0.9 * t)
+
+
+def trans_crystal_ore():
+    """Trans stone with glittering gems that are alternately blue and pink."""
+    img = vblock("diamond_ore")
+    gem = lambda p, px: hsv(px)[1] > 0.25
+    out = gradient_map(img, R_STONE, mask=lambda p, px: not gem(p, px))
+    labels, count = components(img, gem)
+    ramps = [[hexc("1F5288"), hexc("3EA5E6"), BLUE, hexc("E8F9FF")], [hexc("8E3E60"), hexc("E07D9C"), PINK, hexc("FFF0F4")]]
+    lo, hi = lum_range(img, gem)
+    for p, label in labels.items():
+        px = img.getpixel(p)
+        c = sample(ramps[label % 2], (lum(px) - lo) / (hi - lo))
+        out.putpixel(p, (*c, px[3]))
+    return out
+
+
+def trans_crystal_item():
+    return gradient_map(vitem("amethyst_shard"), R_TRANS, curve=lambda t: 0.08 + 0.92 * t)
+
+
+# ============================================================================================ glass, wool, light
+def tinted_glass(base, colour, alpha_boost=1.15):
+    out = base.copy()
+    lo, hi = lum_range(base)
+    for p in pixels(base):
+        px = base.getpixel(p)
+        if px[3] == 0:
+            continue
+        t = (lum(px) - lo) / (hi - lo)
+        c = mix(shade(colour, 0.82), mix(colour, WHITE, 0.55), t)
+        out.putpixel(p, (*c, min(255, round(px[3] * alpha_boost))))
+    return out
+
+
+def trans_stained_glass():
+    """Five translucent flag stripes in a frosted frame."""
+    base = vblock("white_stained_glass")
+    out = base.copy()
+    bands = stripes5(16)
+    lo, hi = lum_range(base)
+    for (x, y) in pixels(base):
+        px = base.getpixel((x, y))
+        t = (lum(px) - lo) / (hi - lo)
+        colour = FLAG[bands[y]] if FLAG[bands[y]] != WHITE else (240, 240, 250)
+        c = mix(shade(colour, 0.85), mix(colour, WHITE, 0.5), t)
+        out.putpixel((x, y), (*c, min(255, round(px[3] * 1.12))))
+    return out
+
+
+def trans_stained_glass_pane_top():
+    return tinted_glass(vblock("white_stained_glass_pane_top"), PINK, 1.0)
+
+
+def trans_pink_stained_glass():
+    return tinted_glass(vblock("white_stained_glass"), PINK)
+
+
+def trans_blue_stained_glass():
+    return tinted_glass(vblock("white_stained_glass"), BLUE)
+
+
+def trans_wool():
+    """White wool's fluffy texture in five flag stripes."""
+    return flag_rows(vblock("white_wool"), lambda i: FLAG_RAMPS[i], curve=lambda t: 0.1 + 0.9 * t)
+
+
+def trans_lantern():
+    """A navy metal lantern with a pink-and-white glow (three animated frames, like vanilla)."""
+    img = vblock("lantern")
+    glow = lambda p, px: hsv(px)[1] > 0.35 and hsv(px)[0] < 0.2 and lum(px) > 0.35
+    out = gradient_map(img, [hexc("141A3A"), hexc("2B3F7A"), hexc("4E79B8"), hexc("8FC3EA")], mask=lambda p, px: not glow(p, px))
+    return gradient_map(img, [hexc("E06A92"), hexc("F5A9B8"), hexc("FFE3EC"), WHITE], mask=glow, out=out)
+
+
+# ============================================================================================ gear
+def is_diamond(px):
+    h, s, v = hsv(px)
+    return px[3] > 0 and 0.38 < h < 0.6 and s > 0.15
+
+
+def recolor_gear(img, ramp=R_TRANS, curve=lambda t: 0.06 + 0.94 * t):
+    """Swaps the diamond parts of a vanilla diamond item/armor texture for crystal colours."""
+    return gradient_map(img, ramp, mask=lambda p, px: is_diamond(px), curve=curve)
+
+
+def trans_tool(name):
+    return recolor_gear(vitem(f"diamond_{name}"))
+
+
+def trans_armor_item(name):
+    """Armor icons get the flag: rows of blue, pink and white crystal plates."""
+    img = vitem(f"diamond_{name}")
+    ys = [y for (x, y) in pixels(img) if is_diamond(img.getpixel((x, y)))]
+    top, bottom = min(ys), max(ys)
+    bands = stripes5(bottom - top + 1)
+    lo, hi = lum_range(img, lambda p, px: is_diamond(px))
+    ramps = [[hexc("17396B"), hexc("2C6FB0"), BLUE, hexc("D6F4FE")], [hexc("7A2F50"), hexc("D16F8F"), PINK, hexc("FFE8EE")],
+             [hexc("6F6B88"), hexc("BDBBD2"), hexc("EEEEF6"), WHITE]]
+    stripe_ramp = [ramps[0], ramps[1], ramps[2], ramps[1], ramps[0]]
+    out = img.copy()
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))
+        if not is_diamond(px):
+            continue
+        c = sample(stripe_ramp[bands[y - top]], (lum(px) - lo) / (hi - lo))
+        out.putpixel((x, y), (*c, px[3]))
+    return out
+
+
+def trans_armor_layer(rel):
+    """Worn armor: the same crystal recolour as the tools (blue shadows, pink mid-tones, white shine)."""
+    return recolor_gear(vextra(rel), curve=lambda t: 0.08 + 0.9 * t)
+
+
+# ============================================================================================ treats
+def trans_cookie():
+    """Vanilla's cookie, but the chocolate chips are pink and blue candy chips."""
+    img = vitem("cookie")
+    chip = lambda p, px: px[3] > 0 and lum(px) < 0.28
+    labels, count = components(img, chip, wrap=False)
+    out = img.copy()
+    ramps = [[hexc("8E3E60"), hexc("E07D9C"), hexc("FBC6D3")], [hexc("1F5288"), hexc("3EA5E6"), hexc("C4EDFF")],
+             [hexc("8E8AA8"), hexc("E6E4F2"), WHITE]]
+    for p, label in labels.items():
+        px = img.getpixel(p)
+        c = sample(ramps[label % 3], lum(px) / 0.28)
+        out.putpixel(p, (*c, px[3]))
+    return out
+
+
+def trans_cake_item():
+    img = vitem("cake")
+    berry = lambda p, px: px[3] > 0 and hsv(px)[1] > 0.45 and (hsv(px)[0] > 0.9 or hsv(px)[0] < 0.04)
+    sponge = lambda p, px: px[3] > 0 and not berry(p, px) and hsv(px)[1] > 0.3 and 0.03 < hsv(px)[0] < 0.15
+    out = gradient_map(img, R_WOOD_PINK, mask=sponge)
+    labels, count = components(img, berry, wrap=False)
+    for p, label in labels.items():
+        px = img.getpixel(p)
+        c = (BLUE, PINK)[label % 2]
+        out.putpixel(p, (*shade(c, 0.75 + 0.5 * lum(px)), px[3]))
+    return out
+
+
+def sprinkle_frosting(img):
+    """Red cherry pixels on vanilla cake textures become pink and blue sprinkles."""
+    red = lambda p, px: px[3] > 0 and hsv(px)[1] > 0.45 and (hsv(px)[0] > 0.9 or hsv(px)[0] < 0.04)
+    labels, count = components(img, red, wrap=False)
+    out = img.copy()
+    for p, label in labels.items():
+        px = img.getpixel(p)
+        out.putpixel(p, (*shade((BLUE, PINK)[label % 2], 0.8 + 0.4 * lum(px)), px[3]))
+    return out
+
+
+def cake_layers(img):
+    """The brown sponge becomes a five-layer trans flag sponge; the frosting stays creamy white."""
+    sponge = lambda p, px: px[3] > 0 and hsv(px)[1] > 0.25 and 0.0 < hsv(px)[0] < 0.15
+    rows = sorted({y for (x, y) in pixels(img) if sponge((x, y), img.getpixel((x, y)))})
+    out = img.copy()
+    if not rows:
+        return out
+    bands = stripes5(len(rows))
+    band_of = {y: bands[i] for i, y in enumerate(rows)}
+    lo, hi = lum_range(img, sponge)
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))
+        if sponge((x, y), px):
+            c = sample(FLAG_RAMPS[band_of[y]], 0.15 + 0.85 * (lum(px) - lo) / (hi - lo))
+            out.putpixel((x, y), (*c, px[3]))
+    return sprinkle_frosting(out)
+
+
+def trans_cake_top():
+    return sprinkle_frosting(vblock("cake_top"))
+
+
+def trans_cake_side():
+    return cake_layers(vblock("cake_side"))
+
+
+def trans_cake_inner():
+    return cake_layers(vblock("cake_inner"))
+
+
+def trans_cake_bottom():
+    return gradient_map(vblock("cake_bottom"), R_WOOD_PINK)
 
 
 def from_ascii(rows, palette):
     img = new(len(rows[0]), len(rows))
     for y, row in enumerate(rows):
-        assert len(row) == len(rows[0]), (row, len(row))
         for x, ch in enumerate(row):
-            if ch in palette:
-                img.putpixel((x, y), rgba(palette[ch]))
-    return img
-
-
-def outline(img, colour=OUTLINE):
-    """Adds a 1px outline around all opaque pixels (4-neighbourhood)."""
-    w, h = img.size
-    src = img.copy()
-    for y in range(h):
-        for x in range(w):
-            if src.getpixel((x, y))[3]:
-                continue
-            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-                nx, ny = x + dx, y + dy
-                if 0 <= nx < w and 0 <= ny < h and src.getpixel((nx, ny))[3]:
-                    img.putpixel((x, y), rgba(colour))
-                    break
-    return img
-
-
-def bevel(img, light=1.18, dark=0.8):
-    """Lightens pixels with an empty pixel above/left and darkens those with one below/right."""
-    w, h = img.size
-    src = img.copy()
-
-    def empty(x, y):
-        return not (0 <= x < w and 0 <= y < h) or src.getpixel((x, y))[3] == 0 or src.getpixel((x, y))[:3] == OUTLINE
-
-    for y in range(h):
-        for x in range(w):
-            p = src.getpixel((x, y))
-            if p[3] == 0 or p[:3] == OUTLINE:
-                continue
-            if empty(x, y - 1) or empty(x - 1, y):
-                img.putpixel((x, y), rgba(shade(p, light), p[3]))
-            elif empty(x, y + 1) or empty(x + 1, y):
-                img.putpixel((x, y), rgba(shade(p, dark), p[3]))
-    return img
-
-
-# ============================================================================================ blocks
-def stone_pixel(rng, x, y, base=(206, 200, 218), tint=0.38):
-    band = FLAG[[0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4][y]]
-    c = mix(base, band, tint)
-    return shade(c, 0.88 + rng.random() * 0.22)
-
-
-def trans_stone():
-    rng = random.Random(1)
-    img = new()
-    for y in range(16):
-        for x in range(16):
-            img.putpixel((x, y), rgba(stone_pixel(rng, x, y)))
-    for _ in range(14):
-        x, y = rng.randrange(16), rng.randrange(16)
-        img.putpixel((x, y), rgba(shade(img.getpixel((x, y)), 0.72)))
-    return img
-
-
-def trans_cobblestone():
-    rng = random.Random(2)
-    seeds = [(rng.randrange(16), rng.randrange(16), rng.choice(FLAG)) for _ in range(10)]
-
-    def nearest(x, y):
-        best = None
-        for i, (sx, sy, _) in enumerate(seeds):
-            dx = min(abs(x - sx), 16 - abs(x - sx))
-            dy = min(abs(y - sy), 16 - abs(y - sy))
-            d = dx * dx + dy * dy
-            if best is None or d < best[0]:
-                best = (d, i)
-        return best
-
-    img = new()
-    for y in range(16):
-        for x in range(16):
-            d, i = nearest(x, y)
-            edge = any(nearest((x + dx) % 16, (y + dy) % 16)[1] != i for dx, dy in ((1, 0), (0, 1)))
-            if edge:
-                c = (120, 108, 140)
-            else:
-                c = shade(mix((200, 194, 214), seeds[i][2], 0.45), 1.08 - min(d, 16) * 0.015 + rng.random() * 0.06)
-            img.putpixel((x, y), rgba(c))
-    return img
-
-
-def bricks(seed, row_colours, mortar=(150, 138, 168), tint=0.5):
-    rng = random.Random(seed)
-    img = new()
-    for y in range(16):
-        row = y // 4
-        offset = 0 if row % 2 == 0 else 4
-        for x in range(16):
-            if y % 4 == 3 or (x + offset) % 8 == 7:
-                c = shade(mortar, 0.92 + rng.random() * 0.1)
-            else:
-                c = mix((206, 198, 214), row_colours[row % len(row_colours)], tint)
-                c = shade(c, 0.9 + rng.random() * 0.16)
-                if y % 4 == 0 or (x + offset) % 8 == 0:
-                    c = shade(c, 1.08)
-            img.putpixel((x, y), rgba(c))
-    return img
-
-
-def trans_dirt(seed=3):
-    rng = random.Random(seed)
-    img = new()
-    base = (156, 108, 128)
-    for y in range(16):
-        for x in range(16):
-            img.putpixel((x, y), rgba(shade(base, 0.82 + rng.random() * 0.3)))
-    for colour, n in ((BLUE, 9), (PINK, 9), (WHITE, 4), ((112, 74, 92), 10)):
-        for _ in range(n):
-            x, y = rng.randrange(16), rng.randrange(16)
-            img.putpixel((x, y), rgba(shade(mix(base, colour, 0.75), 0.9 + rng.random() * 0.15)))
-    return img
-
-
-def grass_colour(x, y, rng):
-    k = (x + y) % 16
-    band = 0 if k < 3 else 1 if k < 6 else 2 if k < 10 else 3 if k < 13 else 4
-    c = FLAG[band]
-    if band == 2:
-        c = (246, 246, 252)
-    return shade(c, 0.8 + rng.random() * 0.26)
-
-
-def trans_grass_top():
-    rng = random.Random(4)
-    img = new()
-    for y in range(16):
-        for x in range(16):
-            img.putpixel((x, y), rgba(grass_colour(x, y, rng)))
-    for _ in range(18):
-        x, y = rng.randrange(16), rng.randrange(16)
-        img.putpixel((x, y), rgba(shade(img.getpixel((x, y)), 1.15)))
-    return img
-
-
-def trans_grass_side():
-    rng = random.Random(5)
-    img = trans_dirt(seed=6)
-    depth = [rng.choice((2, 3, 3, 4, 4, 5)) for _ in range(16)]
-    for x in range(16):
-        stripe = FLAG[band5(x, 16)]
-        if stripe == WHITE:
-            stripe = (246, 246, 252)
-        for y in range(depth[x]):
-            img.putpixel((x, y), rgba(shade(stripe, (0.95 if y == 0 else 0.86) + rng.random() * 0.12)))
-    return img
-
-
-def trans_sand():
-    rng = random.Random(7)
-    img = new()
-    base = (250, 234, 240)
-    for y in range(16):
-        for x in range(16):
-            img.putpixel((x, y), rgba(shade(base, 0.92 + rng.random() * 0.1)))
-    for colour, n in ((PINK, 22), (BLUE, 14), ((255, 255, 255), 10)):
-        for _ in range(n):
-            x, y = rng.randrange(16), rng.randrange(16)
-            img.putpixel((x, y), rgba(shade(mix(base, colour, 0.8), 0.95 + rng.random() * 0.08)))
-    return img
-
-
-GEM = ["..o..", ".oLo.", "oLBPo", ".oPo.", "..o.."]
-
-
-def stamp_gem(img, gx, gy, pal):
-    for dy, row in enumerate(GEM):
-        for dx, ch in enumerate(row):
             if ch != ".":
-                img.putpixel(((gx + dx) % 16, (gy + dy) % 16), rgba(pal[ch]))
-
-
-def trans_crystal_ore():
-    img = trans_stone()
-    pal = {"o": (64, 52, 98), "L": WHITE, "B": BLUE, "P": PINK}
-    for gx, gy in ((1, 1), (9, 2), (4, 8), (11, 10)):
-        stamp_gem(img, gx, gy, pal)
+                c = palette[ch]
+                img.putpixel((x, y), (*c, 255) if len(c) == 3 else c)
     return img
 
 
-def trans_crystal_block():
+def trans_donut():
+    """A frosted ring donut: golden dough, pink icing with blue and white sprinkles, a real hole."""
     img = new()
-    rng = random.Random(8)
+    cx, cy = 7.5, 7.6
+    dough = R_DOUGH
+    icing = [hexc("B44D72"), hexc("DE7896"), hexc("F2A0B5"), hexc("FAC6D3"), hexc("FFE6EE")]
+    rng = random.Random(4)
     for y in range(16):
         for x in range(16):
-            d = min(x, y, 15 - x, 15 - y)
-            if d == 0:
-                c = (58, 120, 178)
-            elif d <= 2:
-                c = BLUE
-            elif d <= 4:
-                c = PINK
-            elif d <= 6:
-                c = WHITE
+            dx, dy = x - cx, (y - cy) * 1.08
+            r = math.hypot(dx, dy)
+            if r > 7.4 or r < 2.3:
+                continue
+            light = -(dx + dy) / 10.0  # light comes from the top left
+            # Wavy edge where the icing ends, with a couple of drips over the dough.
+            angle = math.atan2(dy, dx)
+            edge = 5.9 + 0.55 * math.sin(angle * 5.0 + 0.6) + (0.7 if abs(angle - 1.2) < 0.18 or abs(angle - 2.4) < 0.15 else 0.0)
+            on_icing = 3.15 < r < edge
+            if on_icing:
+                t = 0.62 + light * 0.55 - (0.25 if r > edge - 0.7 else 0.0) - (0.18 if r < 3.75 else 0.0)
+                c = sample(icing, t)
             else:
-                c = PINK
-            c = shade(c, 0.95 + rng.random() * 0.08)
-            if (x - y) in (-1, 0) and 2 < x < 13:
-                c = mix(c, WHITE, 0.6)
-            img.putpixel((x, y), rgba(c))
-    return img
+                t = 0.55 + light * 0.5 - (0.35 if r > 6.8 else 0.0) - (0.3 if r < 2.9 else 0.0)
+                c = sample(dough, t)
+            img.putpixel((x, y), (*c, 255))
+    # Sprinkles.
+    for (x, y, colour) in ((5, 3, BLUE), (9, 3, WHITE), (11, 5, BLUE), (3, 6, WHITE), (12, 8, PINK), (4, 9, BLUE),
+                           (10, 11, WHITE), (6, 12, BLUE), (8, 4, hexc("9BE3FC")), (12, 10, BLUE), (3, 8, hexc("FFE6EE"))):
+        if img.getpixel((x, y))[3] and img.getpixel((x, y))[0] > 170:
+            img.putpixel((x, y), (*colour, 255))
+    # Darker outline, like vanilla food sprites.
+    outline = img.copy()
+    for (x, y) in pixels(img):
+        if img.getpixel((x, y))[3] == 0:
+            continue
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            nx, ny = x + dx, y + dy
+            if not (0 <= nx < 16 and 0 <= ny < 16) or img.getpixel((nx, ny))[3] == 0:
+                c = img.getpixel((x, y))
+                outline.putpixel((x, y), (*shade(c[:3], 0.68), 255))
+                break
+    return outline
 
 
-def trans_log_side():
-    rng = random.Random(9)
-    img = new()
-    streaks = {2: PINK, 3: PINK, 7: BLUE, 11: PINK, 12: PINK, 14: BLUE}
-    for x in range(16):
-        for y in range(16):
-            c = (238, 236, 246)
-            if x in streaks:
-                c = mix(c, streaks[x], 0.65)
-            img.putpixel((x, y), rgba(shade(c, 0.9 + rng.random() * 0.12)))
-    for _ in range(10):  # little bark marks
-        x, y = rng.randrange(15), rng.randrange(16)
-        for dx in range(rng.choice((1, 2, 2, 3))):
-            if x + dx < 16:
-                img.putpixel((x + dx, y), rgba((96, 92, 128)))
-    return img
+def trans_cupcake():
+    rows = [
+        "......wW........",
+        ".....pWWp.......",
+        "....pPPPPp......",
+        "...pPPwPPPp.....",
+        "...PpPPPPPPp....",
+        "..pPPPPbPPPPp...",
+        "..PPwPPPPPwPP...",
+        ".pPPPPPPPPPPPp..",
+        ".dpppppppppppd..",
+        "..BwBwBwBwBwB...",
+        "..bWbWbWbWbWb...",
+        "..BwBwBwBwBwB...",
+        "...bWbWbWbWb....",
+        "...BwBwBwBwB....",
+        "....bbbbbbb.....",
+        "................",
+    ]
+    palette = {
+        "w": hexc("FFF4F7"), "W": WHITE, "p": hexc("D97A97"), "P": hexc("F5A9B8"), "d": hexc("B4557A"),
+        "B": hexc("5BCEFA"), "b": hexc("2F7BBB"),
+    }
+    img = from_ascii(rows, palette)
+    # Shift the cupcake right by one so it sits centred.
+    out = new()
+    out.paste(img, (1, 0))
+    return out
 
 
-def trans_log_top():
-    img = new()
-    rng = random.Random(10)
-    ring_colours = [PINK, WHITE, BLUE]
-    for y in range(16):
-        for x in range(16):
-            r = math.hypot(x - 7.5, y - 7.5)
-            if r > 6.6 or min(x, y, 15 - x, 15 - y) == 0:
-                c = shade((236, 234, 244), 0.9 + rng.random() * 0.1)
-            elif r < 1.6:
-                c = (226, 118, 150)
-            else:
-                c = ring_colours[int(r - 1.6) % 3]
-                c = shade(mix(c, (230, 200, 190), 0.25), 0.92 + rng.random() * 0.08)
-            img.putpixel((x, y), rgba(c))
-    return img
+def trans_macaron():
+    rows = [
+        "................",
+        "................",
+        "....bbbbbbbb....",
+        "..bBBBBBBBBBBb..",
+        ".bBlllBBBBBBBBb.",
+        ".bBBBBBBBBBBBBb.",
+        ".dbbbbbbbbbbbbd.",
+        ".wWWWWWWWWWWWWw.",
+        ".cwwwwwwwwwwwwc.",
+        ".pPPPPPPPPPPPPp.",
+        ".pPPPPPPPPPPPPp.",
+        "..pPPPPPPPPPPp..",
+        "....pppppppp....",
+        "................",
+        "................",
+        "................",
+    ]
+    palette = {
+        "b": hexc("3487C2"), "B": hexc("5BCEFA"), "l": hexc("CFF2FE"), "d": hexc("1F5288"),
+        "w": hexc("E8E6F2"), "W": WHITE, "c": hexc("B9B6CB"),
+        "p": hexc("C26683"), "P": hexc("F5A9B8"),
+    }
+    return from_ascii(rows, palette)
 
 
-def trans_planks():
-    rng = random.Random(11)
-    img = new()
-    colours = [BLUE, PINK, WHITE, PINK]
-    seams = [5, 11, 2, 9]
-    for y in range(16):
-        plank = y // 4
-        for x in range(16):
-            c = mix((214, 182, 168), colours[plank], 0.55)
-            c = shade(c, 0.9 + rng.random() * 0.1)
-            if y % 4 == 3 or x == seams[plank]:
-                c = shade(c, 0.72)
-            elif rng.random() < 0.12:
-                c = shade(c, 0.86)
-            img.putpixel((x, y), rgba(c))
-    return img
-
-
-def trans_leaves():
-    rng = random.Random(12)
-    img = new()
-    for y in range(16):
-        for x in range(16):
-            roll = rng.random()
-            if roll < 0.17:
-                continue  # holes -> cutout rendering
-            if roll < 0.32:
-                c = PINK
-            elif roll < 0.38:
-                c = WHITE
-            else:
-                c = mix(BLUE, (70, 150, 210), rng.random() * 0.5)
-            img.putpixel((x, y), rgba(shade(c, 0.85 + rng.random() * 0.2)))
-    return img
+def trans_boba():
+    rows = [
+        ".........S......",
+        "........sS......",
+        "....oooosSoo....",
+        "...oLLLLsSLLo...",
+        "...oggggsSggo...",
+        "....gPPPsSPg....",
+        "....gPpPsSPg....",
+        "....gPPPPPPg....",
+        "....gPPpPPPg....",
+        "....gPPPPPpg....",
+        ".....gPPPPg.....",
+        ".....gkPkPg.....",
+        ".....gKkKkg.....",
+        ".....gkKkKg.....",
+        "......gggg......",
+        "................",
+    ]
+    palette = {
+        "S": hexc("5BCEFA"), "s": hexc("2F7BBB"), "o": hexc("D2D1E3"), "L": WHITE, "g": hexc("A9A7C0"),
+        "P": hexc("F7C3CF"), "p": hexc("EFA3B6"), "k": hexc("3A2633"), "K": hexc("5C4053"),
+    }
+    return from_ascii(rows, palette)
 
 
 def pride_blossom():
-    rows = [
-        "................",
-        "......bBBb......",
-        ".....bBBBBb.....",
-        "..pPP.BBBB.PPp..",
-        ".pPPPPbBBbPPPPp.",
-        ".pPPPPWYYWPPPPp.",
-        "..pPPPWYYWPPPp..",
-        ".....bWWWWb.....",
-        ".....bBBBBb.....",
-        "......bBBb......",
-        ".......Gg.......",
-        "...gG..Gg.Gg....",
-        "....gGGGgGG.....",
-        ".......Gg.......",
-        ".......Gg.......",
-        ".......Gg.......",
-    ]
-    return from_ascii(rows, {"B": BLUE, "b": shade(BLUE, 0.8), "P": PINK, "p": shade(PINK, 0.82), "W": WHITE,
-                             "Y": (255, 226, 150), "G": GREEN, "g": GREEN_D})
+    """An oxeye daisy whose petals spin pink and blue around a white heart."""
+    img = vblock("oxeye_daisy")
+    petal = lambda p, px: px[3] > 0 and hsv(px)[1] < 0.2 and lum(px) > 0.55
+    centre = lambda p, px: px[3] > 0 and 0.03 < hsv(px)[0] < 0.2 and hsv(px)[1] > 0.4 and lum(px) > 0.35
+    centre_px = [p for p in pixels(img) if centre(p, img.getpixel(p))]
+    cx = sum(p[0] for p in centre_px) / len(centre_px)
+    cy = sum(p[1] for p in centre_px) / len(centre_px)
+    out = img.copy()
+    for p in pixels(img):
+        px = img.getpixel(p)
+        if petal(p, px):
+            angle = math.atan2(p[1] - cy, p[0] - cx)
+            colour = PINK if math.sin(angle * 2.0) > 0 else BLUE
+            out.putpixel(p, (*shade(colour, 0.8 + 0.25 * lum(px)), 255))
+        elif centre(p, px):
+            out.putpixel(p, (*mix(WHITE, PINK, 0.15 * (1 - lum(px))), 255))
+    return out
 
 
-def cake_top():
-    rng = random.Random(13)
-    img = new()
-    for y in range(16):
-        for x in range(16):
-            d = min(x, y, 15 - x, 15 - y)
-            c = PINK if d <= 2 else WHITE
-            img.putpixel((x, y), rgba(shade(c, 0.95 + rng.random() * 0.06)))
-    heart = [".##.##.", "#######", "#######", ".#####.", "..###..", "...#..."]
-    for dy, row in enumerate(heart):
-        for dx, ch in enumerate(row):
-            if ch == "#":
-                img.putpixel((4 + dx, 5 + dy), rgba(shade(PINK, 0.92)))
-    for _ in range(14):
-        x, y = rng.randrange(3, 13), rng.randrange(3, 13)
-        if img.getpixel((x, y))[:3] != shade(PINK, 0.92):
-            img.putpixel((x, y), rgba(rng.choice((BLUE, shade(PINK, 0.85)))))
-    return img
-
-
-def cake_side(inner=False):
-    rng = random.Random(14 if not inner else 15)
-    img = new()
-    layers = {8: PINK, 9: PINK, 10: WHITE, 11: BLUE, 12: BLUE, 13: WHITE, 14: PINK, 15: (240, 214, 190)}
-    if inner:
-        layers = {8: (252, 236, 240), 9: (250, 226, 232), 10: WHITE, 11: BLUE, 12: BLUE, 13: WHITE,
-                  14: PINK, 15: (240, 214, 190)}
-    for y in range(8, 16):
-        for x in range(16):
-            c = layers[y]
-            if not inner and y == 10 and rng.random() < 0.45:
-                c = PINK  # frosting drips
-            img.putpixel((x, y), rgba(shade(c, 0.93 + rng.random() * 0.08)))
-    return img
-
-
-def cake_bottom():
-    rng = random.Random(16)
-    img = new()
-    for y in range(16):
-        for x in range(16):
-            img.putpixel((x, y), rgba(shade((236, 210, 188), 0.92 + rng.random() * 0.08)))
-    return img
-
-
-def pride_oven_side():
-    return bricks(17, [BLUE, PINK, WHITE, PINK], tint=0.55)
+# ============================================================================================ pride oven
+def oven_recolor(img):
+    """Smoker -> Pride Oven: pink wood, pearly stone and iron, and pink-and-white flames."""
+    out = img.copy()
+    for p in pixels(img):
+        px = img.getpixel(p)
+        if px[3] == 0:
+            continue
+        h, s, v = hsv(px)
+        l = lum(px)
+        if s > 0.45 and (h < 0.17 or h > 0.95) and v > 0.55:
+            c = sample([hexc("D9467A"), hexc("F27FA2"), hexc("F9C6D4"), WHITE], (v - 0.55) / 0.45)   # flames
+        elif s > 0.22 and 0.02 < h < 0.15:
+            c = sample(R_WOOD_PINK, l * 1.6)                                                         # logs
+        else:
+            c = sample(mix_ramp(R_PEARL, R_LAVENDER, 0.35), l * 1.25)                               # stone, iron
+        out.putpixel(p, (*c, px[3]))
+    return out
 
 
 def pride_oven_front():
-    img = pride_oven_side()
-    rng = random.Random(18)
-    for y in range(7, 15):
-        for x in range(3, 13):
-            if x in (3, 12) or y == 7:
-                c = (70, 56, 92)
-            else:
-                heat = (y - 7) / 7.0
-                c = mix((255, 220, 140), (255, 120, 150), heat)
-                c = shade(c, 0.85 + rng.random() * 0.2)
-            img.putpixel((x, y), rgba(c))
-    heart = [".#.#.", "#####", ".###.", "..#.."]
-    for dy, row in enumerate(heart):
-        for dx, ch in enumerate(row):
-            if ch == "#":
-                img.putpixel((6 + dx, 1 + dy), rgba(WHITE))
-    return img
+    return oven_recolor(vblock("smoker_front_on"))
+
+
+def pride_oven_side():
+    return oven_recolor(vblock("smoker_side"))
 
 
 def pride_oven_top():
-    img = bricks(19, [WHITE, PINK, BLUE, PINK], tint=0.5)
-    for y in range(6, 10):
-        for x in range(6, 10):
-            img.putpixel((x, y), rgba((70, 56, 92)))
-    return img
+    return oven_recolor(vblock("smoker_top"))
 
 
-# ------------------------------------------------------------------------------------- trans water
-def flag_gradient(t):
-    """Smooth gradient through the flag colours; t in [0, 1) wraps around."""
-    t = t % 1.0
-    stops = [BLUE, PINK, WHITE, PINK, BLUE]
-    pos = t * 4
-    i = int(pos)
-    return mix(stops[i], stops[min(i + 1, 4)], pos - i)
+def pride_oven_bottom():
+    return oven_recolor(vblock("smoker_bottom"))
 
 
-def water_still(frames=32):
-    img = Image.new("RGBA", (16, 16 * frames), CLEAR)
-    for f in range(frames):
-        phase = f / frames
-        for y in range(16):
-            for x in range(16):
-                ripple = (0.06 * math.sin(2 * math.pi * (x / 16 + phase))
-                          + 0.05 * math.sin(2 * math.pi * (y / 8 - 2 * phase)))
-                c = flag_gradient((x + y) / 32 + phase + ripple)
-                crest = 0.5 + 0.5 * math.sin(2 * math.pi * ((x - y) / 16 + 2 * phase))
-                if crest > 0.94:
-                    c = mix(c, WHITE, 0.5)
-                img.putpixel((x, f * 16 + y), rgba(c, 200))
-    return img
-
-
-def water_flow(frames=32):
-    img = Image.new("RGBA", (32, 32 * frames), CLEAR)
-    for f in range(frames):
-        phase = f / frames
-        for y in range(32):
-            for x in range(32):
-                wobble = 0.06 * math.sin(2 * math.pi * (2 * x / 32 + phase))
-                c = flag_gradient(y / 32 - phase + wobble)
-                foam = 0.5 + 0.5 * math.sin(2 * math.pi * (y / 8 - 4 * phase + x / 32))
-                if foam > 0.95:
-                    c = mix(c, WHITE, 0.5)
-                img.putpixel((x, f * 32 + y), rgba(c, 190))
-    return img
-
-
-# ============================================================================================= items
-def tool(head_pixels, handle_pixels, head_order):
-    """head_pixels: list of (x, y); head_order(x, y) -> 0..1 used to stripe the head with the flag."""
-    img = new()
-    for i, (x, y) in enumerate(handle_pixels):
-        img.putpixel((x, y), rgba(WOOD if i % 2 == 0 else WOOD_D))
-    values = [head_order(x, y) for x, y in head_pixels]
-    lo, hi = min(values), max(values)
-    for (x, y), v in zip(head_pixels, values):
-        t = 0 if hi == lo else (v - lo) / (hi - lo)
-        img.putpixel((x, y), rgba(FLAG[band5(int(t * 99.99), 100)]))
-    bevel(img)
-    return outline(img)
-
-
-def line(x0, y0, x1, y1):
-    pts = []
-    n = max(abs(x1 - x0), abs(y1 - y0))
-    for i in range(n + 1):
-        pts.append((round(x0 + (x1 - x0) * i / n), round(y0 + (y1 - y0) * i / n)))
-    return pts
-
-
-def sword():
-    blade = []
-    for i in range(9):
-        blade += [(5 + i, 9 - i), (6 + i, 9 - i)]
-    blade.append((14, 0))
-    guard = [(3, 8), (4, 9), (5, 10), (6, 11), (7, 12)]
-    img = tool(blade, line(4, 11, 2, 13), lambda x, y: x - y)
-    for x, y in guard:
-        img.putpixel((x, y), rgba((170, 120, 190)))
-    img.putpixel((1, 14), rgba(BLUE))
-    return outline(img)
-
-
-def pickaxe():
-    head = set()
-    for k in range(-60, 61):
-        s = k / 10.0
-        px = 10.5 + s * 0.707 - 0.06 * s * s * 0.707
-        py = 4.5 + s * 0.707 + 0.06 * s * s * 0.707
-        for ox, oy in ((0, 0), (0.5, -0.5)):
-            x, y = round(px + ox), round(py + oy)
-            if 1 <= x <= 14 and 1 <= y <= 14:
-                head.add((x, y))
-    head = sorted(head)
-    return tool(head, line(2, 13, 9, 6), lambda x, y: x + y)
-
-
-def axe():
-    # Blade sits on the upper-left side of the handle's top end, so it reads as an axe, not a mallet.
-    head = []
-    for y in range(16):
-        for x in range(16):
-            s, d = x + y, x - y
-            if 9 <= s <= 14 and 2 <= d <= 10 and not (s <= 10 and (d <= 3 or d >= 9)):
-                head.append((x, y))
-    return tool(head, line(2, 13, 12, 3), lambda x, y: x + y)
-
-
-def shovel():
-    rows = {0: (12, 13), 1: (11, 14), 2: (10, 14), 3: (10, 14), 4: (10, 13), 5: (11, 12)}
-    head = [(x, y) for y, (a, b) in rows.items() for x in range(a, b + 1)]
-    return tool(head, line(2, 13, 9, 6), lambda x, y: x - y)
-
-
-def hoe():
-    head = [(7, 2), (8, 2), (9, 2), (10, 2), (11, 2), (12, 3), (7, 3), (8, 3), (11, 3), (12, 4)]
-    return tool(head, line(2, 13, 11, 4), lambda x, y: x)
-
-
-def banded(mask, highlight=True):
-    """Fills the 'X' pixels of mask with flag stripes by row, then bevels and outlines."""
-    img = new()
-    ys = [y for y, row in enumerate(mask) if "X" in row]
-    y0, y1 = min(ys), max(ys)
-    for y, row in enumerate(mask):
-        assert len(row) == 16, row
-        for x, ch in enumerate(row):
-            if ch == "X":
-                img.putpixel((x, y), rgba(FLAG[band5(y - y0, y1 - y0 + 1)]))
-    if highlight:
-        bevel(img)
-    return outline(img)
-
-
-HELMET = ["................", "................", "................", "....XXXXXXXX....", "...XXXXXXXXXX...",
-          "...XXXXXXXXXX...", "...XXXXXXXXXX...", "...XXX....XXX...", "...XXX....XXX...", "...XX......XX...",
-          "................", "................", "................", "................", "................",
-          "................"]
-CHESTPLATE = ["................", "................", "..XXX......XXX..", "..XXXX....XXXX..", "..XXXXXXXXXXXX..",
-              "..XXXXXXXXXXXX..", "...XXXXXXXXXX...", "....XXXXXXXX....", "....XXXXXXXX....", "....XXXXXXXX....",
-              "....XXXXXXXX....", "....XXXXXXXX....", "....XXXXXXXX....", "................", "................",
-              "................"]
-LEGGINGS = ["................", "................", "....XXXXXXXX....", "....XXXXXXXX....", "....XXXXXXXX....",
-            "....XXX..XXX....", "....XXX..XXX....", "....XXX..XXX....", "....XXX..XXX....", "....XXX..XXX....",
-            "....XXX..XXX....", "....XXX..XXX....", "................", "................", "................",
-            "................"]
-BOOTS = ["................", "................", "................", "................", "................",
-         "...XXX....XXX...", "...XXX....XXX...", "...XXX....XXX...", "..XXXX....XXXX..", "..XXXX....XXXX..",
-         "................", "................", "................", "................", "................",
-         "................"]
-CRYSTAL = ["................", "................", "......XXXX......", ".....XXXXXX.....", "....XXXXXXXX....",
-           "...XXXXXXXXXX...", "...XXXXXXXXXX...", "....XXXXXXXX....", ".....XXXXXX.....", "......XXXX......",
-           ".......XX.......", "................", "................", "................", "................",
-           "................"]
-
-
-def crystal_item():
-    img = banded(CRYSTAL)
-    for x, y in ((6, 3), (5, 4), (6, 4), (4, 5)):
-        img.putpixel((x, y), rgba(WHITE))
-    return img
-
-
-def disk(cx, cy, r):
-    return {(x, y) for y in range(16) for x in range(16) if (x - cx) ** 2 + (y - cy) ** 2 <= r * r}
-
-
-def donut():
-    rng = random.Random(20)
-    img = new()
-    ring = disk(7.5, 8, 6.3) - disk(7.5, 8, 2.2)
-    for x, y in ring:
-        frosted = y < 8.5 + 1.2 * math.sin(x * 1.3)
-        c = PINK if frosted else (226, 172, 112)
-        img.putpixel((x, y), rgba(shade(c, 0.95 + rng.random() * 0.08)))
-    for _ in range(9):
-        x, y = rng.choice(sorted(ring))
-        if img.getpixel((x, y))[:3] != (226, 172, 112) and y < 9:
-            img.putpixel((x, y), rgba(rng.choice((BLUE, WHITE))))
-    bevel(img)
-    return outline(img, (96, 54, 64))
-
-
-def cookie():
-    rng = random.Random(21)
-    img = new()
-    for x, y in disk(7.5, 7.5, 6.2):
-        img.putpixel((x, y), rgba(shade((226, 182, 122), 0.9 + rng.random() * 0.12)))
-    for colour in (PINK, PINK, PINK, BLUE, BLUE, BLUE, WHITE, WHITE):
-        x, y = rng.randrange(4, 12), rng.randrange(4, 12)
-        img.putpixel((x, y), rgba(colour))
-    bevel(img)
-    return outline(img, (96, 60, 44))
-
-
-def cupcake():
+# ============================================================================================ silly cat bits
+def silly_cat_spawn_egg():
+    """Spawn eggs are mob faces in 26.2, so this is the Silly Cat's face: big glossy eyes,
+    a white muzzle, a pink nose and its tongue out."""
     rows = [
         "................",
-        ".......PP.......",
-        "......PWWP......",
-        ".....PPWWPP.....",
-        "....PWWPPWWP....",
-        "...PPPWWWWPPP...",
-        "..PWWPPPPPPWWP..",
-        "..PPPPPPPPPPPP..",
-        "...BWBWBWBWBW...",
-        "...BWBWBWBWBW...",
-        "....BWBWBWBW....",
-        "....BWBWBWBW....",
-        ".....BWBWBW.....",
         "................",
-        "................",
-        "................",
+        "..oo........oo..",
+        ".opgo......ogpo.",
+        ".oppgoooooogppo.",
+        ".ogggsgsgsgsggo.",
+        ".ogGGGGGGGGGGgo.",
+        ".oghkkGGGGhkkgo.",
+        ".ogkkkGwwGkkkgo.",
+        ".oGkkkwppwkkkGo.",
+        ".oGGGwwwwwwGGGo.",
+        ".ogGwwowwowwGgo.",
+        "..ogGwwttwwGgo..",
+        "...oggwtTwggo...",
+        "....ooottooo....",
+        "......oTTo......",
     ]
-    img = from_ascii(rows, {"P": PINK, "W": WHITE, "B": BLUE})
-    img.putpixel((7, 0), rgba((222, 76, 112)))
-    img.putpixel((8, 0), rgba((222, 76, 112)))
-    bevel(img)
-    return outline(img, (96, 54, 74))
+    assert all(len(r) == 16 for r in rows)
+    palette = {
+        "o": hexc("3A3940"), "g": hexc("8F8A91"), "G": hexc("B6B1B6"), "s": hexc("5D5860"), "w": hexc("F3F1EE"),
+        "p": hexc("E99AB0"), "k": hexc("141118"), "h": WHITE, "t": hexc("F07A9A"), "T": hexc("C9506F"),
+    }
+    return from_ascii(rows, palette)
 
 
-def macaron():
-    img = new()
-    shape = disk(7.5, 8.5, 6.4)
-    for x, y in shape:
-        if 3 <= y <= 14:
-            img.putpixel((x, y), rgba(FLAG[band5(y - 3, 12)]))
-    bevel(img)
-    return outline(img, (60, 54, 96))
+def slobbered_icon():
+    """18x18 effect icon: a big glossy drop of spit with a heart in it."""
+    rows = [
+        "..................",
+        "........ww........",
+        ".......wWWw.......",
+        ".......wWWw.......",
+        "......wWLWWw......",
+        "......wWLWWw......",
+        ".....wWLLWWWw.....",
+        "....wWWLWWWWWw....",
+        "....wWWWWWWWWw....",
+        "...wWWpWWWpWWWw...",
+        "...wWpPpWpPpWWw...",
+        "...wWpPPPPPpWWw...",
+        "...wWWpPPPpWWWw...",
+        "....wWWpPpWWWw....",
+        "....wWWWpWWWWw....",
+        ".....wwWWWWww.....",
+        ".......wwww.......",
+        "..................",
+    ]
+    palette = {"w": hexc("B98BB0"), "W": hexc("EADCF2"), "L": WHITE, "p": hexc("D97A97"), "P": hexc("F5A9B8")}
+    return from_ascii(rows, palette)
 
 
-def boba():
-    rng = random.Random(22)
-    img = new()
-    for y in range(4, 15):
-        inset = (y - 4) // 4
-        for x in range(4 + inset, 12 - inset):
-            if y == 4:
-                c = (250, 250, 255)
-            elif y < 8:
-                c = PINK
-            elif y < 10:
-                c = (250, 246, 248)
-            else:
-                c = BLUE
-            img.putpixel((x, y), rgba(shade(c, 0.95 + rng.random() * 0.06)))
-    for x, y in ((6, 13), (8, 13), (7, 12), (9, 12), (6, 11), (8, 11)):
-        img.putpixel((x, y), rgba((58, 40, 54)))
-    for i, (x, y) in enumerate(((10, 0), (10, 1), (9, 2), (9, 3))):
-        img.putpixel((x, y), rgba(PINK if i % 2 == 0 else BLUE))
-    bevel(img)
-    return outline(img, (70, 58, 96))
+def saliva_frames(width=320, height=180, frames=6):
+    """Full-screen cat spit: gloopy blobs around the edges and a big smear across the middle, with
+    glossy highlights. Frame 0 is full strength; later frames are progressively fainter (for fading)."""
+    rng = random.Random(42)
+    base = Image.new("RGBA", (width, height), CLEAR)
+    alpha = [[0.0] * width for _ in range(height)]
+
+    def blob(cx, cy, rx, ry, strength):
+        for y in range(max(0, int(cy - ry - 2)), min(height, int(cy + ry + 3))):
+            for x in range(max(0, int(cx - rx - 2)), min(width, int(cx + rx + 3))):
+                d = ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2
+                if d < 1.0:
+                    alpha[y][x] = max(alpha[y][x], strength * (1.0 - d ** 2))
+
+    # Goo collecting at the top edge with drips hanging down.
+    for i in range(26):
+        cx = rng.uniform(0, width)
+        blob(cx, rng.uniform(-6, 10), rng.uniform(14, 34), rng.uniform(8, 20), 0.85)
+        if rng.random() < 0.6:
+            length = rng.uniform(20, 70)
+            for k in range(int(length)):
+                blob(cx + math.sin(k * 0.15) * 1.5, 10 + k, 2.4 + 2.0 * (1 - k / length), 2.0, 0.8)
+            blob(cx, 10 + length, 4.5, 5.0, 0.85)
+    # Splats around the sides and corners.
+    for i in range(40):
+        edge = rng.choice(("left", "right", "bottom", "corner"))
+        if edge == "left":
+            cx, cy = rng.uniform(-10, 40), rng.uniform(0, height)
+        elif edge == "right":
+            cx, cy = rng.uniform(width - 40, width + 10), rng.uniform(0, height)
+        elif edge == "bottom":
+            cx, cy = rng.uniform(0, width), rng.uniform(height - 30, height + 10)
+        else:
+            cx, cy = rng.choice((0, width)), rng.choice((0, height))
+        blob(cx, cy, rng.uniform(10, 30), rng.uniform(10, 26), rng.uniform(0.6, 0.9))
+    # The big lick smear across the middle of the screen.
+    for k in range(60):
+        t = k / 59.0
+        cx = width * (0.18 + 0.64 * t)
+        cy = height * (0.62 - 0.22 * math.sin(t * math.pi))
+        blob(cx, cy, 16 + 10 * math.sin(t * math.pi), 9 + 5 * math.sin(t * math.pi), 0.42)
+
+    for y in range(height):
+        for x in range(width):
+            a = alpha[y][x]
+            if a <= 0.02:
+                continue
+            # Glossy: brighter towards the top-left of each blob (approximated by the alpha gradient).
+            up = alpha[y - 1][x] if y > 0 else a
+            left = alpha[y][x - 1] if x > 0 else a
+            gloss = max(0.0, min(1.0, (a - up) * 6 + (a - left) * 6))
+            c = mix(hexc("F7E3EE"), WHITE, gloss)
+            base.putpixel((x, y), (*c, round(255 * min(0.82, a * 0.9))))
+    # Shiny highlights.
+    for i in range(55):
+        x, y = rng.randrange(width), rng.randrange(height)
+        if alpha[y][x] > 0.35:
+            for dx in range(-1, 2):
+                if 0 <= x + dx < width:
+                    base.putpixel((x + dx, y), (255, 255, 255, 235))
+    base = base.filter(ImageFilter.SMOOTH)
+
+    result = []
+    for i in range(frames):
+        factor = 1.0 if i == 0 else (1.0 - i / frames) ** 1.3
+        frame = base.copy()
+        a = frame.getchannel("A").point(lambda v: round(v * factor))
+        frame.putalpha(a)
+        result.append(frame)
+    return result
 
 
-def cake_item():
-    img = new()
-    for y in range(5, 14):
-        for x in range(2, 14):
-            if y <= 6:
-                c = WHITE
-            elif y == 7:
-                c = PINK if x % 3 else WHITE
-            else:
-                c = FLAG[band5(y - 8, 6)]
-            img.putpixel((x, y), rgba(c))
-    for x, y in ((4, 5), (7, 6), (10, 5), (12, 6)):
-        img.putpixel((x, y), rgba(BLUE))
-    img.putpixel((7, 3), rgba((255, 200, 120)))
-    img.putpixel((7, 4), rgba(PINK))
-    bevel(img)
-    return outline(img, (96, 54, 74))
+# ============================================================================================ entities
+def box_faces(u, v, w, h, d):
+    """UV rectangles (x0, y0, width, height) of a model box at texture offset (u, v), like vanilla's
+    ModelPart.Cube: top, bottom, right (west), front (north), left (east), back (south)."""
+    return {
+        "top": (u + d, v, w, d), "bottom": (u + d + w, v, w, d),
+        "right": (u, v + d, d, h), "front": (u + d, v + d, w, h),
+        "left": (u + d + w, v + d, d, h), "back": (u + 2 * d + w, v + d, w, h),
+    }
 
 
-def water_bucket():
-    img = new()
-    metal = (196, 200, 212)
-    for y in range(4, 15):
-        inset = (y - 4) // 5
-        for x in range(2 + inset, 14 - inset):
-            img.putpixel((x, y), rgba(shade(metal, 1.05 if x < 7 else 0.92)))
-    for x in range(3, 13):
-        img.putpixel((x, 4), rgba(FLAG[band5(x - 3, 10)]))
-        img.putpixel((x, 5), rgba(shade(FLAG[band5(x - 3, 10)], 0.9)))
-    for x, y in ((3, 3), (4, 2), (5, 1), (6, 1), (7, 1), (8, 1), (9, 1), (10, 1), (11, 2), (12, 3)):
-        img.putpixel((x, y), rgba((120, 124, 140)))
-    return outline(img, (60, 62, 84))
+def silly_cat():
+    """The Silly Cat's 64x32 skin, matching SillyCatModel: a grey-brown tabby with darker stripes,
+    a white muzzle, chest, belly and socks, big glossy black eyes, pink ears, nose and tongue."""
+    img = new(64, 32)
+    rng = random.Random(77)
+    fur = [hexc("6A6158"), hexc("8A8178"), hexc("A39A92"), hexc("B9B0A7")]
+    stripe = hexc("554D46")
+    white = [hexc("D9D2CB"), hexc("EEE9E3"), hexc("FAF7F3")]
+    pink = hexc("E99AB0")
 
+    def put(x, y, c, jitter=6):
+        j = rng.randint(-jitter, jitter)
+        img.putpixel((x, y), (*[max(0, min(255, v + j)) for v in c], 255))
 
-# ======================================================================================= entity textures
-def paint_face(img, x0, y0, w, h, rows_from=0, rows_to=None, border=True, face_colour=None):
-    """Paints one box face of a model texture with horizontal flag stripes."""
-    rows_to = h if rows_to is None else rows_to
-    for y in range(rows_from, rows_to):
-        for x in range(w):
-            c = face_colour or FLAG[band5(y, h)]
-            if border and (x == 0 or x == w - 1 or y == rows_from or y == rows_to - 1):
-                c = shade(c, 0.78)
-            img.putpixel((x0 + x, y0 + y), rgba(c))
+    def fill_face(rect, colour_at):
+        x0, y0, w, h = rect
+        for yy in range(h):
+            for xx in range(w):
+                put(x0 + xx, y0 + yy, colour_at(xx, yy, w, h))
 
+    # ---- head (6x5x5 at 0,0)
+    head = box_faces(0, 0, 6, 5, 5)
+    fill_face(head["top"], lambda x, y, w, h: stripe if (x in (1, 4) and y >= 2) or (x in (2, 3) and y == 4) else fur[2])
+    fill_face(head["bottom"], lambda x, y, w, h: white[1])
+    fill_face(head["back"], lambda x, y, w, h: stripe if x in (1, 4) and y < 3 else fur[1])
 
-def paint_box(img, u, v, w, h, d, rows_from=0, rows_to=None, top=True, bottom=True):
-    """UV layout of a Minecraft model box at texture offset (u, v) with size w x h x d."""
-    rows_to = h if rows_to is None else rows_to
-    if top:
-        paint_face(img, u + d, v, w, d, face_colour=BLUE)
-    if bottom:
-        paint_face(img, u + d + w, v, w, d, face_colour=BLUE)
-    for fx, fw in ((u, d), (u + d, w), (u + d + w, d), (u + d + w + d, w)):
-        paint_face(img, fx, v + d, fw, h, rows_from, rows_to)
+    def cheek(front_at_right):
+        def colour(x, y, w, h):
+            near_front = (x == w - 1) if front_at_right else (x == 0)
+            if y >= 3:
+                return white[1] if near_front else white[0]
+            return stripe if y == 1 and not near_front else fur[2]
+        return colour
 
+    fill_face(head["right"], cheek(True))
+    fill_face(head["left"], cheek(False))
+    face = [
+        "GsGGsG",
+        "hkGGhk",
+        "kkGGkk",
+        "GwwwwG",
+        "wwwwww",
+    ]
+    face_palette = {"G": fur[2], "s": stripe, "h": WHITE, "k": hexc("141118"), "w": white[1]}
+    fx, fy, _, _ = head["front"]
+    for y, row in enumerate(face):
+        for x, ch in enumerate(row):
+            put(fx + x, fy + y, face_palette[ch], 0 if ch in "hk" else 5)
 
-def armor_layer_1():
-    img = Image.new("RGBA", (64, 32), CLEAR)
-    paint_box(img, 0, 0, 8, 8, 8)                               # helmet
-    for x in range(10, 14):                                       # open visor on the front face
-        for y in range(11, 16):
-            img.putpixel((x, y), CLEAR)
-    paint_box(img, 16, 16, 8, 12, 4)                             # chestplate
-    heart = [".#.#.", "#####", ".###.", "..#.."]
-    for dy, row in enumerate(heart):                             # heart on the chest
-        for dx, ch in enumerate(row):
-            if ch == "#":
-                img.putpixel((22 + dx, 22 + dy), rgba((226, 98, 136)))
-    paint_box(img, 40, 16, 4, 12, 4, rows_from=0, rows_to=7, bottom=False)   # shoulders / upper arms
-    paint_box(img, 0, 16, 4, 12, 4, rows_from=6, rows_to=12, top=False)      # boots
+    # ---- muzzle (4x2x2 at 22,0)
+    muzzle = box_faces(22, 0, 4, 2, 2)
+    for name in ("top", "bottom", "right", "left", "back"):
+        fill_face(muzzle[name], lambda x, y, w, h: white[2])
+    mx, my, _, _ = muzzle["front"]
+    for x, c in enumerate((white[2], hexc("E78AA3"), hexc("E78AA3"), white[2])):
+        put(mx + x, my, c, 0)
+    for x, c in enumerate((white[1], hexc("8B6B72"), hexc("8B6B72"), white[1])):
+        put(mx + x, my + 1, c, 0)
+
+    # ---- ears (2x2x1 at 34,0 and 40,0)
+    for u, tip_left in ((34, True), (40, False)):
+        ear = box_faces(u, 0, 2, 2, 1)
+        for name in ("top", "bottom", "right", "left", "back"):
+            fill_face(ear[name], lambda x, y, w, h: fur[1])
+        ex, ey, _, _ = ear["front"]
+        put(ex, ey, stripe if tip_left else fur[2])
+        put(ex + 1, ey, fur[2] if tip_left else stripe)
+        put(ex, ey + 1, pink, 2)
+        put(ex + 1, ey + 1, pink, 2)
+
+    # ---- tongue (2x1x5 at 46,0): lighter at the tip, with a darker groove down the middle of the top
+    tongue = box_faces(46, 0, 2, 1, 5)
+    for name, rect in tongue.items():
+        if name == "top":
+            fill_face(rect, lambda x, y, w, h: hexc("D9607F") if x == 0 and y > 0 else hexc("F48CA8") if y == 0 else hexc("F07A9A"))
+        else:
+            fill_face(rect, lambda x, y, w, h: hexc("E2688A"))
+
+    # ---- body (5x4x9 at 0,10)
+    body = box_faces(0, 10, 5, 4, 9)
+    fill_face(body["top"], lambda x, y, w, h: stripe if (y % 3 == 1 and x in (0, 1, 3, 4)) or x == 2 and y % 3 != 2 else fur[2])
+    fill_face(body["bottom"], lambda x, y, w, h: white[1] if y > 1 else white[0])
+    fill_face(body["front"], lambda x, y, w, h: white[2] if 0 < x < w - 1 or y > 0 else white[1])
+    fill_face(body["back"], lambda x, y, w, h: stripe if y == 0 and x in (1, 3) else fur[1])
+
+    def flank(front_at_right):
+        def colour(x, y, w, h):
+            distance_to_front = (w - 1 - x) if front_at_right else x
+            if y == h - 1:
+                return white[0] if distance_to_front > 1 else white[1]
+            if distance_to_front <= 1:
+                return white[1] if y >= 1 else fur[2]
+            return stripe if distance_to_front % 3 == 0 and y < h - 1 else fur[2] if y == 0 else fur[1]
+        return colour
+
+    fill_face(body["right"], flank(True))
+    fill_face(body["left"], flank(False))
+
+    # ---- legs (2x3x2 at 28,10): grey with white socks and pink toe beans
+    leg = box_faces(28, 10, 2, 3, 2)
+    for name in ("right", "front", "left", "back"):
+        fill_face(leg[name], lambda x, y, w, h: white[2] if y == h - 1 else (stripe if y == 0 and x == 1 else fur[1]))
+    fill_face(leg["top"], lambda x, y, w, h: fur[1])
+    fill_face(leg["bottom"], lambda x, y, w, h: pink if (x + y) % 2 == 0 else white[1])
+
+    # ---- tail (1x1x7 at 36,10): ringed, with a dark tip
+    tail = box_faces(36, 10, 1, 1, 7)
+
+    def ring(distance_from_tip):
+        return stripe if distance_from_tip == 0 or distance_from_tip % 2 == 1 else fur[2]
+
+    fill_face(tail["top"], lambda x, y, w, h: ring(y))
+    fill_face(tail["bottom"], lambda x, y, w, h: ring(y))
+    fill_face(tail["right"], lambda x, y, w, h: ring(x))
+    fill_face(tail["left"], lambda x, y, w, h: ring(w - 1 - x))
+    fill_face(tail["front"], lambda x, y, w, h: fur[2])
+    fill_face(tail["back"], lambda x, y, w, h: stripe)
     return img
 
 
-def armor_layer_2():
-    img = Image.new("RGBA", (64, 32), CLEAR)
-    paint_box(img, 16, 16, 8, 12, 4, rows_from=6, rows_to=12, top=False)    # belt / hips
-    paint_box(img, 0, 16, 4, 12, 4, rows_from=0, rows_to=9, bottom=False)   # leggings
-    return img
+def sheep_stripe(x, y):
+    """Which flag stripe a pixel of the adult sheep wool texture gets (see the UV notes in the docs)."""
+    six = [0, 1, 2, 2, 3, 4]
+    if x >= 28:  # body box (28,8) 8x16x6, rotated so its sides run along the sheep
+        if y >= 14:
+            if 28 <= x < 34:
+                return six[x - 28]
+            if 42 <= x < 48:
+                return six[x - 42]
+            return 0  # back and belly: the outer blue stripes
+        return six[min(5, y - 8)]  # chest and rump: rows
+    if y < 16:  # head box (0,0) 6x6x6
+        return six[min(5, y - 6)] if y >= 6 else 0
+    return six[y - 20] if 20 <= y < 26 else 0  # legs (0,16) 4x6x4
 
 
-def villager_profession():
-    """Trans Baker overlay (64x64 villager layout): a white chef hat and a striped apron."""
-    img = Image.new("RGBA", (64, 64), CLEAR)
-    # chef hat on the hat layer (box at 32,0 sized 8x10x8): top face + upper rows of the sides
+def trans_sheep_wool(rel, generic=False):
+    img = vextra(rel)
+    lo, hi = lum_range(img)
+    out = img.copy()
+    six = [0, 1, 2, 2, 3, 4]
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))
+        if px[3] == 0:
+            continue
+        stripe = six[y % 6] if generic else sheep_stripe(x, y)
+        t = (lum(px) - lo) / (hi - lo)
+        c = sample(FLAG_RAMPS[stripe], 0.35 + 0.65 * t)
+        out.putpixel((x, y), (*c, px[3]))
+    return out
+
+
+def trans_baker():
+    """The Trans Baker's outfit: the butcher's apron and headband in trans colours, plus a chef hat."""
+    img = vextra("entity/villager/profession/butcher.png")
+    out = img.copy()
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))
+        if px[3] == 0:
+            continue
+        h, s, v = hsv(px)
+        if s > 0.3 and (h < 0.05 or h > 0.9):  # red headband and stitching -> pink/blue
+            colour = BLUE if (x // 2) % 2 == 0 else PINK
+            out.putpixel((x, y), (*shade(colour, 0.75 + 0.35 * v), 255))
+        elif s < 0.15:  # white apron -> keep, a touch of pink
+            out.putpixel((x, y), (*mix(px[:3], PINK, 0.08), 255))
+    # A puffy chef hat on the hat layer (box at 32,0 sized 8x10x8): top face and the rows above the band.
+    hat_white = [hexc("E8E6F2"), hexc("F6F5FB"), WHITE]
+    rng = random.Random(3)
     for x in range(40, 48):
         for y in range(0, 8):
-            img.putpixel((x, y), rgba(WHITE if (x + y) % 5 else (236, 236, 244)))
+            out.putpixel((x, y), (*hat_white[rng.randrange(3)], 255))
     for x in range(32, 64):
-        for y in range(8, 12):
-            img.putpixel((x, y), rgba(WHITE))
-        img.putpixel((x, 12), rgba(PINK))
-    # apron on the body front (22,26 8x12) and robe front (6,44 8x20)
-    for x in range(22, 30):
-        for y in range(28, 38):
-            img.putpixel((x, y), rgba(WHITE))
-    for x in range(6, 14):
-        for y in range(44, 62):
-            img.putpixel((x, y), rgba(FLAG[band5(y - 44, 18)]))
-    for x, y in ((24, 30), (26, 30), (23, 31), (24, 31), (25, 31), (26, 31), (27, 31), (24, 32), (25, 32),
-                 (26, 32), (25, 33)):
-        img.putpixel((x, y), rgba((226, 98, 136)))
-    return img
+        for y in range(8, 10):
+            out.putpixel((x, y), (*hat_white[rng.randrange(3)], 255))
+    return out
 
 
-# ===================================================================================== sky + icon
+# ============================================================================================ sky + icon
 HEARTS = {
     5: [".#.#.", "#####", "#####", ".###.", "..#.."],
     7: [".##.##.", "#######", "#######", "#######", ".#####.", "..###..", "...#..."],
@@ -836,14 +1266,18 @@ def heart_clouds():
 
 
 def icon():
-    img = Image.new("RGBA", (128, 128), CLEAR)
-    for y in range(128):
-        for x in range(128):
-            cxd = max(0, max(12 - x, x - 115))
-            cyd = max(0, max(12 - y, y - 115))
-            if cxd * cxd + cyd * cyd > 144:
+    """Mod icon: a rounded trans flag tile with a glossy heart and a little crystal sparkle."""
+    size = 128
+    img = Image.new("RGBA", (size, size), CLEAR)
+    bands = stripes5(size)
+    for y in range(size):
+        for x in range(size):
+            cxd = max(0, max(14 - x, x - 113))
+            cyd = max(0, max(14 - y, y - 113))
+            if cxd * cxd + cyd * cyd > 196:
                 continue
-            img.putpixel((x, y), rgba(FLAG[band5(y, 128)]))
+            c = FLAG[bands[y]]
+            img.putpixel((x, y), (*shade(c, 0.97 + 0.06 * ((x + y) % 7 == 0)), 255))
     heart = HEARTS[11]
     scale = 7
     ox, oy = 64 - 11 * scale // 2, 64 - 11 * scale // 2 + 4
@@ -853,69 +1287,110 @@ def icon():
                 continue
             for py in range(scale):
                 for px in range(scale):
-                    img.putpixel((ox + dx * scale + px, oy + dy * scale + py), rgba(WHITE))
+                    gx, gy = dx * scale + px, dy * scale + py
+                    gloss = gx + gy < 26 and (gx - 12) ** 2 + (gy - 12) ** 2 < 60
+                    colour = WHITE if not gloss else hexc("FFFFFF")
+                    shadow = (dy * scale + py) > 9 * scale - 3 and heart[min(10, dy + 1)][dx] != "#"
+                    img.putpixel((ox + gx, oy + gy), (*(hexc("F3E7EE") if shadow else colour), 255))
     for dy, row in enumerate(heart):  # outline
         for dx, ch in enumerate(row):
             if ch != "#":
                 continue
             for ndx, ndy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
                 nx, ny = dx + ndx, dy + ndy
-                inside = 0 <= ny < 11 and 0 <= nx < 11 and heart[ny][nx] == "#"
-                if inside:
+                if 0 <= ny < 11 and 0 <= nx < 11 and heart[ny][nx] == "#":
                     continue
                 for i in range(scale):
                     if ndx:
                         px = ox + dx * scale + (scale - 1 if ndx > 0 else 0)
-                        img.putpixel((px, oy + dy * scale + i), rgba((214, 96, 132)))
+                        img.putpixel((px, oy + dy * scale + i), (*hexc("C9587A"), 255))
                     else:
                         py = oy + dy * scale + (scale - 1 if ndy > 0 else 0)
-                        img.putpixel((ox + dx * scale + i, py), rgba((214, 96, 132)))
+                        img.putpixel((ox + dx * scale + i, py), (*hexc("C9587A"), 255))
+    # sparkle
+    for (sx, sy, r) in ((101, 26, 6), (24, 98, 4)):
+        for k in range(-r, r + 1):
+            img.putpixel((sx + k, sy), (*WHITE, 255))
+            img.putpixel((sx, sy + k), (*WHITE, 255))
     return img
 
 
+# ============================================================================================ main
 def main():
     blocks = {
-        "trans_stone": trans_stone(), "trans_cobblestone": trans_cobblestone(),
-        "trans_stone_bricks": bricks(24, [BLUE, PINK, WHITE, PINK]),
-        "trans_dirt": trans_dirt(), "trans_grass_block_top": trans_grass_top(),
-        "trans_grass_block_side": trans_grass_side(), "trans_sand": trans_sand(),
+        # terrain
+        "trans_grass_block_top": trans_grass_block_top(), "trans_grass_block_side": trans_grass_block_side(),
+        "trans_grass_block_side_overlay": trans_grass_block_side_overlay(), "trans_grass_block_snow": trans_grass_block_snow(),
+        "trans_dirt": trans_dirt(), "trans_sand": trans_sand(), "trans_stone": trans_stone(),
+        "trans_cobblestone": trans_cobblestone(), "trans_stone_bricks": trans_stone_bricks(),
+        "cracked_trans_stone_bricks": cracked_trans_stone_bricks(), "chiseled_trans_stone_bricks": chiseled_trans_stone_bricks(),
+        "trans_sandstone": sandstone("sandstone"), "trans_sandstone_top": sandstone("sandstone_top"),
+        "trans_sandstone_bottom": sandstone("sandstone_bottom"), "cut_trans_sandstone": sandstone("cut_sandstone"),
+        "chiseled_trans_sandstone": chiseled_trans_sandstone(),
+        # crystals
         "trans_crystal_ore": trans_crystal_ore(), "trans_crystal_block": trans_crystal_block(),
-        "trans_log": trans_log_side(), "trans_log_top": trans_log_top(), "trans_planks": trans_planks(),
-        "trans_leaves": trans_leaves(), "pride_blossom": pride_blossom(),
-        "trans_cake_top": cake_top(), "trans_cake_side": cake_side(), "trans_cake_inner": cake_side(True),
-        "trans_cake_bottom": cake_bottom(), "pride_oven_front": pride_oven_front(),
-        "pride_oven_side": pride_oven_side(), "pride_oven_top": pride_oven_top(),
+        "trans_crystal_cluster": trans_crystal_cluster(),
+        # wood
+        "trans_log": trans_log(), "trans_log_top": trans_log_top(), "stripped_trans_log": stripped_trans_log(),
+        "stripped_trans_log_top": stripped_trans_log_top(), "trans_planks": trans_planks(), "trans_leaves": trans_leaves(),
+        "trans_sapling": trans_sapling(), "trans_door_top": trans_door_top(), "trans_door_bottom": trans_door_bottom(),
+        "trans_trapdoor": trans_trapdoor(), "pride_blossom": pride_blossom(),
+        # glass, wool, light
+        "trans_stained_glass": trans_stained_glass(), "trans_stained_glass_pane_top": trans_stained_glass_pane_top(),
+        "trans_pink_stained_glass": trans_pink_stained_glass(),
+        "trans_pink_stained_glass_pane_top": tinted_glass(vblock("white_stained_glass_pane_top"), PINK, 1.0),
+        "trans_blue_stained_glass": trans_blue_stained_glass(),
+        "trans_blue_stained_glass_pane_top": tinted_glass(vblock("white_stained_glass_pane_top"), BLUE, 1.0),
+        "trans_wool": trans_wool(), "trans_lantern": trans_lantern(),
+        # bakery
+        "trans_cake_top": trans_cake_top(), "trans_cake_side": trans_cake_side(), "trans_cake_inner": trans_cake_inner(),
+        "trans_cake_bottom": trans_cake_bottom(), "pride_oven_front": pride_oven_front(), "pride_oven_side": pride_oven_side(),
+        "pride_oven_top": pride_oven_top(), "pride_oven_bottom": pride_oven_bottom(),
     }
     for name, img in blocks.items():
         save(img, f"block/{name}.png")
-
-    save(water_still(), "block/trans_water_still.png")
-    save_mcmeta("block/trans_water_still.png", {"animation": {"frametime": 2}})
-    save(water_flow(), "block/trans_water_flow.png")
-    save_mcmeta("block/trans_water_flow.png", {"animation": {"frametime": 2}})
+    for name in ("trans_crystal_cluster", "trans_sapling", "pride_blossom"):
+        save_mcmeta(f"block/{name}.png", CUTOUT)
+    save_mcmeta("block/trans_leaves.png", LEAVES_META)
+    for name in ("trans_stained_glass", "trans_pink_stained_glass", "trans_blue_stained_glass"):
+        save_mcmeta(f"block/{name}.png", GLASS_META)
+    save_mcmeta("block/trans_lantern.png", {"animation": {"frametime": 8}})
+    save_mcmeta("block/pride_oven_front.png", {"animation": {"interpolate": False, "frametime": 4}})
 
     items = {
-        "trans_crystal": crystal_item(), "trans_sword": sword(), "trans_pickaxe": pickaxe(), "trans_axe": axe(),
-        "trans_shovel": shovel(), "trans_hoe": hoe(), "trans_helmet": banded(HELMET),
-        "trans_chestplate": banded(CHESTPLATE), "trans_leggings": banded(LEGGINGS), "trans_boots": banded(BOOTS),
-        "trans_donut": donut(), "trans_cookie": cookie(), "trans_cupcake": cupcake(), "trans_macaron": macaron(),
-        "trans_boba": boba(), "trans_cake": cake_item(), "trans_water_bucket": water_bucket(),
+        "trans_crystal": trans_crystal_item(),
+        "trans_sword": trans_tool("sword"), "trans_pickaxe": trans_tool("pickaxe"), "trans_axe": trans_tool("axe"),
+        "trans_shovel": trans_tool("shovel"), "trans_hoe": trans_tool("hoe"),
+        "trans_helmet": trans_armor_item("helmet"), "trans_chestplate": trans_armor_item("chestplate"),
+        "trans_leggings": trans_armor_item("leggings"), "trans_boots": trans_armor_item("boots"),
+        "trans_donut": trans_donut(), "trans_cookie": trans_cookie(), "trans_cupcake": trans_cupcake(),
+        "trans_macaron": trans_macaron(), "trans_boba": trans_boba(), "trans_cake": trans_cake_item(),
+        "silly_cat_spawn_egg": silly_cat_spawn_egg(),
     }
     for name, img in items.items():
         save(img, f"item/{name}.png")
 
-    save(armor_layer_1(), "entity/equipment/humanoid/trans_crystal.png")
-    save(armor_layer_2(), "entity/equipment/humanoid_leggings/trans_crystal.png")
-    baker = villager_profession()
-    save(baker, "entity/villager/profession/trans_baker.png")
-    save_mcmeta("entity/villager/profession/trans_baker.png", {"villager": {"hat": "full"}})
-    save(baker, "entity/zombie_villager/profession/trans_baker.png")
-    save_mcmeta("entity/zombie_villager/profession/trans_baker.png", {"villager": {"hat": "full"}})
+    save(trans_armor_layer("entity/equipment/humanoid/diamond.png"), "entity/equipment/humanoid/trans_crystal.png")
+    save(trans_armor_layer("entity/equipment/humanoid_leggings/diamond.png"), "entity/equipment/humanoid_leggings/trans_crystal.png")
+
+    baker = trans_baker()
+    for kind in ("villager", "zombie_villager"):
+        save(baker, f"entity/{kind}/profession/trans_baker.png")
+        save_mcmeta(f"entity/{kind}/profession/trans_baker.png", {"villager": {"hat": "full"}})
+
+    save(silly_cat(), "entity/silly_cat/silly_cat.png")
+    save(trans_sheep_wool("entity/sheep/sheep_wool.png"), "entity/sheep/trans_sheep_wool.png")
+    save(trans_sheep_wool("entity/sheep/sheep_wool_undercoat.png"), "entity/sheep/trans_sheep_wool_undercoat.png")
+    save(trans_sheep_wool("entity/sheep/sheep_wool_baby.png", generic=True), "entity/sheep/trans_sheep_wool_baby.png")
+
+    save(slobbered_icon(), "mob_effect/slobbered.png")
+    for i, frame in enumerate(saliva_frames()):
+        save(frame, f"gui/saliva/saliva_{i}.png")
     save(heart_clouds(), "environment/heart_clouds.png")
 
     icon_path = os.path.join(OUT, "icon.png")
     icon().save(icon_path)
-    print("Textures written to", os.path.normpath(OUT))
+    print("Textures written to", os.path.normpath(os.path.join(OUT, "textures")))
 
 
 if __name__ == "__main__":

@@ -23,9 +23,20 @@ import dev.goober.transdimension.TransDimension;
  * <p>Instead of shipping copies of Mojang's textures, each entity texture is read from your own game
  * files the first time it is drawn in the realm and gradient-mapped onto the trans flag palette
  * (shadows deep blue, mid-tones pink, highlights white), which keeps eyes, faces and details readable.
+ *
+ * <p>A few textures are swapped for hand-made ones instead of being recoloured: sheep wool becomes
+ * trans flag wool (blue, pink, white, pink, blue stripes along the body).
  */
 public final class TransRecolor {
 	private static final Map<Identifier, AbstractTexture> CACHE = new HashMap<>();
+	/** Vanilla textures that are replaced by one of ours (as-is, no recolouring) inside the realm. */
+	private static final Map<Identifier, Identifier> REPLACEMENTS = Map.of(
+			Identifier.withDefaultNamespace("textures/entity/sheep/sheep_wool.png"),
+			TransDimension.id("textures/entity/sheep/trans_sheep_wool.png"),
+			Identifier.withDefaultNamespace("textures/entity/sheep/sheep_wool_baby.png"),
+			TransDimension.id("textures/entity/sheep/trans_sheep_wool_baby.png"),
+			Identifier.withDefaultNamespace("textures/entity/sheep/sheep_wool_undercoat.png"),
+			TransDimension.id("textures/entity/sheep/trans_sheep_wool_undercoat.png"));
 	private static final Map<Identifier, Boolean> FAILED = new HashMap<>();
 
 	/** Gradient stops: position (0..1 brightness) and RGB. */
@@ -83,13 +94,16 @@ public final class TransRecolor {
 	@Nullable
 	private static AbstractTexture create(Identifier id) {
 		Minecraft minecraft = Minecraft.getInstance();
-		Optional<Resource> resource = minecraft.getResourceManager().getResource(id);
+		Identifier replacement = REPLACEMENTS.get(id);
+		Optional<Resource> resource = minecraft.getResourceManager().getResource(replacement != null ? replacement : id);
 		if (resource.isEmpty()) {
 			return null;
 		}
 		try (InputStream stream = resource.get().open()) {
 			NativeImage image = NativeImage.read(stream);
-			recolour(image);
+			if (replacement == null) {
+				recolour(image);
+			}
 			Identifier newId = TransDimension.id("recoloured/" + id.getNamespace() + "/" + id.getPath());
 			DynamicTexture texture = new DynamicTexture(newId::toString, image);
 			minecraft.getTextureManager().register(newId, texture);

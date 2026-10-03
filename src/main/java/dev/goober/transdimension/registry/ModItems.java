@@ -15,13 +15,13 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.AxeItem;
-import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ShovelItem;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.Consumables;
@@ -32,13 +32,18 @@ import net.minecraft.world.item.equipment.EquipmentAsset;
 import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
 import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 import net.fabricmc.fabric.api.registry.CompostableRegistry;
+import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
+import net.fabricmc.fabric.api.registry.FuelValueEvents;
+import net.fabricmc.fabric.api.registry.StrippableBlockRegistry;
+import net.fabricmc.fabric.api.registry.TillableBlockRegistry;
 
 import dev.goober.transdimension.TransDimension;
 
-/** Trans Crystal gear, bakery treats, the Trans Water bucket and the creative tab. */
+/** Trans Crystal gear, bakery treats, the Silly Cat spawn egg and the creative tab. */
 public final class ModItems {
 	// ---------------------------------------------------------------- materials
 	public static final TagKey<Block> INCORRECT_FOR_TRANS_TOOL = TagKey.create(Registries.BLOCK, TransDimension.id("incorrect_for_trans_tool"));
@@ -111,10 +116,9 @@ public final class ModItems {
 			.food(food(4, 0.4F, true),
 					withEffect(Consumables.defaultDrink(), new MobEffectInstance(MobEffects.DOLPHINS_GRACE, 20 * 60, 0))));
 
-	// ---------------------------------------------------------------- misc
-	public static final Item TRANS_WATER_BUCKET = register("trans_water_bucket",
-			properties -> new BucketItem(ModFluids.TRANS_WATER, properties),
-			new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1));
+	// ---------------------------------------------------------------- mobs
+	public static final Item SILLY_CAT_SPAWN_EGG = register("silly_cat_spawn_egg", SpawnEggItem::new,
+			new Item.Properties().spawnEgg(ModEntities.SILLY_CAT));
 
 	// ---------------------------------------------------------------- creative tab
 	public static final ResourceKey<CreativeModeTab> CREATIVE_TAB_KEY = ResourceKey.create(
@@ -135,13 +139,35 @@ public final class ModItems {
 
 	private static List<ItemLike> creativeTabContents() {
 		return List.of(
-				ModBlocks.TRANS_GRASS_BLOCK, ModBlocks.TRANS_DIRT, ModBlocks.TRANS_STONE, ModBlocks.TRANS_COBBLESTONE,
-				ModBlocks.TRANS_STONE_BRICKS, ModBlocks.TRANS_SAND, ModBlocks.TRANS_LOG, ModBlocks.TRANS_PLANKS,
-				ModBlocks.TRANS_LEAVES, ModBlocks.PRIDE_BLOSSOM, ModBlocks.TRANS_CRYSTAL_ORE, ModBlocks.TRANS_CRYSTAL_BLOCK,
-				ModBlocks.PRIDE_OVEN, TRANS_WATER_BUCKET,
+				// nature
+				ModBlocks.TRANS_GRASS_BLOCK, ModBlocks.TRANS_DIRT, ModBlocks.TRANS_SAND, ModBlocks.TRANS_STONE,
+				ModBlocks.TRANS_COBBLESTONE, ModBlocks.TRANS_LOG, ModBlocks.TRANS_WOOD, ModBlocks.STRIPPED_TRANS_LOG,
+				ModBlocks.STRIPPED_TRANS_WOOD, ModBlocks.TRANS_LEAVES, ModBlocks.TRANS_SAPLING, ModBlocks.PRIDE_BLOSSOM,
+				ModBlocks.TRANS_CRYSTAL_ORE, ModBlocks.TRANS_CRYSTAL_CLUSTER, ModBlocks.TRANS_CRYSTAL_BLOCK,
+				// trans wood
+				ModBlocks.TRANS_PLANKS, ModBlocks.TRANS_STAIRS, ModBlocks.TRANS_SLAB, ModBlocks.TRANS_FENCE,
+				ModBlocks.TRANS_FENCE_GATE, ModBlocks.TRANS_DOOR, ModBlocks.TRANS_TRAPDOOR, ModBlocks.TRANS_BUTTON,
+				ModBlocks.TRANS_PRESSURE_PLATE,
+				// trans stone
+				ModBlocks.TRANS_STONE_STAIRS, ModBlocks.TRANS_STONE_SLAB, ModBlocks.TRANS_STONE_BUTTON,
+				ModBlocks.TRANS_STONE_PRESSURE_PLATE, ModBlocks.TRANS_COBBLESTONE_STAIRS, ModBlocks.TRANS_COBBLESTONE_SLAB,
+				ModBlocks.TRANS_COBBLESTONE_WALL, ModBlocks.TRANS_STONE_BRICKS, ModBlocks.CRACKED_TRANS_STONE_BRICKS,
+				ModBlocks.CHISELED_TRANS_STONE_BRICKS, ModBlocks.TRANS_STONE_BRICK_STAIRS, ModBlocks.TRANS_STONE_BRICK_SLAB,
+				ModBlocks.TRANS_STONE_BRICK_WALL,
+				// trans sandstone
+				ModBlocks.TRANS_SANDSTONE, ModBlocks.CUT_TRANS_SANDSTONE, ModBlocks.CHISELED_TRANS_SANDSTONE,
+				ModBlocks.TRANS_SANDSTONE_STAIRS, ModBlocks.TRANS_SANDSTONE_SLAB, ModBlocks.TRANS_SANDSTONE_WALL,
+				// glass, wool, light, furniture
+				ModBlocks.TRANS_STAINED_GLASS, ModBlocks.TRANS_STAINED_GLASS_PANE, ModBlocks.TRANS_PINK_STAINED_GLASS,
+				ModBlocks.TRANS_PINK_STAINED_GLASS_PANE, ModBlocks.TRANS_BLUE_STAINED_GLASS, ModBlocks.TRANS_BLUE_STAINED_GLASS_PANE,
+				ModBlocks.TRANS_WOOL, ModBlocks.TRANS_CARPET, ModBlocks.TRANS_LANTERN, ModBlocks.TRANS_CHAIR, ModBlocks.TRANS_TABLE,
+				// bakery
+				ModBlocks.PRIDE_OVEN, ModBlocks.TRANS_CAKE,
+				TRANS_DONUT, TRANS_COOKIE, TRANS_CUPCAKE, TRANS_MACARON, TRANS_BOBA,
+				// gear
 				TRANS_CRYSTAL, TRANS_SWORD, TRANS_PICKAXE, TRANS_AXE, TRANS_SHOVEL, TRANS_HOE,
 				TRANS_HELMET, TRANS_CHESTPLATE, TRANS_LEGGINGS, TRANS_BOOTS,
-				TRANS_DONUT, TRANS_COOKIE, TRANS_CUPCAKE, TRANS_MACARON, TRANS_BOBA, ModBlocks.TRANS_CAKE
+				SILLY_CAT_SPAWN_EGG
 		);
 	}
 
@@ -169,5 +195,37 @@ public final class ModItems {
 
 		CompostableRegistry.INSTANCE.add(ModBlocks.PRIDE_BLOSSOM, 0.65F);
 		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_LEAVES, 0.3F);
+		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_SAPLING, 0.3F);
+		CompostableRegistry.INSTANCE.add(TRANS_COOKIE, 0.85F);
+		CompostableRegistry.INSTANCE.add(TRANS_CUPCAKE, 0.85F);
+		CompostableRegistry.INSTANCE.add(TRANS_DONUT, 0.85F);
+		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_CAKE, 1.0F);
+
+		// Logs strip with an axe, like vanilla wood.
+		StrippableBlockRegistry.register(ModBlocks.TRANS_LOG, ModBlocks.STRIPPED_TRANS_LOG);
+		StrippableBlockRegistry.register(ModBlocks.TRANS_WOOD, ModBlocks.STRIPPED_TRANS_WOOD);
+
+		// Trans dirt and grass till into (vanilla) farmland, so you can farm in the realm.
+		TillableBlockRegistry.register(ModBlocks.TRANS_DIRT, HoeItem::onlyIfAirAbove, HoeItem.changeIntoState(Blocks.FARMLAND.defaultBlockState()));
+		TillableBlockRegistry.register(ModBlocks.TRANS_GRASS_BLOCK, HoeItem::onlyIfAirAbove, HoeItem.changeIntoState(Blocks.FARMLAND.defaultBlockState()));
+
+		// Wood burns like wood, wool like wool.
+		FlammableBlockRegistry flammable = FlammableBlockRegistry.getDefaultInstance();
+		for (Block block : List.of(ModBlocks.TRANS_PLANKS, ModBlocks.TRANS_STAIRS, ModBlocks.TRANS_SLAB, ModBlocks.TRANS_FENCE,
+				ModBlocks.TRANS_FENCE_GATE, ModBlocks.TRANS_CHAIR, ModBlocks.TRANS_TABLE)) {
+			flammable.add(block, 5, 20);
+		}
+		for (Block block : List.of(ModBlocks.TRANS_LOG, ModBlocks.TRANS_WOOD, ModBlocks.STRIPPED_TRANS_LOG, ModBlocks.STRIPPED_TRANS_WOOD)) {
+			flammable.add(block, 5, 5);
+		}
+		flammable.add(ModBlocks.TRANS_LEAVES, 30, 60);
+		flammable.add(ModBlocks.TRANS_WOOL, 30, 60);
+		flammable.add(ModBlocks.TRANS_CARPET, 60, 20);
+		flammable.add(ModBlocks.PRIDE_BLOSSOM, 60, 100);
+
+		FuelValueEvents.BUILD.register((builder, context) -> {
+			builder.add(ModBlocks.TRANS_CHAIR, context.baseSmeltTime() * 3 / 2);
+			builder.add(ModBlocks.TRANS_TABLE, context.baseSmeltTime() * 3 / 2);
+		});
 	}
 }
