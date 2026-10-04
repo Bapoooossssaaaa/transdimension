@@ -62,7 +62,7 @@ public class TransDimensionClient implements ClientModInitializer {
 	/** Trans pink, used for trans grass outside of a world (and as the fallback colour). */
 	private static final int DEFAULT_GRASS = 0xFFF5A9B8;
 
-	/** Tints trans grass with the biome's grass colour, so every biome has its own shade. */
+	/** Tints trans grass blocks, grass and ferns with the biome's grass colour, so every biome has its own shade. */
 	private static final BlockTintSource TRANS_GRASS_TINT = new BlockTintSource() {
 		@Override
 		public int color(BlockState state) {
@@ -85,7 +85,9 @@ public class TransDimensionClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		TransRecolor.captureRenderThread();
 
-		BlockColorRegistry.register(List.of(TRANS_GRASS_TINT), ModBlocks.TRANS_GRASS_BLOCK);
+		// Trans grass and ferns take the biome's grass colour, like the grass block they grow on.
+		BlockColorRegistry.register(List.of(TRANS_GRASS_TINT), ModBlocks.TRANS_GRASS_BLOCK, ModBlocks.TRANS_SHORT_GRASS,
+				ModBlocks.TALL_TRANS_GRASS, ModBlocks.TRANS_FERN, ModBlocks.LARGE_TRANS_FERN, ModBlocks.POTTED_TRANS_FERN);
 
 		// The Silly Cat.
 		ModelLayerRegistry.registerModelLayer(SillyCatRenderer.LAYER, SillyCatModel::createBodyLayer);

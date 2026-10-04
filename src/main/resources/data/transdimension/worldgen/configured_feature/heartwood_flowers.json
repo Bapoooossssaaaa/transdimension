@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:simple_block",
+  "config": {
+    "to_place": {
+      "type": "minecraft:weighted_state_provider",
+      "entries": [
+        {
+          "data": {
+            "Name": "transdimension:heart_bloom"
+          },
+          "weight": 4
+        },
+        {
+          "data": {
+            "Name": "transdimension:trans_rose"
+          },
+          "weight": 3
+        },
+        {
+          "data": {
+            "Name": "transdimension:blush_carnation"
+          },
+          "weight": 2
+        }
+      ]
+    }
+  }
+}

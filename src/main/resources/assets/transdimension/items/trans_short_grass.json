@@ -1,6 +1,12 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "transdimension:item/trans_short_grass"
+    "model": "transdimension:item/trans_short_grass",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": -677448
+      }
+    ]
   }
 }

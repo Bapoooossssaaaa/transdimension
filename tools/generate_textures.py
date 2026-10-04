@@ -850,12 +850,14 @@ def coral_texture(colour, part, dead=False):
 def vegetation_textures():
     """(name, image, mcmeta or None) for every vegetation block texture."""
     out = [
-        ("trans_short_grass", blades(vblock("short_grass"), GRASS_FAMILIES, seed=5), None),
-        ("tall_trans_grass_bottom", blades(vblock("tall_grass_bottom"), GRASS_FAMILIES, seed=8), None),
-        ("tall_trans_grass_top", blades(vblock("tall_grass_top"), GRASS_FAMILIES, seed=7), None),
-        ("trans_fern", recolour(vblock("fern"), V_BLUE, 0.1, 0.95), None),
-        ("large_trans_fern_bottom", recolour(vblock("large_fern_bottom"), V_BLUE, 0.1, 0.95), None),
-        ("large_trans_fern_top", recolour(vblock("large_fern_top"), V_BLUE, 0.1, 0.95), None),
+        # Grass and ferns are light grey and tinted with the biome's grass colour (like vanilla), so each biome's
+        # grass matches its grass blocks.
+        ("trans_short_grass", grass_gray(vblock("short_grass"), low=0.55), None),
+        ("tall_trans_grass_bottom", grass_gray(vblock("tall_grass_bottom"), low=0.55), None),
+        ("tall_trans_grass_top", grass_gray(vblock("tall_grass_top"), low=0.55), None),
+        ("trans_fern", grass_gray(vblock("fern"), low=0.5), None),
+        ("large_trans_fern_bottom", grass_gray(vblock("large_fern_bottom"), low=0.5), None),
+        ("large_trans_fern_top", grass_gray(vblock("large_fern_top"), low=0.5), None),
         ("pastel_bush", pastel_bush(), None),
         ("trans_firefly_bush", recolour(vblock("firefly_bush"), V_LILAC, 0.0, 0.85), None),
         ("trans_firefly_bush_emissive", trans_firefly_bush_emissive(), {"animation": {"frametime": 3}}),

@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:simple_block",
+  "config": {
+    "to_place": {
+      "type": "minecraft:weighted_state_provider",
+      "entries": [
+        {
+          "data": {
+            "Name": "transdimension:pride_blossom"
+          },
+          "weight": 3
+        },
+        {
+          "data": {
+            "Name": "transdimension:trans_tulip"
+          },
+          "weight": 3
+        },
+        {
+          "data": {
+            "Name": "transdimension:flag_lily"
+          },
+          "weight": 2
+        },
+        {
+          "data": {
+            "Name": "transdimension:trans_rose"
+          },
+          "weight": 2
+        }
+      ]
+    }
+  }
+}

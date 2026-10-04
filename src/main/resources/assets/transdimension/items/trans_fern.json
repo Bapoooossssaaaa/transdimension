@@ -1,6 +1,12 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "transdimension:item/trans_fern"
+    "model": "transdimension:item/trans_fern",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": -677448
+      }
+    ]
   }
 }

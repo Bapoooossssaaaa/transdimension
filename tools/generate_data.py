@@ -513,16 +513,22 @@ def pane(block, english, glass_block):
     loot(block, loot_silk_only(block))
 
 
-def cross_plant(block, english, potted=None, potted_english=None):
+# Grass-coloured plants (trans grass and ferns) are tinted with the biome's grass colour; in the hand they're trans pink.
+def grass_item_tint():
+    return [{"type": "minecraft:constant", "value": argb_int(0xF5A9B8)}]
+
+
+def cross_plant(block, english, potted=None, potted_english=None, tinted=False):
     blockstate(block, {"variants": {"": {"model": f"{NS}:block/{block}"}}})
-    model(block, {"parent": "minecraft:block/cross", "textures": {"cross": block_tex(block)}})
+    model(block, {"parent": "minecraft:block/tinted_cross" if tinted else "minecraft:block/cross", "textures": {"cross": block_tex(block)}})
     model(block, {"parent": "minecraft:item/generated", "textures": {"layer0": block_tex(block)}}, kind="item")
-    item_def(block, f"{NS}:item/{block}")
+    item_def(block, f"{NS}:item/{block}", tints=grass_item_tint() if tinted else None)
     name(block, english)
     loot(block, loot_self(block))
     if potted:
         blockstate(potted, {"variants": {"": {"model": f"{NS}:block/{potted}"}}})
-        model(potted, {"parent": "minecraft:block/flower_pot_cross", "textures": {"plant": block_tex(block)}})
+        model(potted, {"parent": "minecraft:block/tinted_flower_pot_cross" if tinted else "minecraft:block/flower_pot_cross",
+                       "textures": {"plant": block_tex(block)}})
         name(potted, potted_english)
         loot(potted, loot_pot(potted, block))
         tag("block", "flower_pots", potted)
@@ -858,21 +864,24 @@ def plant_tags(block, edible=False):
         tag("block", "edible_for_sheep", block)
 
 
-def cross_model(block, texture=None, item_texture=None, item=True):
-    """A plant drawn as two crossed planes (no biome tint: trans plants carry their own colours)."""
-    model(block, {"parent": "minecraft:block/cross", "textures": {"cross": block_tex(texture or block)}})
+def cross_model(block, texture=None, item_texture=None, item=True, tinted=False):
+    """A plant drawn as two crossed planes. Most trans plants carry their own colours; tinted ones (grass) take the
+    biome's grass colour."""
+    model(block, {"parent": "minecraft:block/tinted_cross" if tinted else "minecraft:block/cross",
+                  "textures": {"cross": block_tex(texture or block)}})
     if item:
         model(block, {"parent": "minecraft:item/generated", "textures": {"layer0": item_texture or block_tex(texture or block)}}, kind="item")
-        item_def(block, f"{NS}:item/{block}")
+        item_def(block, f"{NS}:item/{block}", tints=grass_item_tint() if tinted else None)
 
 
-def double_plant(block, english, vanilla):
+def double_plant(block, english, vanilla, tinted=False):
     blockstate(block, {"variants": {"half=lower": {"model": f"{NS}:block/{block}_bottom"},
                                     "half=upper": {"model": f"{NS}:block/{block}_top"}}})
     for half in ("bottom", "top"):
-        model(f"{block}_{half}", {"parent": "minecraft:block/cross", "textures": {"cross": block_tex(f"{block}_{half}")}})
+        model(f"{block}_{half}", {"parent": "minecraft:block/tinted_cross" if tinted else "minecraft:block/cross",
+                                  "textures": {"cross": block_tex(f"{block}_{half}")}})
     model(block, {"parent": "minecraft:item/generated", "textures": {"layer0": block_tex(f"{block}_top")}}, kind="item")
-    item_def(block, f"{NS}:item/{block}")
+    item_def(block, f"{NS}:item/{block}", tints=grass_item_tint() if tinted else None)
     name(block, english)
     return block
 
@@ -880,17 +889,17 @@ def double_plant(block, english, vanilla):
 def generate_vegetation():
     # ---- grass, ferns, bushes
     blockstate("trans_short_grass", {"variants": {"": {"model": f"{NS}:block/trans_short_grass"}}})
-    cross_model("trans_short_grass")
+    cross_model("trans_short_grass", tinted=True)
     name("trans_short_grass", "Trans Grass")
     loot_like_vanilla("trans_short_grass", "short_grass")
     plant_tags("trans_short_grass", edible=True)
-    double_plant("tall_trans_grass", "Tall Trans Grass", "tall_grass")
+    double_plant("tall_trans_grass", "Tall Trans Grass", "tall_grass", tinted=True)
     loot_like_vanilla("tall_trans_grass", "tall_grass", {"minecraft:short_grass": "trans_short_grass"})
     plant_tags("tall_trans_grass")
-    cross_plant("trans_fern", "Trans Fern", "potted_trans_fern", "Potted Trans Fern")
+    cross_plant("trans_fern", "Trans Fern", "potted_trans_fern", "Potted Trans Fern", tinted=True)
     loot_like_vanilla("trans_fern", "fern")
     plant_tags("trans_fern", edible=True)
-    double_plant("large_trans_fern", "Large Trans Fern", "large_fern")
+    double_plant("large_trans_fern", "Large Trans Fern", "large_fern", tinted=True)
     loot_like_vanilla("large_trans_fern", "large_fern", {"minecraft:fern": "trans_fern"})
     plant_tags("large_trans_fern")
     for block, english, vanilla, edible in (("pastel_bush", "Pastel Bush", "bush", False),
