@@ -97,7 +97,7 @@ public class FairyJarRenderer implements BlockEntityRenderer<FairyJarBlockEntity
 		float size = 1.0F / 16.0F;
 		poseStack.scale(size, size, size);
 		Identifier texture = TEXTURES[state.colour];
-		nodeCollector.submitModel(this.light, state, poseStack, RenderTypes.entityCutoutNoCull(texture), FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
+		nodeCollector.submitModel(this.light, state, poseStack, RenderTypes.entityCutout(texture), FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
 				0, null);
 		nodeCollector.submitModel(this.halo, state, poseStack, RenderTypes.entityTranslucent(texture), FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
 				0, null);
@@ -117,7 +117,7 @@ public class FairyJarRenderer implements BlockEntityRenderer<FairyJarBlockEntity
 		private final ModelPart leftWing;
 
 		LightModel(ModelPart root) {
-			super(root, RenderTypes::entityCutoutNoCull);
+			super(root, RenderTypes::entityCutout);
 			ModelPart light = root.getChild("light");
 			this.rightWing = light.getChild("right_wing");
 			this.leftWing = light.getChild("left_wing");

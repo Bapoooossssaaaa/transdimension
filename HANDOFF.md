@@ -7,7 +7,7 @@ State of the mod for whoever picks it up next (person or AI). The README covers 
 - Target: Minecraft Java **26.2**, Fabric Loader 0.19.5, Fabric API 0.161.0+26.2, Java 25. Mod id `transdimension`, package `dev.goober.transdimension`.
 - **Rounds 1 and 2 compiled and loaded.** The owner ran them on 26.2 next to Sodium, Iris and Xaero's maps. The first run hung on "Preparing for world creation" because the sky timeline repeated vanilla's time markers; commit 2e490ee fixed that.
 - **Round 3 compiles and runs**: the owner's screenshots show Maddie (in her new skin) and the wings in game.
-- **Round 4's main source set gets through the compiler; the client source set hasn't been compiled yet.** The first build reported only six errors in `src/main`, all `Player#displayClientMessage`, which 26.2 split into `sendOverlayMessage` and `sendSystemMessage` (now fixed). Since javac checks every class's names before stopping, that confirmed every other main-side API in round 4. Round 4 rebuilt the wings and added the new plants, woods, flowers, biomes, the three creatures and the whole Fairy Realm endgame (see "Round 4 at a glance"). The cloud environment can't download Gradle, Fabric's maven, Mojang's game files or a JDK 25 (see "Building in the cloud"). Every API was checked by hand against Fabric API's 26.2 source, NeoForge's 26.2 source patches (which quote vanilla 26.2 code around each patch), the NeoForge 26.x porting primers and vanilla 26.2 data from misode/mcmeta. The names that couldn't be confirmed are listed under "Unverified APIs (round 4)" with what to try instead; round 3's table is kept below it.
+- **Both source sets now get through javac's name checks.** The first round-4 builds reported six errors in `src/main` (`Player#displayClientMessage`, which 26.2 split into `sendOverlayMessage` and `sendSystemMessage`) and two in `src/client` (`RenderTypes.entityCutoutNoCull`, renamed `entityCutout` in 26.1), all fixed. javac checks every class's names before it stops, so that confirmed every other API in rounds 3 and 4. What it can't check is mixin targets and names looked up by reflection; the game checks those at startup. Round 4 rebuilt the wings and added the new plants, woods, flowers, biomes, the three creatures and the whole Fairy Realm endgame (see "Round 4 at a glance"). The cloud environment can't download Gradle, Fabric's maven, Mojang's game files or a JDK 25 (see "Building in the cloud"). Every API was checked by hand against Fabric API's 26.2 source, NeoForge's 26.2 source patches (which quote vanilla 26.2 code around each patch), the NeoForge 26.x porting primers and vanilla 26.2 data from misode/mcmeta. The names that couldn't be confirmed are listed under "Unverified APIs (round 4)" with what to try instead; round 3's table is kept below it.
 - `python3 tools/validate_resources.py <mcmeta-summary>/registries/data.json` passes with 0 errors. That run covers resources and data, not Java.
 
 ## Round 3 at a glance
@@ -102,18 +102,15 @@ Hand-made files the scripts don't touch: the cake models and blockstate, `chests
 
 ## Unverified APIs (round 4)
 
-The first round-4 build confirmed every main-side API (see the status above), so only the client side and the mixin's target are left. These were checked against NeoForge's 26.2 patches and Fabric's 26.2 tests where they quote the code, otherwise from the primers and 1.21.x. If the client build fails, look here first.
+The compiler has checked every round-4 API (see the status above). Only the mixin's injection point is left; the game checks it at startup.
 
-| Where | API | If it doesn't compile |
+| Where | API | If it doesn't work |
 | --- | --- | --- |
-| `EnderManMixin` | the `Level#addParticle` call in `EnderMan#aiStep` (javac doesn't check mixin targets; the game does at startup) | The mixin is `require = 0`: worst case the sparkles are purple. |
-| Mob renderers | `LivingEntityRenderState#isInWater`/`isBaby` (confirmed), `ModelPart#xScale/yScale/zScale`, `LivingEntityRenderer.getOverlayCoords`, `RenderTypes.entityTranslucent(Identifier)` (`net.minecraft.client.renderer.rendertype`) | The scale fields are what keyframe animations use; `getOverlayCoords` can become `OverlayTexture.NO_OVERLAY`. |
-| `FairyJarRenderer` | the 26.x block entity renderer shape: `BlockEntityRenderer<T, S extends BlockEntityRenderState>` with `createRenderState`, `extractRenderState(T, S, float, Vec3, ModelFeatureRenderer.CrumblingOverlay)`, `submit(S, PoseStack, SubmitNodeCollector, CameraRenderState)` (confirmed by Fabric's `LecternRendererMixin` test); `Model<S>(ModelPart, Function<Identifier, RenderType>)`; `BlockEntityRenderers.register` (made public by Fabric's transitive access wideners) | If the light won't compile, drop the renderer registration: the jar still shows, just without its light. |
-| `TransIntroOverlay`, client | `CameraRenderState` is in `net.minecraft.client.renderer.state.level` (from Fabric's 26.2 tests) | |
+| `EnderManMixin` | the `Level#addParticle` call in `EnderMan#aiStep` | The mixin is `require = 0`: worst case the sparkles are purple. |
 
 ## Unverified APIs (round 3)
 
-These come from primers, older versions or the shape of 26.2 data, not from 26.2 source. If the build fails, look here first.
+These come from primers, older versions or the shape of 26.2 data, not from 26.2 source. The compiler has since confirmed the Java names; what still matters here is mixin targets, reflected names and data formats, which only show up when the game runs.
 
 | Where | API | If it doesn't compile |
 | --- | --- | --- |
