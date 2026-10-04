@@ -2289,36 +2289,101 @@ def trans_magic_bolt():
     ], {"B": BLUE, "P": PINK, "W": WHITE})
 
 
-def trans_wings_model_texture():
-    """64x32 texture for the wing model (TransWingsModel): an inner and an outer feather panel per wing, both faces.
-    Feathers are white at the root, pink in the middle and blue at the tips, with see-through gaps between the long
-    flight feathers."""
-    img = new(64, 32)
+# Layout shared with TransWingsModel: bone boxes are 5x2x1 / 5x3x1, feathers 3xLx1 (a box of w x h x d at u,v covers
+# u..u+2(w+d) and v..v+d+h; its two big faces are north at u+d and south at u+2d+w).
+WING_ARM, WING_ARM_COVERTS, WING_HAND, WING_HAND_COVERTS = (0, 0), (14, 0), (28, 0), (42, 0)
+WING_SECONDARIES = [((8 * i, 6), length) for i, length in enumerate((7, 8, 9, 10))]
+WING_PRIMARIES = [((8 * i, 20), length) for i, length in enumerate((11, 12, 13, 14, 13))]
+WING_WHITE, WING_PEARL = hexc("FBF9FE"), hexc("E9E5F2")
+WING_PINK, WING_PINK_DEEP, WING_BLUE, WING_BLUE_DEEP = PINK, hexc("E58AA2"), BLUE, hexc("3FA9DE")
 
-    def panel(u, v, w, h, outer):
-        for face_x in (u + 1, u + w + 2):               # the two big faces of a 1-thick box
-            for y in range(h):
-                for x in range(w):
-                    # 0 at the root .. 1 at the tip: entity cubes map the north face's left edge to the box's min x
-                    # (the tip of a wing that reaches out to -x) and the south face the other way round.
-                    along = (w - 1 - x if face_x == u + 1 else x) / max(1, w - 1)
-                    reach = 1.0 if not outer else 1.0 - 0.45 * along                 # outer feathers taper upwards
-                    if y > h * reach:
-                        continue
-                    feather = (x // 2) % 2
-                    if outer and y > h * 0.55 and feather == 1 and y > h * reach - 2:
-                        continue                                                  # gaps between flight feathers
-                    t = (along * 0.6 + (y / h) * 0.6) if outer else (along * 0.45 + (y / h) * 0.35)
-                    ramp = (R_PEARL if t < 0.3 else R_PINK if t < 0.62 else R_BLUE)
-                    shade_t = 0.75 - 0.25 * feather - 0.15 * (y / h)
-                    c = sample(ramp, shade_t + 0.2 if ramp is R_PEARL else shade_t)
-                    if y % 4 == 0 and not outer:
-                        c = shade(c, 0.92)                                        # rows of covert feathers
-                    img.putpixel((face_x + x, v + 1 + y), (*c, 255))
-            for x in range(w):                                                    # top and bottom edges
-                img.putpixel((u + 1 + x, v), (*sample(R_PEARL, 0.8), 255))
-    panel(0, 0, 10, 12, outer=False)
-    panel(0, 13, 12, 14, outer=True)
+
+def wing_gradient(stops, t):
+    t = max(0.0, min(1.0, t))
+    for i in range(1, len(stops)):
+        if t <= stops[i][0]:
+            (a, ca), (b, cb) = stops[i - 1], stops[i]
+            return mix(ca, cb, (t - a) / (b - a) if b > a else 0)
+    return stops[-1][1]
+
+
+def paint_wing_box(img, u, v, w, h, face_fn, edge_fn, end_fn):
+    """Paints a w x h x 1 model box: face_fn for the big north/south faces, edge_fn for the thin sides and end_fn for
+    the two ends. Each returns a colour or None (see-through)."""
+    regions = {"north": (u + 1, v + 1, w, h), "south": (u + 2 + w, v + 1, w, h), "west": (u, v + 1, 1, h),
+               "east": (u + 1 + w, v + 1, 1, h), "top": (u + 1, v, w, 1), "bottom": (u + 1 + w, v, w, 1)}
+    for face, (x0, y0, fw, fh) in regions.items():
+        for y in range(fh):
+            for x in range(fw):
+                fn = face_fn if face in ("north", "south") else edge_fn if face in ("west", "east") else end_fn
+                c = fn(face, x, y)
+                if c is not None:
+                    img.putpixel((x0 + x, y0 + y), (*c, 255))
+
+
+def wing_feather(img, u, v, length, stops):
+    """A flight feather: a pale shaft, a lit and a shaded vane, a pointed tip. The underside (north, towards the body)
+    is a little paler, like real wings."""
+    def col(y, column, face):
+        t = y / max(1, length - 1)
+        c = wing_gradient(stops, t)
+        if column == 1:
+            c = mix(c, WING_WHITE, 0.5 * (1 - t) + 0.12)
+        elif column == 2:
+            c = shade(c, 0.9)
+        return mix(c, WING_PEARL, 0.18) if face == "north" else c
+
+    def face(f, x, y):
+        if y == length - 1 and x != 1:
+            return None
+        c = col(y, x, f)
+        return shade(c, 0.88) if y >= length - 2 and x != 1 else c
+
+    paint_wing_box(img, u, v, 3, length, face,
+                   lambda f, x, y: None if y >= length - 1 else shade(col(y, 0, "south"), 0.82),
+                   lambda f, x, y: col(0, 1, "south") if f == "top" else shade(col(length - 1, 1, "south"), 0.85))
+
+
+def wing_bone(img, u, v, w, h, tint):
+    """The leading edge: a bone covered in tiny white feathers, blushing towards its far end (the north face's left
+    edge is the box's min x, the far end of a right wing)."""
+    def face(f, x, y):
+        a = (w - 1 - x) / max(1, w - 1) if f == "north" else x / max(1, w - 1)
+        c = mix(WING_WHITE, mix(WING_PEARL, tint, 0.3), a * 0.7)
+        return shade(c, 0.9) if y == h - 1 else c
+
+    paint_wing_box(img, u, v, w, h, face, lambda f, x, y: shade(WING_PEARL, 0.92),
+                   lambda f, x, y: WING_WHITE if f == "top" else shade(WING_PEARL, 0.88))
+
+
+def wing_coverts(img, u, v, w, h, stops):
+    """Rows of small rounded covert feathers over the roots of the flight feathers, with a scalloped hem."""
+    def face(f, x, y):
+        if y == h - 1 and x % 2 == 1:
+            return None
+        c = wing_gradient(stops, y / max(1, h - 1))
+        c = shade(c, 0.96) if x % 2 == 1 else c
+        return mix(c, WING_PEARL, 0.15) if f == "north" else c
+
+    paint_wing_box(img, u, v, w, h, face, lambda f, x, y: shade(wing_gradient(stops, y / max(1, h - 1)), 0.86),
+                   lambda f, x, y: WING_WHITE)
+
+
+def trans_wings_model_texture():
+    """64x64 texture for TransWingsModel: white bones and coverts along the leading edge, secondaries white to pink,
+    primaries white to pink to blue, so a spread wing reads white, pink and blue from the body to the tip."""
+    img = new(64, 64)
+    wing_bone(img, *WING_ARM, 5, 2, WING_PINK)
+    wing_coverts(img, *WING_ARM_COVERTS, 5, 3, [(0.0, WING_WHITE), (0.6, mix(WING_WHITE, WING_PINK, 0.5)), (1.0, WING_PINK)])
+    wing_bone(img, *WING_HAND, 5, 2, WING_BLUE)
+    wing_coverts(img, *WING_HAND_COVERTS, 5, 2, [(0.0, WING_WHITE), (1.0, mix(WING_PINK, WING_BLUE, 0.35))])
+    secondary = [(0.0, WING_WHITE), (0.3, WING_WHITE), (0.62, WING_PINK), (1.0, WING_PINK_DEEP)]
+    primary = [(0.0, WING_WHITE), (0.2, WING_WHITE), (0.42, WING_PINK), (0.58, WING_PINK), (0.8, WING_BLUE),
+               (1.0, WING_BLUE_DEEP)]
+    for (u, v), length in WING_SECONDARIES:
+        wing_feather(img, u, v, length, secondary)
+    for (u, v), length in WING_PRIMARIES:
+        wing_feather(img, u, v, length, primary)
     return img
 
 

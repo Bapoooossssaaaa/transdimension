@@ -24,6 +24,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockColorRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRenderEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -39,6 +40,7 @@ import dev.goober.transdimension.client.screen.MaddieDialogueScreen;
 import dev.goober.transdimension.client.wings.TransWingsLayer;
 import dev.goober.transdimension.client.wings.TransWingsModel;
 import dev.goober.transdimension.client.wings.WingAnimations;
+import dev.goober.transdimension.client.wings.WingPose;
 import dev.goober.transdimension.client.wings.WingsController;
 import dev.goober.transdimension.network.OpenMaddieDialoguePayload;
 import dev.goober.transdimension.network.WingFlapPayload;
@@ -95,6 +97,8 @@ public class TransDimensionClient implements ClientModInitializer {
 			}
 		});
 		HudElementRegistry.attachElementBefore(VanillaHudElements.HOTBAR, TransDimension.id("trans_wings"), WingsController::extractHud);
+		// A cape would poke through the folded feathers, so players wearing the wings don't show theirs.
+		LivingEntityFeatureRenderEvents.ALLOW_CAPE_RENDER.register(state -> state.getData(WingPose.KEY) == null);
 
 		ClientPlayNetworking.registerGlobalReceiver(OpenMaddieDialoguePayload.TYPE, (payload, context) ->
 				context.client().gui.setScreen(new MaddieDialogueScreen(payload.entityId(), payload.gifted())));
