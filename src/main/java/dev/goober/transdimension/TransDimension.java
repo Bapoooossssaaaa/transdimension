@@ -20,6 +20,7 @@ import dev.goober.transdimension.registry.ModItems;
 import dev.goober.transdimension.registry.ModSounds;
 import dev.goober.transdimension.registry.ModVillagers;
 import dev.goober.transdimension.teleport.GooberTeleporter;
+import dev.goober.transdimension.world.FairyRealm;
 
 /**
  * Trans Dimension: say "Goober" in chat to visit the Trans Realm.
@@ -30,6 +31,8 @@ public class TransDimension implements ModInitializer {
 
 	/** The level key of the Trans Realm (defined by data/transdimension/dimension/trans_realm.json). */
 	public static final ResourceKey<Level> TRANS_REALM = ResourceKey.create(Registries.DIMENSION, id("trans_realm"));
+	/** Floating islands above the clouds, where the Trans Fairy waits (data/transdimension/dimension/fairy_realm.json). */
+	public static final ResourceKey<Level> FAIRY_REALM = ResourceKey.create(Registries.DIMENSION, id("fairy_realm"));
 
 	@Override
 	public void onInitialize() {
@@ -48,6 +51,7 @@ public class TransDimension implements ModInitializer {
 		ModNetworking.initialize();
 		GooberTeleporter.initialize();
 		RealmEvents.initialize();
+		FairyRealm.initialize();
 
 		LOGGER.info("Trans Dimension loaded. Say \"Goober\" in chat to visit the Trans Realm. You are valid!");
 	}

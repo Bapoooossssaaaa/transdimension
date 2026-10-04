@@ -8,6 +8,7 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.object.boat.BoatModel;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.entity.BoatRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
@@ -33,6 +34,8 @@ import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.fabric.api.resource.v1.reloader.ResourceReloaderKeys;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.client.block.FairyJarRenderer;
+import dev.goober.transdimension.client.entity.FairyCrystalSpikeRenderer;
 import dev.goober.transdimension.client.entity.MaddieRenderer;
 import dev.goober.transdimension.client.entity.PastelSlimeModel;
 import dev.goober.transdimension.client.entity.PastelSlimeRenderer;
@@ -40,6 +43,8 @@ import dev.goober.transdimension.client.entity.SillyCatModel;
 import dev.goober.transdimension.client.entity.SillyCatRenderer;
 import dev.goober.transdimension.client.entity.TransEndermanModel;
 import dev.goober.transdimension.client.entity.TransEndermanRenderer;
+import dev.goober.transdimension.client.entity.TransFairyModel;
+import dev.goober.transdimension.client.entity.TransFairyRenderer;
 import dev.goober.transdimension.client.entity.TransFishModel;
 import dev.goober.transdimension.client.entity.TransFishRenderer;
 import dev.goober.transdimension.client.screen.MaddieDialogueScreen;
@@ -50,6 +55,7 @@ import dev.goober.transdimension.client.wings.WingPose;
 import dev.goober.transdimension.client.wings.WingsController;
 import dev.goober.transdimension.network.OpenMaddieDialoguePayload;
 import dev.goober.transdimension.network.WingFlapPayload;
+import dev.goober.transdimension.registry.ModBlockEntities;
 import dev.goober.transdimension.registry.ModBlocks;
 import dev.goober.transdimension.registry.ModEntities;
 
@@ -96,6 +102,16 @@ public class TransDimensionClient implements ClientModInitializer {
 		ModelLayerRegistry.registerModelLayer(PastelSlimeRenderer.JELLY_LAYER, PastelSlimeModel::createJellyLayer);
 		EntityRenderers.register(ModEntities.PASTEL_SLIME, PastelSlimeRenderer::new);
 
+		// The Fairy Realm: the Trans Fairy (wings and wand star in a glowing layer), her ice crystals, and the Fairy Jar's light.
+		ModelLayerRegistry.registerModelLayer(TransFairyRenderer.LAYER, TransFairyModel::createBodyLayer);
+		ModelLayerRegistry.registerModelLayer(TransFairyRenderer.GLOW_LAYER, TransFairyModel::createGlowLayer);
+		EntityRenderers.register(ModEntities.TRANS_FAIRY, TransFairyRenderer::new);
+		ModelLayerRegistry.registerModelLayer(FairyCrystalSpikeRenderer.LAYER, FairyCrystalSpikeRenderer::createLayer);
+		EntityRenderers.register(ModEntities.FAIRY_CRYSTAL_SPIKE, FairyCrystalSpikeRenderer::new);
+		ModelLayerRegistry.registerModelLayer(FairyJarRenderer.LAYER, FairyJarRenderer::createLayer);
+		ModelLayerRegistry.registerModelLayer(FairyJarRenderer.HALO_LAYER, FairyJarRenderer::createHaloLayer);
+		BlockEntityRenderers.register(ModBlockEntities.FAIRY_JAR, FairyJarRenderer::new);
+
 		// Trans boats use vanilla's boat models with our textures.
 		ModelLayerRegistry.registerModelLayer(TRANS_BOAT_LAYER, BoatModel::createBoatModel);
 		ModelLayerRegistry.registerModelLayer(TRANS_CHEST_BOAT_LAYER, BoatModel::createChestBoatModel);
@@ -130,11 +146,13 @@ public class TransDimensionClient implements ClientModInitializer {
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			ResourceKey<Level> dimension = client.level != null ? client.level.dimension() : null;
-			boolean inRealm = TransDimension.TRANS_REALM.equals(dimension);
+			boolean inFairyRealm = TransDimension.FAIRY_REALM.equals(dimension);
+			// The Fairy Realm floats high above the same pastel world, so it gets the realm's sky, clouds and colours too.
+			boolean inRealm = TransDimension.TRANS_REALM.equals(dimension) || inFairyRealm;
 
 			if (!Objects.equals(dimension, lastDimension)) {
 				if (inRealm) {
-					TransIntroOverlay.start();
+					TransIntroOverlay.start(inFairyRealm);
 				}
 				lastDimension = dimension;
 			}

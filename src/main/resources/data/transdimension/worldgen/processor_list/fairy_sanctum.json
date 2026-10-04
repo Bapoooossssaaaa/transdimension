@@ -1,0 +1,101 @@
+{
+  "processors": [
+    {
+      "processor_type": "minecraft:rule",
+      "rules": [
+        {
+          "input_predicate": {
+            "predicate_type": "minecraft:random_blockstate_match",
+            "block_state": {
+              "Name": "transdimension:fairy_portal_frame",
+              "Properties": {
+                "facing": "north",
+                "pearl": "false"
+              }
+            },
+            "probability": 0.12
+          },
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "output_state": {
+            "Name": "transdimension:fairy_portal_frame",
+            "Properties": {
+              "facing": "north",
+              "pearl": "true"
+            }
+          }
+        },
+        {
+          "input_predicate": {
+            "predicate_type": "minecraft:random_blockstate_match",
+            "block_state": {
+              "Name": "transdimension:fairy_portal_frame",
+              "Properties": {
+                "facing": "south",
+                "pearl": "false"
+              }
+            },
+            "probability": 0.12
+          },
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "output_state": {
+            "Name": "transdimension:fairy_portal_frame",
+            "Properties": {
+              "facing": "south",
+              "pearl": "true"
+            }
+          }
+        },
+        {
+          "input_predicate": {
+            "predicate_type": "minecraft:random_blockstate_match",
+            "block_state": {
+              "Name": "transdimension:fairy_portal_frame",
+              "Properties": {
+                "facing": "east",
+                "pearl": "false"
+              }
+            },
+            "probability": 0.12
+          },
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "output_state": {
+            "Name": "transdimension:fairy_portal_frame",
+            "Properties": {
+              "facing": "east",
+              "pearl": "true"
+            }
+          }
+        },
+        {
+          "input_predicate": {
+            "predicate_type": "minecraft:random_blockstate_match",
+            "block_state": {
+              "Name": "transdimension:fairy_portal_frame",
+              "Properties": {
+                "facing": "west",
+                "pearl": "false"
+              }
+            },
+            "probability": 0.12
+          },
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "output_state": {
+            "Name": "transdimension:fairy_portal_frame",
+            "Properties": {
+              "facing": "west",
+              "pearl": "true"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

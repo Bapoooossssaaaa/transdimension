@@ -6,6 +6,7 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.world.FairyIslandFeature;
 import dev.goober.transdimension.world.HeartTreeFeature;
 import dev.goober.transdimension.world.TransCoralReefFeature;
 
@@ -15,6 +16,9 @@ public final class ModFeatures {
 			TransDimension.id("trans_coral_reef"), new TransCoralReefFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<NoneFeatureConfiguration> HEART_TREE = Registry.register(BuiltInRegistries.FEATURE,
 			TransDimension.id("heart_tree"), new HeartTreeFeature(NoneFeatureConfiguration.CODEC));
+
+	public static final Feature<NoneFeatureConfiguration> FAIRY_ISLAND = Registry.register(BuiltInRegistries.FEATURE,
+			TransDimension.id("fairy_island"), new FairyIslandFeature(NoneFeatureConfiguration.CODEC));
 
 	private ModFeatures() {
 	}

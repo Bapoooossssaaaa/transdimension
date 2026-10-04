@@ -3113,6 +3113,364 @@ def creature_textures():
     yield "block/blue_gel_block.png", gel_block(GEL_BLUE)
 
 
+# ============================================================================================ the Fairy Realm (round 4 endgame)
+# The Trans Fairy (layouts match TransFairyModel), her ice crystals, the Fairy Jar's light, the portal frame and the
+# shimmering portal, the jar, and the fairy's spawn egg.
+FAIRY_SKIN = [hexc(c) for c in ("E3B4A6", "F2CDBF", "FBE0D6", "FEEDE6", "FFF6F2")]
+FAIRY_HAIR = [hexc(c) for c in ("B04E78", "D06A94", "E888AE", "F4A8C4", "FAC8DA")]
+FAIRY_HAIR_TIP = [hexc(c) for c in ("3E8FD0", "5BB6EC", "86D2F7")]
+DRESS_BLUE = [hexc(c) for c in ("3F8FD0", "5BB8EE", "7FD0F8", "A6E2FC", "D2F2FE")]
+DRESS_PINK = [hexc(c) for c in ("D46F93", "E890AC", "F5A9B8", "F9C4CF", "FDE2E8")]
+DRESS_WHITE = [hexc(c) for c in ("C9C6DC", "E0DEEC", "F2F1F8", "FAF9FD", "FFFFFF")]
+FAIRY_EYE = hexc("3C8FD8")
+FAIRY_EYE_DARK = hexc("1F3F7A")
+FAIRY_LASH = hexc("5A2A4A")
+
+
+def _paint(img, u, v, w, h, fn):
+    for y in range(h):
+        for x in range(w):
+            c = fn(x, y)
+            if c is not None:
+                img.putpixel((u + x, v + y), (*c, 255) if len(c) == 3 else c)
+
+
+def fill_box(img, u, v, w, h, d, fn):
+    for face, (fu, fv, fw, fh) in box_faces(u, v, w, h, d).items():
+        _paint(img, fu, fv, fw, fh, lambda x, y, face=face, fw=fw, fh=fh: fn(face, x, y, fw, fh))
+
+
+def trans_fairy():
+    """128x128 for TransFairyModel's solid layer: head 0,0 (face on the front) · hair shell 32,0 · back hair 64,0 ·
+    side locks 88,0 · tiara 96,0 and 96,4 · arms 40,16 · puff sleeves 48,16 · wand 64,16 · bodice 0,32 · collar 20,32 ·
+    skirt tiers 0,44 / 0,53 / 0,64 · legs 0,76 · shoes 8,76."""
+    rng = random.Random(5)
+    img = new(128, 128)
+    # head 8x8x8 at (0,0): skin, face on the front
+    fill_box(img, 0, 0, 8, 8, 8, lambda f, x, y, w, h: sample(FAIRY_SKIN, 0.55 + 0.15 * (f == "front") - 0.1 * (f in ("left", "right")) + 0.05 * rng.random()))
+    fu, fv = 8, 8
+    face = {
+        # eyes: big, two pixels wide, blue with a white sparkle, lashes above
+        (1, 3): FAIRY_LASH, (2, 3): FAIRY_LASH, (5, 3): FAIRY_LASH, (6, 3): FAIRY_LASH,
+        (1, 4): WHITE, (2, 4): FAIRY_EYE, (5, 4): FAIRY_EYE, (6, 4): WHITE,
+        (1, 5): FAIRY_EYE_DARK, (2, 5): FAIRY_EYE_DARK, (5, 5): FAIRY_EYE_DARK, (6, 5): FAIRY_EYE_DARK,
+        (0, 6): hexc("F7A8BC"), (7, 6): hexc("F7A8BC"),
+        (3, 6): hexc("E07A98"), (4, 6): hexc("E07A98"),
+    }
+    for (x, y), c in face.items():
+        img.putpixel((fu + x, fv + y), (*c, 255))
+    # hair shell 8x8x8 at (32,0): fringe on the front top rows, full on top/back/sides, open face
+    def hair_px(f, x, y, w, h):
+        t = 0.45 + 0.35 * rng.random()
+        c = sample(FAIRY_HAIR, t)
+        if f == "front":
+            fringe = [3, 3, 2, 1, 1, 2, 3, 3]          # fringe depth per column (rows from the top)
+            if y >= fringe[x]:
+                return None if not (x in (0, 7) and y < 7) else c   # side strands frame the face
+            return c
+        if f in ("left", "right") and y >= 6:
+            return sample(FAIRY_HAIR_TIP, 0.5 + 0.4 * rng.random()) if rng.random() < 0.5 else c
+        return c
+    fill_box(img, 32, 0, 8, 8, 8, hair_px)
+    # long back hair 9x13x2 at (64,0): pink fading to blue tips
+    fill_box(img, 64, 0, 9, 13, 2, lambda f, x, y, w, h: sample(FAIRY_HAIR_TIP, 0.3 + 0.5 * rng.random()) if y >= h - 4 and f != "top"
+             else sample(FAIRY_HAIR, 0.35 + 0.45 * rng.random() - 0.2 * (x % 3 == 0)))
+    # side locks 2x9x2 at (88,0)
+    fill_box(img, 88, 0, 2, 9, 2, lambda f, x, y, w, h: sample(FAIRY_HAIR_TIP, 0.6) if y >= h - 3 else sample(FAIRY_HAIR, 0.5 + 0.3 * rng.random()))
+    # tiara: band 5x1x1 at (96,0) silver-blue; points 1x2x1 at (96,4) crystal pink
+    fill_box(img, 96, 0, 5, 1, 1, lambda f, x, y, w, h: hexc("DCEBFA") if x % 2 else hexc("A6D6F5"))
+    fill_box(img, 96, 4, 1, 2, 1, lambda f, x, y, w, h: hexc("FBD0DA") if y == 0 else hexc("F5A9B8"))
+    # bodice 6x8x4 at (0,32): flag blue with white lace lacing down the front
+    def bodice(f, x, y, w, h):
+        c = sample(DRESS_BLUE, 0.55 + 0.2 * rng.random() - 0.1 * (f in ("left", "right")))
+        if f == "front" and x in (2, 3) and y % 2 == 1:
+            return sample(DRESS_WHITE, 0.9)
+        if f == "front" and y == h - 1:
+            return sample(DRESS_PINK, 0.7)
+        return c
+    fill_box(img, 0, 32, 6, 8, 4, bodice)
+    # collar band 7x3x5 at (20,32): white lace with pink dots
+    fill_box(img, 20, 32, 7, 3, 5, lambda f, x, y, w, h: sample(DRESS_PINK, 0.8) if (x + y) % 3 == 0 else sample(DRESS_WHITE, 0.85))
+    # skirt tiers: pink (9x3x6 at 0,44), white (11x3x8 at 0,53), pink with a blue hem (13x3x10 at 0,64)
+    def tier(ramp, hem=None):
+        def fn(f, x, y, w, h):
+            if f in ("top", "bottom"):
+                return sample(ramp, 0.45)
+            if hem and y == h - 1:
+                return sample(hem, 0.55 + 0.25 * (x % 2))
+            c = sample(ramp, 0.5 + 0.25 * rng.random())
+            if y == 0 and x % 2 == 0:                    # a scalloped frill at the top of each tier
+                c = sample(ramp, 0.85)
+            if rng.random() < 0.06:                       # glitter
+                c = WHITE
+            return c
+        return fn
+    fill_box(img, 0, 44, 9, 3, 6, tier(DRESS_PINK))
+    fill_box(img, 0, 53, 11, 3, 8, tier(DRESS_WHITE))
+    fill_box(img, 0, 64, 13, 3, 10, tier(DRESS_PINK, DRESS_BLUE))
+    # arms 2x10x2 at (40,16): skin with white gloves at the hand
+    fill_box(img, 40, 16, 2, 10, 2, lambda f, x, y, w, h: sample(DRESS_WHITE, 0.85) if y >= h - 3 else sample(FAIRY_SKIN, 0.55 + 0.1 * rng.random()))
+    # puff sleeves 3x3x3 at (48,16)
+    fill_box(img, 48, 16, 3, 3, 3, lambda f, x, y, w, h: sample(DRESS_PINK, 0.6 + 0.25 * ((x + y) % 2)))
+    # wand stick 1x1x9 at (64,16): pearl white with a pink ribbon wrap
+    fill_box(img, 64, 16, 1, 1, 9, lambda f, x, y, w, h: sample(DRESS_PINK, 0.7) if (x + y) % 4 == 0 else hexc("F4F2FA"))
+    # legs 2x9x2 at (0,76): white stockings; shoes 2x1x3 at (8,76): pink
+    fill_box(img, 0, 76, 2, 9, 2, lambda f, x, y, w, h: sample(DRESS_WHITE, 0.75 + 0.1 * (y % 2)))
+    fill_box(img, 8, 76, 2, 1, 3, lambda f, x, y, w, h: sample(DRESS_PINK, 0.45))
+    return img
+
+
+def trans_fairy_glow():
+    """64x64 for TransFairyModel's glow layer (drawn translucent and full bright): upper wings (15x17 planes) 0,0 ·
+    lower wings (10x13) 0,20 · the wand's star 0,48 and 14,48. White at the hinge, pink, then blue at the rim,
+    with three veins and a scatter of glitter."""
+    img = new(64, 64)
+    rng = random.Random(8)
+
+    def wing(u, v, w, h, cy):
+        """One wing plane, drawn on both faces (north at u, south at u + w, mirrored so the hinge is at x = 0 / w - 1)."""
+        cells = {}
+        for y in range(h):
+            for x in range(w):
+                nx, ny = x / (w - 1), (y - cy) / (h - 1 - cy if y > cy else cy)
+                r = nx * nx + ny * ny * (0.85 + 0.3 * nx)
+                if r > 1.0:
+                    continue
+                cells[(x, y)] = r
+        for (x, y), r in cells.items():
+            t = min(1.0, math.sqrt(x * x + (y - cy) * (y - cy)) / (w * 0.95))
+            # white at the hinge, trans pink in the middle, trans blue at the rim
+            if t < 0.45:
+                c = mix(WHITE, PINK, t / 0.45)
+            else:
+                c = mix(PINK, BLUE, min(1.0, (t - 0.45) / 0.45))
+            a = 105 + int(60 * t)
+            edge = any((x + dx, y + dy) not in cells for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+            # three veins fanning out from the hinge
+            vein = False
+            for angle in (-0.75, -0.15, 0.45):
+                vx, vy = math.cos(angle), math.sin(angle)
+                d = abs(x * vy - (y - cy) * vx)
+                if d < 0.55 and x * vx + (y - cy) * vy > 0:
+                    vein = True
+            if edge:
+                c, a = mix(c, BLUE, 0.55) if t > 0.45 else mix(c, PINK, 0.6), 235
+            elif vein:
+                c, a = mix(c, WHITE, 0.55), 200
+            elif rng.random() < 0.025:
+                c, a = WHITE, 255
+            for side, px in ((0, u + x), (1, u + 2 * w - 1 - x)):
+                img.putpixel((px, v + y), (*c, a))
+
+    wing(0, 0, 15, 17, cy=9)
+    wing(0, 20, 10, 13, cy=3)
+    # star: arm cubes 5x1x1 and 1x5x1 at (0,48), centre 3x3x1.2 at (14,48)
+    _paint(img, 0, 48, 14, 8, lambda x, y: (255, 236, 246, 255) if (x + y) % 3 else (166, 230, 252, 255))
+    _paint(img, 14, 48, 10, 6, lambda x, y: (255, 255, 255, 255) if (x + y) % 2 else (245, 169, 184, 255))
+    return img
+
+
+PEARL_STONE = [hexc(c) for c in ("8E89A8", "B3AFC9", "D2CFE2", "E9E7F2", "F7F6FB")]
+SOCKET = [hexc(c) for c in ("120E2C", "1E1846", "2D2560", "3E3478")]
+OPAL = [hexc(c) for c in ("F5A9B8", "C9B8F2", "8ED8FA", "5BCEFA", "B8F0F5", "FFFFFF", "F9C6E6")]
+
+
+def frame_recolour(img):
+    """End stone -> pearl stone, the green trim -> pink and blue, the dark socket -> deep indigo."""
+    out = img.copy()
+    lo, hi = lum_range(img)
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))
+        if not px[3]:
+            continue
+        h, s, v = hsv(px)
+        t = (lum(px) - lo) / (hi - lo)
+        if s > 0.25 and 0.12 < h < 0.2:          # end stone (yellow)
+            c = sample(PEARL_STONE, 0.25 + 0.75 * t)
+        elif lum(px) < 0.16:                       # the dark socket
+            c = sample(SOCKET, t * 3)
+        else:                                       # green trim: pink on the outer ring, blue inside
+            ring = min(x, y, 15 - x, 15 - y)
+            c = sample([hexc("D46F93"), hexc("F5A9B8"), hexc("FBD0DA")] if ring % 2 == 0 else [hexc("2F86C4"), hexc("5BCEFA"), hexc("A6E6FC")],
+                       0.2 + 0.8 * t)
+        out.putpixel((x, y), (*c, px[3]))
+    return out
+
+
+def fairy_frame_top():
+    return frame_recolour(vblock("end_portal_frame_top"))
+
+
+def fairy_frame_side():
+    return frame_recolour(vblock("end_portal_frame_side"))
+
+
+def fairy_frame_pearl():
+    """The socket with a crystal pearl in it (the frame model shows the middle 8x8 and a 3-pixel rim of it)."""
+    img = new(16, 16)
+    rng = random.Random(4)
+    for y in range(16):
+        for x in range(16):
+            d = math.hypot(x - 7.5, y - 7.5)
+            t = max(0.0, 1.0 - d / 5.5)
+            c = sample([hexc("2C6FB0"), hexc("5BCEFA"), hexc("C9B8F2"), hexc("F5A9B8"), hexc("FFFFFF")], 0.15 + 0.85 * t)
+            img.putpixel((x, y), (*c, 255))
+    for (x, y) in ((6, 5), (7, 5), (6, 6)):
+        img.putpixel((x, y), (255, 255, 255, 255))
+    return img
+
+
+def fairy_portal_frames(n=32):
+    """An opal pool: broad, soft bands of pink, lilac, blue and white drifting through each other (tileable), with stars
+    twinkling in and out at different spots over the loop."""
+    frames = []
+    rng = random.Random(12)
+    tau = math.tau
+    stars = [(rng.randrange(16), rng.randrange(16), rng.randrange(n), 3 + rng.randrange(4)) for _ in range(14)]
+    for k in range(n):
+        p = k / n * tau
+        img = new(16, 16)
+        for y in range(16):
+            for x in range(16):
+                u, v = x / 16 * tau, y / 16 * tau
+                f = math.sin(u + p) + math.sin(v - p) * 0.9 + math.sin(u + v + p) * 0.6 + math.cos(u - v - 2 * p) * 0.5
+                t = (f / 6.0 + 0.5 + k / n) % 1.0
+                c = sample(OPAL + [OPAL[0]], t)
+                img.putpixel((x, y), (*c, 255))
+        for (sx, sy, born, life) in stars:
+            age = (k - born) % n
+            if age < life:
+                glow = 1.0 - abs(age - life / 2) / (life / 2)
+                base = img.getpixel((sx, sy))
+                img.putpixel((sx, sy), (*mix(base[:3], WHITE, 0.4 + 0.6 * glow), 255))
+                if glow > 0.6:
+                    for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                        qx, qy = (sx + dx) % 16, (sy + dy) % 16
+                        b2 = img.getpixel((qx, qy))
+                        img.putpixel((qx, qy), (*mix(b2[:3], WHITE, 0.45 * glow), 255))
+        frames.append(img)
+    strip = new(16, 16 * n)
+    for i, f in enumerate(frames):
+        strip.paste(f, (0, 16 * i))
+    return strip
+
+
+def fairy_jar_glass():
+    """Clear trans glass: barely tinted, with a white glint and a soft pink/blue edge."""
+    img = new(16, 16)
+    for y in range(16):
+        for x in range(16):
+            edge = x in (0, 15) or y in (0, 15)
+            c = mix(PINK, BLUE, x / 15)
+            img.putpixel((x, y), (*mix(c, WHITE, 0.55), 150 if edge else 38))
+    for (x, y) in ((2, 2), (3, 2), (2, 3), (2, 4), (12, 11), (12, 12), (11, 12)):
+        img.putpixel((x, y), (255, 255, 255, 200))
+    return img
+
+
+def fairy_jar_lid():
+    """A cloth cap tied over the jar: trans stripes with a white rim."""
+    img = new(16, 16)
+    bands = stripes5(16)
+    for y in range(16):
+        for x in range(16):
+            c = FLAG[bands[y]]
+            c = shade(c, 0.92 + 0.08 * ((x + y) % 2))
+            img.putpixel((x, y), (*c, 255))
+    return img
+
+
+def fairy_light(colour):
+    """16x16 for the jar's light: the glowing core cube (0,0), the wings (0,6), the halo (0,9; mostly see-through)."""
+    img = new(16, 16)
+    core = hexc(colour)
+    for y in range(6):
+        for x in range(12):
+            img.putpixel((x, y), (*mix(core, WHITE, 0.35 + 0.25 * ((x + y) % 2)), 255))
+    for y in range(6, 9):
+        for x in range(6):
+            img.putpixel((x, y), (*mix(core, WHITE, 0.7), 210))
+    for y in range(9, 15):
+        for x in range(12):
+            img.putpixel((x, y), (*mix(core, WHITE, 0.2), 70))
+    return img
+
+
+def fairy_crystal_spike():
+    """32x32 for the ice crystal shards: deep blue at the base to white tips, a pink glow inside, bright facet edges."""
+    img = new(32, 32)
+    ICE = [hexc(c) for c in ("2C6FB0", "5BB6EC", "A6E2FC", "E6F8FF", "FFFFFF")]
+
+    def shard(u, v, w, h, d):
+        for face, (fu, fv, fw, fh) in {"top": (u + d, v, w, d), "bottom": (u + d + w, v, w, d), "a": (u, v + d, d, h),
+                                       "b": (u + d, v + d, w, h), "c": (u + d + w, v + d, d, h), "e": (u + 2 * d + w, v + d, w, h)}.items():
+            for y in range(fh):
+                for x in range(fw):
+                    if face in ("top", "bottom"):
+                        c, a = sample(ICE, 0.9), 230
+                    else:
+                        t = 1.0 - y / max(1, fh - 1)          # 1 at the top
+                        c = sample(ICE, 0.15 + 0.85 * t)
+                        if fw > 1 and x == fw // 2:
+                            c = mix(c, PINK, 0.35)           # the pink glow down the middle
+                        a = 185 + int(50 * (x == 0 or x == fw - 1))
+                        if x == 0:
+                            c = mix(c, WHITE, 0.5)           # a bright facet edge
+                    img.putpixel((fu + x, fv + y), (*c, a))
+
+    shard(0, 0, 3, 20, 3)       # centre column
+    shard(12, 0, 2, 3, 2)       # centre tip
+    shard(12, 5, 1, 2, 1)       # centre point
+    shard(20, 0, 2, 13, 2)      # side shards
+    shard(28, 0, 1, 2, 1)       # side tips
+    return img
+
+
+def trans_fairy_spawn_egg():
+    """The allay's egg (already a fairy) in trans colours."""
+    img = vitem("allay_spawn_egg")
+    out = img.copy()
+    lo, hi = lum_range(img)
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))
+        if not px[3]:
+            continue
+        t = (lum(px) - lo) / (hi - lo)
+        ramp = [hexc("C2668B"), hexc("F5A9B8"), hexc("FBD0DA"), hexc("FFFFFF")] if y < 8 or (x + y) % 5 == 0 else \
+            [hexc("2C6FB0"), hexc("5BCEFA"), hexc("A6E6FC"), hexc("FFFFFF")]
+        out.putpixel((x, y), (*sample(ramp, 0.1 + 0.9 * t), px[3]))
+    return out
+
+
+def fairy_jar_light():
+    """16x16 for the little winged light in the Fairy Jar's item model: the core (0,0, 6x6) shading pink to blue, a
+    rounded wing (8,0, 6x6)."""
+    img = new(16, 16)
+    for y in range(6):
+        for x in range(6):
+            img.putpixel((x, y), (*mix(mix(PINK, BLUE, x / 5), WHITE, 0.4 + 0.3 * ((x + y) % 2)), 255))
+            if (x - 2.5) ** 2 + (y - 2.5) ** 2 <= 9.5:
+                img.putpixel((8 + x, y), (*mix(WHITE, PINK, 0.35 * x / 5), 220))
+    return img
+
+
+def fairy_realm_textures():
+    """(path under textures/, image, mcmeta or None) for everything above."""
+    yield "entity/trans_fairy/trans_fairy.png", trans_fairy(), None
+    yield "entity/trans_fairy/trans_fairy_glow.png", trans_fairy_glow(), None
+    yield "entity/trans_fairy/fairy_crystal_spike.png", fairy_crystal_spike(), None
+    for name, colour in (("pink", "F5A9B8"), ("white", "FFFFFF"), ("blue", "5BCEFA")):
+        yield f"entity/fairy_light/{name}.png", fairy_light(colour), None
+    yield "block/fairy_portal_frame_top.png", fairy_frame_top(), None
+    yield "block/fairy_portal_frame_side.png", fairy_frame_side(), None
+    yield "block/fairy_portal_frame_pearl.png", fairy_frame_pearl(), None
+    yield "block/fairy_portal.png", fairy_portal_frames(), {"animation": {"frametime": 2, "interpolate": True}}
+    yield "block/fairy_jar_glass.png", fairy_jar_glass(), None
+    yield "block/fairy_jar_lid.png", fairy_jar_lid(), None
+    yield "block/fairy_jar_light.png", fairy_jar_light(), None
+    yield "item/trans_fairy_spawn_egg.png", trans_fairy_spawn_egg(), None
+
+
 # ============================================================================================ sky + icon
 HEARTS = {
     5: [".#.#.", "#####", "#####", ".###.", "..#.."],
@@ -3303,6 +3661,10 @@ def main():
     save(silly_cat(), "entity/silly_cat/silly_cat.png")
     for rel, img in creature_textures():
         save(img, rel)
+    for rel, img, meta in fairy_realm_textures():
+        save(img, rel)
+        if meta:
+            save_mcmeta(rel, meta)
     save(maddie_skin(), "entity/maddie/maddie.png")
     save(trans_wings_model_texture(), "entity/trans_wings.png")
     for kind in ("boat", "chest_boat"):

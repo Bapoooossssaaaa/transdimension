@@ -20,10 +20,12 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityType;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.entity.FairyCrystalSpike;
 import dev.goober.transdimension.entity.Maddie;
 import dev.goober.transdimension.entity.PastelSlime;
 import dev.goober.transdimension.entity.SillyCat;
 import dev.goober.transdimension.entity.TransEnderman;
+import dev.goober.transdimension.entity.TransFairy;
 import dev.goober.transdimension.entity.TransFish;
 import dev.goober.transdimension.entity.TransMagicBolt;
 
@@ -108,6 +110,28 @@ public final class ModEntities {
 					.clientTrackingRange(6)
 					.updateInterval(5)
 					.build(TRANS_MAGIC_BOLT_KEY));
+
+	public static final ResourceKey<EntityType<?>> TRANS_FAIRY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("trans_fairy"));
+	public static final ResourceKey<EntityType<?>> FAIRY_CRYSTAL_SPIKE_KEY = ResourceKey.create(Registries.ENTITY_TYPE,
+			TransDimension.id("fairy_crystal_spike"));
+
+	/** The boss of the Fairy Realm; she never spawns naturally (FairyRealm calls her). */
+	public static final EntityType<TransFairy> TRANS_FAIRY = Registry.register(BuiltInRegistries.ENTITY_TYPE, TRANS_FAIRY_KEY,
+			FabricEntityType.Builder.createMob(TransFairy::new, MobCategory.MONSTER, mob -> mob.defaultAttributes(TransFairy::createAttributes))
+					.sized(0.9F, 2.4F)
+					.eyeHeight(2.0F)
+					.fireImmune()
+					.clientTrackingRange(10)
+					.build(TRANS_FAIRY_KEY));
+	/** The Trans Fairy's ice crystals that burst out of the ground. */
+	public static final EntityType<FairyCrystalSpike> FAIRY_CRYSTAL_SPIKE = Registry.register(BuiltInRegistries.ENTITY_TYPE,
+			FAIRY_CRYSTAL_SPIKE_KEY,
+			EntityType.Builder.<FairyCrystalSpike>of(FairyCrystalSpike::new, MobCategory.MISC)
+					.noLootTable()
+					.sized(0.8F, 1.6F)
+					.clientTrackingRange(6)
+					.updateInterval(2)
+					.build(FAIRY_CRYSTAL_SPIKE_KEY));
 
 	private ModEntities() {
 	}

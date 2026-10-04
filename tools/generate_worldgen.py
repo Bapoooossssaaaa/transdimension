@@ -518,6 +518,14 @@ def generate_features():
         "state": state("trans_cobblestone")}})
     pf("trans_boulders", f"{NS}:trans_boulder", [{"type": "minecraft:rarity_filter", "chance": 3}, {"type": "minecraft:in_square"},
                                                  {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"}, {"type": "minecraft:biome"}])
+    # The Fairy Realm's floating islands (FairyIslandFeature keeps them away from the arena in the middle).
+    cf("fairy_island", {"type": f"{NS}:fairy_island", "config": {}})
+    pf("fairy_islands", f"{NS}:fairy_island", [
+        {"type": "minecraft:rarity_filter", "chance": 4}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "min_inclusive": {"absolute": 70},
+                                                       "max_inclusive": {"absolute": 170}}},
+        {"type": "minecraft:biome"}])
+
     # Wobbly mounds of pink and blue gel in the Gumdrop Glade, where the pastel slimes live.
     for colour in ("pink", "blue"):
         cf(f"{colour}_gel_mound", {"type": "minecraft:block_blob", "config": {
@@ -807,6 +815,13 @@ def generate_biomes():
                     9: [f"{NS}:blooming_cave_ceiling", f"{NS}:blooming_cave_floor", "minecraft:spore_blossom"]},
           creatures=[])
 
+    # ---- the Fairy Realm: islands floating over a sea of clouds, no monsters but the fairy's
+    biome("fairy_realm", temperature=0.7, downfall=0.5, grass="#f7b8d0", foliage="#f5a9b8", water="#8fdcff", water_fog="#3a9fd0",
+          sky="#a8dcff", fog="#fbd6e6", music_sound="minecraft:music.overworld.cherry_grove",
+          particles=particles("minecraft:cherry_leaves", 0.003),
+          features={9: [f"{NS}:fairy_islands"]},
+          creatures=[spawn("pastel_slime", 6, 1, 3), spawn("minecraft:rabbit", 3, 1, 2)], monsters=())
+
     # ---- pastel lush caves
     biome("pastel_lush_caves", temperature=0.5, downfall=0.5, grass="#f0b5c8", foliage="#f5a9b8", water="#7fd6ff", water_fog="#2e7fb0",
           sky="#9fb8ff", fog="#d9c8ff", music_sound="minecraft:music.overworld.lush_caves",
@@ -864,7 +879,7 @@ FEATURE_RANK = [
     f"{NS}:trans_lily_pads", "minecraft:patch_sugar_cane", "minecraft:patch_sugar_cane_swamp",
     "minecraft:brown_mushroom_normal", "minecraft:brown_mushroom_swamp", "minecraft:red_mushroom_swamp",
     f"{NS}:trans_firefly_bushes_near_water", f"{NS}:trans_firefly_bushes_swamp", "minecraft:vines", f"{NS}:trans_boulders",
-    f"{NS}:pink_gel_mounds", f"{NS}:blue_gel_mounds",
+    f"{NS}:pink_gel_mounds", f"{NS}:blue_gel_mounds", f"{NS}:fairy_islands",
     # top layer
     "minecraft:freeze_top_layer",
 ]
@@ -1100,6 +1115,20 @@ def generate_dimension_type():
     attrs["minecraft:visual/water_fog_color"] = "#1f6fa8"
     dim["timelines"] = f"#{NS}:in_trans_realm"
     write(path, dim)
+    # The Fairy Realm shares the realm's sky (same timelines), but its clouds drift far below the islands.
+    fairy = json.loads(json.dumps(dim))
+    fairy["attributes"]["minecraft:visual/cloud_height"] = 72.0
+    write(os.path.join(DATA, NS, "dimension_type", "fairy_realm.json"), fairy)
+
+
+def generate_fairy_dimension():
+    """The Fairy Realm: an empty sky (a flat world of nothing) dotted with floating islands by its one biome's features.
+    The arena island in the middle is placed by FairyRealm.java the first time anyone arrives."""
+    write(os.path.join(DATA, NS, "dimension", "fairy_realm.json"), {
+        "type": f"{NS}:fairy_realm",
+        "generator": {"type": "minecraft:flat", "settings": {
+            "biome": f"{NS}:fairy_realm", "features": True, "lakes": False,
+            "layers": [{"block": "minecraft:air", "height": 1}], "structure_overrides": []}}})
 
 
 def argb(a, rgb):
@@ -1204,6 +1233,7 @@ def main():
     generate_noise_settings()
     n = generate_dimension()
     generate_dimension_type()
+    generate_fairy_dimension()
     generate_timeline()
     print(f"World generation written ({n} biome-source entries).")
 

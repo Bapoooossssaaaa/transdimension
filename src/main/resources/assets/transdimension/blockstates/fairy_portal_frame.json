@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=south,pearl=false": {
+      "model": "transdimension:block/fairy_portal_frame"
+    },
+    "facing=west,pearl=false": {
+      "model": "transdimension:block/fairy_portal_frame",
+      "y": 90
+    },
+    "facing=north,pearl=false": {
+      "model": "transdimension:block/fairy_portal_frame",
+      "y": 180
+    },
+    "facing=east,pearl=false": {
+      "model": "transdimension:block/fairy_portal_frame",
+      "y": 270
+    },
+    "facing=south,pearl=true": {
+      "model": "transdimension:block/fairy_portal_frame_filled"
+    },
+    "facing=west,pearl=true": {
+      "model": "transdimension:block/fairy_portal_frame_filled",
+      "y": 90
+    },
+    "facing=north,pearl=true": {
+      "model": "transdimension:block/fairy_portal_frame_filled",
+      "y": 180
+    },
+    "facing=east,pearl=true": {
+      "model": "transdimension:block/fairy_portal_frame_filled",
+      "y": 270
+    }
+  }
+}

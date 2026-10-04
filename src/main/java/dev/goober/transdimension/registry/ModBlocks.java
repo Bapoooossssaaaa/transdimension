@@ -24,6 +24,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.PlaceOnWaterBlockItem;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.StandingAndWallBlockItem;
 import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.BaseCoralFanBlock;
@@ -79,6 +80,10 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.block.FairyAltarBlock;
+import dev.goober.transdimension.block.FairyJarBlock;
+import dev.goober.transdimension.block.FairyPortalBlock;
+import dev.goober.transdimension.block.FairyPortalFrameBlock;
 import dev.goober.transdimension.block.FurnitureBlock;
 import dev.goober.transdimension.block.PlushSpotBlock;
 import dev.goober.transdimension.block.PrideOvenBlock;
@@ -466,6 +471,24 @@ public final class ModBlocks {
 	public static final Block PRIDE_OVEN = register("pride_oven", PrideOvenBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(3.5F).requiresCorrectToolForDrops()
 					.sound(SoundType.STONE).lightLevel(state -> 8));
+
+	// ---------------------------------------------------------------- the Fairy Realm
+	/** The twelve frames of a Fairy Portal, found in the Fairy Sanctums; they take Trans Crystal Pearls. Unbreakable. */
+	public static final Block FAIRY_PORTAL_FRAME = register("fairy_portal_frame", FairyPortalFrameBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.END_PORTAL_FRAME).mapColor(MapColor.COLOR_PINK).sound(SoundType.AMETHYST)
+					.lightLevel(state -> state.getValue(FairyPortalFrameBlock.PEARL) ? 7 : 1));
+	/** The shimmering surface of an open Fairy Portal. */
+	public static final Block FAIRY_PORTAL = registerWithoutItem("fairy_portal", FairyPortalBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.END_PORTAL).mapColor(MapColor.COLOR_PINK));
+	/** The crystal altar in the middle of the fairy arena: offer it a crystal pearl for a rematch. Unbreakable. */
+	public static final Block FAIRY_ALTAR = register("fairy_altar", FairyAltarBlock::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(-1.0F, 3600000.0F).noLootTable().noOcclusion()
+					.sound(SoundType.AMETHYST).lightLevel(state -> 10));
+	/** The trophy for beating the Trans Fairy: a jar with a little winged light dancing inside. */
+	public static final Block FAIRY_JAR = register("fairy_jar", FairyJarBlock::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
+					.lightLevel(state -> 12),
+			new Item.Properties().rarity(Rarity.EPIC).stacksTo(16));
 
 	private ModBlocks() {
 	}

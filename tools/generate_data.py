@@ -1382,6 +1382,127 @@ def generate_creatures():
         tag("entity_type", t, "trans_fish")
 
 
+# ============================================================================================ the Fairy Realm
+def _faces(texture, uv_side=(0, 0, 16, 16), uv_top=(0, 0, 16, 16), cull=(), skip=()):
+    faces = {}
+    for face in ("down", "up", "north", "south", "west", "east"):
+        if face in skip:
+            continue
+        f = {"uv": list(uv_top if face in ("up", "down") else uv_side), "texture": texture}
+        if face in cull:
+            f["cullface"] = face
+        faces[face] = f
+    return faces
+
+
+def generate_fairy_realm_data():
+    """The endgame: Fairy Portal frames (twelve make a portal), the portal itself, the arena's altar, the Fairy Jar
+    trophy, the Trans Fairy and her crystals, the crystal pearl's messages and the endgame advancements' names.
+    (Structures: generate_fairy_realm.py. Dimension and islands: generate_worldgen.py.)"""
+    # ---- the portal frame: vanilla's end portal frame shape, a crystal pearl glowing in its socket when filled
+    frame_tex = {"particle": block_tex("fairy_portal_frame_side"), "bottom": block_tex("trans_stone"),
+                 "top": block_tex("fairy_portal_frame_top"), "side": block_tex("fairy_portal_frame_side")}
+    base = {"from": [0, 0, 0], "to": [16, 13, 16], "faces": {
+        "down": {"uv": [0, 0, 16, 16], "texture": "#bottom", "cullface": "down"},
+        "up": {"uv": [0, 0, 16, 16], "texture": "#top"},
+        **{side: {"uv": [0, 3, 16, 16], "texture": "#side", "cullface": side} for side in ("north", "south", "west", "east")}}}
+    pearl = {"from": [4, 13, 4], "to": [12, 16, 12], "light_emission": 15, "faces": {
+        "up": {"uv": [4, 4, 12, 12], "texture": "#pearl", "cullface": "up"},
+        **{side: {"uv": [4, 0, 12, 3], "texture": "#pearl"} for side in ("north", "south", "west", "east")}}}
+    model("fairy_portal_frame", {"parent": "minecraft:block/block", "textures": frame_tex, "elements": [base]})
+    model("fairy_portal_frame_filled", {"parent": "minecraft:block/block",
+                                        "textures": {**frame_tex, "pearl": block_tex("fairy_portal_frame_pearl")},
+                                        "elements": [base, pearl]})
+    rotation = {"south": 0, "west": 90, "north": 180, "east": 270}
+    variants = {}
+    for has_pearl in ("false", "true"):
+        for facing, y in rotation.items():
+            v = {"model": f"{NS}:block/fairy_portal_frame" + ("_filled" if has_pearl == "true" else "")}
+            if y:
+                v["y"] = y
+            variants[f"facing={facing},pearl={has_pearl}"] = v
+    blockstate("fairy_portal_frame", {"variants": variants})
+    item_def("fairy_portal_frame", f"{NS}:block/fairy_portal_frame")
+    name("fairy_portal_frame", "Fairy Portal Frame")
+
+    # ---- the portal: a glowing, swirling sheet at the height of an end portal's surface
+    model("fairy_portal", {"ambientocclusion": False, "textures": {"particle": block_tex("fairy_portal"), "portal": block_tex("fairy_portal")},
+                           "elements": [{"from": [0, 11, 0], "to": [16, 12, 16], "light_emission": 15, "shade": False, "faces": {
+                               "up": {"uv": [0, 0, 16, 16], "texture": "#portal"},
+                               "down": {"uv": [0, 0, 16, 16], "texture": "#portal"}}}]})
+    blockstate("fairy_portal", {"variants": {"": {"model": f"{NS}:block/fairy_portal"}}})
+    name("fairy_portal", "Fairy Portal")
+
+    # ---- the altar: a stone base, a glowing prism pillar, a capstone, and a crystal growing out of the top
+    crystal = lambda angle_from, angle_to: {"from": angle_from, "to": angle_to, "light_emission": 15, "shade": False,
+                                            "rotation": {"origin": [8, 20, 8], "axis": "y", "angle": 45, "rescale": True},
+                                            "faces": {f: {"uv": [0, 0, 16, 16], "texture": "#crystal"} for f in
+                                                      (("north", "south") if angle_from[2] == angle_to[2] else ("west", "east"))}}
+    model("fairy_altar", {"parent": "minecraft:block/block", "textures": {
+        "particle": block_tex("chiseled_trans_stone_bricks"), "base": block_tex("trans_stone_bricks"), "pillar": block_tex("pastel_prism"),
+        "cap": block_tex("chiseled_trans_stone_bricks"), "crystal": block_tex("trans_crystal_cluster")},
+        "elements": [
+            {"from": [1, 0, 1], "to": [15, 4, 15], "faces": _faces("#base", (1, 12, 15, 16), (1, 1, 15, 15), cull=("down",))},
+            {"from": [4, 4, 4], "to": [12, 12, 12], "light_emission": 10, "faces": _faces("#pillar", (4, 4, 12, 12), (4, 4, 12, 12), skip=("up", "down"))},
+            {"from": [2, 12, 2], "to": [14, 15, 14], "faces": _faces("#cap", (2, 0, 14, 3), (2, 2, 14, 14))},
+            crystal([3, 15, 8], [13, 25, 8]), crystal([8, 15, 3], [8, 25, 13])]})
+    blockstate("fairy_altar", {"variants": {"": {"model": f"{NS}:block/fairy_altar"}}})
+    item_def("fairy_altar", f"{NS}:block/fairy_altar")
+    name("fairy_altar", "Fairy Altar")
+
+    # ---- the Fairy Jar: a trans glass jar with a flag-striped cloth lid. In the world its light is drawn by FairyJarRenderer;
+    # the item shows a little winged light sitting inside instead.
+    jar = [
+        {"from": [4, 0, 4], "to": [12, 10, 12], "faces": _faces("#glass", (4, 6, 12, 16), (4, 4, 12, 12), cull=("down",))},
+        {"from": [5, 10, 5], "to": [11, 11, 11], "faces": _faces("#glass", (5, 5, 11, 6), (5, 5, 11, 11), skip=("down",))},
+        {"from": [4.5, 11, 4.5], "to": [11.5, 12.5, 11.5], "faces": _faces("#lid", (0, 6, 16, 9), (4, 4, 12, 12))},
+        {"from": [7, 12.5, 7], "to": [9, 13.5, 9], "faces": _faces("#lid", (7, 7, 9, 8), (7, 7, 9, 9), skip=("down",))},
+    ]
+    jar_tex = {"particle": block_tex("fairy_jar_glass"), "glass": block_tex("fairy_jar_glass"), "lid": block_tex("fairy_jar_lid")}
+    model("fairy_jar", {"parent": "minecraft:block/block", "textures": jar_tex, "elements": jar})
+    blockstate("fairy_jar", {"variants": {"": {"model": f"{NS}:block/fairy_jar"}}})
+    light = [
+        {"from": [6.5, 3.5, 6.5], "to": [9.5, 6.5, 9.5], "light_emission": 15, "shade": False,
+         "faces": _faces("#light", (0, 0, 6, 6), (0, 0, 6, 6))},
+        {"from": [3.5, 5, 9], "to": [6.5, 8, 9], "light_emission": 15, "shade": False,
+         "faces": {f: {"uv": [8, 0, 14, 6], "texture": "#light"} for f in ("north", "south")}},
+        {"from": [9.5, 5, 9], "to": [12.5, 8, 9], "light_emission": 15, "shade": False,
+         "faces": {f: {"uv": [8, 0, 14, 6], "texture": "#light"} for f in ("north", "south")}},
+    ]
+    model("fairy_jar", {"parent": "minecraft:block/block", "textures": {**jar_tex, "light": block_tex("fairy_jar_light")},
+                        "elements": light + jar}, kind="item")
+    item_def("fairy_jar", f"{NS}:item/fairy_jar")
+    name("fairy_jar", "Fairy Jar")
+    loot("fairy_jar", loot_self("fairy_jar"))
+
+    # ---- the Trans Fairy and her crystals
+    simple_item("trans_fairy_spawn_egg", "Trans Fairy Spawn Egg")
+    entity_loot("trans_fairy", [
+        {"entries": [{"type": "minecraft:item", "name": rid("fairy_jar")}], "rolls": 1.0},
+        {"entries": [counted("trans_crystal", 3, 5)], "rolls": 1.0},
+        {"entries": [counted("prism_shard", 6, 10, looting=2.0)], "rolls": 1.0},
+        {"entries": [counted("trans_crystal_pearl", 1, 2)], "rolls": 1.0},
+        {"entries": [counted("gumdrop", 3, 6)], "rolls": 1.0}])
+    NAMES.update({
+        "entity.transdimension.trans_fairy": "Trans Fairy",
+        "entity.transdimension.fairy_crystal_spike": "Fairy Ice Crystal",
+        "biome.transdimension.fairy_realm": "Fairy Realm",
+        "filled_map.transdimension.fairy_sanctum": "Map to a Fairy Sanctum",
+        "item.transdimension.trans_crystal_pearl.lore2": "Hold it up in the Trans Realm to find a Fairy Sanctum",
+        "item.transdimension.trans_crystal_pearl.quiet": "The pearl is quiet here. Hold it up in the Trans Realm.",
+        "item.transdimension.trans_crystal_pearl.nothing": "The pearl can't sense any Fairy Sanctum nearby.",
+        "item.transdimension.trans_crystal_pearl.here": "The pearl blazes: a Fairy Sanctum is right here, under the shrine!",
+        "item.transdimension.trans_crystal_pearl.tug": "The pearl tugs you %s, about %s blocks away.",
+        "message.transdimension.fairy_already_here": "The Trans Fairy is already here!",
+        "message.transdimension.fairy_summoned": "The Trans Fairy answers your call!",
+        "message.transdimension.fairy_defeated": "✦ The Trans Fairy is beaten! A portal home has opened north of the arena. ✦",
+        "message.transdimension.fairy_peaceful": "The Trans Fairy rests while the world is peaceful. A portal home is open north of the arena.",
+    })
+    for key, english in (("north", "north"), ("north_east", "north-east"), ("east", "east"), ("south_east", "south-east"),
+                         ("south", "south"), ("south_west", "south-west"), ("west", "west"), ("north_west", "north-west")):
+        NAMES[f"direction.transdimension.{key}"] = english
+
+
 # ============================================================================================ other tags, names, sounds
 def generate_misc():
     for b in ("trans_dirt",):
@@ -1661,6 +1782,18 @@ def generate_advancements():
     A("pearl_of_the_realm", "pearly_white", "trans_crystal_pearl", "Pearl of the Realm",
       "Set a Trans Crystal into a Trans Pearl", {"crystal_pearl": has("trans_crystal_pearl")})
 
+    # ---- the endgame
+    A("fairy_sanctum", "pearl_of_the_realm", "fairy_portal_frame", "Hidden Sanctum", "Find a Fairy Sanctum beneath its moonlit shrine",
+      {"sanctum": player_is(location={"structures": f"{NS}:fairy_sanctum"})})
+    A("fairy_realm", "fairy_sanctum", "trans_crystal_pearl", "Through the Opal Pool",
+      "Set twelve Trans Crystal Pearls into a Fairy Portal and step through",
+      {"entered": {"trigger": "minecraft:changed_dimension", "conditions": {"to": f"{NS}:fairy_realm"}}}, frame="goal")
+    A("fairy_tale_ending", "fairy_realm", "trans_fairy_spawn_egg", "A Fairy Tale Ending", "Defeat the Trans Fairy",
+      {"defeated": {"trigger": "minecraft:player_killed_entity", "conditions": {"entity": [{
+          "condition": "minecraft:entity_properties", "entity": "this", "predicate": {"minecraft:entity_type": rid("trans_fairy")}}]}}},
+      frame="challenge")
+    A("bottled_magic", "fairy_tale_ending", "fairy_jar", "Bottled Magic", "Take home a Fairy Jar", {"jar": has("fairy_jar")})
+
 
 def generate_sounds():
     def event(name, volume=1.0, pitch=1.0):
@@ -1749,6 +1882,7 @@ def main():
     generate_recipes()
     generate_woods_and_flowers_recipes()
     generate_creatures()
+    generate_fairy_realm_data()
     generate_misc()
     generate_sounds()
     generate_advancements()

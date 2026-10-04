@@ -1,0 +1,36 @@
+{
+  "parent": "transdimension:fairy_realm",
+  "criteria": {
+    "defeated": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:entity_type": "transdimension:trans_fairy"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_fairy_spawn_egg"
+    },
+    "title": {
+      "translate": "advancements.transdimension.fairy_tale_ending.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.fairy_tale_ending.description"
+    },
+    "frame": "challenge"
+  },
+  "requirements": [
+    [
+      "defeated"
+    ]
+  ]
+}

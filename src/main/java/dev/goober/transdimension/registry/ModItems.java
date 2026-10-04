@@ -47,6 +47,7 @@ import net.fabricmc.fabric.api.registry.StrippableBlockRegistry;
 import net.fabricmc.fabric.api.registry.TillableBlockRegistry;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.item.TransCrystalPearlItem;
 import dev.goober.transdimension.item.TransWandItem;
 import dev.goober.transdimension.item.TransWings;
 
@@ -98,11 +99,11 @@ public final class ModItems {
 			.stacksTo(16)
 			.useCooldown(1.0F));
 	/** A trans pearl set with a trans crystal. Twelve of them in the frame of a Fairy Portal open the way to the Fairy Realm. */
-	public static final Item TRANS_CRYSTAL_PEARL = register("trans_crystal_pearl", Item::new, new Item.Properties()
+	public static final Item TRANS_CRYSTAL_PEARL = register("trans_crystal_pearl", TransCrystalPearlItem::new, new Item.Properties()
 			.stacksTo(16)
 			.rarity(Rarity.RARE)
 			.component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
-			.component(DataComponents.LORE, lore("item.transdimension.trans_crystal_pearl.lore")));
+			.component(DataComponents.LORE, lore("item.transdimension.trans_crystal_pearl.lore", "item.transdimension.trans_crystal_pearl.lore2")));
 	public static final Item TRANS_ENDERMAN_SPAWN_EGG = register("trans_enderman_spawn_egg", SpawnEggItem::new,
 			new Item.Properties().spawnEgg(ModEntities.TRANS_ENDERMAN));
 
@@ -114,6 +115,10 @@ public final class ModItems {
 			.food(food(2, 0.3F, true), Consumables.defaultFood().consumeSeconds(0.8F).build()));
 	public static final Item PASTEL_SLIME_SPAWN_EGG = register("pastel_slime_spawn_egg", SpawnEggItem::new,
 			new Item.Properties().spawnEgg(ModEntities.PASTEL_SLIME));
+
+	// ---------------------------------------------------------------- the Fairy Realm
+	public static final Item TRANS_FAIRY_SPAWN_EGG = register("trans_fairy_spawn_egg", SpawnEggItem::new,
+			new Item.Properties().spawnEgg(ModEntities.TRANS_FAIRY).rarity(Rarity.EPIC));
 
 	// ---------------------------------------------------------------- boats
 	public static final Item TRANS_BOAT = register("trans_boat",

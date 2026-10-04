@@ -25,7 +25,8 @@ Outputs (under src/main/resources/data):
     transdimension/tags/worldgen/biome/has_structure/egg_house_island.json
     transdimension/tags/worldgen/structure/on_egg_house_maps.json
     transdimension/loot_table/chests/egg_house.json
-    transdimension/loot_table/chests/trans_house.json   (adds a rare map to the island to village house chests)
+    transdimension/loot_table/chests/trans_house.json   (adds rare maps to the island and to a Fairy Sanctum to village
+                                                         house chests; Maddie's own chest always has the sanctum map)
 
     python3 tools/generate_egg_house.py      (needs: pip install nbtlib)
 """
@@ -453,8 +454,18 @@ def loot_table():
                 item("minecraft:egg", 6, 1, 4), item("minecraft:feather", 4, 1, 5), item("minecraft:book", 3, 1, 2)]},
             {"rolls": 1.0, "entries": [{"type": "minecraft:empty", "weight": 4}, item(T + "trans_lantern", 1, 1, 2),
                                        item("minecraft:emerald", 1, 1, 3), item(T + "trans_bed", 1)]},
+            # Maddie always keeps a map to the nearest Fairy Sanctum for adventurers.
+            {"rolls": 1.0, "entries": [sanctum_map(1)]},
         ],
         "random_sequence": T + "chests/egg_house"})
+
+
+def sanctum_map(weight):
+    """A map to the nearest Fairy Sanctum (the endgame dungeon; tools/generate_fairy_realm.py)."""
+    return {"type": "minecraft:item", "name": "minecraft:map", "weight": weight, "functions": [
+        {"function": "minecraft:exploration_map", "destination": f"#{NS}:fairy_sanctums", "decoration": "minecraft:target_x",
+         "zoom": 2, "search_radius": 100, "skip_existing_chunks": False},
+        {"function": "minecraft:set_name", "name": {"translate": "filled_map.transdimension.fairy_sanctum"}, "target": "item_name"}]}
 
 
 def treasure_map_in_village_chests():
@@ -463,8 +474,9 @@ def treasure_map_in_village_chests():
     with open(path, encoding="utf-8") as f:
         table = json.load(f)
     destination = f"#{NS}:on_egg_house_maps"
+    maps = {destination, f"#{NS}:fairy_sanctums"}
     table["pools"] = [p for p in table["pools"]
-                      if not any(fn.get("destination") == destination for e in p["entries"] for fn in e.get("functions", []))]
+                      if not any(fn.get("destination") in maps for e in p["entries"] for fn in e.get("functions", []))]
     table["pools"].append({"rolls": 1.0, "entries": [
         {"type": "minecraft:empty", "weight": 9},
         {"type": "minecraft:item", "name": "minecraft:map", "weight": 1, "functions": [
@@ -472,6 +484,8 @@ def treasure_map_in_village_chests():
              "zoom": 2, "search_radius": 100, "skip_existing_chunks": False},
             {"function": "minecraft:set_name", "name": {"translate": "filled_map.transdimension.egg_house"},
              "target": "item_name"}]}]})
+    # ...and one in twelve a map to the nearest Fairy Sanctum.
+    table["pools"].append({"rolls": 1.0, "entries": [{"type": "minecraft:empty", "weight": 11}, sanctum_map(1)]})
     write(path, table)
 
 

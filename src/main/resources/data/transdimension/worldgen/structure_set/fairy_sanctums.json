@@ -1,0 +1,14 @@
+{
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 71820623,
+    "separation": 24,
+    "spacing": 56
+  },
+  "structures": [
+    {
+      "structure": "transdimension:fairy_sanctum",
+      "weight": 1
+    }
+  ]
+}

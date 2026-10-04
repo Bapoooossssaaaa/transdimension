@@ -1,0 +1,28 @@
+{
+  "parent": "transdimension:fairy_sanctum",
+  "criteria": {
+    "entered": {
+      "trigger": "minecraft:changed_dimension",
+      "conditions": {
+        "to": "transdimension:fairy_realm"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_crystal_pearl"
+    },
+    "title": {
+      "translate": "advancements.transdimension.fairy_realm.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.fairy_realm.description"
+    },
+    "frame": "goal"
+  },
+  "requirements": [
+    [
+      "entered"
+    ]
+  ]
+}

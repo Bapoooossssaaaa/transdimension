@@ -196,7 +196,8 @@ for i in ITEMS:
         err(f"item {i}: no name in en_us.json")
 
 # ------------------------------------------------------------------ data
-for b in BLOCKS - {"trans_cake", "plush_spot"}:   # these two have no loot table (Java says so)
+# These have no loot table (Java says so): the cake, the plush marker, and the unbreakable Fairy Realm blocks.
+for b in BLOCKS - {"trans_cake", "plush_spot", "fairy_portal_frame", "fairy_portal", "fairy_altar"}:
     if not os.path.exists(os.path.join(DATA, NS, "loot_table", "blocks", b + ".json")):
         err(f"block {b}: no loot table")
 
@@ -311,8 +312,9 @@ for b in list(BLOCKS):
             TWINS.setdefault(b, ("dead_" if b.startswith("dead_") else "") + twin)
             break
 # Furniture-like blocks only have a horizontal "facing" (borrowed from the smoker); the bed adds a "heart" property.
-FACING_ONLY = {"pride_oven", "trans_chair", "trans_table", "plush_spot"}
-EXTRA_PROPS = {"trans_bed": {"heart": ["none", "left", "right"]}}
+FACING_ONLY = {"pride_oven", "trans_chair", "trans_table", "plush_spot", "fairy_portal_frame"}
+EXTRA_PROPS = {"trans_bed": {"heart": ["none", "left", "right"]}, "fairy_portal_frame": {"pearl": ["false", "true"]}}
+TWINS["fairy_portal_frame"] = "smoker"
 for b in BLOCKS:
     if b.endswith("_plush"):
         TWINS[b] = "smoker"
