@@ -97,6 +97,7 @@ Some tips:
 - Villages spawn in **Trans Meadows**, **Frosted Fields** and **Sugar Dunes**. `/locate structure transdimension:trans_village` finds the nearest one.
 - Crystal ore appears in trans stone from deep underground up to y≈128.
 - Everything is in the **Trans Dimension** creative tab, including a Maddie spawn egg.
+- Playing with **BSL Shaders**? `extras/BSL_Trans_Realm.txt` is a pastel trans preset that keeps the heart clouds. The instructions are at the top of the file.
 
 ## Building from source
 

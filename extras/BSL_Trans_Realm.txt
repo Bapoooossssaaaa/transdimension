@@ -1,0 +1,72 @@
+# Trans Realm preset for BSL Shaders (Iris or OptiFine)
+#
+# How to use:
+#   1. Put this file in .minecraft/shaderpacks/, next to your BSL zip.
+#   2. Rename it to the zip's exact file name plus ".txt",
+#      e.g. BSL_v10.0.zip -> BSL_v10.0.zip.txt
+#   3. Pick BSL under Video Settings > Shader Packs.
+#
+# The look: pink sunrises and sunsets, soft pink-white daylight, lavender nights, sky-blue skies and water,
+# pink lamplight, a little extra bloom and colour. BSL's own clouds are turned off so the mod's heart clouds
+# (which cycle blue, pink, white, pink, blue) stay visible. Lighting strengths are left at BSL's defaults.
+# Shader settings apply in every dimension, so the Overworld gets the pastel tint too.
+# Options this BSL version doesn't know are skipped, and changing anything in the shader menu rewrites this file.
+
+# Sunlight: morning, day, evening, night
+LIGHT_MR=255
+LIGHT_MG=168
+LIGHT_MB=200
+LIGHT_DR=255
+LIGHT_DG=232
+LIGHT_DB=240
+LIGHT_ER=248
+LIGHT_EG=152
+LIGHT_EB=200
+LIGHT_NR=184
+LIGHT_NG=168
+LIGHT_NB=255
+
+# Ambient (shadow) light: a soft lilac fill
+AMBIENT_MR=200
+AMBIENT_MG=168
+AMBIENT_MB=224
+AMBIENT_DR=208
+AMBIENT_DG=200
+AMBIENT_DB=240
+AMBIENT_ER=200
+AMBIENT_EG=160
+AMBIENT_EB=224
+AMBIENT_NR=152
+AMBIENT_NG=136
+AMBIENT_NB=232
+
+# Sky, torches and lanterns, water
+SKY_R=104
+SKY_G=196
+SKY_B=252
+BLOCKLIGHT_R=255
+BLOCKLIGHT_G=184
+BLOCKLIGHT_B=212
+WATER_R=92
+WATER_G=200
+WATER_B=252
+
+# Atmosphere
+CLOUDS=false
+STARS=true
+AURORA=true
+LIGHT_SHAFT=true
+
+# Camera
+BLOOM=true
+BLOOM_STRENGTH=1.25
+LENS_FLARE=true
+DIRTY_LENS=false
+VIBRANCE=1.10
+
+# Colour grading: a faint pink tint over everything
+COLOR_GRADING=true
+CG_TR=255
+CG_TG=196
+CG_TB=228
+CG_TM=0.10
