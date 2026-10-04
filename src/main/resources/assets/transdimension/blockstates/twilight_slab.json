@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "transdimension:block/twilight_slab"
+    },
+    "type=double": {
+      "model": "transdimension:block/twilight_planks"
+    },
+    "type=top": {
+      "model": "transdimension:block/twilight_slab_top"
+    }
+  }
+}

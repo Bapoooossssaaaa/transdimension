@@ -1,13 +1,22 @@
 {
   "replace": false,
   "values": [
+    "transdimension:blush_carnation",
+    "transdimension:blush_foxglove",
+    "transdimension:fairy_bell",
     "transdimension:flag_lily",
+    "transdimension:forget_me_not",
     "transdimension:heart_bloom",
     "transdimension:lavender_puff",
     "transdimension:pearl_daisy",
+    "transdimension:pearl_lupine",
+    "transdimension:pearl_snowdrop",
     "transdimension:pride_peony",
     "transdimension:sky_bell",
+    "transdimension:sky_delphinium",
+    "transdimension:star_bloom",
     "transdimension:trans_orchid",
+    "transdimension:trans_rose",
     "transdimension:trans_tulip"
   ]
 }

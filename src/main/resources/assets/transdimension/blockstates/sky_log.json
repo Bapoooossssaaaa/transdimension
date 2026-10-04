@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "transdimension:block/sky_log_x"
+    },
+    "axis=y": {
+      "model": "transdimension:block/sky_log_y"
+    },
+    "axis=z": {
+      "model": "transdimension:block/sky_log_z"
+    }
+  }
+}

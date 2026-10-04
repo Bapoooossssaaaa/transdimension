@@ -1331,6 +1331,128 @@ def twilight_leaves():
 LEAVES = ("pearl_leaves", "sky_leaves", "blush_leaves", "twilight_leaves")
 
 
+# ============================================================================================ woods, flowers and hedges
+# The themed forests' own woods. Each family is a vanilla wood re-coloured: pearl (pale oak, pearly white), sky (oak,
+# blue), twilight (dark oak, deep violet) and blush (cherry, rose).
+WOOD_FAMILIES = {
+    # prefix: (vanilla wood, bark ramp, wood ramp, sapling leaf ramp)
+    "pearl": ("pale_oak", [hexc(c) for c in ("6E6A86", "9592AE", "B9B6CF", "D9D7E6", "F1F0F7", "FFFFFF")],
+              [hexc(c) for c in ("A49CB8", "C2BBD3", "DCD6E8", "EEEAF5", "FBF9FE")], R_PETAL_WHITE),
+    "sky": ("oak", [hexc(c) for c in ("14294D", "20406F", "2F5D96", "4B82B8", "73A8D6")],
+            [hexc(c) for c in ("3C79B5", "5A9AD2", "7DBDEB", "A9DBF7", "D4F0FD")], R_PETAL_BLUE),
+    "twilight": ("dark_oak", [hexc(c) for c in ("1A1233", "2A1F4D", "3D2F6B", "55448A", "7462A8")],
+                 [hexc(c) for c in ("5A4A93", "7563B0", "9483CC", "B5A7E3", "D6CDF3")], R_PETAL_LAVENDER),
+    "blush": ("cherry", [hexc(c) for c in ("3E1428", "5E2240", "833659", "A84E74", "C96D92")],
+              [hexc(c) for c in ("B5476E", "D0688B", "E58CA8", "F2B2C6", "FBD9E4")], R_PETAL_PINK),
+}
+
+
+def wood_log_top(img, bark, wood):
+    """The outer ring of a log end is bark, the rings inside are wood."""
+    w, h = img.size
+    ring = lambda p, px: min(p[0], p[1], w - 1 - p[0], h - 1 - p[1]) == 0
+    out = gradient_map(img, bark, mask=ring)
+    return gradient_map(img, wood, mask=lambda p, px: not ring(p, px), out=out)
+
+
+def wood_door(img, bark, wood):
+    """Doors and trapdoors: wooden parts in the planks' colour, dark iron and frames in the bark's."""
+    dark = lambda p, px: hsv(px)[1] < 0.25 and lum(px) < 0.3
+    out = gradient_map(img, wood, mask=lambda p, px: not dark(p, px))
+    return gradient_map(img, bark, mask=dark, out=out)
+
+
+def wood_sapling(img, bark, leaf):
+    """Saplings: the stem in bark colours, everything else in the family's leaf colour."""
+    stem = lambda p, px: hsv(px)[1] < 0.55 and lum(px) < 0.32 and not is_green(px)
+    out = gradient_map(img, bark, mask=stem, curve=lambda t: 0.25 + 0.75 * t)
+    return gradient_map(img, leaf, mask=lambda p, px: not stem(p, px), out=out, curve=lambda t: 0.1 + 0.9 * t)
+
+
+def wood_family_textures(prefix):
+    src, bark, wood, leaf = WOOD_FAMILIES[prefix]
+    blocks = {
+        f"{prefix}_log": gradient_map(vblock(f"{src}_log"), bark),
+        f"{prefix}_log_top": wood_log_top(vblock(f"{src}_log_top"), bark, wood),
+        f"stripped_{prefix}_log": gradient_map(vblock(f"stripped_{src}_log"), wood),
+        f"stripped_{prefix}_log_top": gradient_map(vblock(f"stripped_{src}_log_top"), wood),
+        f"{prefix}_planks": gradient_map(vblock(f"{src}_planks"), wood),
+        f"{prefix}_door_top": wood_door(vblock(f"{src}_door_top"), bark, wood),
+        f"{prefix}_door_bottom": wood_door(vblock(f"{src}_door_bottom"), bark, wood),
+        f"{prefix}_trapdoor": wood_door(vblock(f"{src}_trapdoor"), bark, wood),
+        f"{prefix}_sapling": wood_sapling(vblock(f"{src}_sapling"), bark, leaf),
+    }
+    items = {f"{prefix}_door": wood_door(vitem(f"{src}_door"), bark, wood)}
+    return blocks, items
+
+
+def flowering_blush_leaves():
+    """Blush leaves with clusters of white and blue flowers (the flower pattern of vanilla's flowering azalea leaves)."""
+    base = vblock("azalea_leaves")
+    out = gradient_map(base, R_PETAL_PINK, curve=lambda t: 0.15 + 0.85 * t)
+    flowers = vblock("flowering_azalea_leaves")
+    blossom = lambda p, px: px[3] > 0 and (hsv(px)[0] > 0.75 or hsv(px)[0] < 0.08) and hsv(px)[1] > 0.15
+    labels, _ = components(flowers, blossom, wrap=True)
+    lo, hi = lum_range(flowers, blossom)
+    for p, label in labels.items():
+        px = flowers.getpixel(p)
+        ramp = R_PETAL_WHITE if label % 3 else R_PETAL_BLUE
+        out.putpixel(p, (*sample(ramp, 0.3 + 0.7 * (lum(px) - lo) / (hi - lo)), 255))
+    return out
+
+
+def hedge(leaf_ramp, flower_ramps, seed):
+    """A floral hedge: vanilla's flowering azalea leaves, leaves and flowers each in their own colours."""
+    img = vblock("flowering_azalea_leaves")
+    blossom = lambda p, px: px[3] > 0 and (hsv(px)[0] > 0.75 or hsv(px)[0] < 0.08) and hsv(px)[1] > 0.15
+    out = gradient_map(img, leaf_ramp, mask=lambda p, px: not blossom(p, px), curve=lambda t: 0.15 + 0.85 * t)
+    labels, _ = components(img, blossom, wrap=True)
+    lo, hi = lum_range(img, blossom)
+    rng = random.Random(seed)
+    ramps = {}
+    for p, label in labels.items():
+        ramp = ramps.setdefault(label, flower_ramps[rng.randrange(len(flower_ramps))])
+        px = img.getpixel(p)
+        out.putpixel(p, (*sample(ramp, 0.25 + 0.75 * (lum(px) - lo) / (hi - lo)), 255))
+    return out
+
+
+def star_bloom():
+    """A white star flower; its blue heart is on the glowing layer (star_bloom_emissive)."""
+    return flower(vblock("open_eyeblossom"), lambda p, i: R_PETAL_WHITE)
+
+
+def star_bloom_emissive():
+    img = vblock("open_eyeblossom_emissive")
+    return gradient_map(img, [hexc("3E9BD8"), BLUE, hexc("BDEBFD"), WHITE])
+
+
+def flower_textures():
+    out = {
+        "blush_carnation": flower(vblock("poppy"), lambda p, i: R_PETAL_PINK),
+        "pearl_snowdrop": flower(vblock("white_tulip"), lambda p, i: mix_ramp(R_PETAL_WHITE, R_PETAL_BLUE, 0.12)),
+        "forget_me_not": flower(vblock("azure_bluet"), lambda p, i: R_PETAL_BLUE),
+        "trans_rose": flower(vblock("wither_rose"), lambda p, i: R_PETAL_PINK if 6 <= p[0] <= 9 and p[1] <= 7 else R_PETAL_BLUE),
+        "star_bloom": star_bloom(), "star_bloom_emissive": star_bloom_emissive(),
+        "fairy_bell": flower(vblock("orange_tulip"), lambda p, i: R_PETAL_LAVENDER),
+        "flowering_blush_leaves": flowering_blush_leaves(),
+        "blossom_hedge": hedge([hexc(c) for c in ("8E6E8E", "AA8AAE", "C6A9CC", "E0C9E6", "F4E8F7")], [R_PETAL_PINK, R_PETAL_WHITE], 21),
+        "bluebell_hedge": hedge([hexc(c) for c in ("5A6F9E", "7389BB", "93A9D6", "B8CCEE", "DCE8FB")], [R_PETAL_BLUE, R_PETAL_WHITE], 22),
+        "pearl_hedge": hedge([hexc(c) for c in ("8A879E", "A9A6BD", "C8C6D9", "E2E1EE", "F7F6FB")], [R_PETAL_PINK, R_PETAL_BLUE], 23),
+    }
+    for half in ("top", "bottom"):
+        out[f"sky_delphinium_{half}"] = flower(vblock(f"lilac_{half}"), lambda p, i: R_PETAL_BLUE)
+        out[f"blush_foxglove_{half}"] = flower(vblock(f"rose_bush_{half}"), lambda p, i: R_PETAL_PINK)
+        out[f"pearl_lupine_{half}"] = flower(vblock(f"lilac_{half}"), lambda p, i: (R_PETAL_WHITE, R_PETAL_PINK, R_PETAL_BLUE)[i % 3])
+    return out
+
+
+FLOWER_CUTOUT = ("blush_carnation", "pearl_snowdrop", "forget_me_not", "trans_rose", "star_bloom", "star_bloom_emissive", "fairy_bell",
+                 "sky_delphinium_top", "sky_delphinium_bottom", "blush_foxglove_top", "blush_foxglove_bottom", "pearl_lupine_top",
+                 "pearl_lupine_bottom")
+
+
+
 # ============================================================================================ pride oven
 def oven_recolor(img):
     """Smoker -> Pride Oven: pink wood, pearly stone and iron, and pink-and-white flames."""
@@ -2732,6 +2854,19 @@ def main():
     blocks.update({name: cat_plush(name) for name in PLUSHES})
     for name, img in blocks.items():
         save(img, f"block/{name}.png")
+    for prefix in WOOD_FAMILIES:
+        family_blocks, family_items = wood_family_textures(prefix)
+        for name, img in family_blocks.items():
+            save(img, f"block/{name}.png")
+        save_mcmeta(f"block/{prefix}_sapling.png", CUTOUT)
+        for name, img in family_items.items():
+            save(img, f"item/{name}.png")
+    for name, img in flower_textures().items():
+        save(img, f"block/{name}.png")
+    for name in FLOWER_CUTOUT:
+        save_mcmeta(f"block/{name}.png", CUTOUT)
+    for name in ("flowering_blush_leaves", "blossom_hedge", "bluebell_hedge", "pearl_hedge"):
+        save_mcmeta(f"block/{name}.png", LEAVES_META)
     for name, img, meta in vegetation_textures():
         save(img, f"block/{name}.png")
         if meta:

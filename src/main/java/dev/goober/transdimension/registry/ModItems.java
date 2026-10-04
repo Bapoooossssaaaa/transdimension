@@ -199,6 +199,27 @@ public final class ModItems {
 		// Logs strip with an axe, like vanilla wood.
 		StrippableBlockRegistry.register(ModBlocks.TRANS_LOG, ModBlocks.STRIPPED_TRANS_LOG);
 		StrippableBlockRegistry.register(ModBlocks.TRANS_WOOD, ModBlocks.STRIPPED_TRANS_WOOD);
+		// The themed forests' woods strip, burn and compost like any wood.
+		for (ModBlocks.WoodFamily family : ModBlocks.WOOD_FAMILIES) {
+			StrippableBlockRegistry.register(family.log(), family.strippedLog());
+			StrippableBlockRegistry.register(family.wood(), family.strippedWood());
+			for (Block block : List.of(family.planks(), family.stairs(), family.slab(), family.fence(), family.fenceGate())) {
+				FlammableBlockRegistry.getDefaultInstance().add(block, 5, 20);
+			}
+			for (Block block : List.of(family.log(), family.strippedLog(), family.wood(), family.strippedWood())) {
+				FlammableBlockRegistry.getDefaultInstance().add(block, 5, 5);
+			}
+			CompostableRegistry.INSTANCE.add(family.sapling(), 0.3F);
+		}
+		for (Block flower : List.of(ModBlocks.BLUSH_CARNATION, ModBlocks.PEARL_SNOWDROP, ModBlocks.FORGET_ME_NOT, ModBlocks.TRANS_ROSE,
+				ModBlocks.STAR_BLOOM, ModBlocks.FAIRY_BELL, ModBlocks.SKY_DELPHINIUM, ModBlocks.BLUSH_FOXGLOVE, ModBlocks.PEARL_LUPINE)) {
+			CompostableRegistry.INSTANCE.add(flower, 0.65F);
+			FlammableBlockRegistry.getDefaultInstance().add(flower, 60, 100);
+		}
+		for (Block leafy : List.of(ModBlocks.FLOWERING_BLUSH_LEAVES, ModBlocks.BLOSSOM_HEDGE, ModBlocks.BLUEBELL_HEDGE, ModBlocks.PEARL_HEDGE)) {
+			CompostableRegistry.INSTANCE.add(leafy, 0.3F);
+			FlammableBlockRegistry.getDefaultInstance().add(leafy, 30, 60);
+		}
 
 		// Trans dirt and grass till into (vanilla) farmland, so you can farm in the realm.
 		TillableBlockRegistry.register(ModBlocks.TRANS_DIRT, HoeItem::onlyIfAirAbove, HoeItem.changeIntoState(Blocks.FARMLAND.defaultBlockState()));

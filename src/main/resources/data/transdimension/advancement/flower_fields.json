@@ -1,0 +1,37 @@
+{
+  "parent": "transdimension:petal_pusher",
+  "criteria": {
+    "fields": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:pride_flower_fields"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_rose"
+    },
+    "title": {
+      "translate": "advancements.transdimension.flower_fields.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.flower_fields.description"
+    }
+  },
+  "requirements": [
+    [
+      "fields"
+    ]
+  ]
+}

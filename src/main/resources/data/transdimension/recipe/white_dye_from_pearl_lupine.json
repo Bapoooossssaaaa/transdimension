@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "white_dye",
+  "ingredients": [
+    "transdimension:pearl_lupine"
+  ],
+  "result": {
+    "count": 2,
+    "id": "minecraft:white_dye"
+  }
+}

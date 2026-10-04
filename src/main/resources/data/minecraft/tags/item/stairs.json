@@ -1,11 +1,14 @@
 {
   "replace": false,
   "values": [
+    "transdimension:blush_stairs",
     "transdimension:cobbled_trans_deepslate_stairs",
+    "transdimension:pearl_stairs",
     "transdimension:polished_trans_andesite_stairs",
     "transdimension:polished_trans_deepslate_stairs",
     "transdimension:polished_trans_diorite_stairs",
     "transdimension:polished_trans_granite_stairs",
+    "transdimension:sky_stairs",
     "transdimension:trans_andesite_stairs",
     "transdimension:trans_cobblestone_stairs",
     "transdimension:trans_deepslate_brick_stairs",
@@ -15,6 +18,7 @@
     "transdimension:trans_sandstone_stairs",
     "transdimension:trans_stairs",
     "transdimension:trans_stone_brick_stairs",
-    "transdimension:trans_stone_stairs"
+    "transdimension:trans_stone_stairs",
+    "transdimension:twilight_stairs"
   ]
 }

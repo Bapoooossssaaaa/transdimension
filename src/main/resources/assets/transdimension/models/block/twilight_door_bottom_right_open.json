@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/door_bottom_right_open",
+  "textures": {
+    "bottom": "transdimension:block/twilight_door_bottom",
+    "top": "transdimension:block/twilight_door_top"
+  }
+}

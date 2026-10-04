@@ -1,8 +1,11 @@
 {
   "replace": false,
   "values": [
+    "transdimension:blush_foxglove",
+    "transdimension:pearl_lupine",
     "transdimension:pride_blossom",
     "transdimension:pride_peony",
+    "transdimension:sky_delphinium",
     "transdimension:trans_petals"
   ]
 }

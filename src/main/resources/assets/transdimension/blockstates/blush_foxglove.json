@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "half=lower": {
+      "model": "transdimension:block/blush_foxglove_bottom"
+    },
+    "half=upper": {
+      "model": "transdimension:block/blush_foxglove_top"
+    }
+  }
+}

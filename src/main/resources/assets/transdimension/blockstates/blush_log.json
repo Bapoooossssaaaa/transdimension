@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "transdimension:block/blush_log_x"
+    },
+    "axis=y": {
+      "model": "transdimension:block/blush_log_y"
+    },
+    "axis=z": {
+      "model": "transdimension:block/blush_log_z"
+    }
+  }
+}

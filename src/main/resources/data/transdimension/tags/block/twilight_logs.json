@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:stripped_twilight_log",
+    "transdimension:stripped_twilight_wood",
+    "transdimension:twilight_log",
+    "transdimension:twilight_wood"
+  ]
+}

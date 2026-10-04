@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:blush_log",
+    "transdimension:blush_wood",
+    "transdimension:stripped_blush_log",
+    "transdimension:stripped_blush_wood"
+  ]
+}

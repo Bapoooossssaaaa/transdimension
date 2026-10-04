@@ -79,10 +79,12 @@
     ],
     [
       "transdimension:trees_trans_meadow",
+      "transdimension:heart_trees_rare",
       "transdimension:tall_trans_grass",
       "transdimension:pride_blossoms",
       "transdimension:trans_flowers",
       "transdimension:pride_peonies",
+      "transdimension:tall_trans_flowers",
       "transdimension:trans_petals_meadow",
       "transdimension:trans_grass_meadow",
       "transdimension:pastel_bushes",

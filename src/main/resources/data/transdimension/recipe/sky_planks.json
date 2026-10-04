@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "planks",
+  "ingredients": [
+    "#transdimension:sky_logs"
+  ],
+  "result": {
+    "count": 4,
+    "id": "transdimension:sky_planks"
+  }
+}

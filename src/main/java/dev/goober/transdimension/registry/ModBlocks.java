@@ -103,6 +103,15 @@ public final class ModBlocks {
 			Optional.of(configuredFeature("trans_tree")),
 			Optional.of(configuredFeature("trans_cherry_tree")));
 
+	/** Pearlwood: tall slender white trees. */
+	public static final TreeGrower PEARL_TREE_GROWER = grower("pearl", null, "pearlwood_tree", "pearlwood_tree_short");
+	/** Skywood: blue oaks, and big fancy ones near flowers. */
+	public static final TreeGrower SKY_TREE_GROWER = grower("sky", null, "bluebell_tree", "fancy_bluebell_tree");
+	/** Twilight wood: four saplings grow a dark-oak style canopy, one grows a small twilight tree. */
+	public static final TreeGrower TWILIGHT_TREE_GROWER = grower("twilight", "twilight_tree", "twilight_tree_small", null);
+	/** Blushwood: candy floss puffs, and near flowers, a heart tree. */
+	public static final TreeGrower BLUSH_TREE_GROWER = grower("blush", null, "candy_floss_tree_pink", "heart_tree");
+
 	// ---------------------------------------------------------------- terrain
 	public static final Block TRANS_GRASS_BLOCK = register("trans_grass_block", TransGrassBlock::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.GRASS_BLOCK));
@@ -285,6 +294,16 @@ public final class ModBlocks {
 			properties -> new FlowerPotBlock(TRANS_SAPLING, properties),
 			BlockBehaviour.Properties.ofFullCopy(Blocks.POTTED_CHERRY_SAPLING));
 
+	// ---------------------------------------------------------------- the themed forests' own woods
+	public static final WoodFamily PEARL_WOOD = woodFamily("pearl", PEARL_TREE_GROWER);
+	public static final WoodFamily SKY_WOOD = woodFamily("sky", SKY_TREE_GROWER);
+	public static final WoodFamily TWILIGHT_WOOD = woodFamily("twilight", TWILIGHT_TREE_GROWER);
+	public static final WoodFamily BLUSH_WOOD = woodFamily("blush", BLUSH_TREE_GROWER);
+	/** Every extra wood family, for stripping, burning and composting. */
+	public static final List<WoodFamily> WOOD_FAMILIES = List.of(PEARL_WOOD, SKY_WOOD, TWILIGHT_WOOD, BLUSH_WOOD);
+	/** Blush leaves dotted with white and blue flowers; heart trees wear them. */
+	public static final Block FLOWERING_BLUSH_LEAVES = leaves("flowering_blush_leaves");
+
 	// ---------------------------------------------------------------- flowers
 	public static final Block PRIDE_BLOSSOM = register("pride_blossom",
 			properties -> new FlowerBlock(MobEffects.REGENERATION, 8.0F, properties),
@@ -308,6 +327,34 @@ public final class ModBlocks {
 			BlockBehaviour.Properties.ofFullCopy(Blocks.PEONY));
 	public static final Block TRANS_PETALS = register("trans_petals", FlowerBedBlock::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.PINK_PETALS));
+	// More small flowers for the flower fields.
+	public static final Block BLUSH_CARNATION = flower("blush_carnation", MobEffects.REGENERATION, 6.0F);
+	public static final Block POTTED_BLUSH_CARNATION = potted("potted_blush_carnation", BLUSH_CARNATION);
+	public static final Block PEARL_SNOWDROP = flower("pearl_snowdrop", MobEffects.SLOW_FALLING, 8.0F);
+	public static final Block POTTED_PEARL_SNOWDROP = potted("potted_pearl_snowdrop", PEARL_SNOWDROP);
+	public static final Block FORGET_ME_NOT = flower("forget_me_not", MobEffects.NIGHT_VISION, 8.0F);
+	public static final Block POTTED_FORGET_ME_NOT = potted("potted_forget_me_not", FORGET_ME_NOT);
+	public static final Block TRANS_ROSE = flower("trans_rose", MobEffects.LUCK, 10.0F);
+	public static final Block POTTED_TRANS_ROSE = potted("potted_trans_rose", TRANS_ROSE);
+	/** A white star-shaped flower with a blue heart that glows softly at night. */
+	public static final Block STAR_BLOOM = register("star_bloom", properties -> new FlowerBlock(MobEffects.NIGHT_VISION, 8.0F, properties),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.POPPY).lightLevel(state -> 5));
+	public static final Block POTTED_STAR_BLOOM = registerWithoutItem("potted_star_bloom", properties -> new FlowerPotBlock(STAR_BLOOM, properties),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.POTTED_POPPY).lightLevel(state -> 5));
+	public static final Block FAIRY_BELL = flower("fairy_bell", MobEffects.JUMP_BOOST, 6.0F);
+	public static final Block POTTED_FAIRY_BELL = potted("potted_fairy_bell", FAIRY_BELL);
+	// Tall flowers (two blocks high, like the Pride Peony).
+	public static final Block SKY_DELPHINIUM = register("sky_delphinium", TallFlowerBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.LILAC));
+	public static final Block BLUSH_FOXGLOVE = register("blush_foxglove", TallFlowerBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.ROSE_BUSH));
+	public static final Block PEARL_LUPINE = register("pearl_lupine", TallFlowerBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.LILAC));
+	// Floral blocks: leafy hedges thick with flowers, for gardens and the flower fields.
+	public static final Block BLOSSOM_HEDGE = register("blossom_hedge", Block::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.FLOWERING_AZALEA_LEAVES));
+	public static final Block BLUEBELL_HEDGE = register("bluebell_hedge", Block::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.FLOWERING_AZALEA_LEAVES));
+	public static final Block PEARL_HEDGE = register("pearl_hedge", Block::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.FLOWERING_AZALEA_LEAVES));
 
 	// ---------------------------------------------------------------- trans vegetation: grass, ferns, bushes
 	public static final Block TALL_TRANS_GRASS = register("tall_trans_grass", DoublePlantBlock::new,
@@ -453,6 +500,53 @@ public final class ModBlocks {
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, BuiltInRegistries.BLOCK.getKey(standing));
 		Registry.register(BuiltInRegistries.ITEM, key, new StandingAndWallBlockItem(standing, wall, Direction.DOWN,
 				new Item.Properties().useBlockDescriptionPrefix().setId(key)));
+	}
+
+	/**
+	 * A family of wood: log, wood and their stripped versions, planks with everything vanilla makes from them, and a
+	 * sapling with its pot. The family borrows cherry wood's sounds, timings and door behaviour.
+	 */
+	public record WoodFamily(Block log, Block strippedLog, Block wood, Block strippedWood, Block planks, Block stairs, Block slab,
+			Block fence, Block fenceGate, Block door, Block trapdoor, Block button, Block pressurePlate, Block sapling,
+			Block pottedSapling) {
+	}
+
+	private static WoodFamily woodFamily(String name, TreeGrower grower) {
+		Block log = register(name + "_log", RotatedPillarBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BIRCH_LOG));
+		Block strippedLog = register("stripped_" + name + "_log", RotatedPillarBlock::new,
+				BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_BIRCH_LOG));
+		Block wood = register(name + "_wood", RotatedPillarBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BIRCH_WOOD));
+		Block strippedWood = register("stripped_" + name + "_wood", RotatedPillarBlock::new,
+				BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_BIRCH_WOOD));
+		Block planks = register(name + "_planks", Block::new, BlockBehaviour.Properties.ofFullCopy(Blocks.CHERRY_PLANKS));
+		Block stairs = stairs(name + "_stairs", planks, Blocks.CHERRY_STAIRS);
+		Block slab = slab(name + "_slab", Blocks.CHERRY_SLAB);
+		Block fence = register(name + "_fence", FenceBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.CHERRY_FENCE));
+		Block fenceGate = register(name + "_fence_gate", properties -> new FenceGateBlock(WoodType.CHERRY, properties),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.CHERRY_FENCE_GATE));
+		Block door = register(name + "_door", properties -> new DoorBlock(BlockSetType.CHERRY, properties),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.CHERRY_DOOR));
+		Block trapdoor = register(name + "_trapdoor", properties -> new TrapDoorBlock(BlockSetType.CHERRY, properties),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.CHERRY_TRAPDOOR));
+		Block button = register(name + "_button", properties -> new ButtonBlock(BlockSetType.CHERRY, 30, properties),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.CHERRY_BUTTON));
+		Block pressurePlate = register(name + "_pressure_plate", properties -> new PressurePlateBlock(BlockSetType.CHERRY, properties),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.CHERRY_PRESSURE_PLATE));
+		Block sapling = register(name + "_sapling", properties -> new SaplingBlock(grower, properties),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.CHERRY_SAPLING));
+		Block pottedSapling = registerWithoutItem("potted_" + name + "_sapling", properties -> new FlowerPotBlock(sapling, properties),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.POTTED_CHERRY_SAPLING));
+		return new WoodFamily(log, strippedLog, wood, strippedWood, planks, stairs, slab, fence, fenceGate, door, trapdoor, button,
+				pressurePlate, sapling, pottedSapling);
+	}
+
+	/** A tree grower from configured feature names (null for none): two-by-two trees, single trees, trees near flowers. */
+	private static TreeGrower grower(String name, String mega, String tree, String nearFlowers) {
+		return new TreeGrower(TransDimension.MOD_ID + ":" + name, optionalFeature(mega), optionalFeature(tree), optionalFeature(nearFlowers));
+	}
+
+	private static Optional<ResourceKey<net.minecraft.world.level.levelgen.feature.ConfiguredFeature<?, ?>>> optionalFeature(String name) {
+		return name == null ? Optional.empty() : Optional.of(configuredFeature(name));
 	}
 
 	private static Block plush(String name) {

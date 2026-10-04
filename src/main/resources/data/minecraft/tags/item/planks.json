@@ -1,6 +1,10 @@
 {
   "replace": false,
   "values": [
-    "transdimension:trans_planks"
+    "transdimension:blush_planks",
+    "transdimension:pearl_planks",
+    "transdimension:sky_planks",
+    "transdimension:trans_planks",
+    "transdimension:twilight_planks"
   ]
 }

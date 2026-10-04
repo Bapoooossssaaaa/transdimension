@@ -18,6 +18,12 @@
         },
         {
           "data": {
+            "Name": "transdimension:fairy_bell"
+          },
+          "weight": 2
+        },
+        {
+          "data": {
             "Name": "transdimension:pride_blossom"
           },
           "weight": 1

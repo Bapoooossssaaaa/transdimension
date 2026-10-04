@@ -1,0 +1,31 @@
+{
+  "parent": "transdimension:petal_pusher",
+  "criteria": {
+    "star": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:star_bloom"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:star_bloom"
+    },
+    "title": {
+      "translate": "advancements.transdimension.star_gazer.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.star_gazer.description"
+    }
+  },
+  "requirements": [
+    [
+      "star"
+    ]
+  ]
+}

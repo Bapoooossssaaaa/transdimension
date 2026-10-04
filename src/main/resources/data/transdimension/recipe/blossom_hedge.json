@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "L": "transdimension:blush_leaves",
+    "F": "transdimension:trans_rose"
+  },
+  "pattern": [
+    "LLL",
+    "LFL",
+    "LLL"
+  ],
+  "result": {
+    "count": 8,
+    "id": "transdimension:blossom_hedge"
+  }
+}

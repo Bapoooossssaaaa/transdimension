@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:sky_log",
+    "transdimension:sky_wood",
+    "transdimension:stripped_sky_log",
+    "transdimension:stripped_sky_wood"
+  ]
+}

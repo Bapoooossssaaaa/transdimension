@@ -1,7 +1,11 @@
 {
   "replace": false,
   "values": [
+    "transdimension:blossom_hedge",
+    "transdimension:bluebell_hedge",
     "transdimension:blush_leaves",
+    "transdimension:flowering_blush_leaves",
+    "transdimension:pearl_hedge",
     "transdimension:pearl_leaves",
     "transdimension:sky_leaves",
     "transdimension:trans_leaves",

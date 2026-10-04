@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "transdimension:block/twilight_log_top",
+    "side": "transdimension:block/twilight_log"
+  }
+}

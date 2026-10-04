@@ -71,6 +71,13 @@ def java_names():
     for m in re.finditer(r'\b(?:registerWithoutItem|potted)\("([a-z0-9_]+)"[,)]', src):
         no_item.add(m.group(1))
         blocks.add(m.group(1))
+    # Wood families registered through ModBlocks.woodFamily("<prefix>", ...).
+    for m in re.finditer(r'\bwoodFamily\("([a-z]+)"', src):
+        w = m.group(1)
+        blocks.update({f"{w}_log", f"stripped_{w}_log", f"{w}_wood", f"stripped_{w}_wood", f"{w}_planks", f"{w}_stairs", f"{w}_slab",
+                       f"{w}_fence", f"{w}_fence_gate", f"{w}_door", f"{w}_trapdoor", f"{w}_button", f"{w}_pressure_plate",
+                       f"{w}_sapling", f"potted_{w}_sapling"})
+        no_item.add(f"potted_{w}_sapling")
     # Coral colours registered through ModBlocks.coral("<colour>"): fans get their item from fanItem(), wall fans none.
     for m in re.finditer(r'\bcoral\("([a-z]+)"\)', src):
         c = m.group(1)
@@ -286,7 +293,17 @@ TWINS.update({
     "pastel_bush": "bush", "trans_firefly_bush": "firefly_bush", "short_sugar_grass": "short_dry_grass",
     "tall_sugar_grass": "tall_dry_grass", "trans_seagrass": "seagrass", "tall_trans_seagrass": "tall_seagrass",
     "trans_kelp": "kelp", "trans_kelp_plant": "kelp_plant", "trans_lily_pad": "lily_pad",
+    "sky_delphinium": "peony", "blush_foxglove": "peony", "pearl_lupine": "peony",
 })
+# Wood family blocks behave like cherry's (logs and wood have an axis, and so on); saplings like the cherry sapling.
+for b in list(BLOCKS):
+    for suffix, twin in (("_log", "cherry_log"), ("_wood", "cherry_wood"), ("_planks", "cherry_planks"), ("_fence_gate", "cherry_fence_gate"),
+                         ("_fence", "cherry_fence"), ("_door", "cherry_door"), ("_trapdoor", "cherry_trapdoor"), ("_button", "cherry_button"),
+                         ("_pressure_plate", "cherry_pressure_plate"), ("_sapling", "cherry_sapling"), ("_leaves", "cherry_leaves"),
+                         ("_hedge", "flowering_azalea_leaves")):
+        if b.endswith(suffix) and not b.startswith("potted_"):
+            TWINS.setdefault(b, twin)
+            break
 for b in list(BLOCKS):
     for suffix, twin in (("_coral_wall_fan", "tube_coral_wall_fan"), ("_coral_fan", "tube_coral_fan"), ("_coral_block", "tube_coral_block"),
                          ("_coral", "tube_coral")):

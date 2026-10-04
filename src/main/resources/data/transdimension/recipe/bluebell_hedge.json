@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "L": "transdimension:sky_leaves",
+    "F": "transdimension:forget_me_not"
+  },
+  "pattern": [
+    "LLL",
+    "LFL",
+    "LLL"
+  ],
+  "result": {
+    "count": 8,
+    "id": "transdimension:bluebell_hedge"
+  }
+}

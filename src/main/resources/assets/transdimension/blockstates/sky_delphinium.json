@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "half=lower": {
+      "model": "transdimension:block/sky_delphinium_bottom"
+    },
+    "half=upper": {
+      "model": "transdimension:block/sky_delphinium_top"
+    }
+  }
+}

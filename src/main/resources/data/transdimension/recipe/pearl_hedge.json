@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "L": "transdimension:pearl_leaves",
+    "F": "transdimension:pearl_snowdrop"
+  },
+  "pattern": [
+    "LLL",
+    "LFL",
+    "LLL"
+  ],
+  "result": {
+    "count": 8,
+    "id": "transdimension:pearl_hedge"
+  }
+}

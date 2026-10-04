@@ -1,0 +1,88 @@
+{
+  "type": "minecraft:simple_block",
+  "config": {
+    "to_place": {
+      "type": "minecraft:weighted_state_provider",
+      "entries": [
+        {
+          "data": {
+            "Name": "transdimension:star_bloom"
+          },
+          "weight": 6
+        },
+        {
+          "data": {
+            "Name": "transdimension:trans_short_grass"
+          },
+          "weight": 14
+        },
+        {
+          "data": {
+            "Name": "transdimension:trans_moss_carpet"
+          },
+          "weight": 8
+        },
+        {
+          "data": {
+            "Name": "transdimension:fairy_bell"
+          },
+          "weight": 4
+        },
+        {
+          "data": {
+            "Name": "transdimension:forget_me_not"
+          },
+          "weight": 4
+        },
+        {
+          "data": {
+            "Name": "transdimension:trans_rose"
+          },
+          "weight": 3
+        },
+        {
+          "data": {
+            "Name": "transdimension:blush_carnation"
+          },
+          "weight": 3
+        },
+        {
+          "data": {
+            "Name": "transdimension:pearl_snowdrop"
+          },
+          "weight": 3
+        },
+        {
+          "data": {
+            "Name": "transdimension:pride_blossom"
+          },
+          "weight": 3
+        },
+        {
+          "data": {
+            "Name": "transdimension:sky_delphinium",
+            "Properties": {
+              "half": "lower"
+            }
+          },
+          "weight": 2
+        },
+        {
+          "data": {
+            "Name": "transdimension:blush_foxglove",
+            "Properties": {
+              "half": "lower"
+            }
+          },
+          "weight": 2
+        },
+        {
+          "data": {
+            "Name": "transdimension:pastel_bush"
+          },
+          "weight": 2
+        }
+      ]
+    }
+  }
+}

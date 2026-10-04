@@ -78,7 +78,9 @@
       "minecraft:spring_lava"
     ],
     [
+      "transdimension:heart_trees_rare",
       "transdimension:trees_candy_floss_grove",
+      "transdimension:hedge_bushes",
       "transdimension:trans_flowers",
       "transdimension:heart_blooms",
       "transdimension:trans_petals_forest",

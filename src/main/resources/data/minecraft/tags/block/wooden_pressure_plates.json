@@ -1,6 +1,10 @@
 {
   "replace": false,
   "values": [
-    "transdimension:trans_pressure_plate"
+    "transdimension:blush_pressure_plate",
+    "transdimension:pearl_pressure_plate",
+    "transdimension:sky_pressure_plate",
+    "transdimension:trans_pressure_plate",
+    "transdimension:twilight_pressure_plate"
   ]
 }

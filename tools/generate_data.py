@@ -677,14 +677,17 @@ def generate_blocks():
     button("trans_button", "Trans Button", "trans_planks", "axe", wooden=True)
     pressure_plate("trans_pressure_plate", "Trans Pressure Plate", "trans_planks", "axe", wooden=True)
 
-    for leaves_id, english in (("trans_leaves", "Trans Leaves"), ("pearl_leaves", "Pearl Leaves"), ("sky_leaves", "Sky Leaves"),
-                               ("blush_leaves", "Blush Leaves"), ("twilight_leaves", "Twilight Leaves")):
+    # Each kind of leaves drops the sapling of its own wood (trans leaves drop trans saplings).
+    for leaves_id, english, sapling in (("trans_leaves", "Trans Leaves", "trans_sapling"), ("pearl_leaves", "Pearl Leaves", "pearl_sapling"),
+                                        ("sky_leaves", "Sky Leaves", "sky_sapling"), ("blush_leaves", "Blush Leaves", "blush_sapling"),
+                                        ("twilight_leaves", "Twilight Leaves", "twilight_sapling"),
+                                        ("flowering_blush_leaves", "Flowering Blush Leaves", "blush_sapling")):
         blockstate(leaves_id, {"variants": {"": {"model": f"{NS}:block/{leaves_id}"}}})
         model(leaves_id, {"parent": "minecraft:block/leaves", "textures": {"all": block_tex(leaves_id)}})
         item_def(leaves_id, f"{NS}:block/{leaves_id}")
         name(leaves_id, english)
         mine(leaves_id, "hoe")
-        loot(leaves_id, loot_leaves(leaves_id, "trans_sapling"))
+        loot(leaves_id, loot_leaves(leaves_id, sapling))
         tag("block", "leaves", leaves_id)
         tag("item", "leaves", leaves_id)
 
@@ -983,6 +986,125 @@ def generate_vegetation():
             tag("block", "trans_wall_corals", wall, ns=NS)
         tag("block", "trans_coral_blocks", f"{colour}_coral_block", ns=NS)
 
+
+
+# ============================================================================================ woods, flowers and hedges
+# The themed forests' own woods (ModBlocks.WoodFamily): id prefix -> English name.
+WOOD_FAMILIES = {"pearl": "Pearl", "sky": "Sky", "twilight": "Twilight", "blush": "Blush"}
+# More small flowers (dye colour, dye count), tall flowers and floral hedges.
+NEW_FLOWERS = {"blush_carnation": ("Blush Carnation", "pink_dye"), "pearl_snowdrop": ("Pearl Snowdrop", "white_dye"),
+               "forget_me_not": ("Forget-Me-Not", "light_blue_dye"), "trans_rose": ("Trans Rose", "pink_dye"),
+               "star_bloom": ("Starbloom", "white_dye"), "fairy_bell": ("Fairy Bells", "purple_dye")}
+TALL_FLOWERS = {"sky_delphinium": ("Sky Delphinium", "light_blue_dye"), "blush_foxglove": ("Blush Foxglove", "pink_dye"),
+                "pearl_lupine": ("Pearl Lupine", "white_dye")}
+HEDGES = {"blossom_hedge": "Blossom Hedge", "bluebell_hedge": "Bluebell Hedge", "pearl_hedge": "Pearl Hedge"}
+
+
+def wood_family(prefix, english):
+    """Blockstates, models, loot, tags and names for one wood family; recipes are in wood_family_recipes()."""
+    log(f"{prefix}_log", f"{english} Log", f"{prefix}_log", f"{prefix}_log_top")
+    log(f"stripped_{prefix}_log", f"Stripped {english} Log", f"stripped_{prefix}_log", f"stripped_{prefix}_log_top")
+    wood(f"{prefix}_wood", f"{english} Wood", f"{prefix}_log")
+    wood(f"stripped_{prefix}_wood", f"Stripped {english} Wood", f"stripped_{prefix}_log")
+    logs = [f"{prefix}_log", f"stripped_{prefix}_log", f"{prefix}_wood", f"stripped_{prefix}_wood"]
+    tag("block", f"{prefix}_logs", *logs, ns=NS)
+    tag("item", f"{prefix}_logs", *logs, ns=NS)
+    tag("block", "logs_that_burn", f"#{NS}:{prefix}_logs")
+    tag("item", "logs_that_burn", f"#{NS}:{prefix}_logs")
+    tag("block", "overworld_natural_logs", f"{prefix}_log")
+    planks = f"{prefix}_planks"
+    cube(planks, f"{english} Planks", tool="axe")
+    tag("block", "planks", planks)
+    tag("item", "planks", planks)
+    tex = {"bottom": planks, "top": planks, "side": planks}
+    stairs(f"{prefix}_stairs", f"{english} Stairs", planks, tex, "axe")
+    tag("block", "wooden_stairs", f"{prefix}_stairs")
+    tag("item", "wooden_stairs", f"{prefix}_stairs")
+    slab(f"{prefix}_slab", f"{english} Slab", planks, tex, "axe")
+    tag("block", "wooden_slabs", f"{prefix}_slab")
+    tag("item", "wooden_slabs", f"{prefix}_slab")
+    fence(f"{prefix}_fence", f"{english} Fence", planks)
+    fence_gate(f"{prefix}_fence_gate", f"{english} Fence Gate", planks)
+    door(f"{prefix}_door", f"{english} Door", f"{prefix}_door_top", f"{prefix}_door_bottom")
+    trapdoor(f"{prefix}_trapdoor", f"{english} Trapdoor", f"{prefix}_trapdoor")
+    button(f"{prefix}_button", f"{english} Button", planks, "axe", wooden=True)
+    pressure_plate(f"{prefix}_pressure_plate", f"{english} Pressure Plate", planks, "axe", wooden=True)
+    cross_plant(f"{prefix}_sapling", f"{english} Sapling", f"potted_{prefix}_sapling", f"Potted {english} Sapling")
+    tag("block", "saplings", f"{prefix}_sapling")
+    tag("item", "saplings", f"{prefix}_sapling")
+
+
+def wood_family_recipes(prefix):
+    R = recipe
+    planks = f"{prefix}_planks"
+    R(planks, shapeless(planks, [f"#{NS}:{prefix}_logs"], 4, group="planks"))
+    R(f"{prefix}_wood", shaped(f"{prefix}_wood", ["##", "##"], {"#": f"{prefix}_log"}, 3, group="bark"))
+    R(f"stripped_{prefix}_wood", shaped(f"stripped_{prefix}_wood", ["##", "##"], {"#": f"stripped_{prefix}_log"}, 3, group="bark"))
+    R(f"{prefix}_stairs", shaped(f"{prefix}_stairs", ["#  ", "## ", "###"], {"#": planks}, 4, group="wooden_stairs"))
+    R(f"{prefix}_slab", shaped(f"{prefix}_slab", ["###"], {"#": planks}, 6, group="wooden_slab"))
+    R(f"{prefix}_fence", shaped(f"{prefix}_fence", ["W#W", "W#W"], {"#": "minecraft:stick", "W": planks}, 3, category="misc", group="wooden_fence"))
+    R(f"{prefix}_fence_gate", shaped(f"{prefix}_fence_gate", ["#W#", "#W#"], {"#": "minecraft:stick", "W": planks}, 1, category="redstone",
+                                     group="wooden_fence_gate"))
+    R(f"{prefix}_door", shaped(f"{prefix}_door", ["##", "##", "##"], {"#": planks}, 3, category="redstone", group="wooden_door"))
+    R(f"{prefix}_trapdoor", shaped(f"{prefix}_trapdoor", ["###", "###"], {"#": planks}, 2, category="redstone", group="wooden_trapdoor"))
+    R(f"{prefix}_button", shapeless(f"{prefix}_button", [planks], 1, category="redstone", group="wooden_button"))
+    R(f"{prefix}_pressure_plate", shaped(f"{prefix}_pressure_plate", ["##"], {"#": planks}, 1, category="redstone", group="wooden_pressure_plate"))
+
+
+def tall_flower(block, english):
+    blockstate(block, from_template("peony", "peony", block))
+    for half in ("top", "bottom"):
+        model(f"{block}_{half}", {"parent": "minecraft:block/cross", "textures": {"cross": block_tex(f"{block}_{half}")}})
+    model(block, {"parent": "minecraft:item/generated", "textures": {"layer0": block_tex(f"{block}_top")}}, kind="item")
+    item_def(block, f"{NS}:item/{block}")
+    name(block, english)
+    loot_like_vanilla(block, "peony", {"minecraft:peony": block})
+    for t in ("flowers", "bee_attractive", "replaceable_by_trees"):
+        tag("block", t, block)
+    tag("item", "flowers", block)
+    tag("item", "bee_food", block)
+
+
+def generate_woods_and_flowers():
+    for prefix, english in WOOD_FAMILIES.items():
+        wood_family(prefix, english)
+    for flower_id, (english, _) in NEW_FLOWERS.items():
+        cross_plant(flower_id, english, f"potted_{flower_id}", f"Potted {english}")
+        for t in ("small_flowers", "bee_attractive"):
+            tag("block", t, flower_id)
+        tag("item", "small_flowers", flower_id)
+        tag("item", "bee_food", flower_id)
+    # The Starbloom's blue heart glows: an emissive cross like vanilla's open eyeblossom (block, item and pot).
+    model("star_bloom", {"parent": "minecraft:block/cross_emissive", "textures": {
+        "cross": block_tex("star_bloom"), "cross_emissive": block_tex("star_bloom_emissive")}})
+    model("star_bloom", {"parent": "minecraft:item/generated", "textures": {
+        "layer0": block_tex("star_bloom"), "layer1": block_tex("star_bloom_emissive")}}, kind="item")
+    model("potted_star_bloom", {"parent": "minecraft:block/flower_pot_cross_emissive", "textures": {
+        "cross_emissive": block_tex("star_bloom_emissive"), "plant": block_tex("star_bloom")}})
+    for block, (english, _) in TALL_FLOWERS.items():
+        tall_flower(block, english)
+    for block, english in HEDGES.items():
+        blockstate(block, {"variants": {"": {"model": f"{NS}:block/{block}"}}})
+        model(block, {"parent": "minecraft:block/leaves", "textures": {"all": block_tex(block)}})
+        item_def(block, f"{NS}:block/{block}")
+        name(block, english)
+        mine(block, "hoe")
+        loot(block, loot_self(block))
+        tag("block", "hedges", block, ns=NS)
+        tag("item", "hedges", block, ns=NS)
+
+
+def generate_woods_and_flowers_recipes():
+    R = recipe
+    for prefix in WOOD_FAMILIES:
+        wood_family_recipes(prefix)
+    for block, (_, dye) in {**NEW_FLOWERS, **TALL_FLOWERS}.items():
+        count = 2 if block in TALL_FLOWERS else 1
+        R(f"{dye}_from_{block}", shapeless(f"minecraft:{dye}", [block], count, category="misc", group=dye))
+    # Hedges: leaves of the matching colour around a flower.
+    for hedge, leaves, flower in (("blossom_hedge", "blush_leaves", "trans_rose"), ("bluebell_hedge", "sky_leaves", "forget_me_not"),
+                                  ("pearl_hedge", "pearl_leaves", "pearl_snowdrop")):
+        R(hedge, shaped(hedge, ["LLL", "LFL", "LLL"], {"L": leaves, "F": flower}, 8))
 
 
 def furniture_blockstate(block):
@@ -1294,6 +1416,8 @@ BIOMES = {
     "crystal_grove": "Crystal Grove", "pastel_peaks": "Pastel Peaks", "heartwood_grove": "Heartwood Grove",
     "crystal_caves": "Crystal Caves", "pearlwood_forest": "Pearlwood Forest", "bluebell_woods": "Bluebell Woods",
     "twilight_thicket": "Twilight Thicket", "candy_floss_grove": "Candy Floss Grove", "pastel_lush_caves": "Pastel Lush Caves",
+    "pride_flower_fields": "Pride Flower Fields", "moonlit_meadow": "Moonlit Meadow", "gumdrop_glade": "Gumdrop Glade",
+    "pastel_reef": "Pastel Reef", "blooming_caverns": "Blooming Caverns",
 }
 
 
@@ -1370,6 +1494,10 @@ def generate_advancements():
       {"crystal_caves": in_biome("crystal_caves")})
     A("pastel_lush_caves", "crystal_caves", "trans_moss_block", "Soft Spot", "Find the Pastel Lush Caves",
       {"pastel_lush_caves": in_biome("pastel_lush_caves")})
+    A("blooming_caverns", "crystal_caves", "star_bloom", "Underground Garden", "Find the Blooming Caverns",
+      {"blooming_caverns": in_biome("blooming_caverns")})
+    A("pastel_reef", "goober", "blush_coral_fan", "Reef Dreams", "Swim through the Pastel Reef",
+      {"reef": in_biome("pastel_reef")})
     A("pastel_peaks", "goober", "trans_stone", "Head in the Clouds", "Climb above Y 160 in the Pastel Peaks",
       {"peak": player_is(location={"biomes": rid("pastel_peaks"), "position": {"y": {"min": 160.0}}})})
     A("pastel_passport", "pastel_peaks", "minecraft:filled_map", "Pastel Passport", "Visit every biome of the Trans Realm",
@@ -1433,11 +1561,16 @@ def generate_advancements():
       {"cake": has("trans_cake")})
 
     # ---- flowers
-    flowers = ["pride_blossom", *FLOWERS, "pride_peony", "trans_petals"]
+    flowers = ["pride_blossom", *FLOWERS, *NEW_FLOWERS, "pride_peony", *TALL_FLOWERS, "trans_petals"]
     A("petal_pusher", "goober", "trans_tulip", "Petal Pusher", "Pick a flower of the Trans Realm",
       {"flower": has_any(flowers)})
     A("pastel_bouquet", "petal_pusher", "pride_peony", "Pastel Bouquet", "Collect every flower of the Trans Realm",
       {f: has(f) for f in flowers}, frame="challenge")
+    A("flower_fields", "petal_pusher", "trans_rose", "Stop and Smell the Flowers", "Wander through the Pride Flower Fields",
+      {"fields": in_biome("pride_flower_fields")})
+    A("heart_tree", "flower_fields", "flowering_blush_leaves", "Love Grows on Trees",
+      "Shear some Flowering Blush Leaves from a heart tree", {"leaves": has("flowering_blush_leaves")}, frame="goal")
+    A("star_gazer", "petal_pusher", "star_bloom", "Star Gazer", "Pick a glowing Starbloom", {"star": has("star_bloom")})
 
 
 def generate_sounds():
@@ -1523,7 +1656,9 @@ def main():
     remove_stale()
     generate_blocks()
     generate_vegetation()
+    generate_woods_and_flowers()
     generate_recipes()
+    generate_woods_and_flowers_recipes()
     generate_misc()
     generate_sounds()
     generate_advancements()

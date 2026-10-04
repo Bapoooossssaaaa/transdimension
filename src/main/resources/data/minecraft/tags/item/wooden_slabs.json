@@ -1,6 +1,10 @@
 {
   "replace": false,
   "values": [
-    "transdimension:trans_slab"
+    "transdimension:blush_slab",
+    "transdimension:pearl_slab",
+    "transdimension:sky_slab",
+    "transdimension:trans_slab",
+    "transdimension:twilight_slab"
   ]
 }

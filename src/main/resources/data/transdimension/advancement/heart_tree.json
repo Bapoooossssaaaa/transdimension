@@ -1,0 +1,32 @@
+{
+  "parent": "transdimension:flower_fields",
+  "criteria": {
+    "leaves": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:flowering_blush_leaves"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:flowering_blush_leaves"
+    },
+    "title": {
+      "translate": "advancements.transdimension.heart_tree.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.heart_tree.description"
+    },
+    "frame": "goal"
+  },
+  "requirements": [
+    [
+      "leaves"
+    ]
+  ]
+}

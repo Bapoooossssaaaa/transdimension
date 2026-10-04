@@ -1,6 +1,10 @@
 {
   "replace": false,
   "values": [
-    "transdimension:trans_button"
+    "transdimension:blush_button",
+    "transdimension:pearl_button",
+    "transdimension:sky_button",
+    "transdimension:trans_button",
+    "transdimension:twilight_button"
   ]
 }

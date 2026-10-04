@@ -1,6 +1,10 @@
 {
   "replace": false,
   "values": [
-    "transdimension:trans_fence_gate"
+    "transdimension:blush_fence_gate",
+    "transdimension:pearl_fence_gate",
+    "transdimension:sky_fence_gate",
+    "transdimension:trans_fence_gate",
+    "transdimension:twilight_fence_gate"
   ]
 }

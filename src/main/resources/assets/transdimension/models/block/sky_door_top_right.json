@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/door_top_right",
+  "textures": {
+    "bottom": "transdimension:block/sky_door_bottom",
+    "top": "transdimension:block/sky_door_top"
+  }
+}

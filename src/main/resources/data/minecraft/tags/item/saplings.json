@@ -1,6 +1,10 @@
 {
   "replace": false,
   "values": [
-    "transdimension:trans_sapling"
+    "transdimension:blush_sapling",
+    "transdimension:pearl_sapling",
+    "transdimension:sky_sapling",
+    "transdimension:trans_sapling",
+    "transdimension:twilight_sapling"
   ]
 }

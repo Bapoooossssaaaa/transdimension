@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:pearl_log",
+    "transdimension:pearl_wood",
+    "transdimension:stripped_pearl_log",
+    "transdimension:stripped_pearl_wood"
+  ]
+}

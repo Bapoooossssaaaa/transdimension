@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "transdimension:block/twilight_log_x"
+    },
+    "axis=y": {
+      "model": "transdimension:block/twilight_log_y"
+    },
+    "axis=z": {
+      "model": "transdimension:block/twilight_log_z"
+    }
+  }
+}

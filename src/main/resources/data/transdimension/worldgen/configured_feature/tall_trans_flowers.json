@@ -1,0 +1,42 @@
+{
+  "type": "minecraft:simple_block",
+  "config": {
+    "to_place": {
+      "type": "minecraft:noise_provider",
+      "noise": {
+        "amplitudes": [
+          1.0
+        ],
+        "firstOctave": 0
+      },
+      "scale": 0.03,
+      "seed": 2468,
+      "states": [
+        {
+          "Name": "transdimension:sky_delphinium",
+          "Properties": {
+            "half": "lower"
+          }
+        },
+        {
+          "Name": "transdimension:blush_foxglove",
+          "Properties": {
+            "half": "lower"
+          }
+        },
+        {
+          "Name": "transdimension:pearl_lupine",
+          "Properties": {
+            "half": "lower"
+          }
+        },
+        {
+          "Name": "transdimension:pride_peony",
+          "Properties": {
+            "half": "lower"
+          }
+        }
+      ]
+    }
+  }
+}

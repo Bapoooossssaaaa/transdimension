@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "transdimension:block/star_bloom",
+    "layer1": "transdimension:block/star_bloom_emissive"
+  }
+}

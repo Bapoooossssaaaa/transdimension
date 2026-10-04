@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "planks",
+  "ingredients": [
+    "#transdimension:blush_logs"
+  ],
+  "result": {
+    "count": 4,
+    "id": "transdimension:blush_planks"
+  }
+}

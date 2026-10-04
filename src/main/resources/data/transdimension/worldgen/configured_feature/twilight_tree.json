@@ -73,7 +73,7 @@
     "trunk_provider": {
       "type": "minecraft:simple_state_provider",
       "state": {
-        "Name": "transdimension:trans_log",
+        "Name": "transdimension:twilight_log",
         "Properties": {
           "axis": "y"
         }

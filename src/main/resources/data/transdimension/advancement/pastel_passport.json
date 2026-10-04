@@ -288,6 +288,86 @@
           }
         ]
       }
+    },
+    "pride_flower_fields": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:pride_flower_fields"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "moonlit_meadow": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:moonlit_meadow"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "gumdrop_glade": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:gumdrop_glade"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "pastel_reef": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:pastel_reef"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "blooming_caverns": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:blooming_caverns"
+              }
+            }
+          }
+        ]
+      }
     }
   },
   "display": {
@@ -356,6 +436,21 @@
     ],
     [
       "pastel_lush_caves"
+    ],
+    [
+      "pride_flower_fields"
+    ],
+    [
+      "moonlit_meadow"
+    ],
+    [
+      "gumdrop_glade"
+    ],
+    [
+      "pastel_reef"
+    ],
+    [
+      "blooming_caverns"
     ]
   ]
 }

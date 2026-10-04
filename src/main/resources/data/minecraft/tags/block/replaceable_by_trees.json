@@ -1,10 +1,13 @@
 {
   "replace": false,
   "values": [
+    "transdimension:blush_foxglove",
     "transdimension:large_trans_fern",
     "transdimension:pastel_bush",
+    "transdimension:pearl_lupine",
     "transdimension:pride_peony",
     "transdimension:short_sugar_grass",
+    "transdimension:sky_delphinium",
     "transdimension:tall_sugar_grass",
     "transdimension:tall_trans_grass",
     "transdimension:tall_trans_seagrass",

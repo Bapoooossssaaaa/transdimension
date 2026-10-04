@@ -1,0 +1,37 @@
+{
+  "parent": "transdimension:goober",
+  "criteria": {
+    "reef": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:pastel_reef"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:blush_coral_fan"
+    },
+    "title": {
+      "translate": "advancements.transdimension.pastel_reef.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.pastel_reef.description"
+    }
+  },
+  "requirements": [
+    [
+      "reef"
+    ]
+  ]
+}

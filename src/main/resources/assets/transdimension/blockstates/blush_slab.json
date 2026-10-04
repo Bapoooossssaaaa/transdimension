@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "transdimension:block/blush_slab"
+    },
+    "type=double": {
+      "model": "transdimension:block/blush_planks"
+    },
+    "type=top": {
+      "model": "transdimension:block/blush_slab_top"
+    }
+  }
+}

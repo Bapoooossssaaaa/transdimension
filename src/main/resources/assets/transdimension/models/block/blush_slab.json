@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "transdimension:block/blush_planks",
+    "top": "transdimension:block/blush_planks",
+    "side": "transdimension:block/blush_planks"
+  }
+}

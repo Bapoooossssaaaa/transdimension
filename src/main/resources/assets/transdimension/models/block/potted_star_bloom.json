@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/flower_pot_cross_emissive",
+  "textures": {
+    "cross_emissive": "transdimension:block/star_bloom_emissive",
+    "plant": "transdimension:block/star_bloom"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cross_emissive",
+  "textures": {
+    "cross": "transdimension:block/star_bloom",
+    "cross_emissive": "transdimension:block/star_bloom_emissive"
+  }
+}

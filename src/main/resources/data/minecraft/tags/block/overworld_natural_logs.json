@@ -1,6 +1,10 @@
 {
   "replace": false,
   "values": [
-    "transdimension:trans_log"
+    "transdimension:blush_log",
+    "transdimension:pearl_log",
+    "transdimension:sky_log",
+    "transdimension:trans_log",
+    "transdimension:twilight_log"
   ]
 }

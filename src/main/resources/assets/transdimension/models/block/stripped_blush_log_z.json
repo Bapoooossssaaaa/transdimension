@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column_uv_locked_z",
+  "textures": {
+    "end": "transdimension:block/stripped_blush_log_top",
+    "side": "transdimension:block/stripped_blush_log"
+  }
+}

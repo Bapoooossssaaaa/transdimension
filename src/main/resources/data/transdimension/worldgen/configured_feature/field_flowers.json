@@ -1,0 +1,54 @@
+{
+  "type": "minecraft:simple_block",
+  "config": {
+    "to_place": {
+      "type": "minecraft:noise_provider",
+      "noise": {
+        "amplitudes": [
+          1.0
+        ],
+        "firstOctave": 0
+      },
+      "scale": 0.05,
+      "seed": 1357,
+      "states": [
+        {
+          "Name": "transdimension:trans_rose"
+        },
+        {
+          "Name": "transdimension:blush_carnation"
+        },
+        {
+          "Name": "transdimension:forget_me_not"
+        },
+        {
+          "Name": "transdimension:pearl_snowdrop"
+        },
+        {
+          "Name": "transdimension:trans_tulip"
+        },
+        {
+          "Name": "transdimension:heart_bloom"
+        },
+        {
+          "Name": "transdimension:sky_bell"
+        },
+        {
+          "Name": "transdimension:fairy_bell"
+        },
+        {
+          "Name": "transdimension:pearl_daisy"
+        },
+        {
+          "Name": "transdimension:pride_blossom"
+        },
+        {
+          "Name": "transdimension:flag_lily"
+        },
+        {
+          "Name": "transdimension:trans_orchid"
+        }
+      ]
+    }
+  }
+}

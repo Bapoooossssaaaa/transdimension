@@ -1,6 +1,10 @@
 {
   "replace": false,
   "values": [
-    "transdimension:trans_trapdoor"
+    "transdimension:blush_trapdoor",
+    "transdimension:pearl_trapdoor",
+    "transdimension:sky_trapdoor",
+    "transdimension:trans_trapdoor",
+    "transdimension:twilight_trapdoor"
   ]
 }
