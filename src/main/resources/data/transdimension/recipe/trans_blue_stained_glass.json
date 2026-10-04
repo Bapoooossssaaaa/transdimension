@@ -4,7 +4,7 @@
   "group": "stained_glass",
   "key": {
     "#": "transdimension:trans_glass",
-    "X": "transdimension:trans_crystal"
+    "X": "transdimension:prism_shard"
   },
   "pattern": [
     "###",

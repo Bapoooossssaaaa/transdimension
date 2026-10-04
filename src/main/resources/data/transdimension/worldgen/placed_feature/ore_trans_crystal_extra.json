@@ -1,9 +1,9 @@
 {
-  "feature": "transdimension:ore_trans_crystal",
+  "feature": "transdimension:ore_trans_crystal_small",
   "placement": [
     {
       "type": "minecraft:count",
-      "count": 14
+      "count": 3
     },
     {
       "type": "minecraft:in_square"
@@ -13,10 +13,10 @@
       "height": {
         "type": "minecraft:uniform",
         "max_inclusive": {
-          "absolute": 200
+          "absolute": 48
         },
         "min_inclusive": {
-          "absolute": 0
+          "absolute": -32
         }
       }
     },

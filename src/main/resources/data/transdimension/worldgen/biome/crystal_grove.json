@@ -69,6 +69,7 @@
       "transdimension:trans_ore_copper",
       "transdimension:ore_trans_crystal",
       "transdimension:ore_trans_crystal_deep",
+      "transdimension:ore_trans_crystal_large",
       "transdimension:ore_trans_crystal_extra",
       "minecraft:disk_clay"
     ],

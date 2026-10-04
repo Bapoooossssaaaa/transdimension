@@ -1,12 +1,12 @@
 {
   "parent": "transdimension:trans_crystal",
   "criteria": {
-    "pickaxe": {
+    "block": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
-            "items": "transdimension:trans_pickaxe"
+            "items": "transdimension:trans_crystal_block"
           }
         ]
       }
@@ -14,18 +14,19 @@
   },
   "display": {
     "icon": {
-      "id": "transdimension:trans_pickaxe"
+      "id": "transdimension:trans_crystal_block"
     },
     "title": {
       "translate": "advancements.transdimension.crystal_clear.title"
     },
     "description": {
       "translate": "advancements.transdimension.crystal_clear.description"
-    }
+    },
+    "frame": "goal"
   },
   "requirements": [
     [
-      "pickaxe"
+      "block"
     ]
   ]
 }

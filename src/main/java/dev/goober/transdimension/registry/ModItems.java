@@ -2,7 +2,6 @@ package dev.goober.transdimension.registry;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -14,13 +13,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.Unit;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BoatItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.HoeItem;
@@ -28,17 +25,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.SpawnEggItem;
-import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
-import net.minecraft.world.item.equipment.ArmorMaterial;
-import net.minecraft.world.item.equipment.ArmorType;
-import net.minecraft.world.item.equipment.EquipmentAsset;
-import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -55,59 +46,13 @@ import dev.goober.transdimension.TransDimension;
 import dev.goober.transdimension.item.TransWandItem;
 import dev.goober.transdimension.item.TransWings;
 
-/** Trans Crystal gear, bakery treats, the Silly Cat spawn egg and the creative tab. */
+/** Crystals, bakery treats, spawn eggs, Maddie's gifts, boats and the creative tab. */
 public final class ModItems {
-	// ---------------------------------------------------------------- materials
-	public static final TagKey<Block> INCORRECT_FOR_TRANS_TOOL = TagKey.create(Registries.BLOCK, TransDimension.id("incorrect_for_trans_tool"));
-	public static final TagKey<Item> REPAIRS_TRANS_GEAR = TagKey.create(Registries.ITEM, TransDimension.id("repairs_trans_gear"));
-
-	/** Slightly better than diamond: durability, speed, damage bonus, enchantability. */
-	public static final ToolMaterial TRANS_TOOL_MATERIAL = new ToolMaterial(INCORRECT_FOR_TRANS_TOOL, 1800, 9.0F, 3.5F, 20, REPAIRS_TRANS_GEAR);
-
-	public static final int ARMOR_BASE_DURABILITY = 35;
-	public static final ResourceKey<EquipmentAsset> TRANS_EQUIPMENT_ASSET = ResourceKey.create(EquipmentAssets.ROOT_ID, TransDimension.id("trans_crystal"));
-	public static final ArmorMaterial TRANS_ARMOR_MATERIAL = new ArmorMaterial(
-			ARMOR_BASE_DURABILITY,
-			Map.of(
-					ArmorType.HELMET, 3,
-					ArmorType.CHESTPLATE, 8,
-					ArmorType.LEGGINGS, 6,
-					ArmorType.BOOTS, 3
-			),
-			20,
-			SoundEvents.ARMOR_EQUIP_DIAMOND,
-			2.5F,
-			0.05F,
-			REPAIRS_TRANS_GEAR,
-			TRANS_EQUIPMENT_ASSET
-	);
-
-	// ---------------------------------------------------------------- crystal + gear
+	// ---------------------------------------------------------------- crystals
+	/** A rare gem from trans crystal ore, deep underground. It makes Trans Crystal Pearls, the keys to the Fairy Realm. */
 	public static final Item TRANS_CRYSTAL = register("trans_crystal", Item::new, new Item.Properties());
-
-	public static final Item TRANS_SWORD = register("trans_sword", Item::new,
-			new Item.Properties().sword(TRANS_TOOL_MATERIAL, 3.0F, -2.4F));
-	public static final Item TRANS_PICKAXE = register("trans_pickaxe", Item::new,
-			new Item.Properties().pickaxe(TRANS_TOOL_MATERIAL, 1.0F, -2.8F));
-	public static final Item TRANS_AXE = register("trans_axe",
-			properties -> new AxeItem(TRANS_TOOL_MATERIAL, 5.0F, -3.0F, properties), new Item.Properties());
-	public static final Item TRANS_SHOVEL = register("trans_shovel",
-			properties -> new ShovelItem(TRANS_TOOL_MATERIAL, 1.5F, -3.0F, properties), new Item.Properties());
-	public static final Item TRANS_HOE = register("trans_hoe",
-			properties -> new HoeItem(TRANS_TOOL_MATERIAL, -3.0F, 0.0F, properties), new Item.Properties());
-
-	public static final Item TRANS_HELMET = register("trans_helmet", Item::new, new Item.Properties()
-			.humanoidArmor(TRANS_ARMOR_MATERIAL, ArmorType.HELMET)
-			.durability(ArmorType.HELMET.getDurability(ARMOR_BASE_DURABILITY)));
-	public static final Item TRANS_CHESTPLATE = register("trans_chestplate", Item::new, new Item.Properties()
-			.humanoidArmor(TRANS_ARMOR_MATERIAL, ArmorType.CHESTPLATE)
-			.durability(ArmorType.CHESTPLATE.getDurability(ARMOR_BASE_DURABILITY)));
-	public static final Item TRANS_LEGGINGS = register("trans_leggings", Item::new, new Item.Properties()
-			.humanoidArmor(TRANS_ARMOR_MATERIAL, ArmorType.LEGGINGS)
-			.durability(ArmorType.LEGGINGS.getDurability(ARMOR_BASE_DURABILITY)));
-	public static final Item TRANS_BOOTS = register("trans_boots", Item::new, new Item.Properties()
-			.humanoidArmor(TRANS_ARMOR_MATERIAL, ArmorType.BOOTS)
-			.durability(ArmorType.BOOTS.getDurability(ARMOR_BASE_DURABILITY)));
+	/** Common sparkly shards from prism clusters in the crystal caves and groves; decoration and crafting. */
+	public static final Item PRISM_SHARD = register("prism_shard", Item::new, new Item.Properties());
 
 	// ---------------------------------------------------------------- bakery treats
 	public static final Item TRANS_DONUT = register("trans_donut", Item::new, new Item.Properties().food(

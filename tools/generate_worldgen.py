@@ -287,7 +287,7 @@ def generate_features():
     cf("trans_crystal_spike", {"type": "minecraft:spike", "config": {
         "can_place_on": {"type": "minecraft:matching_blocks", "blocks": [f"{NS}:trans_grass_block", f"{NS}:trans_stone", f"{NS}:trans_sand", f"{NS}:trans_dirt", "minecraft:snow_block"]},
         "can_replace": {"type": "minecraft:matching_block_tag", "tag": "minecraft:ice_spike_replaceable"},
-        "state": state("trans_crystal_block")}})
+        "state": state("pastel_prism")}})
     pf("trans_crystal_spikes", f"{NS}:trans_crystal_spike", [{"type": "minecraft:count", "count": 2}, {"type": "minecraft:in_square"},
                                                              {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"}, {"type": "minecraft:biome"}])
     pf("trans_crystal_spikes_rare", f"{NS}:trans_crystal_spike", [{"type": "minecraft:rarity_filter", "chance": 6}, {"type": "minecraft:in_square"},
@@ -315,10 +315,10 @@ def generate_features():
         {"type": "minecraft:random_offset", "xz_spread": 0, "y_spread": -1}, {"type": "minecraft:biome"}])
     cf("trans_crystal_geode", {"type": "minecraft:geode", "config": {
         "blocks": {
-            "alternate_inner_layer_provider": simple(state("trans_crystal_ore")),
+            "alternate_inner_layer_provider": simple(state("pastel_prism")),
             "cannot_replace": "#minecraft:features_cannot_replace",
             "filling_provider": simple(state("minecraft:air")),
-            "inner_layer_provider": simple(state("trans_crystal_block")),
+            "inner_layer_provider": simple(state("pastel_prism")),
             "inner_placements": [state("trans_crystal_cluster", facing="up", waterlogged=False)],
             "invalid_blocks": "#minecraft:geode_invalid_blocks",
             "middle_layer_provider": simple(state("trans_stone_bricks")),
@@ -333,18 +333,26 @@ def generate_features():
     pf("trans_crystal_geode", f"{NS}:trans_crystal_geode", geode(28, 30))
     pf("trans_crystal_geode_common", f"{NS}:trans_crystal_geode", geode(6, 50))
 
-    # ---- ores: trans crystal veins in trans stone and trans deepslate
-    cf("ore_trans_crystal", {"type": "minecraft:ore", "config": {"discard_chance_on_air_exposure": 0.0, "size": 7, "targets": [
-        {"state": state("trans_crystal_ore"), "target": {"predicate_type": "minecraft:tag_match", "tag": f"{NS}:trans_stone_ore_replaceables"}},
-        {"state": state("trans_deepslate_crystal_ore"),
-         "target": {"predicate_type": "minecraft:tag_match", "tag": f"{NS}:trans_deepslate_ore_replaceables"}}]}})
+    # ---- ores: trans crystals are rare, deep and mostly small, rarer than diamonds (vanilla's diamond placements,
+    # scaled down). Crystal Groves and Pastel Peaks get a few small veins higher up. Geodes and spikes are pastel prism.
+    def crystal_ore(name, size, discard):
+        cf(name, {"type": "minecraft:ore", "config": {"discard_chance_on_air_exposure": discard, "size": size, "targets": [
+            {"state": state("trans_crystal_ore"), "target": {"predicate_type": "minecraft:tag_match", "tag": f"{NS}:trans_stone_ore_replaceables"}},
+            {"state": state("trans_deepslate_crystal_ore"),
+             "target": {"predicate_type": "minecraft:tag_match", "tag": f"{NS}:trans_deepslate_ore_replaceables"}}]}})
+    crystal_ore("ore_trans_crystal_small", 3, 0.5)
+    crystal_ore("ore_trans_crystal_buried", 6, 1.0)
+    crystal_ore("ore_trans_crystal_large", 9, 0.7)
     generate_vanilla_ores()
-    ore = lambda count, lo, hi, shape="trapezoid": [{"type": "minecraft:count", "count": count}, {"type": "minecraft:in_square"},
-                                                   {"type": "minecraft:height_range", "height": {"type": f"minecraft:{shape}", "max_inclusive": hi, "min_inclusive": lo}},
-                                                   {"type": "minecraft:biome"}]
-    pf("ore_trans_crystal", f"{NS}:ore_trans_crystal", ore(10, {"absolute": -16}, {"absolute": 128}))
-    pf("ore_trans_crystal_deep", f"{NS}:ore_trans_crystal", ore(6, {"above_bottom": -80}, {"above_bottom": 80}))
-    pf("ore_trans_crystal_extra", f"{NS}:ore_trans_crystal", ore(14, {"absolute": 0}, {"absolute": 200}, "uniform"))
+    deep = {"type": "minecraft:height_range", "height": {"type": "minecraft:trapezoid", "max_inclusive": {"above_bottom": 80},
+                                                         "min_inclusive": {"above_bottom": -80}}}
+    pf("ore_trans_crystal", f"{NS}:ore_trans_crystal_small", [{"type": "minecraft:count", "count": 4}, {"type": "minecraft:in_square"}, deep, {"type": "minecraft:biome"}])
+    pf("ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_buried", [{"type": "minecraft:count", "count": 2}, {"type": "minecraft:in_square"}, deep, {"type": "minecraft:biome"}])
+    pf("ore_trans_crystal_large", f"{NS}:ore_trans_crystal_large", [{"type": "minecraft:rarity_filter", "chance": 14}, {"type": "minecraft:in_square"}, deep, {"type": "minecraft:biome"}])
+    pf("ore_trans_crystal_extra", f"{NS}:ore_trans_crystal_small", [
+        {"type": "minecraft:count", "count": 3}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "max_inclusive": {"absolute": 48}, "min_inclusive": {"absolute": -32}}},
+        {"type": "minecraft:biome"}])
 
     # ---- rocks
     cf("trans_boulder", {"type": "minecraft:block_blob", "config": {
@@ -420,7 +428,7 @@ OCEAN_MONSTERS = [spawn("minecraft:drowned", 100, 1, 1)] + [m for m in MONSTERS 
 BATS = [spawn("minecraft:bat", 10, 8, 8)]
 
 UNDERGROUND = ["minecraft:monster_room", "minecraft:monster_room_deep"]
-ORES = TRANS_ORES + [f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_deep", "minecraft:disk_clay"]
+ORES = TRANS_ORES + [f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_large", "minecraft:disk_clay"]
 SPRINGS = ["minecraft:spring_water", "minecraft:spring_lava"]
 CAVE_DECOR = ["minecraft:glow_lichen"]
 
@@ -622,7 +630,8 @@ FEATURE_RANK = [
     "minecraft:monster_room", "minecraft:monster_room_deep",
     # ores
     *TRANS_ORES, f"{NS}:trans_ore_copper_large", f"{NS}:trans_ore_emerald", f"{NS}:trans_ore_clay",
-    f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_extra", "minecraft:disk_clay", "minecraft:disk_sand",
+    f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_large", f"{NS}:ore_trans_crystal_extra",
+    "minecraft:disk_clay", "minecraft:disk_sand",
     # underground decoration
     "minecraft:glow_lichen", f"{NS}:trans_crystal_clusters_cave_floor", f"{NS}:trans_crystal_clusters_cave_ceiling",
     # springs

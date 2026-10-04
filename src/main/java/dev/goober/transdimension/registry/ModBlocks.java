@@ -198,7 +198,7 @@ public final class ModBlocks {
 	public static final Block TRANS_EMERALD_ORE = ore("trans_emerald_ore", UniformInt.of(3, 7), Blocks.EMERALD_ORE);
 	public static final Block TRANS_DEEPSLATE_EMERALD_ORE = ore("trans_deepslate_emerald_ore", UniformInt.of(3, 7), Blocks.DEEPSLATE_EMERALD_ORE);
 
-	// ---------------------------------------------------------------- crystals
+	// ---------------------------------------------------------------- crystals (rare, deep ore) and prisms (common decoration)
 	public static final Block TRANS_CRYSTAL_ORE = register("trans_crystal_ore",
 			properties -> new DropExperienceBlock(UniformInt.of(3, 7), properties),
 			BlockBehaviour.Properties.ofFullCopy(Blocks.DIAMOND_ORE).lightLevel(state -> 3));
@@ -207,10 +207,16 @@ public final class ModBlocks {
 			BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_DIAMOND_ORE).lightLevel(state -> 3));
 	public static final Block TRANS_CRYSTAL_BLOCK = register("trans_crystal_block", Block::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK).strength(5.0F, 6.0F).requiresCorrectToolForDrops().lightLevel(state -> 6));
-	/** A glowing crystal cluster that grows on any face, like amethyst clusters (height 7, width 10). */
+	/**
+	 * A glowing prism cluster that grows on any face, like amethyst clusters (height 7, width 10). It drops prism shards;
+	 * the id is older than the name.
+	 */
 	public static final Block TRANS_CRYSTAL_CLUSTER = register("trans_crystal_cluster",
 			properties -> new AmethystClusterBlock(7.0F, 10.0F, properties),
 			BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_CLUSTER).lightLevel(state -> 7));
+	/** Glowing pastel crystal rock lining the realm's geodes and crystal spikes; four prism shards make one. */
+	public static final Block PASTEL_PRISM = register("pastel_prism", Block::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK).lightLevel(state -> 5));
 
 	// ---------------------------------------------------------------- trans wood family
 	public static final Block TRANS_LOG = register("trans_log", RotatedPillarBlock::new,

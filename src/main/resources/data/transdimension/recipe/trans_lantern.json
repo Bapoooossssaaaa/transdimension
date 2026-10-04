@@ -3,15 +3,16 @@
   "category": "misc",
   "key": {
     "#": "minecraft:torch",
-    "X": "transdimension:trans_crystal"
+    "X": "minecraft:iron_nugget",
+    "S": "transdimension:prism_shard"
   },
   "pattern": [
-    "XXX",
+    "XSX",
     "X#X",
     "XXX"
   ],
   "result": {
-    "count": 2,
+    "count": 1,
     "id": "transdimension:trans_lantern"
   }
 }

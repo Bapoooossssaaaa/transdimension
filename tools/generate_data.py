@@ -143,10 +143,10 @@ def loot_cluster(name, drop):
         {"type": "minecraft:alternatives", "children": [
             {"type": "minecraft:item", "conditions": [{"condition": "minecraft:match_tool", "predicate": {
                 "items": "#minecraft:cluster_max_harvestables"}}], "functions": [
-                {"count": 2.0, "function": "minecraft:set_count"},
+                {"count": 4.0, "function": "minecraft:set_count"},
                 {"enchantment": "minecraft:fortune", "formula": "minecraft:ore_drops", "function": "minecraft:apply_bonus"}],
              "name": rid(drop)},
-            {"type": "minecraft:item", "functions": [{"count": 1.0, "function": "minecraft:set_count"},
+            {"type": "minecraft:item", "functions": [{"count": 2.0, "function": "minecraft:set_count"},
                                                      {"function": "minecraft:explosion_decay"}], "name": rid(drop)}]}]}],
         "rolls": 1.0}])
 
@@ -638,14 +638,17 @@ def generate_blocks():
     tag("block", "needs_iron_tool", "trans_crystal_ore", "trans_deepslate_crystal_ore", "trans_crystal_block")
     cube("trans_crystal_block", "Block of Trans Crystal")
     tag("block", "crystal_sound_blocks", "trans_crystal_block")
+    # Pastel prism: the common, glowing crystal rock of geodes and crystal spikes (its clusters drop prism shards).
+    cube("pastel_prism", "Pastel Prism")
+    tag("block", "crystal_sound_blocks", "pastel_prism")
     blockstate("trans_crystal_cluster", from_template("amethyst_cluster", "amethyst_cluster", "trans_crystal_cluster"))
     model("trans_crystal_cluster", {"parent": "minecraft:block/cross", "textures": {"cross": block_tex("trans_crystal_cluster")}})
     model("trans_crystal_cluster", {"parent": "minecraft:item/generated", "textures": {"layer0": block_tex("trans_crystal_cluster")},
                                     "display": {"head": {"translation": [0, 14, -5]}}}, kind="item")
     item_def("trans_crystal_cluster", f"{NS}:item/trans_crystal_cluster")
-    name("trans_crystal_cluster", "Trans Crystal Cluster")
+    name("trans_crystal_cluster", "Prism Cluster")
     mine("trans_crystal_cluster", "pickaxe")
-    loot("trans_crystal_cluster", loot_cluster("trans_crystal_cluster", "trans_crystal"))
+    loot("trans_crystal_cluster", loot_cluster("trans_crystal_cluster", "prism_shard"))
 
     # ---- trans wood family
     log("trans_log", "Trans Log", "trans_log", "trans_log_top")
@@ -984,7 +987,7 @@ def generate_recipes():
     R("trans_stained_glass", shaped("trans_stained_glass", ["PBW", "B#B", "WBP"],
                                     {"#": "trans_glass", "P": "minecraft:pink_dye", "B": "minecraft:light_blue_dye", "W": "minecraft:white_dye"}, 5, group="stained_glass"))
     R("trans_pink_stained_glass", shaped("trans_pink_stained_glass", ["###", "#X#", "###"], {"#": "trans_glass", "X": "transdimension:pride_blossom"}, 8, group="stained_glass"))
-    R("trans_blue_stained_glass", shaped("trans_blue_stained_glass", ["###", "#X#", "###"], {"#": "trans_glass", "X": "transdimension:trans_crystal"}, 8, group="stained_glass"))
+    R("trans_blue_stained_glass", shaped("trans_blue_stained_glass", ["###", "#X#", "###"], {"#": "trans_glass", "X": "transdimension:prism_shard"}, 8, group="stained_glass"))
     for glass_block in ("trans_glass", "trans_stained_glass", "trans_pink_stained_glass", "trans_blue_stained_glass"):
         R(f"{glass_block}_pane", shaped(f"{glass_block}_pane", ["###", "###"], {"#": glass_block}, 16, category="misc", group="stained_glass_pane"))
     R("trans_wool", shaped("trans_wool", ["L", "P", "W"], {"L": "minecraft:light_blue_wool", "P": "minecraft:pink_wool", "W": "minecraft:white_wool"}, 3, group="wool"))
@@ -992,7 +995,8 @@ def generate_recipes():
     R("trans_boat", shaped("trans_boat", ["# #", "###"], {"#": "trans_planks"}, category="misc", group="boat"))
     R("trans_chest_boat", shapeless("trans_chest_boat", ["minecraft:chest", "trans_boat"], category="misc", group="chest_boat"))
     R("trans_bed", shaped("trans_bed", ["###", "XXX"], {"#": "trans_wool", "X": "#minecraft:planks"}, category="misc", group="bed"))
-    R("trans_lantern", shaped("trans_lantern", ["XXX", "X#X", "XXX"], {"#": "minecraft:torch", "X": "transdimension:trans_crystal"}, 2, category="misc"))
+    R("trans_lantern", shaped("trans_lantern", ["XSX", "X#X", "XXX"], {"#": "minecraft:torch", "X": "minecraft:iron_nugget",
+                                                                     "S": "transdimension:prism_shard"}, 1, category="misc"))
     # deepslate: cobbled -> polished -> bricks -> tiles, like vanilla
     R("trans_deepslate", smelting("trans_deepslate", "cobbled_trans_deepslate"))
     R("polished_trans_deepslate", shaped("polished_trans_deepslate", ["##", "##"], {"#": "cobbled_trans_deepslate"}, 4))
@@ -1033,7 +1037,8 @@ def generate_recipes():
                                   ("heart_bloom", "pink_dye", 2), ("pride_peony", "pink_dye", 2), ("trans_petals", "pink_dye", 1)):
         R(f"{dye}_from_{flower_id}", shapeless(f"minecraft:{dye}", [flower_id], count, category="misc", group=dye))
     R("trans_moss_carpet", shaped("trans_moss_carpet", ["##"], {"#": "trans_moss_block"}, 3, category="misc", group="carpet"))
-    R("trans_sapling_from_blossoms", shapeless("trans_sapling", ["minecraft:cherry_sapling", "transdimension:pride_blossom", "transdimension:trans_crystal"], 1, category="misc"))
+    R("trans_sapling_from_blossoms", shapeless("trans_sapling", ["minecraft:cherry_sapling", "transdimension:pride_blossom", "transdimension:prism_shard"], 1, category="misc"))
+    R("pastel_prism", shaped("pastel_prism", ["##", "##"], {"#": "prism_shard"}, 1))
 
 
 # ============================================================================================ other tags, names, sounds
@@ -1070,20 +1075,7 @@ def generate_misc():
     tag("item", "flowers", "pride_blossom")
     tag("block", "bee_attractive", "pride_blossom")
 
-    # tools and armor
-    tag("item", "swords", "trans_sword")
-    tag("item", "pickaxes", "trans_pickaxe")
-    tag("item", "axes", "trans_axe")
-    tag("item", "shovels", "trans_shovel")
-    tag("item", "hoes", "trans_hoe")
-    tag("item", "head_armor", "trans_helmet")
-    tag("item", "chest_armor", "trans_chestplate")
-    tag("item", "leg_armor", "trans_leggings")
-    tag("item", "foot_armor", "trans_boots")
-
     # the mod's own tags
-    tag("item", "repairs_trans_gear", "trans_crystal", ns=NS)
-    tag("block", "incorrect_for_trans_tool", "#minecraft:incorrect_for_diamond_tool", ns=NS)
     # The Pride Oven is a job site villagers can claim.
     tag("point_of_interest_type", "acquirable_job_site", "transdimension:pride_oven")
 
@@ -1104,6 +1096,10 @@ def generate_misc():
         NAMES[f"painting.{NS}.{painting}.title"] = title
         NAMES[f"painting.{NS}.{painting}.author"] = author
         tag("painting_variant", "placeable", painting)
+
+    # crystals: the rare gem has its own sprite; prism shards drop from prism clusters
+    simple_item("trans_crystal", "Trans Crystal")
+    simple_item("prism_shard", "Prism Shard")
 
     # Maddie and her gifts
     simple_item("trans_wings", "Trans Wings")
@@ -1126,10 +1122,7 @@ def generate_misc():
 
     # Names that aren't blocks.
     items = {
-        "trans_crystal": "Trans Crystal", "trans_sword": "Trans Crystal Sword", "trans_pickaxe": "Trans Crystal Pickaxe",
-        "trans_axe": "Trans Crystal Axe", "trans_shovel": "Trans Crystal Shovel", "trans_hoe": "Trans Crystal Hoe",
-        "trans_helmet": "Trans Crystal Helmet", "trans_chestplate": "Trans Crystal Chestplate",
-        "trans_leggings": "Trans Crystal Leggings", "trans_boots": "Trans Crystal Boots",
+        "trans_crystal": "Trans Crystal",
         "trans_donut": "Trans Donut", "trans_cookie": "Sprinkle Cookie", "trans_cupcake": "Pride Cupcake",
         "trans_macaron": "Trans Macaron", "trans_boba": "Trans Boba Tea", "silly_cat_spawn_egg": "Silly Cat Spawn Egg",
     }
@@ -1280,13 +1273,9 @@ def generate_advancements():
     A("flag_fluff", "goober", "trans_wool", "Flag Fluff", "Shear a trans flag sheep in the realm", {"wool": has("trans_wool")})
 
     # ---- crystals and gear
-    A("trans_crystal", "goober", "trans_crystal", "Shiny!", "Mine a Trans Crystal", {"crystal": has("trans_crystal")})
-    A("crystal_clear", "trans_crystal", "trans_pickaxe", "Crystal Clear", "Make a Trans Crystal Pickaxe",
-      {"pickaxe": has("trans_pickaxe")})
-    A("armored_in_pride", "crystal_clear", "trans_chestplate", "Armored in Pride", "Wear a full set of Trans Crystal armor",
-      {"armor": player_is(equipment={"head": {"items": rid("trans_helmet")}, "chest": {"items": rid("trans_chestplate")},
-                                     "legs": {"items": rid("trans_leggings")}, "feet": {"items": rid("trans_boots")}})},
-      frame="goal")
+    A("trans_crystal", "goober", "trans_crystal", "Shiny!", "Find a rare Trans Crystal deep underground", {"crystal": has("trans_crystal")})
+    A("crystal_clear", "trans_crystal", "trans_crystal_block", "Crystal Clear", "Collect nine Trans Crystals and make a Block of Trans Crystal",
+      {"block": has("trans_crystal_block")}, frame="goal")
     A("deep_pastel", "trans_crystal", "trans_deepslate", "Deep Pastel", "Dig down to Trans Deepslate",
       {"deepslate": has("cobbled_trans_deepslate")})
 
@@ -1363,7 +1352,15 @@ def remove_stale():
         os.path.join(ASSETS, "models", "item", "pride_blossom.json"),
         os.path.join(DATA, "minecraft", "tags", "fluid", "water.json"),
         os.path.join(DATA, NS, "recipe", "glass_from_trans_sand.json"),
+        # trans crystal gear (crystals are a rare ore now, round 4)
+        os.path.join(ASSETS, "equipment", "trans_crystal.json"),
+        os.path.join(DATA, NS, "tags", "block", "incorrect_for_trans_tool.json"),
+        os.path.join(DATA, NS, "tags", "item", "repairs_trans_gear.json"),
     ]
+    for gear in ("trans_sword", "trans_pickaxe", "trans_axe", "trans_shovel", "trans_hoe", "trans_helmet", "trans_chestplate",
+                 "trans_leggings", "trans_boots"):
+        stale += [os.path.join(ASSETS, "items", f"{gear}.json"), os.path.join(ASSETS, "models", "item", f"{gear}.json"),
+                  os.path.join(DATA, NS, "recipe", f"{gear}.json"), os.path.join(ASSETS, "textures", "item", f"{gear}.png")]
     for p in stale:
         if os.path.exists(p):
             os.remove(p)

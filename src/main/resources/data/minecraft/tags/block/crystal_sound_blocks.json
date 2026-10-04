@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "transdimension:pastel_prism",
     "transdimension:trans_crystal_block"
   ]
 }
