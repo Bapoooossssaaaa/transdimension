@@ -22,6 +22,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BoatItem;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.EnderpearlItem;
 import net.minecraft.world.item.HoeItem;
@@ -180,6 +181,10 @@ public final class ModItems {
 	// ---------------------------------------------------------------- the Fairy Realm
 	public static final Item TRANS_FAIRY_SPAWN_EGG = register("trans_fairy_spawn_egg", SpawnEggItem::new,
 			new Item.Properties().spawnEgg(ModEntities.TRANS_FAIRY).rarity(Rarity.EPIC));
+
+	// ---------------------------------------------------------------- pink lava
+	public static final Item PINK_LAVA_BUCKET = register("pink_lava_bucket", properties -> new BucketItem(ModFluids.PINK_LAVA, properties),
+			new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1));
 
 	// ---------------------------------------------------------------- wild fairies
 	/** A fairy caught in a glass bottle: hold it and it saves you from death once, like a totem. */

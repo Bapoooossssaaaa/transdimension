@@ -32,6 +32,7 @@ import net.minecraft.world.level.block.BaseCoralPlantBlock;
 import net.minecraft.world.level.block.BaseCoralWallFanBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.BonemealableFeaturePlacerBlock;
 import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.ButtonBlock;
@@ -478,6 +479,9 @@ public final class ModBlocks {
 			BlockBehaviour.Properties.ofFullCopy(Blocks.END_PORTAL_FRAME).mapColor(MapColor.COLOR_PINK).sound(SoundType.AMETHYST)
 					.lightLevel(state -> state.getValue(FairyPortalFrameBlock.PEARL) ? 7 : 1));
 	/** The shimmering surface of an open Fairy Portal. */
+	/** The Trans Realm's lava: pink, otherwise vanilla lava (see PinkLavaFluid). */
+	public static final Block PINK_LAVA = registerWithoutItem("pink_lava", properties -> new LiquidBlock(ModFluids.PINK_LAVA, properties) {
+	}, BlockBehaviour.Properties.ofFullCopy(Blocks.LAVA));
 	public static final Block FAIRY_PORTAL = registerWithoutItem("fairy_portal", FairyPortalBlock::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.END_PORTAL).mapColor(MapColor.COLOR_PINK));
 	/** The crystal altar in the middle of the fairy arena: offer it a crystal pearl for a rematch. Unbreakable. */

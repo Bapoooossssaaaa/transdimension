@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:multiface_growth",
+  "config": {
+    "block": "minecraft:glow_lichen",
+    "can_place_on_ceiling": true,
+    "can_place_on_wall": true,
+    "search_range": 20,
+    "can_be_placed_on": [
+      "transdimension:trans_stone",
+      "transdimension:trans_deepslate",
+      "transdimension:trans_granite",
+      "transdimension:trans_diorite",
+      "transdimension:trans_andesite",
+      "transdimension:trans_cobblestone",
+      "transdimension:cobbled_trans_deepslate"
+    ]
+  }
+}

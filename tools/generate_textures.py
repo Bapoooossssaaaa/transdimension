@@ -54,7 +54,8 @@ R_LAVENDER = [hexc(c) for c in ("2F2652", "4E4382", "7468B4", "A096D8", "C9C1EF"
 R_STONE = [hexc(c) for c in ("4E484C", "6A6368", "888085", "A69EA3", "C3BCC0", "DDD7DA")]
 R_MORTAR = [hexc(c) for c in ("3A3539", "524C50", "6C6569", "878084", "A29B9F", "BDB7BA")]
 # Deep slate: cool blue-grey, darker than stone.
-R_DEEPSLATE = [hexc(c) for c in ("15181F", "21262F", "2F3542", "404858", "535D6F", "687487")]
+# Deep slate: twilight indigo with mauve-pink light (it used to be plain blue-grey, which didn't look trans).
+R_DEEPSLATE = [hexc(c) for c in ("161A33", "232A4C", "373862", "54477A", "7A5C8E", "A684AE")]
 R_GRANITE = [hexc(c) for c in ("6A3846", "8E5165", "B07186", "CF94A7", "E6B8C6", "F6DCE4")]
 R_DIORITE = [hexc(c) for c in ("8A8E99", "AAB0BB", "C8CED7", "E0E5EB", "F2F5F8", "FFFFFF")]
 R_ANDESITE = [hexc(c) for c in ("3C4758", "536176", "6B7C93", "8697AE", "A2B3C8", "C0CEDF")]
@@ -397,14 +398,32 @@ def bricks_from(img, seed=11, accent=None, base=None, mortar=None, tint=0.3):
 
 
 # ============================================================================================ deepslate
-def trans_deepslate(name="deepslate"):
+# Natural deepslate is layered: every four rows the slate leans faintly pink, then blue, like sediment in the flag's colours.
+R_DEEPSLATE_PINK = mix_ramp(R_DEEPSLATE, [hexc(c) for c in ("2A1730", "40223F", "5A3155", "7A4670", "9E6690", "C493B4")], 0.4)
+R_DEEPSLATE_BLUE = mix_ramp(R_DEEPSLATE, [hexc(c) for c in ("141C36", "1F2C52", "2D4170", "435C8E", "6683AE", "93AED0")], 0.4)
+
+
+def layered(img, ramps, period=4):
+    """Gradient-maps rows of an image with ramps in turn, `period` rows each (strata)."""
+    lo, hi = lum_range(img)
+    out = img.copy()
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))
+        t = (lum(px) - lo) / (hi - lo)
+        out.putpixel((x, y), (*sample(ramps[(y // period) % len(ramps)], t), px[3]))
+    return out
+
+
+def trans_deepslate(name="deepslate", strata=False):
+    """Twilight slate; natural and cobbled deepslate show faint pink and blue strata."""
     base = vblock(name)
-    return glints(gradient_map(base, R_DEEPSLATE), base, R_DEEPSLATE, top=0.985, bottom=-1.0, chance=0.4, pink_mix=0.3)
+    img = layered(base, [R_DEEPSLATE, R_DEEPSLATE_PINK, R_DEEPSLATE, R_DEEPSLATE_BLUE]) if strata else gradient_map(base, R_DEEPSLATE)
+    return glints(img, base, R_DEEPSLATE, top=0.985, bottom=-1.0, chance=0.4, pink_mix=0.3)
 
 
 def deepslate_bricks(name, seed):
     """Dark slate bricks or tiles; each one leans faintly pink or blue."""
-    deep_mortar = [hexc(c) for c in ("0B0D12", "13161C", "1C2029", "272C37", "333A47", "414959")]
+    deep_mortar = [hexc(c) for c in ("0C0A16", "141123", "1D1930", "27223F", "332C4F", "413862")]
     return bricks_from(vblock(name), seed=seed, base=R_DEEPSLATE, mortar=deep_mortar, tint=0.16)
 
 
@@ -456,16 +475,20 @@ def trans_gravel():
 
 # ============================================================================================ ores
 def ore_on(base_new, base_vanilla, ore_vanilla, ramp):
-    """Moves the ore of a vanilla ore texture onto a new background. Coloured ore pixels keep their
-    vanilla colours (so ores stay recognisable); grey pixels that differ from the vanilla background
-    (the ore's outlines and shading) are re-shaded with the new rock's palette."""
+    """Moves the ore of a vanilla ore texture onto a new background, so ores blend with the rock round them.
+
+    Vanilla redraws the stone a little differently on every ore texture, so pixels close to the vanilla background
+    count as background and take the new rock's own pixel. Clearly coloured pixels (the ore itself) keep their vanilla
+    colours; the rest of the ore (outlines, shading, coal) is re-shaded with the new rock's palette. Deepslate's darkest
+    pixels are faintly blue, so "coloured" means real colour (a spread of over 30 between channels), not saturation."""
     out = base_new.copy()
     lo, hi = lum_range(base_vanilla)
     for p in pixels(ore_vanilla):
         px = ore_vanilla.getpixel(p)
-        if px[:3] == base_vanilla.getpixel(p)[:3]:
+        bg = base_vanilla.getpixel(p)
+        if max(abs(px[i] - bg[i]) for i in range(3)) < 24:
             continue
-        if hsv(px)[1] > 0.14:
+        if max(px[:3]) - min(px[:3]) > 30:
             out.putpixel(p, px)
         else:
             c = sample(ramp, (lum(px) - lo) / (hi - lo))
@@ -477,7 +500,7 @@ ORES = ("coal", "iron", "copper", "gold", "redstone", "lapis", "diamond", "emera
 
 
 def trans_ores():
-    stone_new, deep_new = trans_stone(), trans_deepslate()
+    stone_new, deep_new = trans_stone(), trans_deepslate(strata=True)
     stone_v, deep_v = vblock("stone"), vblock("deepslate")
     out = {}
     for ore in ORES:
@@ -692,7 +715,7 @@ def trans_deepslate_crystal_ore():
     ore = vblock("deepslate_diamond_ore")
     deep_v = vblock("deepslate")
     gem = lambda p, px: hsv(px)[1] > 0.25
-    out = ore_on(trans_deepslate(), deep_v, ore, R_DEEPSLATE)
+    out = ore_on(trans_deepslate(strata=True), deep_v, ore, R_DEEPSLATE)
     labels, count = components(ore, gem)
     ramps = [[hexc("1F5288"), hexc("3EA5E6"), BLUE, hexc("E8F9FF")], [hexc("8E3E60"), hexc("E07D9C"), PINK, hexc("FFF0F4")]]
     lo, hi = lum_range(ore, gem)
@@ -795,6 +818,25 @@ def animated(img, ramp, lo_t=0.0, hi_t=1.0):
         frame = gradient_map(img.crop((0, y, w, y + w)), ramp, lo=lo, hi=hi, curve=lambda t: lo_t + (hi_t - lo_t) * t)
         out.paste(frame, (0, y))
     return out
+
+
+# ============================================================================================ pink lava
+# The Trans Realm's lava: vanilla's lava animation re-coloured from deep magenta through hot pink to a pale glow.
+R_PINK_LAVA = [hexc(c) for c in ("6E0C40", "A4195B", "D8407F", "F26F9F", "FAA6C2", "FFE4EE")]
+
+
+def pink_lava(name):
+    """(image, mcmeta) for pink_lava_still / pink_lava_flow, from vanilla's lava_still / lava_flow."""
+    with _zip(BLOCK_ZIP).open(f"base block textures/{name}.png.mcmeta") as f:
+        meta = json.load(f)
+    return animated(vblock(name), R_PINK_LAVA, 0.0, 1.0), meta
+
+
+def pink_lava_bucket():
+    """The lava bucket with pink lava in it."""
+    img = vitem("lava_bucket")
+    hot = lambda p, px: px[3] > 0 and max(px[:3]) - min(px[:3]) > 60
+    return gradient_map(img, R_PINK_LAVA, mask=hot, curve=lambda t: 0.2 + 0.8 * t)
 
 
 def pastel_bush():
@@ -3665,8 +3707,8 @@ def main():
         "trans_sandstone_bottom": sandstone("sandstone_bottom"), "cut_trans_sandstone": sandstone("cut_sandstone"),
         "chiseled_trans_sandstone": chiseled_trans_sandstone(),
         # deepslate
-        "trans_deepslate": trans_deepslate(), "trans_deepslate_top": trans_deepslate("deepslate_top"),
-        "cobbled_trans_deepslate": trans_deepslate("cobbled_deepslate"),
+        "trans_deepslate": trans_deepslate(strata=True), "trans_deepslate_top": trans_deepslate("deepslate_top"),
+        "cobbled_trans_deepslate": trans_deepslate("cobbled_deepslate", strata=True),
         "polished_trans_deepslate": trans_deepslate("polished_deepslate"),
         "trans_deepslate_bricks": deepslate_bricks("deepslate_bricks", 3),
         "cracked_trans_deepslate_bricks": deepslate_bricks("cracked_deepslate_bricks", 3),
@@ -3737,9 +3779,13 @@ def main():
         save_mcmeta(f"block/{name}.png", GLASS_META)
     save_mcmeta("block/trans_lantern.png", {"animation": {"frametime": 8}})
     save_mcmeta("block/pride_oven_front.png", {"animation": {"interpolate": False, "frametime": 4}})
+    for vanilla, ours in (("lava_still", "pink_lava_still"), ("lava_flow", "pink_lava_flow")):
+        img, meta = pink_lava(vanilla)
+        save(img, f"block/{ours}.png")
+        save_mcmeta(f"block/{ours}.png", meta)
 
     items = {
-        "trans_crystal": trans_crystal_item(), "prism_shard": prism_shard_item(),
+        "trans_crystal": trans_crystal_item(), "prism_shard": prism_shard_item(), "pink_lava_bucket": pink_lava_bucket(),
         "trans_sword": trans_tool("sword"), "trans_pickaxe": trans_tool("pickaxe"), "trans_axe": trans_tool("axe"),
         "trans_shovel": trans_tool("shovel"), "trans_hoe": trans_tool("hoe"),
         "trans_helmet": trans_armor_item("helmet"), "trans_chestplate": trans_armor_item("chestplate"),

@@ -16,6 +16,7 @@ import dev.goober.transdimension.registry.ModBlocks;
 import dev.goober.transdimension.registry.ModEffects;
 import dev.goober.transdimension.registry.ModEntities;
 import dev.goober.transdimension.registry.ModFeatures;
+import dev.goober.transdimension.registry.ModFluids;
 import dev.goober.transdimension.registry.ModItems;
 import dev.goober.transdimension.registry.ModSounds;
 import dev.goober.transdimension.registry.ModVillagers;
@@ -36,10 +37,11 @@ public class TransDimension implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		// Order matters: sounds -> blocks (the oven uses a sound) -> block entities (need their blocks) -> entities ->
+		// Order matters: sounds -> fluids (pink lava's block needs its fluid) -> blocks (the oven uses a sound) -> block entities (need their blocks) -> entities ->
 		// items (the spawn egg and boats need their entity types, the creative tab needs every block) -> effects ->
 		// villagers (the oven POI).
 		ModSounds.initialize();
+		ModFluids.initialize();
 		ModBlocks.initialize();
 		ModBlockEntities.initialize();
 		ModFeatures.initialize();

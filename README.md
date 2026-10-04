@@ -8,7 +8,9 @@ A Fabric mod for **Minecraft Java 26.2** that adds the **Trans Realm**, a whole 
 
 ### The Trans Realm
 
-Overworld-style hills, caves, rivers and oceans with twenty-three biomes. The ground is trans grass and dirt over soft grey trans stone, with trans deepslate further down, and rose granite, pearl diorite, sky andesite and trans gravel mixed in. All the vanilla ores are there too (coal, iron, copper, gold, redstone, lapis, diamond and emerald, in stone and deepslate versions), so you can live in the realm.
+Overworld-style hills, caves, rivers and oceans with twenty-three biomes. The ground is trans grass and dirt over soft grey trans stone, with twilight-purple trans deepslate further down (layered with faint pink and blue strata), and rose granite, pearl diorite, sky andesite and trans gravel mixed in. All the vanilla ores are there too (coal, iron, copper, gold, redstone, lapis, diamond and emerald, in stone and deepslate versions, set into the realm's own rock), so you can live in the realm.
+
+The realm's **lava is pink**: pink lava burns, sets fires and makes stone and obsidian just like lava, and you can carry it in a bucket. Its caves have glow lichen, and deep down, mossy patches with glowing Starblooms and glow berry vines. Its **dungeons** are built of trans cobblestone and stone bricks over mossy floors, with a monster spawner, unlit pink and blue candles, and chests of dungeon loot with the realm's treasures mixed in.
 
 | Biome | What it's like |
 | --- | --- |
@@ -26,7 +28,7 @@ Overworld-style hills, caves, rivers and oceans with twenty-three biomes. The gr
 | Pastel Peaks | Snow-capped mountains with lilac grass. |
 | Trans Beach, Trans Ocean, Deep Trans Ocean | Blue water, dolphins and drowned. |
 | Pastel River | Rivers of pink water. |
-| Crystal Caves | Deep caves lined with trans crystal clusters and geodes. |
+| Crystal Caves | Rare, deep caves lined with prism clusters and geodes (the only caves with crystals in them). |
 | Pastel Lush Caves | Pink and blue moss, cave vines, spore blossoms, the realm's flowers, and trans-coloured axolotls. |
 | Pride Flower Fields | Rolling fields of every flower in the realm, tall flowers and blossom hedges, with **heart trees**: blushwood trees whose crowns are big puffy hearts. |
 | Moonlit Meadow | Pale silver grass under drifting fireflies, glowing Starblooms, Forget-Me-Nots and frost flowers. |

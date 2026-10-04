@@ -8,11 +8,13 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.object.boat.BoatModel;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.FluidModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.entity.BoatRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -24,6 +26,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderingRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockColorRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRenderEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
@@ -59,6 +62,7 @@ import dev.goober.transdimension.network.WingFlapPayload;
 import dev.goober.transdimension.registry.ModBlockEntities;
 import dev.goober.transdimension.registry.ModBlocks;
 import dev.goober.transdimension.registry.ModEntities;
+import dev.goober.transdimension.registry.ModFluids;
 
 public class TransDimensionClient implements ClientModInitializer {
 	/** Trans pink, used for trans grass outside of a world (and as the fallback colour). */
@@ -87,6 +91,9 @@ public class TransDimensionClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		TransRecolor.captureRenderThread();
 
+		// Pink lava: vanilla lava's look, in pink.
+		FluidRenderingRegistry.register(ModFluids.PINK_LAVA, ModFluids.FLOWING_PINK_LAVA, new FluidModel.Unbaked(
+				new Material(TransDimension.id("block/pink_lava_still")), new Material(TransDimension.id("block/pink_lava_flow")), null, null));
 		// Trans grass and ferns take the biome's grass colour, like the grass block they grow on.
 		BlockColorRegistry.register(List.of(TRANS_GRASS_TINT), ModBlocks.TRANS_GRASS_BLOCK, ModBlocks.TRANS_SHORT_GRASS,
 				ModBlocks.TALL_TRANS_GRASS, ModBlocks.TRANS_FERN, ModBlocks.LARGE_TRANS_FERN, ModBlocks.POTTED_TRANS_FERN);

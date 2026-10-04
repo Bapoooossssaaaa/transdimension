@@ -37,8 +37,8 @@
       "transdimension:trans_crystal_geode_common"
     ],
     [
-      "minecraft:monster_room",
-      "minecraft:monster_room_deep"
+      "transdimension:trans_dungeon",
+      "transdimension:trans_dungeon_deep"
     ],
     [],
     [],
@@ -75,13 +75,15 @@
       "minecraft:disk_clay"
     ],
     [
-      "minecraft:glow_lichen",
+      "transdimension:trans_glow_lichen",
+      "transdimension:deep_cave_moss",
+      "transdimension:deep_cave_ceiling_moss",
       "transdimension:trans_crystal_clusters_cave_floor",
       "transdimension:trans_crystal_clusters_cave_ceiling"
     ],
     [
-      "minecraft:spring_water",
-      "minecraft:spring_lava"
+      "transdimension:spring_trans_water",
+      "transdimension:spring_pink_lava"
     ],
     [],
     []

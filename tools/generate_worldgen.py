@@ -257,6 +257,33 @@ def generate_features():
                 {"type": "minecraft:random_offset", "xz_spread": 0, "y_spread": y_spread}, {"type": "minecraft:biome"}]
 
     pf("trans_lush_caves_vegetation", f"{NS}:trans_moss_patch", cave_scan(125, "down", 1))
+    cf("trans_glow_lichen", {"type": "minecraft:multiface_growth", "config": {
+        "block": "minecraft:glow_lichen", "can_place_on_ceiling": True, "can_place_on_wall": True, "search_range": 20,
+        "can_be_placed_on": [f"{NS}:{b}" for b in ("trans_stone", "trans_deepslate", "trans_granite", "trans_diorite", "trans_andesite",
+                                                   "trans_cobblestone", "cobbled_trans_deepslate")]}})
+    pf("trans_glow_lichen", f"{NS}:trans_glow_lichen", [
+        {"type": "minecraft:count", "count": {"type": "minecraft:uniform", "min_inclusive": 104, "max_inclusive": 157}},
+        {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "min_inclusive": {"above_bottom": 0},
+                                                       "max_inclusive": {"absolute": 256}}},
+        {"type": "minecraft:in_square"},
+        {"type": "minecraft:surface_relative_threshold_filter", "heightmap": "OCEAN_FLOOR_WG", "max_inclusive": -13},
+        {"type": "minecraft:biome"}])
+    cf("deep_cave_vegetation", {"type": "minecraft:simple_block", "config": {"to_place": {"type": "minecraft:weighted_state_provider", "entries": [
+        {"data": state("trans_short_grass"), "weight": 5}, {"data": state("trans_moss_carpet"), "weight": 3},
+        {"data": state("star_bloom"), "weight": 2}, {"data": state("trans_fern"), "weight": 1}]}}})
+    cf("deep_cave_moss", moss_patch("floor", 1, f"{NS}:deep_cave_vegetation", 0.55,
+                                    {"type": "minecraft:uniform", "max_inclusive": 4, "min_inclusive": 2}))
+    cf("deep_cave_ceiling_moss", moss_patch("ceiling", 1, "minecraft:cave_vine_in_moss", 0.12,
+                                            {"type": "minecraft:uniform", "max_inclusive": 4, "min_inclusive": 2}))
+
+    def deep_scan(count, direction, y_spread):
+        """Like cave_scan, but only in the deepslate levels (below y 0)."""
+        scan = cave_scan(count, direction, y_spread)
+        scan[2] = {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "min_inclusive": {"above_bottom": 8},
+                                                                 "max_inclusive": {"absolute": 0}}}
+        return scan
+    pf("deep_cave_moss", f"{NS}:deep_cave_moss", deep_scan(5, "down", 1))
+    pf("deep_cave_ceiling_moss", f"{NS}:deep_cave_ceiling_moss", deep_scan(3, "up", -1))
     pf("trans_lush_caves_ceiling_vegetation", f"{NS}:trans_moss_patch_ceiling", cave_scan(125, "up", -1))
 
     # ---- flowers and ground cover
@@ -470,14 +497,14 @@ def generate_features():
     cf("trans_crystal_cluster", {"type": "minecraft:simple_block", "config": {"to_place": simple(state("trans_crystal_cluster", facing="up", waterlogged=False))}})
     pf("trans_crystal_clusters_surface", f"{NS}:trans_crystal_cluster", [{"type": "minecraft:count", "count": 2}] + blossoms + patch(12, xz=4, y=1))
     pf("trans_crystal_clusters_cave_floor", f"{NS}:trans_crystal_cluster", [
-        {"type": "minecraft:count", "count": 90}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:count", "count": 45}, {"type": "minecraft:in_square"},
         {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "max_inclusive": {"absolute": 60}, "min_inclusive": {"above_bottom": 4}}},
         {"type": "minecraft:environment_scan", "allowed_search_condition": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"},
          "direction_of_search": "down", "max_steps": 12, "target_condition": {"type": "minecraft:solid"}},
         {"type": "minecraft:random_offset", "xz_spread": 0, "y_spread": 1}, {"type": "minecraft:biome"}])
     cf("trans_crystal_cluster_hanging", {"type": "minecraft:simple_block", "config": {"to_place": simple(state("trans_crystal_cluster", facing="down", waterlogged=False))}})
     pf("trans_crystal_clusters_cave_ceiling", f"{NS}:trans_crystal_cluster_hanging", [
-        {"type": "minecraft:count", "count": 60}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:count", "count": 30}, {"type": "minecraft:in_square"},
         {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "max_inclusive": {"absolute": 60}, "min_inclusive": {"above_bottom": 4}}},
         {"type": "minecraft:environment_scan", "allowed_search_condition": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"},
          "direction_of_search": "up", "max_steps": 12, "target_condition": {"type": "minecraft:solid"}},
@@ -500,7 +527,7 @@ def generate_features():
                                  {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "max_inclusive": {"absolute": top},
                                                                                "min_inclusive": {"above_bottom": 6}}}, {"type": "minecraft:biome"}]
     pf("trans_crystal_geode", f"{NS}:trans_crystal_geode", geode(28, 30))
-    pf("trans_crystal_geode_common", f"{NS}:trans_crystal_geode", geode(6, 50))
+    pf("trans_crystal_geode_common", f"{NS}:trans_crystal_geode", geode(10, 50))
 
     # ---- ores: trans crystals are rare, deep and mostly small, rarer than diamonds (vanilla's diamond placements,
     # scaled down). Crystal Groves and Pastel Peaks get a few small veins higher up. Geodes and spikes are pastel prism.
@@ -529,6 +556,34 @@ def generate_features():
         "state": state("trans_cobblestone")}})
     pf("trans_boulders", f"{NS}:trans_boulder", [{"type": "minecraft:rarity_filter", "chance": 3}, {"type": "minecraft:in_square"},
                                                  {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"}, {"type": "minecraft:biome"}])
+    # Springs of water and pink lava in the realm's rock (vanilla's placements).
+    spring_rock = [f"{NS}:{b}" for b in ("trans_stone", "trans_deepslate", "trans_granite", "trans_diorite", "trans_andesite", "trans_dirt")]
+    cf("spring_trans_water", {"type": "minecraft:spring_feature", "config": {
+        "state": {"Name": "minecraft:water", "Properties": {"falling": "true"}}, "valid_blocks": spring_rock}})
+    pf("spring_trans_water", f"{NS}:spring_trans_water", [
+        {"type": "minecraft:count", "count": 25}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "min_inclusive": {"above_bottom": 0},
+                                                       "max_inclusive": {"absolute": 192}}},
+        {"type": "minecraft:biome"}])
+    cf("spring_pink_lava", {"type": "minecraft:spring_feature", "config": {
+        "state": {"Name": f"{NS}:pink_lava", "Properties": {"falling": "true"}}, "valid_blocks": spring_rock}})
+    pf("spring_pink_lava", f"{NS}:spring_pink_lava", [
+        {"type": "minecraft:count", "count": 20}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:height_range", "height": {"type": "minecraft:very_biased_to_bottom", "inner": 8,
+                                                       "min_inclusive": {"above_bottom": 0}, "max_inclusive": {"below_top": 8}}},
+        {"type": "minecraft:biome"}])
+    # Trans dungeons (TransDungeonFeature): vanilla's monster room placements, made of trans stone.
+    cf("trans_dungeon", {"type": f"{NS}:trans_dungeon", "config": {}})
+    pf("trans_dungeon", f"{NS}:trans_dungeon", [
+        {"type": "minecraft:count", "count": 10}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "min_inclusive": {"absolute": 0},
+                                                       "max_inclusive": {"below_top": 0}}},
+        {"type": "minecraft:biome"}])
+    pf("trans_dungeon_deep", f"{NS}:trans_dungeon", [
+        {"type": "minecraft:count", "count": 4}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "min_inclusive": {"above_bottom": 6},
+                                                       "max_inclusive": {"absolute": -1}}},
+        {"type": "minecraft:biome"}])
     # The Fairy Realm's floating islands (FairyIslandFeature keeps them away from the arena in the middle).
     cf("fairy_island", {"type": f"{NS}:fairy_island", "config": {}})
     pf("fairy_islands", f"{NS}:fairy_island", [
@@ -612,10 +667,14 @@ MONSTERS = [spawn("minecraft:spider", 100, 4, 4), spawn("minecraft:zombie", 95, 
 OCEAN_MONSTERS = [spawn("minecraft:drowned", 100, 1, 1)] + [m for m in MONSTERS if m["type"] != "minecraft:slime"]
 BATS = [spawn("minecraft:bat", 10, 8, 8)]
 
-UNDERGROUND = ["minecraft:monster_room", "minecraft:monster_room_deep"]
+# Trans dungeons (TransDungeonFeature) instead of vanilla's cobblestone monster rooms, placed the same way.
+UNDERGROUND = [f"{NS}:trans_dungeon", f"{NS}:trans_dungeon_deep"]
 ORES = TRANS_ORES + [f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_large", "minecraft:disk_clay"]
-SPRINGS = ["minecraft:spring_water", "minecraft:spring_lava"]
-CAVE_DECOR = ["minecraft:glow_lichen"]
+# The realm's own springs: vanilla's only break out of vanilla stone, and the realm's lava is pink.
+SPRINGS = [f"{NS}:spring_trans_water", f"{NS}:spring_pink_lava"]
+# Every cave: glow lichen on trans rock (vanilla's only grows on vanilla stone), and deep down, now and then, a patch of
+# moss with glowing Starblooms on the floor or glow berry vines hanging from the ceiling.
+CAVE_DECOR = [f"{NS}:trans_glow_lichen", f"{NS}:deep_cave_moss", f"{NS}:deep_cave_ceiling_moss"]
 
 
 def biome(name, *, temperature, downfall, grass, foliage, water, water_fog, sky, fog, music_sound,
@@ -860,15 +919,16 @@ def generate_biomes():
 FEATURE_RANK = [
     # structures & local modifications
     "minecraft:fossil_upper", f"{NS}:trans_crystal_geode_common", f"{NS}:trans_crystal_geode",
-    "minecraft:monster_room", "minecraft:monster_room_deep",
+    f"{NS}:trans_dungeon", f"{NS}:trans_dungeon_deep",
     # ores
     *TRANS_ORES, f"{NS}:trans_ore_copper_large", f"{NS}:trans_ore_emerald", f"{NS}:trans_ore_clay",
     f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_large", f"{NS}:ore_trans_crystal_extra",
     "minecraft:disk_clay", "minecraft:disk_sand",
     # underground decoration
-    "minecraft:glow_lichen", f"{NS}:trans_crystal_clusters_cave_floor", f"{NS}:trans_crystal_clusters_cave_ceiling",
+    f"{NS}:trans_glow_lichen", f"{NS}:deep_cave_moss", f"{NS}:deep_cave_ceiling_moss",
+    f"{NS}:trans_crystal_clusters_cave_floor", f"{NS}:trans_crystal_clusters_cave_ceiling",
     # springs
-    "minecraft:spring_water", "minecraft:spring_lava",
+    f"{NS}:spring_trans_water", f"{NS}:spring_pink_lava",
     # vegetation: big things first, then flowers, grass and small decorations
     f"{NS}:trans_crystal_spikes", f"{NS}:frosted_ice_spikes", f"{NS}:trans_crystal_spikes_rare",
     f"{NS}:trees_trans_meadow", f"{NS}:trees_blossom_forest", f"{NS}:trees_heartwood_grove", f"{NS}:trees_crystal_grove",
@@ -1103,8 +1163,9 @@ def generate_dimension():
         for lo, hi in merge_cells(by_biome[name]):
             rng = [(bands[a][lo[a]][0], bands[a][hi[a]][1]) for a in range(5)]
             entries.append(entry(name, rng[1], rng[2], rng[0], rng[3], rng[4]))
-    # Cave biomes deep under the wetter, more inland parts of the realm: crystal caves, and lush caves where it's wettest.
-    entries.append(entry("crystal_caves", full, (0.3, 0.65), (0.0, 1.0), full, full, depth=[0.2, 0.9]))
+    # Cave biomes deep under the wetter, more inland parts of the realm: crystal caves (only a narrow, deep band, so they're
+    # a find rather than every cave), and lush caves where it's wettest.
+    entries.append(entry("crystal_caves", full, (0.45, 0.65), (0.0, 1.0), full, full, depth=[0.45, 0.9]))
     entries.append(entry("pastel_lush_caves", full, (0.65, 1.0), (0.0, 1.0), full, full, depth=[0.2, 0.9]))
     # Blooming caverns under the drier middle of the realm.
     entries.append(entry("blooming_caverns", full, (-0.1, 0.3), (0.0, 1.0), full, full, depth=[0.2, 0.9]))

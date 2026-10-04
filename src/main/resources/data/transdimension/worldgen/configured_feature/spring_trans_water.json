@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:spring_feature",
+  "config": {
+    "state": {
+      "Name": "minecraft:water",
+      "Properties": {
+        "falling": "true"
+      }
+    },
+    "valid_blocks": [
+      "transdimension:trans_stone",
+      "transdimension:trans_deepslate",
+      "transdimension:trans_granite",
+      "transdimension:trans_diorite",
+      "transdimension:trans_andesite",
+      "transdimension:trans_dirt"
+    ]
+  }
+}

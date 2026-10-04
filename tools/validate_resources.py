@@ -196,8 +196,8 @@ for i in ITEMS:
         err(f"item {i}: no name in en_us.json")
 
 # ------------------------------------------------------------------ data
-# These have no loot table (Java says so): the cake, the plush marker, and the unbreakable Fairy Realm blocks.
-for b in BLOCKS - {"trans_cake", "plush_spot", "fairy_portal_frame", "fairy_portal", "fairy_altar"}:
+# These have no loot table (Java says so): the cake, the plush marker, the unbreakable Fairy Realm blocks and pink lava.
+for b in BLOCKS - {"trans_cake", "plush_spot", "fairy_portal_frame", "fairy_portal", "fairy_altar", "pink_lava"}:
     if not os.path.exists(os.path.join(DATA, NS, "loot_table", "blocks", b + ".json")):
         err(f"block {b}: no loot table")
 
@@ -342,8 +342,18 @@ def block_props(ident):
     return VANILLA_BLOCKS.get(path, [None])[0]
 
 
+# Fluid states (a spring feature's "state") only have "falling".
+FLUID_STATE_PROPS = {"falling": ["true", "false"]}
+
+
 def check_states(obj, where):
     if isinstance(obj, dict):
+        if obj.get("type") == "minecraft:spring_feature" and isinstance(obj.get("config", {}).get("state"), dict):
+            fluid = obj["config"]["state"]
+            for k, v in fluid.get("Properties", {}).items():
+                if v not in FLUID_STATE_PROPS.get(k, []):
+                    err(f"{where}: fluid {fluid.get('Name')} has no property {k}={v}")
+            obj = {k: (dict(v, state=None) if k == "config" else v) for k, v in obj.items()}
         if "Name" in obj and isinstance(obj["Name"], str):
             ident = obj["Name"]
             if not block_exists(ident):

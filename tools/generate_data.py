@@ -1371,6 +1371,38 @@ def generate_creatures():
          "entries": [{"type": "minecraft:item", "name": "minecraft:bone_meal"}], "rolls": 1.0}])
     entity_loot("trans_enderman", [{"entries": [counted("trans_pearl", 0, 1)], "rolls": 1.0}])
     entity_loot("pastel_slime", [{"entries": [counted("pastel_gel", 0, 2)], "rolls": 1.0}])
+    # Pink lava: the realm's lava (PinkLavaFluid). Its block only needs a particle texture; it counts as lava by tag.
+    blockstate("pink_lava", {"variants": {"": {"model": f"{NS}:block/pink_lava"}}})
+    model("pink_lava", {"textures": {"particle": block_tex("pink_lava_still")}})
+    name("pink_lava", "Pink Lava")
+    simple_item("pink_lava_bucket", "Pink Lava Bucket")
+    tag("fluid", "lava", "pink_lava", "flowing_pink_lava")
+
+    # Trans dungeons (TransDungeonFeature): vanilla's dungeon loot with the realm's treasures mixed in.
+    def entry(item, weight, lo=1, hi=1, enchant=False):
+        e = {"type": "minecraft:item", "name": rid(item), "weight": weight}
+        functions = []
+        if hi > 1:
+            functions.append({"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": float(lo), "max": float(hi)}})
+        if enchant:
+            functions.append({"function": "minecraft:enchant_randomly"})
+        if functions:
+            e["functions"] = functions
+        return e
+    write(os.path.join(DATA, NS, "loot_table", "chests", "trans_dungeon.json"), {"type": "minecraft:chest", "pools": [
+        {"rolls": {"type": "minecraft:uniform", "min": 1.0, "max": 3.0}, "entries": [
+            entry("minecraft:saddle", 20), entry("minecraft:golden_apple", 15), entry("minecraft:enchanted_golden_apple", 2),
+            entry("minecraft:name_tag", 20), entry("minecraft:music_disc_cat", 10), entry("minecraft:iron_horse_armor", 12),
+            entry("minecraft:golden_horse_armor", 8), entry("minecraft:diamond_horse_armor", 4), entry("minecraft:book", 10, enchant=True),
+            entry("trans_crystal", 6), entry("trans_pearl", 10, 1, 2), entry("bottled_fairy", 2)]},
+        {"rolls": {"type": "minecraft:uniform", "min": 1.0, "max": 4.0}, "entries": [
+            entry("minecraft:iron_ingot", 10, 1, 4), entry("minecraft:gold_ingot", 5, 1, 4), entry("minecraft:bread", 20),
+            entry("gumdrop", 15, 2, 5), entry("prism_shard", 15, 2, 6), entry("minecraft:redstone", 15, 1, 4),
+            entry("minecraft:coal", 15, 1, 4), entry("star_bloom", 5, 1, 2)]},
+        {"rolls": 3.0, "entries": [entry("minecraft:bone", 10, 1, 8), entry("minecraft:gunpowder", 10, 1, 8),
+                                   entry("minecraft:rotten_flesh", 10, 1, 8), entry("minecraft:string", 10, 1, 8)]}],
+        "random_sequence": f"{NS}:chests/trans_dungeon"})
+
     # Fairies are much nicer met than fought (they give gifts), but they do leave some glitter behind.
     entity_loot("fairy", [{"entries": [counted("minecraft:glowstone_dust", 1, 2)], "rolls": 1.0},
                           {"conditions": [{"chance": 0.25, "condition": "minecraft:random_chance"}],

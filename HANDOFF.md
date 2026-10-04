@@ -110,7 +110,7 @@ The compiler has checked every round-4 API (see the status above). Only the mixi
 
 ## Unverified APIs (round 5)
 
-Written after round 4 compiled, not yet compiled themselves.
+Written after round 4 compiled, not yet compiled themselves. Mixins: `NoiseBasedChunkGeneratorMixin` joins `EnderManMixin` in `transdimension.mixins.json`.
 
 | Where | API | If it doesn't compile |
 | --- | --- | --- |
@@ -119,6 +119,10 @@ Written after round 4 compiled, not yet compiled themselves.
 | `Fairy` | `PathfinderMob`, `Mob.createMobAttributes()`, `Mob.checkMobSpawnRules`, `EntityGetter#getNearestPlayer(Entity, double)`, `Mth.rotLerp`, `Inventory#add`, `spawnAtLocation(ServerLevel, ItemStack)` (confirmed by NeoForge's Fox patch), `getSoundVolume()` | |
 | `ModItems.BOTTLED_FAIRY` | `DataComponents.DEATH_PROTECTION` (confirmed) with `DeathProtection.TOTEM_OF_UNDYING` | Build the totem's effects by hand: `new DeathProtection(List.of(...))` as vanilla's totem does. |
 | `FairyRenderer` | `LivingEntityRenderer#scale(S, PoseStack)`, `EntityRenderer#getBlockLightLevel(T, BlockPos)` | Drop either override: the fairy is just smaller, or lit by the world instead of glowing. |
+| `TransDungeonFeature` | `RandomizableContainer.setBlockEntityLootTable(level, random, pos, key)`, `SpawnerBlockEntity#setEntityId(EntityType, RandomSource)`, `BlockTags.FEATURES_CANNOT_REPLACE`, `getMinY()` (confirmed) | It is vanilla's `MonsterRoomFeature` with other blocks: copy whatever that class does in 26.2. |
+| `PinkLavaFluid`, `ModFluids` | extends `LavaFluid`, overriding `getFlowing`/`getSource`/`getBucket`/`createLegacyBlock`/`isSame`; inner `Flowing`/`Source` exactly like Fabric's 26.2 test fluids (`fabric-rendering-fluids-v1` testmod); `new LiquidBlock(fluid, properties) {}`; `BucketItem(Fluid, Properties)`, `Properties#craftRemainder` | If `LavaFluid` can't be extended, extend `FlowingFluid` like the Fabric test fluids (pink lava then won't start fires). |
+| client fluid model | `FluidRenderingRegistry.register(still, flowing, new FluidModel.Unbaked(new Material(id), new Material(id), null, null))` (from Fabric's 26.2 test mod) | |
+| `NoiseBasedChunkGeneratorMixin` | `@Inject` at RETURN of the static `createFluidPicker(NoiseGeneratorSettings)`; `Aquifer.FluidStatus` is a record (1.21.2 primer) | `require = 0`: worst case the deep lava (below y -54) stays orange. |
 
 ## Unverified APIs (round 3)
 
