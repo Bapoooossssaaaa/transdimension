@@ -32,7 +32,7 @@ Overworld-style hills, caves, rivers and oceans with eighteen biomes. The ground
 - **Flowers.** Vanilla's flowers are replaced in the realm by its own: Trans Tulips, Pearl Daisies, Sky Bells, Flag Lilies, Lavender Puffs, Trans Orchids, Heart Blooms, the tall Pride Peony, Trans Petals and Pride Blossoms. All of them make dye and can be potted.
 - **Water** is vanilla water recoloured per biome (blue seas, pink rivers, lavender crystal pools).
 - **Sky.** Its own day/night cycle: trans blue skies, pink fog, pink-and-blue sunrises and sunsets, and brighter stars at night.
-- **Clouds.** Heart-shaped, and they drift through the flag's colours in order: blue, pink, white, pink, blue. Normal clouds come back when you leave.
+- **Clouds.** Heart-shaped, and they drift through the flag's exact colours in order: blue, pink, white, pink, blue. Normal clouds come back when you leave.
 - **Retextured mobs.** Every mob in the realm is redrawn in pinks, blues and whites (the creeper and sheep kept their earlier looks), and sheep grow trans-flag wool. Shear them for **trans wool**.
 
 ### Maddie and the Egg House
@@ -97,7 +97,7 @@ Some tips:
 - Villages spawn in **Trans Meadows**, **Frosted Fields** and **Sugar Dunes**. `/locate structure transdimension:trans_village` finds the nearest one.
 - Crystal ore appears in trans stone from deep underground up to y≈128.
 - Everything is in the **Trans Dimension** creative tab, including a Maddie spawn egg.
-- Playing with **BSL Shaders**? `extras/BSL_Trans_Realm.txt` is a pastel trans preset that keeps the heart clouds. The instructions are at the top of the file.
+- Playing with **BSL Shaders**? `extras/BSL_Trans_Realm.txt` is a trans preset: heart clouds in flag colours, the realm's own sky and fog, biome-coloured water, pink sunsets and lamplight. The instructions are at the top of the file.
 
 ## Building from source
 
