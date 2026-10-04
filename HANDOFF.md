@@ -6,7 +6,7 @@ State of the mod for whoever picks it up next (person or AI). The README covers 
 
 - Target: Minecraft Java **26.2**, Fabric Loader 0.19.5, Fabric API 0.161.0+26.2, Java 25. Mod id `transdimension`, package `dev.goober.transdimension`.
 - **Rounds 1 and 2 compiled and loaded.** The owner ran them on 26.2 next to Sodium, Iris and Xaero's maps. The first run hung on "Preparing for world creation" because the sky timeline repeated vanilla's time markers; commit 2e490ee fixed that.
-- **Round 3 hasn't been compiled.** The cloud environment can't download Gradle, Fabric's maven, Mojang's game files or a JDK 25 (see "Building in the cloud"). Every API was checked by hand against Fabric API's source, the fabric-docs reference mod for 26.2, the NeoForge 26.x porting primers and vanilla 26.2 data from misode/mcmeta. The names that couldn't be confirmed are listed under "Unverified APIs" with what to try instead.
+- **Round 3: the main source set compiles; the client source set may still have errors** (the owner builds locally and pastes them; fixes so far: `ChunkPos#pack`, a Fabric attachment for Maddie's gift flag, no `knockback` call, no `Options#hideGui`). Nothing in round 3 has been play-tested. The cloud environment can't download Gradle, Fabric's maven, Mojang's game files or a JDK 25 (see "Building in the cloud"). Every API was checked by hand against Fabric API's source, the fabric-docs reference mod for 26.2, the NeoForge 26.x porting primers and vanilla 26.2 data from misode/mcmeta. The names that couldn't be confirmed are listed under "Unverified APIs" with what to try instead.
 - `python3 tools/validate_resources.py <mcmeta-summary>/registries/data.json` passes with 0 errors. That run covers resources and data, not Java.
 
 ## Round 3 at a glance
@@ -48,7 +48,7 @@ The wings are an equippable chest item with the `glider` component and no equipm
 
 ### Clouds
 
-Since 1.21.6 the cloud renderer only takes shapes from `clouds.png`; colours come from the `minecraft:visual/cloud_color` attribute. So the hearts keep coming from `HeartClouds` and the colours from the `trans_clouds` timeline, which multiplies the realm's white base colour through blue, pink, white and pink over five minutes. The day timeline still dims it at night.
+Since 1.21.6 the cloud renderer only takes shapes from `clouds.png`; colours come from the `minecraft:visual/cloud_color` attribute. So the hearts keep coming from `HeartClouds` and the colours from the `trans_clouds` timeline, which multiplies the realm's white base colour through the flag's exact blue (`#5BCEFA`), pink (`#F5A9B8`), white and pink over five minutes. Paler tints washed out under shader packs. `extras/BSL_Trans_Realm.txt` is a BSL preset that turns off BSL's own clouds so the hearts show; its option names are from memory, not checked against BSL's source. The day timeline still dims it at night.
 
 ## Generators
 
