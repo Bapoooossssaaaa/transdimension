@@ -53,6 +53,14 @@ State of the mod for whoever picks it up next (person or AI). The README covers 
 - **The boss.** `entity/TransFairy` is a `Monster` that flies by setting its own velocity (`travel` is overridden) and runs a small state machine in `customServerAiStep`: hover (orbit around her home), volley (`TransMagicBolt`s), swoop, spikes (`entity/FairyCrystalSpike`, like evoker fangs), summon (trans endermen) and starfall, with three phases by health. The synced `ACTION` drives the model's poses. On death `FairyRealm.onFairyDefeated` opens the portal home; her loot table drops the Fairy Jar. The `fairy_altar` re-summons her for a crystal pearl.
 - **Rendering.** `TransFairyModel` has two layer definitions with the same parts: the solid body and a glow layer (wings and wand star) that `TransFairyGlowLayer` draws translucent and full bright. The crystal spike and the jar's light (a block entity renderer, `client/block/FairyJarRenderer`) are drawn full bright too.
 
+### How the camps work
+
+`generate_camps.py` reads 26.3's abandoned camp templates (the cherry grove version: 10 tents, 45 shared campsites and 4 cherry grove ones, fetched from misode/mcmeta's `26.3-data` branch into `tools/vanilla_extra/structures/abandoned_camp/`). 26.3 writes palettes as `id`/`properties` instead of `Name`/`Properties`; the script rewrites them in 26.2's format with data version 4903. Three things don't exist in 26.2: white wool stairs (our light blue, pink and white wool stairs, chosen by row so the tents are flag-striped), straw beds (trans beds) and cushion entities (our cushion blocks, one block above where the entity sat; their 16 colours fold into three). The loot tables are 26.3's with its camp and treasure maps swapped for trans items. A camp is a tent (the start pool) joined to one campsite; the tents' tree jigsaws grow `trans_cherry_tree_checked` or `trans_tree_bees_checked`. Jigsaw pieces are placed with a known shape, so fence and wall connections come from the templates and beds keep `heart=none`.
+
+### How sitting works
+
+`FurnitureBlock` takes an optional seat height (pixels). Using a seat with an empty hand calls `entity/Seat.sit`: it spawns an invisible `Seat` entity on the seat's surface and the player rides it (one per block). The seat discards itself as soon as nobody rides it or the block under it stops being a seat. Players sit with their hips 0.6 above their feet (the player's vehicle attachment), so the seat entity goes exactly at the surface.
+
 ### How the plushes work
 
 Village houses carry an invisible `plush_spot` block (a corner of the room, facing in; `generate_villages.py` puts one in 22 of the 36 house pieces). It has a ticking block entity. On its first tick the server looks up the trans village whose piece it sits in, then checks the realm level's `PlushLedger` (a persistent Fabric attachment). If that village has no plush yet, the spot turns into one, choosing among the cats handed out least so far, and the village is recorded. Otherwise the spot turns into air. So every village gets exactly one plush, in whichever house loads first, and the first nine villages give nine different cats. The ledger stores indexes into `ModBlocks.PLUSHES`: only ever append to that list.
@@ -89,7 +97,8 @@ Run from the repository root (needs `pip install pillow nbtlib`), in this order:
 4. `python3 tools/generate_villages.py`: everything under `structure/village/trans`, `worldgen/template_pool/village/trans`, the processor lists, the village structure and structure set, the village biome tag and `#minecraft:village`.
 5. `python3 tools/generate_egg_house.py`: the island template, its pool, structure, structure set, biome tag, map tag, `chests/egg_house` and the map pools (Egg House and Fairy Sanctum maps) in `chests/trans_house`.
 6. `python3 tools/generate_fairy_realm.py`: the Fairy Sanctum and arena island templates, the sanctum's structure, pool, structure set, processor list, tags and `chests/fairy_sanctum`.
-7. `python3 tools/validate_resources.py /path/to/mcmeta-summary/registries/data.json`: cross-checks all of the above.
+7. `python3 tools/generate_camps.py`: the trans camp (see "How the camps work"): `structure/trans_camp`, `worldgen/template_pool/trans_camp`, the structure, structure set, biome tag and `chests/trans_camp_{common,secret,barrel}`.
+8. `python3 tools/validate_resources.py /path/to/mcmeta-summary/registries/data.json`: cross-checks all of the above.
 
 Hand-made files the scripts don't touch: the crystal tools' and armor's item definitions, item models and recipes, `equipment/trans_crystal.json`, the cake models and blockstate, `chests/trans_bakery`, most of `chests/trans_house`, and the baker trades and trade sets.
 
@@ -124,6 +133,10 @@ Written after round 4 compiled, not yet compiled themselves. Mixins: `NoiseBased
 | client fluid model | `FluidRenderingRegistry.register(still, flowing, new FluidModel.Unbaked(new Material(id), new Material(id), null, null))` (from Fabric's 26.2 test mod) | |
 | `ModBlocks.TRANS_SEA_PICKLE` | `SeaPickleBlock::new` (a public `(Properties)` constructor) | Subclass it: `properties -> new SeaPickleBlock(properties) {}`. |
 | `NoiseBasedChunkGeneratorMixin` | `@Inject` at RETURN of the static `createFluidPicker(NoiseGeneratorSettings)`; `Aquifer.FluidStatus` is a record (1.21.2 primer) | `require = 0`: worst case the deep lava (below y -54) stays orange. |
+| `TransDungeonFeature`, `ModBlocks` wool stairs | 26.2 keeps dyed blocks in `ColorCollection`s: `Blocks.DYED_CANDLE.pink()`/`.lightBlue()` (the field name comes from Fabric's `BlockItemIds.DYED_CANDLE`), `Blocks.WOOL.lightBlue()` | `.pick(DyeColor.PINK)` works on any collection; if `DYED_CANDLE` is wrong, find the candle collection in `Blocks`. |
+| `Seat`, `SeatRenderer` | a plain `Entity` like `FairyCrystalSpike`; `player.startRiding(Entity)` (final since 1.21.9), `isVehicle()`, `ejectPassengers()`, `EntityType.Builder.sized(0.001F, 0.001F)`; the renderer is `EntityRenderer<Seat, EntityRenderState>` returning `new EntityRenderState()` | Register vanilla's `NoopRenderer::new` instead of `SeatRenderer`. |
+| `FurnitureBlock`, `TransLampBlock` | `useWithoutItem(BlockState, Level, BlockPos, Player, BlockHitResult)` (confirmed by NeoForge's NoteBlock patch), `Block.UPDATE_ALL`, `MapColor.SNOW` | |
+| `TransDirtPathBlock` | extends `DirtPathBlock` (protected constructor), overriding `getStateForPlacement` and `tick(BlockState, ServerLevel, BlockPos, RandomSource)`; `Block.pushEntitiesUp(old, new, level, pos)` | Extend `Block` and copy vanilla's `DirtPathBlock` (shape, `canSurvive`, `updateShape`). `FlattenableBlockRegistry.register(Block, BlockState)` is confirmed in Fabric's source. |
 
 ## Unverified APIs (round 3)
 
@@ -154,6 +167,7 @@ Earlier rounds' uncertain names (`SnowyBlock`, `UntintedParticleLeavesBlock`, `A
 - A Silly Cat that can be tamed or bred.
 - Villages in more biomes (Pastel Peaks and the forests are left out on purpose: steep or crowded).
 - Trampled farmland in villages turns back into vanilla dirt, not trans dirt.
+- 26.3 has abandoned camps for 18 biomes; only the cherry grove version is ported. Others (meadow, flower forest, snowy taiga...) would only need their templates copied into `tools/vanilla_extra/structures/abandoned_camp/` and a folder entry in `generate_camps.py`.
 
 ## Building in the cloud
 

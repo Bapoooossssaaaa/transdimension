@@ -53,6 +53,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 import net.fabricmc.fabric.api.registry.CompostableRegistry;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
+import net.fabricmc.fabric.api.registry.FlattenableBlockRegistry;
 import net.fabricmc.fabric.api.registry.FuelValueEvents;
 import net.fabricmc.fabric.api.registry.StrippableBlockRegistry;
 import net.fabricmc.fabric.api.registry.TillableBlockRegistry;
@@ -313,6 +314,17 @@ public final class ModItems {
 		CompostableRegistry.INSTANCE.add(TRANS_CUPCAKE, 0.85F);
 		CompostableRegistry.INSTANCE.add(TRANS_DONUT, 0.85F);
 		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_CAKE, 1.0F);
+
+		// Wool furniture burns like wool, the bookshelf like a bookshelf.
+		for (Block woollen : List.of(ModBlocks.LIGHT_BLUE_WOOL_STAIRS, ModBlocks.PINK_WOOL_STAIRS, ModBlocks.WHITE_WOOL_STAIRS,
+				ModBlocks.LIGHT_BLUE_WOOL_SLAB, ModBlocks.PINK_WOOL_SLAB, ModBlocks.WHITE_WOOL_SLAB, ModBlocks.LIGHT_BLUE_CUSHION,
+				ModBlocks.PINK_CUSHION, ModBlocks.WHITE_CUSHION, ModBlocks.TRANS_ARMCHAIR)) {
+			FlammableBlockRegistry.getDefaultInstance().add(woollen, 30, 60);
+		}
+		FlammableBlockRegistry.getDefaultInstance().add(ModBlocks.TRANS_BOOKSHELF, 30, 20);
+		// A shovel wears trans grass and dirt into a trans dirt path, like vanilla's.
+		FlattenableBlockRegistry.register(ModBlocks.TRANS_GRASS_BLOCK, ModBlocks.TRANS_DIRT_PATH.defaultBlockState());
+		FlattenableBlockRegistry.register(ModBlocks.TRANS_DIRT, ModBlocks.TRANS_DIRT_PATH.defaultBlockState());
 
 		// Logs strip with an axe, like vanilla wood.
 		StrippableBlockRegistry.register(ModBlocks.TRANS_LOG, ModBlocks.STRIPPED_TRANS_LOG);

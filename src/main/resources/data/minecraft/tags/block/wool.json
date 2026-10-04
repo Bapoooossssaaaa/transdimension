@@ -1,6 +1,12 @@
 {
   "replace": false,
   "values": [
-    "transdimension:trans_wool"
+    "transdimension:light_blue_wool_slab",
+    "transdimension:light_blue_wool_stairs",
+    "transdimension:pink_wool_slab",
+    "transdimension:pink_wool_stairs",
+    "transdimension:trans_wool",
+    "transdimension:white_wool_slab",
+    "transdimension:white_wool_stairs"
   ]
 }

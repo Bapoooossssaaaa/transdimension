@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "transdimension:block/light_blue_cushion"
+    },
+    "facing=east": {
+      "model": "transdimension:block/light_blue_cushion",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "transdimension:block/light_blue_cushion",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "transdimension:block/light_blue_cushion",
+      "y": 270
+    }
+  }
+}

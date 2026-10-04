@@ -44,6 +44,7 @@ import dev.goober.transdimension.client.entity.FairyCrystalSpikeRenderer;
 import dev.goober.transdimension.client.entity.MaddieRenderer;
 import dev.goober.transdimension.client.entity.PastelSlimeModel;
 import dev.goober.transdimension.client.entity.PastelSlimeRenderer;
+import dev.goober.transdimension.client.entity.SeatRenderer;
 import dev.goober.transdimension.client.entity.SillyCatModel;
 import dev.goober.transdimension.client.entity.SillyCatRenderer;
 import dev.goober.transdimension.client.entity.TransEndermanModel;
@@ -121,6 +122,9 @@ public class TransDimensionClient implements ClientModInitializer {
 		ModelLayerRegistry.registerModelLayer(FairyLightModel.HALO_LAYER, FairyLightModel::createHaloLayer);
 		EntityRenderers.register(ModEntities.FAIRY, FairyRenderer::new);
 		BlockEntityRenderers.register(ModBlockEntities.FAIRY_JAR, FairyJarRenderer::new);
+
+		// The invisible seat you ride while sitting on furniture.
+		EntityRenderers.register(ModEntities.SEAT, SeatRenderer::new);
 
 		// Trans boats use vanilla's boat models with our textures.
 		ModelLayerRegistry.registerModelLayer(TRANS_BOAT_LAYER, BoatModel::createBoatModel);

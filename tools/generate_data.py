@@ -362,7 +362,8 @@ def stairs(block, english, base, textures, tool):
     model(f"{block}_outer", {"parent": "minecraft:block/outer_stairs", "textures": tex})
     item_def(block, f"{NS}:block/{block}")
     name(block, english)
-    mine(block, tool)
+    if tool:
+        mine(block, tool)
     loot(block, loot_self(block))
     tag("block", "stairs", block)
     tag("item", "stairs", block)
@@ -370,14 +371,16 @@ def stairs(block, english, base, textures, tool):
 
 def slab(block, english, full_block, textures, tool):
     bs = from_template("cherry_slab", "cherry_slab", block)
-    bs["variants"]["type=double"]["model"] = f"{NS}:block/{full_block}"
+    double_ns, double_path = rid(full_block).split(":")
+    bs["variants"]["type=double"]["model"] = f"{double_ns}:block/{double_path}"
     blockstate(block, bs)
     tex = {k: block_tex(v) for k, v in textures.items()}
     model(block, {"parent": "minecraft:block/slab", "textures": tex})
     model(f"{block}_top", {"parent": "minecraft:block/slab_top", "textures": tex})
     item_def(block, f"{NS}:block/{block}")
     name(block, english)
-    mine(block, tool)
+    if tool:
+        mine(block, tool)
     loot(block, loot_slab(block))
     tag("block", "slabs", block)
     tag("item", "slabs", block)
@@ -854,6 +857,136 @@ def generate_blocks():
     mine("pride_oven", "pickaxe")
     loot("pride_oven", loot_self("pride_oven"))
     name("trans_cake", "Trans Cake")
+
+
+# ============================================================================================ furniture, wool and paths (round 5)
+FLAG_COLOURS = (("light_blue", "Light Blue"), ("pink", "Pink"), ("white", "White"))
+
+
+def cushion_model():
+    """A plump floor cushion (the shared parent; each colour fills in #top and #side)."""
+    faces = {f: {"texture": "#side"} for f in ALL}
+    faces["up"] = {"texture": "#top"}
+    faces["down"]["cullface"] = "down"
+    return {"parent": "minecraft:block/block", "textures": {"particle": "#side"},
+            "elements": [{"from": [1, 0, 1], "to": [15, 5, 15], "faces": faces}]}
+
+
+def stool_model():
+    """Four legs joined by two rungs, a round-cornered seat and a trans flag pad."""
+    log = {f: "#log" for f in ALL}
+    legs = [element([x, 0, z], [x + 1.5, 9, z + 1.5], log) for x, z in ((3.5, 3.5), (11, 3.5), (3.5, 11), (11, 11))]
+    rungs = [element([5, 3, 3.75], [11, 4, 4.75], log), element([5, 3, 11.25], [11, 4, 12.25], log)]
+    seat = element([3, 9, 3], [13, 10, 13], {f: "#planks" for f in ALL})
+    pad = element([3.5, 10, 3.5], [12.5, 11, 12.5], {f: "#cushion" for f in ALL})
+    return {"parent": "minecraft:block/block", "textures": {
+        "particle": block_tex("trans_planks"), "planks": block_tex("trans_planks"), "log": block_tex("stripped_trans_log"),
+        "cushion": block_tex("trans_wool")}, "elements": legs + rungs + [seat, pad]}
+
+
+def armchair_model():
+    """An armchair in the flag's colours, its open side facing north: a light blue frame and arms, a pink seat cushion
+    and a white cushion against the back. FurnitureBlock.ARMCHAIR_SHAPE matches it."""
+    frame = {f: "#frame" for f in ALL}
+    feet = [element([x, 0, z], [x + 2, 2, z + 2], {f: "#wood" for f in ALL}) for x, z in ((2, 2), (12, 2), (2, 12), (12, 12))]
+    body = element([1, 2, 1], [15, 7, 15], frame)
+    seat = element([3, 7, 1.5], [13, 10, 12], {f: "#seat" for f in ALL})
+    arms = [element([1, 7, 1], [3, 13, 15], frame), element([13, 7, 1], [15, 13, 15], frame)]
+    back = element([1, 7, 12], [15, 16, 15], frame)
+    back_cushion = element([3, 10, 11], [13, 15, 12], {f: "#back" for f in ALL})
+    return {"parent": "minecraft:block/block", "textures": {
+        "particle": block_tex("trans_fabric_light_blue"), "frame": block_tex("trans_fabric_light_blue"),
+        "seat": block_tex("trans_fabric_pink"), "back": block_tex("trans_fabric_white"), "wood": block_tex("stripped_trans_log")},
+        "elements": feet + [body, seat] + arms + [back, back_cushion]}
+
+
+def lamp_model(on):
+    """A table lamp: a pearly foot and stem under a flag-striped shade (brighter when it's on)."""
+    base = {f: "#base" for f in ALL}
+    shade = {f: "#shade" for f in ALL}
+    shade["up"] = shade["down"] = "#shade_top"
+    suffix = "_on" if on else ""
+    return {"parent": "minecraft:block/block", "textures": {
+        "particle": block_tex("trans_lamp_shade" + suffix), "base": block_tex("trans_lamp_base"),
+        "shade": block_tex("trans_lamp_shade" + suffix), "shade_top": block_tex("trans_lamp_shade_top" + suffix)},
+        "elements": [element([5, 0, 5], [11, 2, 11], base), element([7, 2, 7], [9, 8, 9], base), element([3, 8, 3], [13, 15, 13], shade)]}
+
+
+def generate_furniture():
+    # ---- the trans dirt path (shovel on trans grass or dirt; the camps' footpaths)
+    blockstate("trans_dirt_path", {"variants": {"": [
+        {"model": f"{NS}:block/trans_dirt_path", **({"y": y} if y else {})} for y in (0, 90, 180, 270)]}})
+    model("trans_dirt_path", {"parent": "minecraft:block/dirt_path", "textures": {
+        "particle": block_tex("trans_dirt"), "top": block_tex("trans_dirt_path_top"), "side": block_tex("trans_dirt_path_side"),
+        "bottom": block_tex("trans_dirt")}})
+    item_def("trans_dirt_path", f"{NS}:block/trans_dirt_path")
+    name("trans_dirt_path", "Trans Dirt Path")
+    mine("trans_dirt_path", "shovel")
+    loot("trans_dirt_path", loot_self("trans_dirt_path", drop="trans_dirt"))
+
+    # ---- wool stairs and slabs in the flag's colours (vanilla wool textures; the camps' tents)
+    for colour, english in FLAG_COLOURS:
+        tex = {k: f"minecraft:block/{colour}_wool" for k in ("bottom", "top", "side")}
+        stairs(f"{colour}_wool_stairs", f"{english} Wool Stairs", None, tex, None)
+        slab(f"{colour}_wool_slab", f"{english} Wool Slab", f"minecraft:{colour}_wool", tex, None)
+        tag("block", "wool", f"{colour}_wool_stairs", f"{colour}_wool_slab")
+
+    # ---- cushions: one shared model; they're seats (FurnitureBlock)
+    model("cushion", cushion_model())
+    for colour, english in FLAG_COLOURS:
+        block = f"{colour}_cushion"
+        furniture_blockstate(block)
+        model(block, {"parent": f"{NS}:block/cushion", "textures": {
+            "top": block_tex(f"{colour}_cushion_top"), "side": block_tex(f"{colour}_cushion_side")}})
+        item_def(block, f"{NS}:block/{block}")
+        name(block, f"{english} Cushion")
+        loot(block, loot_self(block))
+        tag("block", "cushions", block, ns=NS)
+        tag("item", "cushions", block, ns=NS)
+
+    # ---- stool, armchair, lamp and bookshelf
+    for block, english, build, tool in (("trans_stool", "Trans Stool", stool_model, "axe"),
+                                        ("trans_armchair", "Trans Armchair", armchair_model, None)):
+        furniture_blockstate(block)
+        model(block, build())
+        item_def(block, f"{NS}:block/{block}")
+        name(block, english)
+        if tool:
+            mine(block, tool)
+        loot(block, loot_self(block))
+    blockstate("trans_lamp", {"variants": {"lit=false": {"model": f"{NS}:block/trans_lamp"},
+                                           "lit=true": {"model": f"{NS}:block/trans_lamp_on"}}})
+    model("trans_lamp", lamp_model(False))
+    model("trans_lamp_on", lamp_model(True))
+    item_def("trans_lamp", f"{NS}:block/trans_lamp_on")
+    name("trans_lamp", "Trans Lamp")
+    loot("trans_lamp", loot_self("trans_lamp"))
+    blockstate("trans_bookshelf", {"variants": {"": {"model": f"{NS}:block/trans_bookshelf"}}})
+    model("trans_bookshelf", {"parent": "minecraft:block/cube_column", "textures": {
+        "end": block_tex("trans_planks"), "side": block_tex("trans_bookshelf")}})
+    item_def("trans_bookshelf", f"{NS}:block/trans_bookshelf")
+    name("trans_bookshelf", "Trans Bookshelf")
+    mine("trans_bookshelf", "axe")
+    loot("trans_bookshelf", table("trans_bookshelf", [{"entries": [{"type": "minecraft:alternatives", "children": [
+        {"type": "minecraft:item", "conditions": [SILK], "name": rid("trans_bookshelf")},
+        {"type": "minecraft:item", "functions": [{"add": False, "count": 3.0, "function": "minecraft:set_count"},
+                                                 {"function": "minecraft:explosion_decay"}], "name": "minecraft:book"}]}],
+        "rolls": 1.0}]))
+    tag("block", "enchantment_power_provider", "trans_bookshelf")
+    name("seat", "Seat", kind="entity")
+
+    R = recipe
+    for colour, _ in FLAG_COLOURS:
+        wool = f"minecraft:{colour}_wool"
+        R(f"{colour}_wool_stairs", shaped(f"{colour}_wool_stairs", ["#  ", "## ", "###"], {"#": wool}, 4, group="woolen_stairs"))
+        R(f"{colour}_wool_slab", shaped(f"{colour}_wool_slab", ["###"], {"#": wool}, 6, group="woolen_slab"))
+        R(f"{colour}_cushion", shaped(f"{colour}_cushion", ["###"], {"#": f"{colour}_wool_slab"}, 1, category="misc", group="cushion"))
+    R("trans_stool", shaped("trans_stool", ["C", "F"], {"C": "trans_carpet", "F": "trans_fence"}, 1, category="misc"))
+    R("trans_armchair", shaped("trans_armchair", ["B  ", "BPB", "T T"], {
+        "B": "minecraft:light_blue_wool", "P": "minecraft:pink_wool", "T": "trans_planks"}, 1, category="misc"))
+    R("trans_lamp", shaped("trans_lamp", ["W", "T", "S"], {"W": "trans_wool", "T": "minecraft:torch", "S": "trans_slab"}, 1,
+                           category="misc"))
+    R("trans_bookshelf", shaped("trans_bookshelf", ["###", "XXX", "###"], {"#": "trans_planks", "X": "minecraft:book"}, 1))
 
 
 # ============================================================================================ trans vegetation
@@ -1965,6 +2098,7 @@ def main():
     generate_woods_and_flowers_recipes()
     generate_creatures()
     generate_fairy_realm_data()
+    generate_furniture()
     generate_misc()
     generate_sounds()
     generate_advancements()

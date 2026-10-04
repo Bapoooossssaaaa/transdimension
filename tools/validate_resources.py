@@ -66,7 +66,7 @@ def vanilla_has(registry, ident):
 def java_names():
     blocks, items, no_item = set(), set(), set()
     src = open(os.path.join(JAVA, "registry", "ModBlocks.java"), encoding="utf-8").read()
-    for m in re.finditer(r'\b(?:register|stairs|slab|wall|glass|pane|copy|ore|flower|leaves|plush)\("([a-z0-9_]+)"[,)]', src):
+    for m in re.finditer(r'\b(?:register|stairs|slab|wall|glass|pane|copy|ore|flower|leaves|plush|cushion)\("([a-z0-9_]+)"[,)]', src):
         blocks.add(m.group(1))
     for m in re.finditer(r'\b(?:registerWithoutItem|potted)\("([a-z0-9_]+)"[,)]', src):
         no_item.add(m.group(1))
@@ -312,7 +312,10 @@ for b in list(BLOCKS):
             TWINS.setdefault(b, ("dead_" if b.startswith("dead_") else "") + twin)
             break
 # Furniture-like blocks only have a horizontal "facing" (borrowed from the smoker); the bed adds a "heart" property.
-FACING_ONLY = {"pride_oven", "trans_chair", "trans_table", "plush_spot", "fairy_portal_frame"}
+FACING_ONLY = {"pride_oven", "trans_chair", "trans_table", "plush_spot", "fairy_portal_frame", "trans_stool", "trans_armchair",
+               "light_blue_cushion", "pink_cushion", "white_cushion"}
+TWINS.update({b: "smoker" for b in FACING_ONLY if b not in TWINS})
+TWINS.update({"trans_lamp": "redstone_lamp", "trans_dirt_path": "dirt_path", "trans_bookshelf": "bookshelf"})
 EXTRA_PROPS = {"trans_bed": {"heart": ["none", "left", "right"]}, "fairy_portal_frame": {"pearl": ["false", "true"]}}
 TWINS["fairy_portal_frame"] = "smoker"
 TWINS["trans_sea_pickle"] = "sea_pickle"

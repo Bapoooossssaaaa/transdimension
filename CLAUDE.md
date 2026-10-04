@@ -6,7 +6,7 @@ Claude Code loads this file at the start of every session, so it stays short. Fo
 
 Fabric mod for **Minecraft Java 26.2**: a trans-flag dimension (the Trans Realm). Mod id `transdimension`, package `dev.goober.transdimension`. Fabric Loader 0.19.5, Fabric API 0.161.0+26.2, Loom 1.18, Java 25. Minecraft 26.x is unobfuscated, so it uses Mojang's names and has no mappings. `README.md` lists every feature.
 
-- `src/main`: common code. `registry/` (ModBlocks, ModItems, ModEntities, ModAttachments...), `block/` (incl. the fairy portal, altar and jar), `entity/` (Maddie, SillyCat, TransMagicBolt, TransFish, TransEnderman, PastelSlime, TransFairy, FairyCrystalSpike), `item/` (TransWings, TransWandItem, TransCrystalPearlItem), `network/`, `event/RealmEvents`, `world/` (PlushLedger, FairyRealm, FairyRealmState, FairyIslandFeature, HeartTreeFeature, TransCoralReefFeature), `teleport/`, `mixin/EnderManMixin`.
+- `src/main`: common code. `registry/` (ModBlocks, ModItems, ModEntities, ModAttachments...), `block/` (incl. the fairy portal, altar and jar), `entity/` (Maddie, SillyCat, TransMagicBolt, TransFish, TransEnderman, PastelSlime, TransFairy, FairyCrystalSpike, Fairy, Seat), `item/` (TransWings, TransWandItem, TransCrystalPearlItem), `network/`, `event/RealmEvents`, `world/` (PlushLedger, FairyRealm, FairyRealmState, FairyIslandFeature, HeartTreeFeature, TransCoralReefFeature), `teleport/`, `mixin/EnderManMixin`.
 - `src/client`: `TransDimensionClient`, `HeartClouds`, `TransRecolor`, `TransIntroOverlay`, `wings/`, `screen/MaddieDialogueScreen`, `entity/` models and renderers, `block/FairyJarRenderer`, `mixin/` (AvatarRendererMixin, TextureManagerMixin).
 - `extras/BSL_Trans_Realm.txt`: a preset for BSL Shaders (not part of the jar).
 
@@ -20,7 +20,8 @@ Most assets and data are written by Python scripts. Change the script, rerun it,
 4. `tools/generate_villages.py`: trans villages
 5. `tools/generate_egg_house.py`: Maddie's floating island
 6. `tools/generate_fairy_realm.py`: the Fairy Sanctum and the Fairy Realm's arena island (its `ARENA_*` numbers must match `FairyRealm.java`)
-7. `tools/validate_resources.py <mcmeta>/registries/data.json`: must report 0 errors
+7. `tools/generate_camps.py`: trans camps (26.3's abandoned camp, converted from `tools/vanilla_extra/structures/abandoned_camp/`)
+8. `tools/validate_resources.py <mcmeta>/registries/data.json`: must report 0 errors
 
 You only need to rerun the script you changed (plus the validator). The validator's vanilla id check needs misode/mcmeta's 26.2 summary branch; without it, run the script with no argument.
 
@@ -28,12 +29,13 @@ You only need to rerun the script you changed (plus the validator). The validato
 
 The cloud environment can't download Minecraft or Fabric, so **the owner builds locally on Windows** (`gradlew build`) and pastes the errors. When fixing compile errors:
 - Read the error, fix only that, and check `HANDOFF.md` → "Unverified APIs" for what might be wrong next.
-- 26.2 names learned the hard way: `ChunkPos#pack()` (not `toLong`), no `Entity#getTags` on players (use a Fabric attachment), `LivingEntity#knockback` takes a `DamageSource`, no `Options#hideGui`, `Blocks.WOOL.pink()` / `Blocks.BED.red()` for dyed blocks, `Screen#extractBackground(GuiGraphicsExtractor, ...)`, `minecraft.gui.setScreen`, `Player#sendOverlayMessage(Component)` / `sendSystemMessage(Component)` (no `displayClientMessage`), `RenderTypes.entityCutout` (was `entityCutoutNoCull`; the culled one is `entityCutoutCull`).
+- 26.2 names learned the hard way: `ChunkPos#pack()` (not `toLong`), no `Entity#getTags` on players (use a Fabric attachment), `LivingEntity#knockback` takes a `DamageSource`, no `Options#hideGui`, `Blocks.WOOL.pink()` / `Blocks.BED.red()` / `Blocks.DYED_CANDLE.lightBlue()` for dyed blocks (they're `ColorCollection`s), `Screen#extractBackground(GuiGraphicsExtractor, ...)`, `minecraft.gui.setScreen`, `Player#sendOverlayMessage(Component)` / `sendSystemMessage(Component)` (no `displayClientMessage`), `RenderTypes.entityCutout` (was `entityCutoutNoCull`; the culled one is `entityCutoutCull`).
 - Read from source for round 4 and confirmed by the compiler: `new ServerBossEvent(UUID, Component, color, overlay)`, `Animal#mobInteract` is public, `Block#entityInside(..., InsideBlockEffectApplier, boolean)`, `hurtMarked` (renamed only in 26.3), `ServerLevel#getStructureManager`, `RenderTypes` in `client.renderer.rendertype`.
 - Fabric API source, if a session has it, is the best reference. Never guess silently: say which names are unverified.
 
 ## Status (latest first)
 
+- **Round 5 is written but not built yet**: wild fairies and the Bottled Fairy, trans dungeons, pink lava, deepslate strata, the crystal gear back, biome-tinted grass, clay, sea pickles and gravel, trans camps (26.3's abandoned camp), furniture you can sit on, wool stairs and slabs, and trans dirt paths. HANDOFF's "Unverified APIs (round 5)" table lists what to check when the build fails.
 - **Round 4 builds**: `gradlew build` passes (the last errors were `displayClientMessage` and `entityCutoutNoCull`). Play-testing is next. Round 4 added: rebuilt wings, trans vegetation, four woods, new flowers and biomes, crystals as a rare gem, trans fish, trans endermen, pastel slime pets, and the Fairy Realm endgame (sanctums, portal, the Trans Fairy boss, the fairy jar). Mixin targets and reflection are only checked when the game starts.
 - Recent work: the BSL preset; the clouds now use the flag's exact blue `#5BCEFA` and pink `#F5A9B8`.
 - Round 3 (beds, boats, plushes, Maddie, wand, wings, Egg House, paintings, advancements) is written. It builds along with round 4. Nothing in round 3 has been play-tested.

@@ -1,0 +1,7 @@
+{
+  "parent": "transdimension:block/cushion",
+  "textures": {
+    "top": "transdimension:block/light_blue_cushion_top",
+    "side": "transdimension:block/light_blue_cushion_side"
+  }
+}

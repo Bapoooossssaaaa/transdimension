@@ -24,6 +24,7 @@ import dev.goober.transdimension.entity.Fairy;
 import dev.goober.transdimension.entity.FairyCrystalSpike;
 import dev.goober.transdimension.entity.Maddie;
 import dev.goober.transdimension.entity.PastelSlime;
+import dev.goober.transdimension.entity.Seat;
 import dev.goober.transdimension.entity.SillyCat;
 import dev.goober.transdimension.entity.TransEnderman;
 import dev.goober.transdimension.entity.TransFairy;
@@ -144,6 +145,15 @@ public final class ModEntities {
 					.clientTrackingRange(6)
 					.updateInterval(2)
 					.build(FAIRY_CRYSTAL_SPIKE_KEY));
+
+	public static final ResourceKey<EntityType<?>> SEAT_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("seat"));
+	/** The invisible seat a player rides while sitting on a cushion, stool, chair or armchair. */
+	public static final EntityType<Seat> SEAT = Registry.register(BuiltInRegistries.ENTITY_TYPE, SEAT_KEY,
+			EntityType.Builder.<Seat>of(Seat::new, MobCategory.MISC)
+					.noLootTable()
+					.sized(0.001F, 0.001F)
+					.clientTrackingRange(10)
+					.build(SEAT_KEY));
 
 	private ModEntities() {
 	}

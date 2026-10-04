@@ -3,6 +3,7 @@
   "values": [
     "transdimension:trans_clay",
     "transdimension:trans_dirt",
+    "transdimension:trans_dirt_path",
     "transdimension:trans_grass_block",
     "transdimension:trans_gravel",
     "transdimension:trans_sand"

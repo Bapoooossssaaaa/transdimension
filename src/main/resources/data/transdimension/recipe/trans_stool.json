@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": "transdimension:trans_carpet",
+    "F": "transdimension:trans_fence"
+  },
+  "pattern": [
+    "C",
+    "F"
+  ],
+  "result": {
+    "count": 1,
+    "id": "transdimension:trans_stool"
+  }
+}

@@ -1048,6 +1048,130 @@ def trans_lantern_item():
     return gradient_map(img, [hexc("E06A92"), hexc("F5A9B8"), hexc("FFE3EC"), WHITE], mask=glow, out=out)
 
 
+# ============================================================================================ furniture and paths
+R_PATH = [hexc(c) for c in ("6A4258", "87586F", "A47389", "BE8FA4", "D6AEC0")]
+FABRIC_INDEX = {"light_blue": 0, "pink": 1, "white": 2}
+
+
+def trans_dirt_path_top():
+    """Trodden trans dirt: a lighter, dustier pink than the dirt itself, like vanilla's path."""
+    return gradient_map(vblock("dirt_path_top"), R_PATH)
+
+
+def trans_dirt_path_side():
+    """Vanilla's path side: the trodden band along the top in path colours, the dirt below matching trans dirt."""
+    img = vblock("dirt_path_side")
+    path = vblock("dirt_path_top")
+    top = {path.getpixel(p)[:3] for p in pixels(path)}
+    band = lambda p, px: p[1] <= 4 and px[:3] in top
+    out = gradient_map(img, R_PATH, mask=band)
+    lo, hi = lum_range(vblock("dirt"))
+    return gradient_map(img, R_DIRT, mask=lambda p, px: not band(p, px), lo=lo, hi=hi, out=out)
+
+
+def fabric(colour):
+    """Soft upholstery in one of the flag's colours ('light_blue', 'pink' or 'white'), woven like wool."""
+    return gradient_map(vblock("white_wool"), FLAG_RAMPS[FABRIC_INDEX[colour]], curve=lambda t: 0.15 + 0.85 * t)
+
+
+def cushion_top(colour):
+    """A tufted cushion seen from above (the model uses pixels 1-14): piping round the edge, creases running in from
+    the corners and a button in the middle."""
+    img = fabric(colour)
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))[:3]
+        if 1 <= x <= 14 and 1 <= y <= 14:
+            if x in (1, 14) or y in (1, 14):
+                img.putpixel((x, y), (*mix(px, WHITE, 0.45), 255))
+            elif (x == y or x + y == 15) and 3 <= x <= 12 and not 6 <= x <= 9:
+                img.putpixel((x, y), (*shade(px, 0.76), 255))
+            elif 7 <= x <= 8 and 7 <= y <= 8:
+                img.putpixel((x, y), (*(mix(px, WHITE, 0.4) if (x, y) == (7, 7) else shade(px, 0.58)), 255))
+            elif 6 <= x <= 9 and 6 <= y <= 9:
+                img.putpixel((x, y), (*shade(px, 0.88), 255))
+    return img
+
+
+def cushion_side(colour):
+    """The cushion's sides (the model shows rows 11-15): piping along the top, a shadow along the bottom."""
+    img = fabric(colour)
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))[:3]
+        if y == 11:
+            img.putpixel((x, y), (*mix(px, WHITE, 0.35), 255))
+        elif y == 15:
+            img.putpixel((x, y), (*shade(px, 0.86), 255))
+    return img
+
+
+def trans_lamp_shade(on):
+    """The lamp shade's sides (rows 1-7 show): the flag in five bands, and brighter when the lamp is on."""
+    wool = vblock("white_wool")
+    rows = [0, 0, 1, 2, 2, 2, 3, 4]
+    rows = rows + rows
+    ramps = [light_ramp(c, 0.86 if on else 0.68, 1.0) for c in (BLUE, PINK, (246, 246, 252), PINK, BLUE)]
+    img = flag_rows(wool, lambda i: ramps[i], rows=rows, curve=lambda t: (0.35 if on else 0.1) + (0.65 if on else 0.9) * t)
+    if on:
+        for x in range(0, 16, 3):
+            img.putpixel((x, 4 + x % 2), (*WHITE, 255))
+    return img
+
+
+def trans_lamp_shade_top(on):
+    """The shade from above and below (pixels 3-12): a blue rim round the opening, dark inside, or glowing when on."""
+    img = fabric("light_blue")
+    for (x, y) in pixels(img):
+        if 4 <= x <= 11 and 4 <= y <= 11:
+            if on:
+                c = mix(hexc("FFF4D6"), WHITE, 0.5) if 6 <= x <= 9 and 6 <= y <= 9 else hexc("FFE3EC")
+            else:
+                c = hexc("3A2A45") if 5 <= x <= 10 and 5 <= y <= 10 else hexc("5A4466")
+            img.putpixel((x, y), (*c, 255))
+    return img
+
+
+def trans_lamp_base():
+    """Pearly ceramic for the lamp's foot and stem."""
+    return gradient_map(vblock("calcite"), R_PEARL[1:])
+
+
+def trans_bookshelf():
+    """Vanilla's bookshelf in trans planks, full of pink, blue, white and lavender books."""
+    img = vblock("bookshelf")
+    wood = lambda p, px: 0.06 <= hsv(px)[0] <= 0.13 and hsv(px)[2] > 0.38 and hsv(px)[1] < 0.7
+    dark = lambda p, px: hsv(px)[2] <= 0.42 and not wood(p, px) and 0.04 <= hsv(px)[0] <= 0.15 and 0.3 <= hsv(px)[1] <= 0.7
+    families = [
+        (lambda h, s: s > 0.5 and (h < 0.08 or h > 0.9), R_PINK[1:5]),
+        (lambda h, s: s > 0.4 and 0.55 <= h <= 0.67, R_BLUE[1:5]),
+        (lambda h, s: s > 0.5 and 0.16 < h < 0.5, R_PEARL[1:]),
+        (lambda h, s: s > 0.5 and 0.12 <= h <= 0.16, R_LAVENDER[1:5]),
+        (lambda h, s: s < 0.08, mix_ramp(R_PEARL, R_PINK, 0.3)[2:]),
+    ]
+    out = gradient_map(img, R_WOOD_PINK, mask=wood)
+    out = gradient_map(img, [hexc("2A1726"), hexc("3D2236"), hexc("4F2E46")], mask=dark, out=out)
+    done = {p for p in pixels(img) if wood(p, img.getpixel(p)) or dark(p, img.getpixel(p))}
+    for test, ramp in families:
+        mask = lambda p, px, test=test: p not in done and test(hsv(px)[0], hsv(px)[1])
+        out = gradient_map(img, ramp, mask=mask, out=out)
+        done |= {p for p in pixels(img) if mask(p, img.getpixel(p))}
+    missing = [p for p in pixels(img) if p not in done]
+    if missing:
+        raise SystemExit(f"trans_bookshelf: unclassified pixels {missing[:5]}")
+    return out
+
+
+def furniture_textures():
+    textures = {"trans_dirt_path_top": trans_dirt_path_top(), "trans_dirt_path_side": trans_dirt_path_side(),
+                "trans_lamp_shade": trans_lamp_shade(False), "trans_lamp_shade_on": trans_lamp_shade(True),
+                "trans_lamp_shade_top": trans_lamp_shade_top(False), "trans_lamp_shade_top_on": trans_lamp_shade_top(True),
+                "trans_lamp_base": trans_lamp_base(), "trans_bookshelf": trans_bookshelf()}
+    for colour in FABRIC_INDEX:
+        textures[f"trans_fabric_{colour}"] = fabric(colour)
+        textures[f"{colour}_cushion_top"] = cushion_top(colour)
+        textures[f"{colour}_cushion_side"] = cushion_side(colour)
+    return textures
+
+
 # ============================================================================================ treats
 def trans_cookie():
     """Vanilla's cookie, but the chocolate chips are pink and blue candy chips."""
@@ -3774,6 +3898,7 @@ def main():
         "trans_clay": trans_clay(), "trans_sea_pickle": trans_sea_pickle(),
     }
     blocks.update({name: cat_plush(name) for name in PLUSHES})
+    blocks.update(furniture_textures())
     for name, img in blocks.items():
         save(img, f"block/{name}.png")
     for prefix in WOOD_FAMILIES:

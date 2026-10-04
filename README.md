@@ -76,6 +76,10 @@ Built from Minecraft's own plains village pieces, rebuilt in trans blocks: strip
 
 **Every village hides one cat plush** in a corner of one of its houses. There are nine different cats: Silly, Trans, Midnight, Biscuit, Patches, Mochi, Pearl, Bubblegum and Bluebell. The world hands out the cats you haven't found yet first, so nine villages are enough to collect them all, which earns an advancement.
 
+### Trans camps
+
+Minecraft 26.3's **abandoned camps**, brought back to 26.2 and made trans: a tent with flag-striped canvas (light blue along the bottom, then pink, then white up to the ridge, so its cross-section reads like the flag) over a pair of trans beds, and a campsite joined to it: a cold campfire ringed with cushions, fallen trans logs and petals, a little farm, a stone mound or a pond. Chests and barrels hold camping gear, food, cushions and the odd treasure (a diamond, potions, trans crystals, maybe a Bottled Fairy). Camps turn up in the realm's woods, meadows and flower fields, worn into the ground by trans dirt paths.
+
 ### Blocks and items
 
 - **Building sets:** trans stone, cobblestone, stone bricks, sandstone, the trans deepslate family (cobbled, polished, bricks, tiles, chiseled), rose granite, pearl diorite and sky andesite, each with stairs, slabs and walls where vanilla has them. There's a full **trans wood set** with four extra kinds of leaves from the themed forests.
@@ -83,7 +87,9 @@ Built from Minecraft's own plains village pieces, rebuilt in trans blocks: strip
 - **Trans Bed.** Put two side by side and they share one big heart across the blankets.
 - **Trans Boat** and **Trans Boat with Chest**.
 - **Paintings:** two portraits of the Silly Cat, a trans heart, the realm's flag, a pastel sunrise, the Egg House, a crystal bloom and a plush party. They turn up when you place a painting anywhere.
-- **Trans wool** and carpet, moss and moss carpet, **Trans Lanterns**, **Trans Chairs** and **Trans Tables**.
+- **Trans wool** and carpet, moss and moss carpet, **Trans Lanterns**, and **wool stairs and slabs** in light blue, pink and white (like 26.3's).
+- **Furniture:** **Trans Chairs**, **Trans Stools**, **Trans Armchairs** (light blue with a pink seat and a white back cushion) and floor **cushions** in light blue, pink and white are all seats: use one with an empty hand to sit down, sneak to get up. There's also the **Trans Table**, the **Trans Lamp** (a flag-striped table lamp; use it to switch it on and off) and the **Trans Bookshelf** (pastel books; it powers enchanting tables).
+- **Trans dirt paths:** use a shovel on trans grass or dirt.
 - **Trans Crystal.** A rare gem: its ore glows faintly deep underground (more of it under Crystal Groves and in the Crystal Caves). Nine make a Block of Trans Crystal, they craft the **Trans Crystal tools and armor** (a little better than diamond, in the flag's colours), and with a Trans Pearl they make the Trans Crystal Pearls that open the Fairy Portal. The common **prism clusters** of the crystal caves drop **prism shards** for the decorative **Pastel Prism** block.
 - **The Trans Baker.** A villager profession whose job site is the Pride Oven. Bakers trade cookies, donuts, cupcakes, macarons, boba, cakes, crystals and lanterns.
 - **Treats:**
@@ -147,6 +153,7 @@ Most of the assets and data are written by scripts in `tools/` (Python 3, with `
 | `generate_villages.py` | The trans village: structure templates (converted from the vanilla plains village), template pools, processors, the structure and its structure set. |
 | `generate_egg_house.py` | The Egg House island, read out of `Egg House!.zip`, and its structure, pool, structure set, loot and treasure maps. |
 | `generate_fairy_realm.py` | The endgame's structures: the Fairy Sanctum (shrine, stairs and portal hall) and the Fairy Realm's arena island, plus the sanctum's worldgen files, tags and chest loot. |
+| `generate_camps.py` | The trans camp: 26.3's abandoned camp templates (cherry grove version, in `tools/vanilla_extra/structures/abandoned_camp/`) rewritten in 26.2's format with trans blocks, plus its pools, structure, structure set, biome tag and chest loot. |
 | `validate_resources.py` | Checks that everything above points at things that exist. Pass `mcmeta-summary/registries/data.json` from [misode/mcmeta](https://github.com/misode/mcmeta) (26.2 summary branch) to check vanilla ids too. |
 
 To restyle the mod, edit the palettes at the top of `generate_textures.py`, the biome table in `generate_worldgen.py` or the block swaps in `generate_villages.py` and `generate_egg_house.py`, then rerun the scripts. Maddie's lines are in `generate_data.py` (`MADDIE_DIALOGUE`). Baker trades live in `data/transdimension/villager_trade/` and `data/transdimension/trade_set/`.

@@ -123,7 +123,7 @@ public class TransDungeonFeature extends Feature<NoneFeatureConfiguration> {
 		for (int candle = 0; candle < 3; candle++) {
 			BlockPos pos = origin.offset(random.nextInt(rx * 2 + 1) - rx, 0, random.nextInt(rz * 2 + 1) - rz);
 			if (level.isEmptyBlock(pos) && solid(level.getBlockState(pos.below())) && this.wallBeside(level, pos) != null) {
-				Block block = random.nextBoolean() ? Blocks.PINK_CANDLE : Blocks.LIGHT_BLUE_CANDLE;
+				Block block = random.nextBoolean() ? Blocks.DYED_CANDLE.pink() : Blocks.DYED_CANDLE.lightBlue();
 				level.setBlock(pos, block.defaultBlockState(), Block.UPDATE_CLIENTS);
 			}
 		}

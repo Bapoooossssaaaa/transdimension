@@ -90,10 +90,12 @@ import dev.goober.transdimension.block.FurnitureBlock;
 import dev.goober.transdimension.block.PlushSpotBlock;
 import dev.goober.transdimension.block.PrideOvenBlock;
 import dev.goober.transdimension.block.TransBedBlock;
+import dev.goober.transdimension.block.TransDirtPathBlock;
 import dev.goober.transdimension.block.TransGrassBlock;
 import dev.goober.transdimension.block.TransGrassPlantBlock;
 import dev.goober.transdimension.block.TransKelpBlock;
 import dev.goober.transdimension.block.TransKelpPlantBlock;
+import dev.goober.transdimension.block.TransLampBlock;
 import dev.goober.transdimension.block.TransSeagrassBlock;
 
 /**
@@ -125,6 +127,9 @@ public final class ModBlocks {
 			BlockBehaviour.Properties.ofFullCopy(Blocks.GRASS_BLOCK));
 	public static final Block TRANS_DIRT = register("trans_dirt", Block::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.DIRT));
+	/** Trans grass or dirt worn down with a shovel; the camps' footpaths are made of it. */
+	public static final Block TRANS_DIRT_PATH = register("trans_dirt_path", TransDirtPathBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.DIRT_PATH));
 	public static final Block TRANS_SAND = register("trans_sand",
 			properties -> new ColoredFallingBlock(new ColorRGBA(0xFFF5A9B8), properties),
 			BlockBehaviour.Properties.ofFullCopy(Blocks.SAND));
@@ -438,6 +443,13 @@ public final class ModBlocks {
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(0.8F).sound(SoundType.WOOL).ignitedByLava());
 	public static final Block TRANS_CARPET = register("trans_carpet", CarpetBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(0.1F).sound(SoundType.WOOL).ignitedByLava());
+	// Wool stairs and slabs in the flag's colours (26.3 adds them in every colour); the camps' tents are made of them.
+	public static final Block LIGHT_BLUE_WOOL_STAIRS = stairs("light_blue_wool_stairs", Blocks.WOOL.lightBlue(), Blocks.WOOL.lightBlue());
+	public static final Block PINK_WOOL_STAIRS = stairs("pink_wool_stairs", Blocks.WOOL.pink(), Blocks.WOOL.pink());
+	public static final Block WHITE_WOOL_STAIRS = stairs("white_wool_stairs", Blocks.WOOL.white(), Blocks.WOOL.white());
+	public static final Block LIGHT_BLUE_WOOL_SLAB = slab("light_blue_wool_slab", Blocks.WOOL.lightBlue());
+	public static final Block PINK_WOOL_SLAB = slab("pink_wool_slab", Blocks.WOOL.pink());
+	public static final Block WHITE_WOOL_SLAB = slab("white_wool_slab", Blocks.WOOL.white());
 	/** Two side by side make a double bed with one heart across both blankets; see {@link TransBedBlock}. */
 	public static final Block TRANS_BED = register("trans_bed", TransBedBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).sound(SoundType.WOOD).strength(0.2F).noOcclusion()
@@ -446,13 +458,30 @@ public final class ModBlocks {
 	public static final Block TRANS_LANTERN = register("trans_lantern", LanternBlock::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.LANTERN));
 
-	// ---------------------------------------------------------------- furniture
+	// ---------------------------------------------------------------- furniture (the chair, stool, armchair and cushions are seats)
 	public static final Block TRANS_CHAIR = register("trans_chair",
-			properties -> new FurnitureBlock(FurnitureBlock.CHAIR_SHAPE, properties),
+			properties -> new FurnitureBlock(FurnitureBlock.CHAIR_SHAPE, 10.0, properties),
 			BlockBehaviour.Properties.ofFullCopy(Blocks.CHERRY_PLANKS).noOcclusion());
 	public static final Block TRANS_TABLE = register("trans_table",
 			properties -> new FurnitureBlock(FurnitureBlock.TABLE_SHAPE, properties),
 			BlockBehaviour.Properties.ofFullCopy(Blocks.CHERRY_PLANKS).noOcclusion());
+	public static final Block TRANS_STOOL = register("trans_stool",
+			properties -> new FurnitureBlock(FurnitureBlock.STOOL_SHAPE, 11.0, properties),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.CHERRY_PLANKS).noOcclusion());
+	public static final Block TRANS_ARMCHAIR = register("trans_armchair",
+			properties -> new FurnitureBlock(FurnitureBlock.ARMCHAIR_SHAPE, 10.0, properties),
+			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).strength(0.8F).sound(SoundType.WOOL).noOcclusion()
+					.ignitedByLava());
+	/** Floor cushions to sit on, like 26.3's (which are entities there); the camps put them round their campfires. */
+	public static final Block LIGHT_BLUE_CUSHION = cushion("light_blue_cushion", MapColor.COLOR_LIGHT_BLUE);
+	public static final Block PINK_CUSHION = cushion("pink_cushion", MapColor.COLOR_PINK);
+	public static final Block WHITE_CUSHION = cushion("white_cushion", MapColor.SNOW);
+	public static final Block TRANS_LAMP = register("trans_lamp", TransLampBlock::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(0.3F).sound(SoundType.WOOL).noOcclusion()
+					.lightLevel(state -> state.getValue(TransLampBlock.LIT) ? 15 : 0));
+	/** Trans planks full of pastel books; it powers enchanting tables like a bookshelf. */
+	public static final Block TRANS_BOOKSHELF = register("trans_bookshelf", Block::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.BOOKSHELF));
 
 	// ---------------------------------------------------------------- cat plushes (one waits in a house of every village)
 	public static final Block PLUSH_SILLY = plush("silly_cat_plush");
@@ -594,6 +623,11 @@ public final class ModBlocks {
 		return register(name, properties -> new FurnitureBlock(FurnitureBlock.PLUSH_SHAPE, properties),
 				BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(0.5F).sound(SoundType.WOOL).noOcclusion()
 						.ignitedByLava());
+	}
+
+	private static Block cushion(String name, MapColor colour) {
+		return register(name, properties -> new FurnitureBlock(FurnitureBlock.CUSHION_SHAPE, 5.0, properties),
+				BlockBehaviour.Properties.of().mapColor(colour).strength(0.4F).sound(SoundType.WOOL).noOcclusion().ignitedByLava());
 	}
 
 	private static Block leaves(String name) {

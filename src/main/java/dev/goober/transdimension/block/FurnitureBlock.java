@@ -7,8 +7,11 @@ import org.jspecify.annotations.Nullable;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -16,12 +19,16 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import dev.goober.transdimension.entity.Seat;
+
 /**
- * Decorative trans furniture (chairs, tables and cat plushes) for the village houses and your own builds.
+ * Trans furniture (chairs, tables, cushions, stools, armchairs and cat plushes) for the village houses, the camps and
+ * your own builds. Furniture with a seat height is a seat: use it with an empty hand to sit down ({@link Seat}).
  *
  * <p>The shape is given as boxes for a block facing north (pixel coordinates, like {@link Block#box});
  * the other three directions are rotated from it. Rotation and mirroring are implemented so the
@@ -34,6 +41,21 @@ public class FurnitureBlock extends Block {
 	public static final double[][] CHAIR_SHAPE = {
 			{3, 0, 3, 13, 8, 13},
 			{3, 8, 11, 13, 16, 13},
+	};
+	/** A plump square floor cushion. */
+	public static final double[][] CUSHION_SHAPE = {
+			{1, 0, 1, 15, 5, 15},
+	};
+	/** A round-topped stool on four legs. */
+	public static final double[][] STOOL_SHAPE = {
+			{3, 0, 3, 13, 11, 13},
+	};
+	/** An armchair whose open side faces north: a padded seat between two arms, and a tall back along the south edge. */
+	public static final double[][] ARMCHAIR_SHAPE = {
+			{1, 0, 1, 15, 10, 15},
+			{1, 10, 1, 3, 13, 15},
+			{13, 10, 1, 15, 13, 15},
+			{1, 10, 12, 15, 16, 15},
 	};
 	/** A round-ish pedestal table: a thick top, a central post and a foot. */
 	public static final double[][] TABLE_SHAPE = {
@@ -49,9 +71,17 @@ public class FurnitureBlock extends Block {
 	};
 
 	private final Map<Direction, VoxelShape> shapes = new EnumMap<>(Direction.class);
+	/** How high the seat is, in pixels above the bottom of the block; 0 for furniture you can't sit on. */
+	private final double seatHeight;
 
 	public FurnitureBlock(double[][] northBoxes, Properties properties) {
+		this(northBoxes, 0.0, properties);
+	}
+
+	/** Furniture you can sit on, with its seat {@code seatHeight} pixels above the bottom of the block. */
+	public FurnitureBlock(double[][] northBoxes, double seatHeight, Properties properties) {
 		super(properties);
+		this.seatHeight = seatHeight;
 		for (Direction direction : Direction.Plane.HORIZONTAL) {
 			VoxelShape shape = Shapes.empty();
 			for (double[] box : northBoxes) {
@@ -75,6 +105,15 @@ public class FurnitureBlock extends Block {
 	@Override
 	protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
 		return this.shapes.get(state.getValue(FACING));
+	}
+
+	public boolean isSeat() {
+		return this.seatHeight > 0.0;
+	}
+
+	@Override
+	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+		return this.isSeat() ? Seat.sit(level, pos, this.seatHeight / 16.0, player) : InteractionResult.PASS;
 	}
 
 	@Override

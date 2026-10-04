@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "transdimension:block/trans_lamp"
+    },
+    "lit=true": {
+      "model": "transdimension:block/trans_lamp_on"
+    }
+  }
+}

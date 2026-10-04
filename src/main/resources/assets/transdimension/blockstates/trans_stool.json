@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "transdimension:block/trans_stool"
+    },
+    "facing=east": {
+      "model": "transdimension:block/trans_stool",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "transdimension:block/trans_stool",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "transdimension:block/trans_stool",
+      "y": 270
+    }
+  }
+}
