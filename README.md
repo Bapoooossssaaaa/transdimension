@@ -81,7 +81,7 @@ Built from Minecraft's own plains village pieces, rebuilt in trans blocks: strip
 - **Trans Boat** and **Trans Boat with Chest**.
 - **Paintings:** two portraits of the Silly Cat, a trans heart, the realm's flag, a pastel sunrise, the Egg House, a crystal bloom and a plush party. They turn up when you place a painting anywhere.
 - **Trans wool** and carpet, moss and moss carpet, **Trans Lanterns**, **Trans Chairs** and **Trans Tables**.
-- **Trans Crystal.** A rare gem: its ore glows faintly deep underground (more of it under Crystal Groves and in the Crystal Caves). Nine make a Block of Trans Crystal, and with a Trans Pearl they make the Trans Crystal Pearls that open the Fairy Portal. The common **prism clusters** of the crystal caves drop **prism shards** for the decorative **Pastel Prism** block.
+- **Trans Crystal.** A rare gem: its ore glows faintly deep underground (more of it under Crystal Groves and in the Crystal Caves). Nine make a Block of Trans Crystal, they craft the **Trans Crystal tools and armor** (a little better than diamond, in the flag's colours), and with a Trans Pearl they make the Trans Crystal Pearls that open the Fairy Portal. The common **prism clusters** of the crystal caves drop **prism shards** for the decorative **Pastel Prism** block.
 - **The Trans Baker.** A villager profession whose job site is the Pride Oven. Bakers trade cookies, donuts, cupcakes, macarons, boba, cakes, crystals and lanterns.
 - **Treats:**
 
@@ -106,7 +106,7 @@ Built from Minecraft's own plains village pieces, rebuilt in trans blocks: strip
 
 ### Advancements
 
-The **Trans Dimension** tab has 45 advancements: exploring every biome, finding the Egg House, meeting Maddie and using her gifts (fly above Y 250!), petting Silly Cats, building beds that make a heart, finding crystals, the bakery's treats, collecting every flower and all nine plushes, heart trees and Starblooms, catching trans fish, taming pastel slimes, and the whole road to the Fairy Realm and its fairy.
+The **Trans Dimension** tab has 46 advancements: exploring every biome, finding the Egg House, meeting Maddie and using her gifts (fly above Y 250!), petting Silly Cats, building beds that make a heart, finding crystals and wearing a full set of crystal armor, the bakery's treats, collecting every flower and all nine plushes, heart trees and Starblooms, catching trans fish, taming pastel slimes, and the whole road to the Fairy Realm and its fairy.
 
 ## Playing
 

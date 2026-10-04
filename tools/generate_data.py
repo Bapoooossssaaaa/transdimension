@@ -1538,7 +1538,20 @@ def generate_misc():
     tag("item", "flowers", "pride_blossom")
     tag("block", "bee_attractive", "pride_blossom")
 
+    # crystal tools and armor (crafted from Trans Crystals; their item models, recipes and equipment asset are hand-made)
+    tag("item", "swords", "trans_sword")
+    tag("item", "pickaxes", "trans_pickaxe")
+    tag("item", "axes", "trans_axe")
+    tag("item", "shovels", "trans_shovel")
+    tag("item", "hoes", "trans_hoe")
+    tag("item", "head_armor", "trans_helmet")
+    tag("item", "chest_armor", "trans_chestplate")
+    tag("item", "leg_armor", "trans_leggings")
+    tag("item", "foot_armor", "trans_boots")
+
     # the mod's own tags
+    tag("item", "repairs_trans_gear", "trans_crystal", ns=NS)
+    tag("block", "incorrect_for_trans_tool", "#minecraft:incorrect_for_diamond_tool", ns=NS)
     # The Pride Oven is a job site villagers can claim.
     tag("point_of_interest_type", "acquirable_job_site", "transdimension:pride_oven")
 
@@ -1585,7 +1598,10 @@ def generate_misc():
 
     # Names that aren't blocks.
     items = {
-        "trans_crystal": "Trans Crystal",
+        "trans_crystal": "Trans Crystal", "trans_sword": "Trans Crystal Sword", "trans_pickaxe": "Trans Crystal Pickaxe",
+        "trans_axe": "Trans Crystal Axe", "trans_shovel": "Trans Crystal Shovel", "trans_hoe": "Trans Crystal Hoe",
+        "trans_helmet": "Trans Crystal Helmet", "trans_chestplate": "Trans Crystal Chestplate",
+        "trans_leggings": "Trans Crystal Leggings", "trans_boots": "Trans Crystal Boots",
         "trans_donut": "Trans Donut", "trans_cookie": "Sprinkle Cookie", "trans_cupcake": "Pride Cupcake",
         "trans_macaron": "Trans Macaron", "trans_boba": "Trans Boba Tea", "silly_cat_spawn_egg": "Silly Cat Spawn Egg",
     }
@@ -1745,6 +1761,10 @@ def generate_advancements():
     A("trans_crystal", "goober", "trans_crystal", "Shiny!", "Find a rare Trans Crystal deep underground", {"crystal": has("trans_crystal")})
     A("crystal_clear", "trans_crystal", "trans_crystal_block", "Crystal Clear", "Collect nine Trans Crystals and make a Block of Trans Crystal",
       {"block": has("trans_crystal_block")}, frame="goal")
+    A("armored_in_pride", "trans_crystal", "trans_chestplate", "Armored in Pride", "Wear a full set of Trans Crystal armor",
+      {"armor": player_is(equipment={"head": {"items": rid("trans_helmet")}, "chest": {"items": rid("trans_chestplate")},
+                                     "legs": {"items": rid("trans_leggings")}, "feet": {"items": rid("trans_boots")}})},
+      frame="goal")
     A("deep_pastel", "trans_crystal", "trans_deepslate", "Deep Pastel", "Dig down to Trans Deepslate",
       {"deepslate": has("cobbled_trans_deepslate")})
 
@@ -1849,15 +1869,7 @@ def remove_stale():
         os.path.join(ASSETS, "models", "item", "pride_blossom.json"),
         os.path.join(DATA, "minecraft", "tags", "fluid", "water.json"),
         os.path.join(DATA, NS, "recipe", "glass_from_trans_sand.json"),
-        # trans crystal gear (crystals are a rare ore now, round 4)
-        os.path.join(ASSETS, "equipment", "trans_crystal.json"),
-        os.path.join(DATA, NS, "tags", "block", "incorrect_for_trans_tool.json"),
-        os.path.join(DATA, NS, "tags", "item", "repairs_trans_gear.json"),
     ]
-    for gear in ("trans_sword", "trans_pickaxe", "trans_axe", "trans_shovel", "trans_hoe", "trans_helmet", "trans_chestplate",
-                 "trans_leggings", "trans_boots"):
-        stale += [os.path.join(ASSETS, "items", f"{gear}.json"), os.path.join(ASSETS, "models", "item", f"{gear}.json"),
-                  os.path.join(DATA, NS, "recipe", f"{gear}.json"), os.path.join(ASSETS, "textures", "item", f"{gear}.png")]
     for p in stale:
         if os.path.exists(p):
             os.remove(p)

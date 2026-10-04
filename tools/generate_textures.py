@@ -708,6 +708,46 @@ def trans_crystal_item():
     return gradient_map(vitem("diamond"), R_TRANS, curve=lambda t: 0.04 + 0.96 * t)
 
 
+# ============================================================================================ crystal gear
+def is_diamond(px):
+    h, s, v = hsv(px)
+    return px[3] > 0 and 0.38 < h < 0.6 and s > 0.15
+
+
+def recolor_gear(img, ramp=R_TRANS, curve=lambda t: 0.06 + 0.94 * t):
+    """Swaps the diamond parts of a vanilla diamond item/armor texture for crystal colours."""
+    return gradient_map(img, ramp, mask=lambda p, px: is_diamond(px), curve=curve)
+
+
+def trans_tool(name):
+    return recolor_gear(vitem(f"diamond_{name}"))
+
+
+def trans_armor_item(name):
+    """Armor icons get the flag: rows of blue, pink and white crystal plates."""
+    img = vitem(f"diamond_{name}")
+    ys = [y for (x, y) in pixels(img) if is_diamond(img.getpixel((x, y)))]
+    top, bottom = min(ys), max(ys)
+    bands = stripes5(bottom - top + 1)
+    lo, hi = lum_range(img, lambda p, px: is_diamond(px))
+    ramps = [[hexc("17396B"), hexc("2C6FB0"), BLUE, hexc("D6F4FE")], [hexc("7A2F50"), hexc("D16F8F"), PINK, hexc("FFE8EE")],
+             [hexc("6F6B88"), hexc("BDBBD2"), hexc("EEEEF6"), WHITE]]
+    stripe_ramp = [ramps[0], ramps[1], ramps[2], ramps[1], ramps[0]]
+    out = img.copy()
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))
+        if not is_diamond(px):
+            continue
+        c = sample(stripe_ramp[bands[y - top]], (lum(px) - lo) / (hi - lo))
+        out.putpixel((x, y), (*c, px[3]))
+    return out
+
+
+def trans_armor_layer(rel):
+    """Worn armor: the same crystal recolour as the tools (blue shadows, pink mid-tones, white shine)."""
+    return recolor_gear(vextra(rel), curve=lambda t: 0.08 + 0.9 * t)
+
+
 def prism_shard_item():
     return gradient_map(vitem("amethyst_shard"), R_PRISM, curve=lambda t: 0.08 + 0.92 * t)
 
@@ -3643,6 +3683,10 @@ def main():
 
     items = {
         "trans_crystal": trans_crystal_item(), "prism_shard": prism_shard_item(),
+        "trans_sword": trans_tool("sword"), "trans_pickaxe": trans_tool("pickaxe"), "trans_axe": trans_tool("axe"),
+        "trans_shovel": trans_tool("shovel"), "trans_hoe": trans_tool("hoe"),
+        "trans_helmet": trans_armor_item("helmet"), "trans_chestplate": trans_armor_item("chestplate"),
+        "trans_leggings": trans_armor_item("leggings"), "trans_boots": trans_armor_item("boots"),
         "trans_donut": trans_donut(), "trans_cookie": trans_cookie(), "trans_cupcake": trans_cupcake(),
         "trans_macaron": trans_macaron(), "trans_boba": trans_boba(), "trans_cake": trans_cake_item(),
         "silly_cat_spawn_egg": silly_cat_spawn_egg(), "trans_door": trans_door_item(), "trans_lantern": trans_lantern_item(),
@@ -3654,6 +3698,9 @@ def main():
     items.update(vegetation_items())
     for name, img in items.items():
         save(img, f"item/{name}.png")
+
+    save(trans_armor_layer("entity/equipment/humanoid/diamond.png"), "entity/equipment/humanoid/trans_crystal.png")
+    save(trans_armor_layer("entity/equipment/humanoid_leggings/diamond.png"), "entity/equipment/humanoid_leggings/trans_crystal.png")
 
 
     baker = trans_baker()

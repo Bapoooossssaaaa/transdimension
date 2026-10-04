@@ -91,7 +91,7 @@ Run from the repository root (needs `pip install pillow nbtlib`), in this order:
 6. `python3 tools/generate_fairy_realm.py`: the Fairy Sanctum and arena island templates, the sanctum's structure, pool, structure set, processor list, tags and `chests/fairy_sanctum`.
 7. `python3 tools/validate_resources.py /path/to/mcmeta-summary/registries/data.json`: cross-checks all of the above.
 
-Hand-made files the scripts don't touch: the cake models and blockstate, `chests/trans_bakery`, most of `chests/trans_house`, and the baker trades and trade sets.
+Hand-made files the scripts don't touch: the crystal tools' and armor's item definitions, item models and recipes, `equipment/trans_crystal.json`, the cake models and blockstate, `chests/trans_bakery`, most of `chests/trans_house`, and the baker trades and trade sets.
 
 ## Conventions
 
