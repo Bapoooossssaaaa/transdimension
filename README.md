@@ -8,7 +8,7 @@ A Fabric mod for **Minecraft Java 26.2** that adds the **Trans Realm**, a whole 
 
 ### The Trans Realm
 
-Overworld-style hills, caves, rivers and oceans with eighteen biomes. The ground is trans grass and dirt over soft grey trans stone, with trans deepslate further down, and rose granite, pearl diorite, sky andesite and trans gravel mixed in. All the vanilla ores are there too (coal, iron, copper, gold, redstone, lapis, diamond and emerald, in stone and deepslate versions), so you can live in the realm.
+Overworld-style hills, caves, rivers and oceans with twenty-three biomes. The ground is trans grass and dirt over soft grey trans stone, with trans deepslate further down, and rose granite, pearl diorite, sky andesite and trans gravel mixed in. All the vanilla ores are there too (coal, iron, copper, gold, redstone, lapis, diamond and emerald, in stone and deepslate versions), so you can live in the realm.
 
 | Biome | What it's like |
 | --- | --- |
@@ -28,8 +28,15 @@ Overworld-style hills, caves, rivers and oceans with eighteen biomes. The ground
 | Pastel River | Rivers of pink water. |
 | Crystal Caves | Deep caves lined with trans crystal clusters and geodes. |
 | Pastel Lush Caves | Pink and blue moss, cave vines, spore blossoms, the realm's flowers, and trans-coloured axolotls. |
+| Pride Flower Fields | Rolling fields of every flower in the realm, tall flowers and blossom hedges, with **heart trees**: blushwood trees whose crowns are big puffy hearts. |
+| Moonlit Meadow | Pale silver grass under drifting fireflies, glowing Starblooms, Forget-Me-Nots and frost flowers. |
+| Gumdrop Glade | Candy-pink grass, candy floss trees, wobbly mounds of pink and blue gel, and the **pastel slimes**. |
+| Pastel Reef | Warm shallow seas full of blush, sky and pearl coral reefs and trans fish. |
+| Blooming Caverns | Flower caves: floors of trans moss thick with flowers and glowing Starblooms, ceilings of flowering blush leaves hung with lanterns, spore blossoms. |
 
-- **Flowers.** Vanilla's flowers are replaced in the realm by its own: Trans Tulips, Pearl Daisies, Sky Bells, Flag Lilies, Lavender Puffs, Trans Orchids, Heart Blooms, the tall Pride Peony, Trans Petals and Pride Blossoms. All of them make dye and can be potted.
+- **Flowers.** Vanilla's flowers are replaced in the realm by its own: Trans Tulips, Pearl Daisies, Sky Bells, Flag Lilies, Lavender Puffs, Trans Orchids, Heart Blooms, Blush Carnations, Pearl Snowdrops, Forget-Me-Nots, Trans Roses, Fairy Bells and glowing **Starblooms**, the tall Pride Peony, Sky Delphinium, Blush Foxglove and Pearl Lupine, Trans Petals and Pride Blossoms. They make dye and the small ones can be potted. **Blossom, Bluebell and Pearl Hedges** are flowering leafy blocks for gardens.
+- **Plants.** Trans grass and tall grass (pink, blue and white blades), ferns, pastel bushes, firefly bushes with pink and blue fireflies, sugar grass in the dunes, trans seagrass, trans kelp, lily pads with a tiny flower, and three colours of coral (blush, sky and pearl) with fans, blocks and dead versions.
+- **Trees and woods.** Besides the trans wood there are four new woods, each with a full set (logs, wood, stripped, planks, stairs, slabs, fences, gates, doors, trapdoors, buttons, pressure plates, saplings): white **pearlwood**, blue **skywood**, lavender **twilight wood** and pink **blushwood**. Plant a blush sapling near flowers and it may grow into a heart tree.
 - **Water** is vanilla water recoloured per biome (blue seas, pink rivers, lavender crystal pools).
 - **Sky.** Its own day/night cycle: trans blue skies, pink fog, pink-and-blue sunrises and sunsets, and brighter stars at night.
 - **Clouds.** Heart-shaped, and they drift through the flag's exact colours in order: blue, pink, white, pink, blue. Normal clouds come back when you leave.
@@ -42,13 +49,19 @@ Somewhere high in the realm's sky floats a little island with a house on it: the
 **Maddie** lives there. Talk to her and a dialogue box opens with her portrait. Ask what she has for you and she gives you two gifts:
 
 - **Trans Wand.** Shoots a sparkling heart of trans magic that flies straight and does three hearts of damage. It never runs out.
-- **Trans Wings.** Wear them like an elytra, then:
+- **Trans Wings.** Big feathered bird wings, white at the shoulder through pink to blue at the tips. Wear them like an elytra, then:
   - **launch**: crouch on the ground to charge, then jump to shoot into the sky (about 25 blocks on a full charge). The wings unfold into a glide at the top.
   - **flap**: tap jump while gliding for a strong wingbeat up and forward. You have six flaps; landing refills them, and gliding earns one back every four seconds.
   - **soar**: you sink more slowly than with an elytra.
   - **hover**: crouch while gliding to brake and float gently down.
 
-  Falls and wall bumps don't hurt while you wear them. Other players see your feathered wings in third person, folded on your back, trembling while you charge, spread while you glide, and beating when you flap, with a sparkle trail behind you.
+  Falls and wall bumps don't hurt while you wear them. Other players see your wings in third person: neatly folded on your back, trembling while you charge, spread wide while you glide, beating up and down when you flap, with a sparkle trail behind you.
+
+### Creatures of the realm
+
+- **Trans fish** swim in schools in the realm's seas, rivers and reef: little fish striped like the flag, with a pearly face and a forked flag tail. Catch them in a bucket, or cook them.
+- **Trans endermen** replace the endermen in the realm: snow white with soft pink and blue blended in, glowing pink eyes, and light blue sparkles instead of purple ones. They behave like endermen (don't stare!) but leave blocks alone, and drop **Trans Pearls**, which you can throw like ender pearls.
+- **Pastel slimes** live in the Gumdrop Glade: pink and blue cubes with a sleepy little face and a clear jelly coat that squash and stretch as they bounce about. They're friendly. Feed them **Gumdrops** (pastel gel and sugar) to tame them: a tamed slime wears a bow, follows you around, sits when you use it with an empty hand, and two of them make a baby. They drop **pastel gel**, which also makes bouncy pink and blue **gel blocks**.
 
 ### The Silly Cat
 
@@ -68,7 +81,7 @@ Built from Minecraft's own plains village pieces, rebuilt in trans blocks: strip
 - **Trans Boat** and **Trans Boat with Chest**.
 - **Paintings:** two portraits of the Silly Cat, a trans heart, the realm's flag, a pastel sunrise, the Egg House, a crystal bloom and a plush party. They turn up when you place a painting anywhere.
 - **Trans wool** and carpet, moss and moss carpet, **Trans Lanterns**, **Trans Chairs** and **Trans Tables**.
-- **Trans Crystal.** Crystal ore glows faintly underground and in Crystal Groves. Crystals make a sword, pickaxe, axe, shovel, hoe and a full armor set, all slightly better than diamond.
+- **Trans Crystal.** A rare gem: its ore glows faintly deep underground (more of it under Crystal Groves and in the Crystal Caves). Nine make a Block of Trans Crystal, and with a Trans Pearl they make the Trans Crystal Pearls that open the Fairy Portal. The common **prism clusters** of the crystal caves drop **prism shards** for the decorative **Pastel Prism** block.
 - **The Trans Baker.** A villager profession whose job site is the Pride Oven. Bakers trade cookies, donuts, cupcakes, macarons, boba, cakes, crystals and lanterns.
 - **Treats:**
 
@@ -83,9 +96,17 @@ Built from Minecraft's own plains village pieces, rebuilt in trans blocks: strip
 
 - **Intro cinematic.** On arrival, a starry indigo screen unfurls a waving trans flag, a heart pops in with sparkles, "Welcome to the Trans Realm" types itself out, and a little bell jingle plays.
 
+### The endgame: the Fairy Realm
+
+1. **Find a Fairy Sanctum.** Somewhere in the Trans Realm a ring of pale pillars crowned with crystals stands around a glowing column: a moonlit shrine. A spiral staircase winds down beneath it into a domed hall, where twelve **Fairy Portal frames** ring a dais, like an end portal. Maddie's chest always holds a **map to a Fairy Sanctum** (village houses sometimes do too), and a **Trans Crystal Pearl** held up in the realm tugs you towards the nearest one and tells you roughly how far.
+2. **Light the portal.** Craft **Trans Crystal Pearls** (a Trans Pearl from a trans enderman plus a Trans Crystal) and set one into each empty frame. When all twelve glow, the middle fills with a shimmering pool of pink, lilac, blue and white light, swirling like opal and twinkling with stars.
+3. **The Fairy Realm.** Drop into the pool and you arrive on a lush floating island high above a sea of heart clouds, with more islands drifting all around. A path leads to a round arena paved in the flag's colours, ringed by crystal-topped pillars, with trees, flowers and a waterfall around it.
+4. **The Trans Fairy.** She waits above her altar: a fairy queen with long pink hair, a crystal tiara, a gown in the flag's stripes, a star wand and four glittering wings. She flies circles around the arena and fights back: volleys of sparkling hearts from her wand, swooping dives straight through you, ice crystals bursting out of the ground under your feet (watch for the swirling frost), and once she's hurt she calls trans endermen to help and rains hearts from the sky. Each third of her health makes her faster.
+5. **The prize.** Beat her and a portal home opens on the arena's north side. She drops the **Fairy Jar**: a trans glass jar with a lid, and inside it a little cube of light with wings that dances about, glowing pink, white and blue in turn. Put it anywhere in your builds. Offer a crystal pearl to the **Fairy Altar** in the arena to call her back for another round.
+
 ### Advancements
 
-The **Trans Dimension** tab has 33 advancements: exploring every biome, finding the Egg House, meeting Maddie and using her gifts (fly above Y 250!), petting Silly Cats, building beds that make a heart, crystal gear, the bakery's treats, collecting every flower and all nine plushes.
+The **Trans Dimension** tab has 45 advancements: exploring every biome, finding the Egg House, meeting Maddie and using her gifts (fly above Y 250!), petting Silly Cats, building beds that make a heart, finding crystals, the bakery's treats, collecting every flower and all nine plushes, heart trees and Starblooms, catching trans fish, taming pastel slimes, and the whole road to the Fairy Realm and its fairy.
 
 ## Playing
 
@@ -95,8 +116,9 @@ The **Trans Dimension** tab has 33 advancements: exploring every biome, finding 
 
 Some tips:
 - Villages spawn in **Trans Meadows**, **Frosted Fields** and **Sugar Dunes**. `/locate structure transdimension:trans_village` finds the nearest one.
-- Crystal ore appears in trans stone from deep underground up to y≈128.
-- Everything is in the **Trans Dimension** creative tab, including a Maddie spawn egg.
+- Trans crystal ore is rare and deep: dig below y≈16, ideally near the bottom of the world, or explore the Crystal Caves.
+- `/locate structure transdimension:fairy_sanctum` finds the nearest Fairy Sanctum.
+- Everything is in the **Trans Dimension** creative tab, including spawn eggs for Maddie, the realm's creatures and the Trans Fairy.
 - Playing with **BSL Shaders**? `extras/BSL_Trans_Realm.txt` is a trans preset: heart clouds in flag colours, the realm's own sky and fog, biome-coloured water, pink sunsets and lamplight. The instructions are at the top of the file.
 
 ## Building from source
@@ -120,20 +142,22 @@ Most of the assets and data are written by scripts in `tools/` (Python 3, with `
 | `generate_data.py` | Blockstates, models, item definitions, loot tables, recipes, tags, painting variants, advancements, `sounds.json` and the English text. |
 | `generate_worldgen.py` | Features, biomes, surface rules, noise settings, the dimension and the sky and cloud timelines. |
 | `generate_villages.py` | The trans village: structure templates (converted from the vanilla plains village), template pools, processors, the structure and its structure set. |
-| `generate_egg_house.py` | The Egg House island, read out of `Egg House!.zip`, and its structure, pool, structure set, loot and treasure map. |
+| `generate_egg_house.py` | The Egg House island, read out of `Egg House!.zip`, and its structure, pool, structure set, loot and treasure maps. |
+| `generate_fairy_realm.py` | The endgame's structures: the Fairy Sanctum (shrine, stairs and portal hall) and the Fairy Realm's arena island, plus the sanctum's worldgen files, tags and chest loot. |
 | `validate_resources.py` | Checks that everything above points at things that exist. Pass `mcmeta-summary/registries/data.json` from [misode/mcmeta](https://github.com/misode/mcmeta) (26.2 summary branch) to check vanilla ids too. |
 
 To restyle the mod, edit the palettes at the top of `generate_textures.py`, the biome table in `generate_worldgen.py` or the block swaps in `generate_villages.py` and `generate_egg_house.py`, then rerun the scripts. Maddie's lines are in `generate_data.py` (`MADDIE_DIALOGUE`). Baker trades live in `data/transdimension/villager_trade/` and `data/transdimension/trade_set/`.
 
 ## Notes and troubleshooting
 
-This was written against the real 26.2 APIs and checked against Fabric API 0.161.0's source, the Fabric docs reference mod, the 26.x porting primers and vanilla 26.2 data. Earlier versions compiled and loaded on 26.2; the newest code (beds, boats, plushes, Maddie, the wand and the wings) hasn't been compiled yet, because the cloud environment it was written in can't download Minecraft. `HANDOFF.md` lists the names that were least certain and what to try if one doesn't compile.
+This was written against the real 26.2 APIs and checked against Fabric API 0.161.0's source, the Fabric docs reference mod, the 26.x porting primers and vanilla 26.2 data. Earlier versions compiled and loaded on 26.2, and the round 3 features (beds, boats, plushes, Maddie, the wand, the wings) have been seen working in game. The newest code (round 4: the rebuilt wings, the new plants, woods and biomes, the creatures and the whole Fairy Realm) hasn't been compiled yet, because the cloud environment it was written in can't download Minecraft. `HANDOFF.md` lists the names that were least certain and what to try if one doesn't compile.
 
 Three features hook into game internals and are built to fail safely:
 
 - **Heart clouds** re-run the vanilla cloud loader with a redirected texture. If that ever stops matching, the log says "Could not swap in the heart clouds" and you get normal clouds.
 - **Mob recolouring** hooks `TextureManager#getTexture` with `require = 0`. If it doesn't match, mobs keep their normal look.
 - **Wing animations** hook the player renderer with `require = 0`. If it doesn't match, the wings still fly but aren't drawn.
+- **Trans endermen's sparkles** swap the enderman's portal particles with `require = 0`. If it doesn't match, they trail purple portal particles instead.
 
 ## License
 

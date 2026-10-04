@@ -6,7 +6,8 @@ State of the mod for whoever picks it up next (person or AI). The README covers 
 
 - Target: Minecraft Java **26.2**, Fabric Loader 0.19.5, Fabric API 0.161.0+26.2, Java 25. Mod id `transdimension`, package `dev.goober.transdimension`.
 - **Rounds 1 and 2 compiled and loaded.** The owner ran them on 26.2 next to Sodium, Iris and Xaero's maps. The first run hung on "Preparing for world creation" because the sky timeline repeated vanilla's time markers; commit 2e490ee fixed that.
-- **Round 3: the main source set compiles; the client source set may still have errors** (the owner builds locally and pastes them; fixes so far: `ChunkPos#pack`, a Fabric attachment for Maddie's gift flag, no `knockback` call, no `Options#hideGui`). Nothing in round 3 has been play-tested. The cloud environment can't download Gradle, Fabric's maven, Mojang's game files or a JDK 25 (see "Building in the cloud"). Every API was checked by hand against Fabric API's source, the fabric-docs reference mod for 26.2, the NeoForge 26.x porting primers and vanilla 26.2 data from misode/mcmeta. The names that couldn't be confirmed are listed under "Unverified APIs" with what to try instead.
+- **Round 3 compiles and runs**: the owner's screenshots show Maddie (in her new skin) and the wings in game.
+- **Round 4 (this round) has not been compiled.** It rebuilt the wings and added the new plants, woods, flowers, biomes, the three creatures and the whole Fairy Realm endgame (see "Round 4 at a glance"). The cloud environment can't download Gradle, Fabric's maven, Mojang's game files or a JDK 25 (see "Building in the cloud"). Every API was checked by hand against Fabric API's 26.2 source, NeoForge's 26.2 source patches (which quote vanilla 26.2 code around each patch), the NeoForge 26.x porting primers and vanilla 26.2 data from misode/mcmeta. The names that couldn't be confirmed are listed under "Unverified APIs (round 4)" with what to try instead; round 3's table is kept below it.
 - `python3 tools/validate_resources.py <mcmeta-summary>/registries/data.json` passes with 0 errors. That run covers resources and data, not Java.
 
 ## Round 3 at a glance
@@ -30,6 +31,28 @@ State of the mod for whoever picks it up next (person or AI). The README covers 
 | Flag-coloured clouds | `generate_worldgen.py` `generate_cloud_timeline()` |
 | Advancement tab | `generate_data.py` `generate_advancements()` |
 
+## Round 4 at a glance
+
+| Area | Where |
+| --- | --- |
+| Quick fixes: trans sand smelts into trans glass (it left `#minecraft:smelts_to_glass`, which vanilla's glass recipe uses), blue tops on trans wool, Maddie's skin from `maddieskintexture.png`, the Egg House ten times rarer (152/76 chunk grid) | `generate_data.py`, `generate_textures.py` (`trans_wool_top`, `MADDIE_SKIN`), `generate_egg_house.py` |
+| Trans Wings rebuilt: feathered bird wings with a clean fold, up-and-down wingbeats; capes hidden while wearing them | `client/wings/TransWingsModel`, `WingPose`, `WingAnimations`; texture `trans_wings_model_texture()`; `TransDimensionClient` (`ALLOW_CAPE_RENDER`) |
+| Trans crystals: a rare deep ore, gear removed; prism clusters drop prism shards; Pastel Prism block | `ModItems`, `ModBlocks`, `generate_worldgen.py` crystal ores, `generate_data.py` |
+| Vegetation: trans grass/ferns/bushes/firefly bushes/sugar grass, seagrass, kelp, lily pads, blush/sky/pearl corals | `ModBlocks` (`coral()`), `block/TransGrassPlantBlock`, `TransSeagrassBlock`, `TransKelpBlock`, `TransKelpPlantBlock`, `world/TransCoralReefFeature`, `generate_data.py` `generate_vegetation()` |
+| Four wood families (pearl, sky, twilight, blush), heart trees, new flowers, tall flowers, hedges, flowering blush leaves | `ModBlocks.WoodFamily`/`woodFamily()`, `world/HeartTreeFeature`, `generate_data.py` `generate_woods_and_flowers()` |
+| Five biomes: Pride Flower Fields, Moonlit Meadow, Gumdrop Glade, Pastel Reef, Blooming Caverns (a cave biome) | `generate_worldgen.py` (`land_biome`, `generate_biomes`) |
+| Trans fish, trans enderman, pastel slime pets, gel blocks, gumdrops, trans pearls | `entity/TransFish`, `TransEnderman`, `PastelSlime`, `mixin/EnderManMixin`; `client/entity/*Fish*`, `*Enderman*`, `*PastelSlime*`; `generate_data.py` `generate_creatures()`; `generate_textures.py` `creature_textures()` |
+| The endgame: Fairy Sanctums, the Fairy Portal, the Fairy Realm, the Trans Fairy, the Fairy Jar | see "How the Fairy Realm works" |
+
+### How the Fairy Realm works
+
+- **Sanctums.** `generate_fairy_realm.py` builds `structure/fairy_sanctum.nbt` (33x41x41: a shrine on top, a spiral staircase, a domed hall with the frames) and a one-piece jigsaw structure whose template y 33 lands on the first free block above the ground (`start_height` -33 with `project_start_to_heightmap`), `random_spread` 56/24 chunks, `terrain_adaptation: none`. The processor list `fairy_sanctum` fills about one frame in eight with a pearl. Maps: `#transdimension:fairy_sanctums` (Maddie's chest always, village house chests one in twelve, both written by `generate_egg_house.py`). `item/TransCrystalPearlItem` finds the nearest one with `ChunkGenerator#findNearestMapStructure` and points the way.
+- **The portal.** `block/FairyPortalFrameBlock` takes a pearl (`useItemOn`), then `FairyRealm.tryOpenPortal` looks for a complete ring of twelve filled frames around a 3x3 hole (end portal layout) and fills it with `block/FairyPortalBlock`, which implements vanilla's `Portal` (`entity.setAsInsidePortal`), so travel works like the end portal for every entity. `FairyRealm.portalDestination` sends you to the Fairy Realm, remembering the portal you used (`ModAttachments.FAIRY_RETURN`), or from there back beside that portal.
+- **The realm.** `dimension/fairy_realm.json` is a flat world of air whose one biome (`fairy_realm`) only places `FairyIslandFeature` islands (none within 96 blocks of 0,0). The dimension type copies the Trans Realm's (same timelines, so the same sky) with clouds at y 72, below the islands. The client treats it as "in the realm" for the heart clouds and mob colours, and plays the intro with a Fairy Realm title.
+- **The arena.** The first arrival (or any player arriving by other means, through `ServerEntityLevelChangeEvents`) places `structure/fairy_realm/arena_island.nbt` at (-36, 84, -36) and calls the Trans Fairy; `FairyRealmState` (a level attachment) remembers that it's built and whether she's been beaten. `ARENA_*` in the script and the constants in `world/FairyRealm` must agree. On peaceful the portal home opens at once.
+- **The boss.** `entity/TransFairy` is a `Monster` that flies by setting its own velocity (`travel` is overridden) and runs a small state machine in `customServerAiStep`: hover (orbit around her home), volley (`TransMagicBolt`s), swoop, spikes (`entity/FairyCrystalSpike`, like evoker fangs), summon (trans endermen) and starfall, with three phases by health. The synced `ACTION` drives the model's poses. On death `FairyRealm.onFairyDefeated` opens the portal home; her loot table drops the Fairy Jar. The `fairy_altar` re-summons her for a crystal pearl.
+- **Rendering.** `TransFairyModel` has two layer definitions with the same parts: the solid body and a glow layer (wings and wand star) that `TransFairyGlowLayer` draws translucent and full bright. The crystal spike and the jar's light (a block entity renderer, `client/block/FairyJarRenderer`) are drawn full bright too.
+
 ### How the plushes work
 
 Village houses carry an invisible `plush_spot` block (a corner of the room, facing in; `generate_villages.py` puts one in 22 of the 36 house pieces). It has a ticking block entity. On its first tick the server looks up the trans village whose piece it sits in, then checks the realm level's `PlushLedger` (a persistent Fabric attachment). If that village has no plush yet, the spot turns into one, choosing among the cats handed out least so far, and the village is recorded. Otherwise the spot turns into air. So every village gets exactly one plush, in whichever house loads first, and the first nine villages give nine different cats. The ledger stores indexes into `ModBlocks.PLUSHES`: only ever append to that list.
@@ -40,11 +63,17 @@ Village houses carry an invisible `plush_spot` block (a corner of the room, faci
 
 When the island is placed, the item frames may log "Hanging entity at invalid position" once: their saved block position points at the original world. Placement moves them to the right spot anyway.
 
+### How the mobs work
+
+- **Trans fish** extend vanilla's `Cod` (schooling, flopping, bucketing) with their own model and bucket item.
+- **Trans endermen** extend `EnderMan` without the block-carrying goals. `EnderManMixin` swaps the portal particles in `aiStep` for light blue dust (`require = 0`); `handleEntityEvent(46)` makes the teleport burst. Their glowing eyes are a second, slightly bigger head drawn full bright (`TransEndermanModel.createEyesLayer`).
+- **Pastel slimes** are `TamableAnimal`s that only move by hopping: `travel` is ignored on the ground except on the tick they jump, and `jumpFromGround` pushes them towards where they're going. `squish` drives the squash-and-stretch in the model; a second model draws the translucent jelly coat.
+
 ### How the wings work
 
 Player movement is client side, so `WingsController` (client) reads the jump and sneak keys and changes the player's velocity: charge and launch, flap, softer glide, hover. It sends a `WingActionPayload` for each action. The server (`TransWings.handleAction`) checks the wings are worn, starts the glide after a launch (`tryToStartFallFlying`), plays sounds and particles, and relays a `WingFlapPayload` to players tracking the flyer so their client plays the flap animation. `RealmEvents` cancels fall and fly-into-wall damage for wearers.
 
-The wings are an equippable chest item with the `glider` component and no equipment asset, so vanilla draws nothing. `AvatarRendererMixin` puts a `WingPose` on each player's render state (from `WingAnimations`, which eases the spread and times flaps per entity id), and `TransWingsLayer` (added to every `AvatarRenderer` through `LivingEntityRenderLayerRegistrationCallback`) draws `TransWingsModel` on the body.
+The wings are an equippable chest item with the `glider` component and no equipment asset, so vanilla draws nothing. `AvatarRendererMixin` puts a `WingPose` on each player's render state (from `WingAnimations`, which eases the spread and times flaps per entity id), and `TransWingsLayer` (added to every `AvatarRenderer` through `LivingEntityRenderLayerRegistrationCallback`) draws `TransWingsModel` on the body. Since round 4 each wing is an arm bone, a hand bone and overlapping feather planes; folded, the feathers lie flat along the back without crossing the body, and a flap swings the whole wing up and down. Players wearing them don't show their cape.
 
 ### Clouds
 
@@ -58,10 +87,11 @@ Run from the repository root (needs `pip install pillow nbtlib`), in this order:
 2. `python3 tools/generate_data.py`: blockstates, models, item definitions, loot tables, recipes, block/item/entity/painting tags, painting variants, advancements (it wipes the advancement folder), `sounds.json` and `en_us.json`. It wipes and rewrites `data/minecraft/tags/` except `worldgen`, plus our block and item tags.
 3. `python3 tools/generate_worldgen.py`: features, biomes (it wipes the biome folder), surface rules, noise settings, the dimension, the dimension type and the timelines. Placed features of all biomes are sorted by one global `FEATURE_RANK` list, because Minecraft crashes on inconsistent feature order. New features must be added there.
 4. `python3 tools/generate_villages.py`: everything under `structure/village/trans`, `worldgen/template_pool/village/trans`, the processor lists, the village structure and structure set, the village biome tag and `#minecraft:village`.
-5. `python3 tools/generate_egg_house.py`: the island template, its pool, structure, structure set, biome tag, map tag, `chests/egg_house` and the map pool in `chests/trans_house`.
-6. `python3 tools/validate_resources.py /path/to/mcmeta-summary/registries/data.json`: cross-checks all of the above.
+5. `python3 tools/generate_egg_house.py`: the island template, its pool, structure, structure set, biome tag, map tag, `chests/egg_house` and the map pools (Egg House and Fairy Sanctum maps) in `chests/trans_house`.
+6. `python3 tools/generate_fairy_realm.py`: the Fairy Sanctum and arena island templates, the sanctum's structure, pool, structure set, processor list, tags and `chests/fairy_sanctum`.
+7. `python3 tools/validate_resources.py /path/to/mcmeta-summary/registries/data.json`: cross-checks all of the above.
 
-Hand-made files the scripts don't touch: the cake models and blockstate, `equipment/trans_crystal.json`, `chests/trans_bakery`, most of `chests/trans_house`, and the baker trades and trade sets.
+Hand-made files the scripts don't touch: the cake models and blockstate, `chests/trans_bakery`, most of `chests/trans_house`, and the baker trades and trade sets.
 
 ## Conventions
 
@@ -69,6 +99,26 @@ Hand-made files the scripts don't touch: the cake models and blockstate, `equipm
 - Every block needs a blockstate, an item definition (unless registered without an item), a model, a name, a loot table, mining tags and a texture made by the texture script. The validator reports any that are missing.
 - Hooks into game internals fail safe: mixins use `require = 0`, and reflection is wrapped in try/catch with a disable flag.
 - The owner's photos are not in the repository; only the 48x48 pixelated versions in `tools/art/` are.
+
+## Unverified APIs (round 4)
+
+Checked against NeoForge's 26.2 patches where they quote the code, otherwise from the primers and 1.21.x. If the build fails, look here first.
+
+| Where | API | If it doesn't compile |
+| --- | --- | --- |
+| `PastelSlime` | `TamableAnimal.createAnimalAttributes()`, `FollowOwnerGoal(TamableAnimal, double, float, float)`, `SitWhenOrderedToGoal`, `BreedGoal`, `tame(Player)`, `isOwnedBy`, `getOwner()`, `isInSittingPose()`, `public void jumpFromGround()`, `public void travel(Vec3)`, `Path#getEndNode()`, `getSpeed()` | `mobInteract` is public on animals (confirmed by the 26.2 Sheep patch). If `jumpFromGround` is protected, the public override still compiles. |
+| `TransEnderman`, `EnderManMixin` | `EnderMan::createAttributes`, `GoalSelector#removeAllGoals(Predicate)`, `isCreepy()`, the `Level#addParticle` call in `EnderMan#aiStep` | The mixin is `require = 0`: worst case the sparkles are purple. |
+| `TransFish`, `ModItems` | `Cod#getBucketItemStack`, `MobBucketItem(EntityType, Fluid, SoundEvent, Properties)`, `DataComponents.BUCKET_ENTITY_DATA` with `CustomData.EMPTY`, `EnderpearlItem::new`, `Consumable.Builder#consumeSeconds` | Copy vanilla's `COD_BUCKET` and `ENDER_PEARL` entries in `Items`. |
+| `ModEntities` | `WaterAnimal::checkSurfaceWaterAnimalSpawnRules`, `AbstractFish::createAttributes`, `Monster::checkMonsterSpawnRules`, `Animal::checkAnimalSpawnRules`, `EntityType.Builder#fireImmune` | Vanilla's `SpawnPlacements` lists the matching predicates. |
+| Mob renderers | `LivingEntityRenderState#isInWater`/`isBaby` (confirmed), `ModelPart#xScale/yScale/zScale`, `LivingEntityRenderer.getOverlayCoords`, `RenderTypes.entityTranslucent(Identifier)` (`net.minecraft.client.renderer.rendertype`) | The scale fields are what keyframe animations use; `getOverlayCoords` can become `OverlayTexture.NO_OVERLAY`. |
+| `TransFairy` | `ServerBossEvent(UUID, Component, BossBarColor, BossBarOverlay)` (26.1 added the UUID), `Mth.createInsecureUUID`, `xpReward`, `customServerAiStep(ServerLevel)`, `onSyncedDataUpdated`, `startSeenByPlayer`/`stopSeenByPlayer`, `hurtMarked` (renamed in 26.3, so it exists in 26.2) | |
+| `FairyCrystalSpike` | a plain `Entity` with `hurtServer`, `readAdditionalSaveData(ValueInput)`/`addAdditionalSaveData(ValueOutput)`; `ServerLevel#getEntity(UUID)`; `MobEffects.SLOWNESS` | Same shape as vanilla's `EvokerFangs`. |
+| `FairyPortalBlock`, `FairyPortalFrameBlock`, `FairyAltarBlock` | `Portal` (`getPortalDestination(ServerLevel, Entity, BlockPos)`), `Entity#canUsePortal`, `setAsInsidePortal`; `entityInside(..., InsideBlockEffectApplier, boolean)` and `useItemOn(...)` (both confirmed) | Compare with vanilla's `EndPortalBlock`. Without `Portal`, teleport the player from `entityInside` on the next server tick (`server.execute`). |
+| `FairyRealm` | `ServerLevel#getStructureManager().get(Identifier)` (26.3 renames it), `StructureTemplate#placeInWorld(level, pos, pivot, settings, random, flags)`, `ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL` (confirmed in Fabric) | |
+| `TransCrystalPearlItem` | `ChunkGenerator#findNearestMapStructure(ServerLevel, HolderSet, BlockPos, int, boolean)` returning a `Pair`, `HolderLookup#get(TagKey)`, `ItemCooldowns#addCooldown(ItemStack, int)` | Without it, the pearl can just send its "quiet" message; the maps still lead to sanctums. |
+| `FairyIslandFeature` | `Registry#get(ResourceKey)` returning a holder, `ConfiguredFeature#place(level, generator, random, pos)` | |
+| `FairyJarRenderer` | the 26.x block entity renderer shape: `BlockEntityRenderer<T, S extends BlockEntityRenderState>` with `createRenderState`, `extractRenderState(T, S, float, Vec3, ModelFeatureRenderer.CrumblingOverlay)`, `submit(S, PoseStack, SubmitNodeCollector, CameraRenderState)`; `Model<S>(ModelPart, Function<Identifier, RenderType>)`; `BlockEntityRenderers.register` (made public by Fabric's transitive access wideners) | If the light won't compile, drop the renderer registration: the jar still shows, just without its light. |
+| `TransIntroOverlay`, client | `CameraRenderState` is in `net.minecraft.client.renderer.state.level` (from Fabric's 26.2 tests) | |
 
 ## Unverified APIs (round 3)
 
@@ -93,7 +143,8 @@ Earlier rounds' uncertain names (`SnowyBlock`, `UntintedParticleLeavesBlock`, `A
 
 ## Things that would be nice next
 
-- **Compile and play-test round 3.** Look first at: the wings in flight (launch height, flap strength, how the hover feels), the wing model's poses and texture orientation in third person, Maddie's dialogue box layout at small GUI scales, the plush spot turning into a plush when a village loads, the Egg House island in the sky, and the trans bed heart.
+- **Compile and play-test round 4.** Look first at: the Trans Fairy fight (her orbit height, how hard the volleys and spikes hit, whether swoops feel fair), the arena island and the portal home appearing after the fight, the Fairy Sanctum's spiral staircase and how often sanctums turn up, the crystal pearl's tug, the pastel slimes' hopping, the trans enderman's eyes, the fairy jar's light, and the new wings in flight.
+- Boss music for the fairy fight (vanilla only plays boss music in the End).
 - Real sound effects for the Silly Cat, the Pride Oven and the wings (now vanilla sounds re-pitched).
 - A Silly Cat that can be tamed or bred.
 - Villages in more biomes (Pastel Peaks and the forests are left out on purpose: steep or crowded).
