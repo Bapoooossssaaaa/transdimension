@@ -34,9 +34,9 @@ The cloud environment can't download Minecraft or Fabric, so **the owner builds 
 
 ## Status (latest first)
 
-- **Round 4: both source sets get through javac's name checks** (the last errors, `displayClientMessage` and `entityCutoutNoCull`, are fixed); a full `gradlew build` and play-testing are next. Round 4 added: rebuilt wings, trans vegetation, four woods, new flowers and biomes, crystals as a rare gem, trans fish, trans endermen, pastel slime pets, and the Fairy Realm endgame (sanctums, portal, the Trans Fairy boss, the fairy jar). Mixin targets and reflection are only checked when the game starts.
+- **Round 4 builds**: `gradlew build` passes (the last errors were `displayClientMessage` and `entityCutoutNoCull`). Play-testing is next. Round 4 added: rebuilt wings, trans vegetation, four woods, new flowers and biomes, crystals as a rare gem, trans fish, trans endermen, pastel slime pets, and the Fairy Realm endgame (sanctums, portal, the Trans Fairy boss, the fairy jar). Mixin targets and reflection are only checked when the game starts.
 - Recent work: the BSL preset; the clouds now use the flag's exact blue `#5BCEFA` and pink `#F5A9B8`.
-- Round 3 (beds, boats, plushes, Maddie, wand, wings, Egg House, paintings, advancements) is written. Its code now gets through javac along with round 4. Nothing in round 3 has been play-tested.
+- Round 3 (beds, boats, plushes, Maddie, wand, wings, Egg House, paintings, advancements) is written. It builds along with round 4. Nothing in round 3 has been play-tested.
 - Rounds 1 and 2 compiled and ran on 26.2 next to Sodium, Iris and Xaero's maps.
 
 ## Rules
