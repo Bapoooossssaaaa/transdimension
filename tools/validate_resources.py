@@ -394,6 +394,15 @@ for f in walk_json(os.path.join(WG, "configured_feature")):
             if isinstance(r, str) and not placed_exists(r):
                 err(f"{os.path.relpath(f, ROOT)}: unknown placed feature {r}")
 
+# Our entity ids, from ModEntities (every TransDimension.id("...") there is an entity type).
+ENTITIES = set(re.findall(r'TransDimension\.id\("([a-z0-9_]+)"\)',
+                          open(os.path.join(JAVA, "registry", "ModEntities.java"), encoding="utf-8").read()))
+
+
+def entity_exists(ident):
+    return path_of(ident) in ENTITIES if is_ours(ident) else vanilla_has("entity_type", ident)
+
+
 for f in walk_json(os.path.join(WG, "biome")):
     d = load(f)
     if not d:
@@ -408,7 +417,7 @@ for f in walk_json(os.path.join(WG, "biome")):
     for group in d["spawners"].values():
         for sp in group:
             t = sp["type"]
-            if not (is_ours(t) and path_of(t) == "silly_cat") and not vanilla_has("entity_type", t):
+            if not entity_exists(t):
                 err(f"{rel}: unknown entity {t}")
     for part in d["attributes"].get("minecraft:visual/ambient_particles", []):
         if not vanilla_has("particle_type", part["particle"]["type"]):
@@ -425,10 +434,6 @@ if dim:
             err(f"dimension: unknown biome {b}")
 
 # ------------------------------------------------------------------ villages: structures, pools, templates
-ENTITIES = set(re.findall(r'TransDimension\.id\("([a-z0-9_]+)"\)',
-                          open(os.path.join(JAVA, "registry", "ModEntities.java"), encoding="utf-8").read()))
-
-
 def ours_or_vanilla(ident, folder, registry, ext=".json"):
     ns, path = ident.split(":", 1) if ":" in ident else ("minecraft", ident)
     if ns == NS:
@@ -438,10 +443,6 @@ def ours_or_vanilla(ident, folder, registry, ext=".json"):
 
 def pool_exists(ident):
     return ident == "minecraft:empty" or ours_or_vanilla(ident, "worldgen/template_pool", "worldgen/template_pool")
-
-
-def entity_exists(ident):
-    return path_of(ident) in ENTITIES if is_ours(ident) else vanilla_has("entity_type", ident)
 
 
 def biome_tag_ok(tag):

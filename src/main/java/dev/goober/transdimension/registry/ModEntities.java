@@ -8,6 +8,11 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.SpawnPlacementTypes;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.fish.AbstractFish;
+import net.minecraft.world.entity.animal.fish.WaterAnimal;
+import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.vehicle.boat.Boat;
 import net.minecraft.world.entity.vehicle.boat.ChestBoat;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -16,10 +21,13 @@ import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityType;
 
 import dev.goober.transdimension.TransDimension;
 import dev.goober.transdimension.entity.Maddie;
+import dev.goober.transdimension.entity.PastelSlime;
 import dev.goober.transdimension.entity.SillyCat;
+import dev.goober.transdimension.entity.TransEnderman;
+import dev.goober.transdimension.entity.TransFish;
 import dev.goober.transdimension.entity.TransMagicBolt;
 
-/** Entity types. The Silly Cat spawns naturally through the biome JSON spawn lists. */
+/** Entity types. The realm's creatures spawn naturally through the biome JSON spawn lists. */
 public final class ModEntities {
 	public static final ResourceKey<EntityType<?>> SILLY_CAT_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("silly_cat"));
 
@@ -30,6 +38,39 @@ public final class ModEntities {
 					.sized(0.6F, 0.7F)
 					.clientTrackingRange(8)
 					.build(SILLY_CAT_KEY));
+
+	public static final ResourceKey<EntityType<?>> TRANS_FISH_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("trans_fish"));
+	public static final ResourceKey<EntityType<?>> TRANS_ENDERMAN_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("trans_enderman"));
+	public static final ResourceKey<EntityType<?>> PASTEL_SLIME_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("pastel_slime"));
+
+	/** Flag-striped schooling fish of the realm's seas and rivers; sized, spawned and bucketed like a cod. */
+	public static final EntityType<TransFish> TRANS_FISH = Registry.register(BuiltInRegistries.ENTITY_TYPE, TRANS_FISH_KEY,
+			FabricEntityType.Builder.createMob(TransFish::new, MobCategory.WATER_AMBIENT, mob -> mob
+							.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+									WaterAnimal::checkSurfaceWaterAnimalSpawnRules)
+							.defaultAttributes(AbstractFish::createAttributes))
+					.sized(0.5F, 0.3F)
+					.eyeHeight(0.195F)
+					.clientTrackingRange(4)
+					.build(TRANS_FISH_KEY));
+	/** The realm's white enderman; it replaces the vanilla enderman in the realm's spawn lists. */
+	public static final EntityType<TransEnderman> TRANS_ENDERMAN = Registry.register(BuiltInRegistries.ENTITY_TYPE, TRANS_ENDERMAN_KEY,
+			FabricEntityType.Builder.createMob(TransEnderman::new, MobCategory.MONSTER, mob -> mob
+							.spawnPlacement(SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules)
+							.defaultAttributes(EnderMan::createAttributes))
+					.sized(0.6F, 2.9F)
+					.eyeHeight(2.55F)
+					.clientTrackingRange(8)
+					.build(TRANS_ENDERMAN_KEY));
+	/** Pink and blue pet slimes of the Gumdrop Glade. */
+	public static final EntityType<PastelSlime> PASTEL_SLIME = Registry.register(BuiltInRegistries.ENTITY_TYPE, PASTEL_SLIME_KEY,
+			FabricEntityType.Builder.createMob(PastelSlime::new, MobCategory.CREATURE, mob -> mob
+							.spawnPlacement(SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Animal::checkAnimalSpawnRules)
+							.defaultAttributes(PastelSlime::createAttributes))
+					.sized(0.8F, 0.8F)
+					.eyeHeight(0.5F)
+					.clientTrackingRange(10)
+					.build(PASTEL_SLIME_KEY));
 
 	public static final ResourceKey<EntityType<?>> TRANS_BOAT_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("trans_boat"));
 	public static final ResourceKey<EntityType<?>> TRANS_CHEST_BOAT_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("trans_chest_boat"));

@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:cooked_trans_fish",
+    "transdimension:trans_fish"
+  ]
+}

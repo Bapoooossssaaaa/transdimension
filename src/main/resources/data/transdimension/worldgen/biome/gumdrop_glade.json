@@ -82,7 +82,9 @@
       "transdimension:heart_blooms",
       "transdimension:trans_petals_meadow",
       "transdimension:trans_grass_plain",
-      "transdimension:pastel_bushes"
+      "transdimension:pastel_bushes",
+      "transdimension:pink_gel_mounds",
+      "transdimension:blue_gel_mounds"
     ],
     []
   ],
@@ -100,22 +102,28 @@
     "axolotls": [],
     "creature": [
       {
+        "type": "transdimension:pastel_slime",
+        "maxCount": 4,
+        "minCount": 2,
+        "weight": 16
+      },
+      {
         "type": "minecraft:rabbit",
         "maxCount": 3,
         "minCount": 2,
-        "weight": 6
+        "weight": 4
       },
       {
         "type": "minecraft:chicken",
         "maxCount": 4,
         "minCount": 4,
-        "weight": 6
+        "weight": 4
       },
       {
         "type": "transdimension:silly_cat",
         "maxCount": 2,
         "minCount": 1,
-        "weight": 6
+        "weight": 4
       }
     ],
     "misc": [],
@@ -157,7 +165,7 @@
         "weight": 100
       },
       {
-        "type": "minecraft:enderman",
+        "type": "transdimension:trans_enderman",
         "maxCount": 4,
         "minCount": 1,
         "weight": 10

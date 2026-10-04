@@ -518,6 +518,14 @@ def generate_features():
         "state": state("trans_cobblestone")}})
     pf("trans_boulders", f"{NS}:trans_boulder", [{"type": "minecraft:rarity_filter", "chance": 3}, {"type": "minecraft:in_square"},
                                                  {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"}, {"type": "minecraft:biome"}])
+    # Wobbly mounds of pink and blue gel in the Gumdrop Glade, where the pastel slimes live.
+    for colour in ("pink", "blue"):
+        cf(f"{colour}_gel_mound", {"type": "minecraft:block_blob", "config": {
+            "can_place_on": {"type": "minecraft:matching_block_tag", "tag": "minecraft:forest_rock_can_place_on"},
+            "state": state(f"{colour}_gel_block")}})
+        pf(f"{colour}_gel_mounds", f"{NS}:{colour}_gel_mound", [
+            {"type": "minecraft:rarity_filter", "chance": 4}, {"type": "minecraft:in_square"},
+            {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"}, {"type": "minecraft:biome"}])
 
 
 # ============================================================================================ vanilla ores
@@ -581,7 +589,7 @@ def spawn(entity, weight, lo, hi):
 
 MONSTERS = [spawn("minecraft:spider", 100, 4, 4), spawn("minecraft:zombie", 95, 4, 4), spawn("minecraft:zombie_villager", 5, 1, 1),
             spawn("minecraft:skeleton", 100, 4, 4), spawn("minecraft:creeper", 100, 4, 4), spawn("minecraft:slime", 100, 4, 4),
-            spawn("minecraft:enderman", 10, 1, 4), spawn("minecraft:witch", 5, 1, 1)]
+            spawn("trans_enderman", 10, 1, 4), spawn("minecraft:witch", 5, 1, 1)]
 OCEAN_MONSTERS = [spawn("minecraft:drowned", 100, 1, 1)] + [m for m in MONSTERS if m["type"] != "minecraft:slime"]
 BATS = [spawn("minecraft:bat", 10, 8, 8)]
 
@@ -675,7 +683,7 @@ def generate_biomes():
                         f"{NS}:trans_crystal_spikes_rare", local=["minecraft:fossil_upper"]),
           creatures=[spawn("minecraft:rabbit", 4, 2, 3), spawn("minecraft:camel", 1, 1, 1)],
           monsters=[spawn("minecraft:spider", 100, 4, 4), spawn("minecraft:husk", 95, 4, 4), spawn("minecraft:skeleton", 100, 4, 4),
-                    spawn("minecraft:creeper", 100, 4, 4), spawn("minecraft:enderman", 10, 1, 4), spawn("minecraft:witch", 5, 1, 1)])
+                    spawn("minecraft:creeper", 100, 4, 4), spawn("trans_enderman", 10, 1, 4), spawn("minecraft:witch", 5, 1, 1)])
 
     biome("lavender_marsh", temperature=0.8, downfall=0.9, grass="#b9a8e0", foliage="#a898d8", water="#7aa8e8", water_fog="#3a4a80",
           sky="#afa6f0", fog="#c8b8f0", music_sound="minecraft:music.overworld.swamp",
@@ -685,7 +693,7 @@ def generate_biomes():
                         "minecraft:patch_sugar_cane_swamp", "minecraft:brown_mushroom_swamp", "minecraft:red_mushroom_swamp",
                         f"{NS}:trans_firefly_bushes_swamp", f"{NS}:trans_grass_normal"),
           creatures=[spawn("minecraft:frog", 10, 2, 5), spawn("silly_cat", 4, 1, 2)],
-          water_ambient=[spawn("minecraft:tropical_fish", 4, 1, 3)])
+          water_ambient=[spawn("trans_fish", 8, 2, 4), spawn("minecraft:tropical_fish", 4, 1, 3)])
 
     biome("frosted_fields", temperature=-0.3, downfall=0.5, grass="#d6eeff", foliage="#cfe8ff", water="#9be3fc", water_fog="#3d8fc0",
           sky="#cde8ff", fog="#eaf4ff", music_sound="minecraft:music.overworld.grove",
@@ -723,18 +731,20 @@ def generate_biomes():
           features={**ocean_floor, 9: [f"{NS}:trans_coral_reefs_rare", f"{NS}:trans_seagrass_warm", "minecraft:sea_pickle", f"{NS}:trans_kelp_warm"]},
           creatures=[], monsters=OCEAN_MONSTERS,
           water_creatures=[spawn("minecraft:squid", 4, 1, 4), spawn("minecraft:dolphin", 2, 1, 2)],
-          water_ambient=[spawn("minecraft:tropical_fish", 25, 8, 8), spawn("minecraft:cod", 10, 3, 6), spawn("minecraft:pufferfish", 5, 1, 3)])
+          water_ambient=[spawn("trans_fish", 20, 3, 6), spawn("minecraft:tropical_fish", 25, 8, 8), spawn("minecraft:cod", 6, 3, 6),
+                         spawn("minecraft:pufferfish", 5, 1, 3)])
     biome("deep_trans_ocean", temperature=0.5, downfall=0.5, grass="#f5a9b8", foliage="#f5a9b8", water="#3e9fd8", water_fog="#0f3f78",
           sky="#7fd4fa", fog="#f7d0d8", music_sound="minecraft:music.game", underwater_music=True,
           features={**ocean_floor, 9: [f"{NS}:trans_seagrass_deep", f"{NS}:trans_kelp_cold"]},
           creatures=[], monsters=OCEAN_MONSTERS,
           water_creatures=[spawn("minecraft:squid", 6, 1, 4), spawn("minecraft:dolphin", 1, 1, 2)],
-          water_ambient=[spawn("minecraft:cod", 10, 3, 6), spawn("minecraft:salmon", 5, 1, 5)],
+          water_ambient=[spawn("trans_fish", 12, 3, 6), spawn("minecraft:cod", 8, 3, 6), spawn("minecraft:salmon", 5, 1, 5)],
           underground_water=[spawn("minecraft:glow_squid", 10, 4, 6)])
     biome("trans_river", temperature=0.6, downfall=0.6, grass="#f5a9b8", foliage="#f5a9b8", water="#f5a9b8", water_fog="#c86a88",
           sky="#8ed8fa", fog="#f7c4cf", music_sound="minecraft:music.overworld.meadow",
           features={**ocean_floor, 9: [f"{NS}:trans_seagrass_river", "minecraft:patch_sugar_cane", f"{NS}:trans_lily_pads"]},
-          creatures=[], water_creatures=[spawn("minecraft:squid", 2, 1, 4)], water_ambient=[spawn("minecraft:salmon", 5, 1, 5)])
+          creatures=[], water_creatures=[spawn("minecraft:squid", 2, 1, 4)],
+          water_ambient=[spawn("trans_fish", 10, 2, 5), spawn("minecraft:salmon", 5, 1, 5)])
 
     # ---- themed forests
     biome("pearlwood_forest", temperature=0.3, downfall=0.6, grass="#eef0ff", foliage="#ffffff", water="#a6e1fa", water_fog="#4a8fc0",
@@ -781,14 +791,15 @@ def generate_biomes():
           sky="#bfe6ff", fog="#ffe0f0", music_sound="minecraft:music.overworld.cherry_grove",
           particles=particles("minecraft:cherry_leaves", 0.001),
           features=land(f"{NS}:trees_candy_floss_grove", f"{NS}:pastel_bushes", f"{NS}:heart_blooms", f"{NS}:trans_petals_meadow",
-                        f"{NS}:trans_grass_plain"),
-          creatures=[spawn("minecraft:rabbit", 6, 2, 3), spawn("minecraft:chicken", 6, 4, 4), spawn("silly_cat", 6, 1, 2)])
+                        f"{NS}:trans_grass_plain", f"{NS}:pink_gel_mounds", f"{NS}:blue_gel_mounds"),
+          creatures=[spawn("pastel_slime", 16, 2, 4), spawn("minecraft:rabbit", 4, 2, 3), spawn("minecraft:chicken", 4, 4, 4),
+                     spawn("silly_cat", 4, 1, 2)])
     biome("pastel_reef", temperature=0.8, downfall=0.5, grass="#f5a9b8", foliage="#f5a9b8", water="#6fe0f2", water_fog="#1f9fb8",
           sky="#7fd4fa", fog="#f7d0d8", music_sound="minecraft:music.game", underwater_music=True,
           features={**ocean_floor, 9: [f"{NS}:trans_coral_reefs_dense", f"{NS}:trans_seagrass_warm", "minecraft:sea_pickle"]},
           creatures=[], monsters=OCEAN_MONSTERS,
           water_creatures=[spawn("minecraft:dolphin", 3, 1, 2)],
-          water_ambient=[spawn("minecraft:tropical_fish", 30, 8, 8), spawn("minecraft:pufferfish", 6, 1, 3)])
+          water_ambient=[spawn("trans_fish", 25, 4, 8), spawn("minecraft:tropical_fish", 30, 8, 8), spawn("minecraft:pufferfish", 6, 1, 3)])
     biome("blooming_caverns", temperature=0.6, downfall=0.6, grass="#f5a9c0", foliage="#f5a9b8", water="#8fd8ff", water_fog="#2e7fb0",
           sky="#9fb8ff", fog="#f0c8e0", music_sound="minecraft:music.overworld.lush_caves",
           particles=particles("minecraft:spore_blossom_air", 0.004),
@@ -853,6 +864,7 @@ FEATURE_RANK = [
     f"{NS}:trans_lily_pads", "minecraft:patch_sugar_cane", "minecraft:patch_sugar_cane_swamp",
     "minecraft:brown_mushroom_normal", "minecraft:brown_mushroom_swamp", "minecraft:red_mushroom_swamp",
     f"{NS}:trans_firefly_bushes_near_water", f"{NS}:trans_firefly_bushes_swamp", "minecraft:vines", f"{NS}:trans_boulders",
+    f"{NS}:pink_gel_mounds", f"{NS}:blue_gel_mounds",
     # top layer
     "minecraft:freeze_top_layer",
 ]

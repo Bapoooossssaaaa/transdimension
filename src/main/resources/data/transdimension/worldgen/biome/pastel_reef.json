@@ -134,7 +134,7 @@
         "weight": 100
       },
       {
-        "type": "minecraft:enderman",
+        "type": "transdimension:trans_enderman",
         "maxCount": 4,
         "minCount": 1,
         "weight": 10
@@ -148,6 +148,12 @@
     ],
     "underground_water_creature": [],
     "water_ambient": [
+      {
+        "type": "transdimension:trans_fish",
+        "maxCount": 8,
+        "minCount": 4,
+        "weight": 25
+      },
       {
         "type": "minecraft:tropical_fish",
         "maxCount": 8,

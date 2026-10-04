@@ -1,0 +1,31 @@
+{
+  "parent": "transdimension:pearly_white",
+  "criteria": {
+    "crystal_pearl": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_crystal_pearl"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_crystal_pearl"
+    },
+    "title": {
+      "translate": "advancements.transdimension.pearl_of_the_realm.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.pearl_of_the_realm.description"
+    }
+  },
+  "requirements": [
+    [
+      "crystal_pearl"
+    ]
+  ]
+}

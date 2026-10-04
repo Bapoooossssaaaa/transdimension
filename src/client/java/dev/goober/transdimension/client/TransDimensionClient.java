@@ -34,8 +34,14 @@ import net.fabricmc.fabric.api.resource.v1.reloader.ResourceReloaderKeys;
 
 import dev.goober.transdimension.TransDimension;
 import dev.goober.transdimension.client.entity.MaddieRenderer;
+import dev.goober.transdimension.client.entity.PastelSlimeModel;
+import dev.goober.transdimension.client.entity.PastelSlimeRenderer;
 import dev.goober.transdimension.client.entity.SillyCatModel;
 import dev.goober.transdimension.client.entity.SillyCatRenderer;
+import dev.goober.transdimension.client.entity.TransEndermanModel;
+import dev.goober.transdimension.client.entity.TransEndermanRenderer;
+import dev.goober.transdimension.client.entity.TransFishModel;
+import dev.goober.transdimension.client.entity.TransFishRenderer;
 import dev.goober.transdimension.client.screen.MaddieDialogueScreen;
 import dev.goober.transdimension.client.wings.TransWingsLayer;
 import dev.goober.transdimension.client.wings.TransWingsModel;
@@ -79,6 +85,16 @@ public class TransDimensionClient implements ClientModInitializer {
 		// The Silly Cat.
 		ModelLayerRegistry.registerModelLayer(SillyCatRenderer.LAYER, SillyCatModel::createBodyLayer);
 		EntityRenderers.register(ModEntities.SILLY_CAT, SillyCatRenderer::new);
+
+		// The realm's creatures: trans fish, trans endermen (with glowing eyes) and pastel slimes (with a jelly coat).
+		ModelLayerRegistry.registerModelLayer(TransFishRenderer.LAYER, TransFishModel::createBodyLayer);
+		EntityRenderers.register(ModEntities.TRANS_FISH, TransFishRenderer::new);
+		ModelLayerRegistry.registerModelLayer(TransEndermanRenderer.LAYER, TransEndermanModel::createBodyLayer);
+		ModelLayerRegistry.registerModelLayer(TransEndermanRenderer.EYES_LAYER, TransEndermanModel::createEyesLayer);
+		EntityRenderers.register(ModEntities.TRANS_ENDERMAN, TransEndermanRenderer::new);
+		ModelLayerRegistry.registerModelLayer(PastelSlimeRenderer.LAYER, PastelSlimeModel::createBodyLayer);
+		ModelLayerRegistry.registerModelLayer(PastelSlimeRenderer.JELLY_LAYER, PastelSlimeModel::createJellyLayer);
+		EntityRenderers.register(ModEntities.PASTEL_SLIME, PastelSlimeRenderer::new);
 
 		// Trans boats use vanilla's boat models with our textures.
 		ModelLayerRegistry.registerModelLayer(TRANS_BOAT_LAYER, BoatModel::createBoatModel);

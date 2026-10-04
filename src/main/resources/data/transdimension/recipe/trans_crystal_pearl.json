@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "transdimension:trans_pearl",
+    "transdimension:trans_crystal"
+  ],
+  "result": {
+    "count": 1,
+    "id": "transdimension:trans_crystal_pearl"
+  }
+}

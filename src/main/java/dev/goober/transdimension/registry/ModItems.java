@@ -20,20 +20,24 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BoatItem;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.EnderpearlItem;
 import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.MobBucketItem;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Fluids;
 
 import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 import net.fabricmc.fabric.api.registry.CompostableRegistry;
@@ -46,7 +50,7 @@ import dev.goober.transdimension.TransDimension;
 import dev.goober.transdimension.item.TransWandItem;
 import dev.goober.transdimension.item.TransWings;
 
-/** Crystals, bakery treats, spawn eggs, Maddie's gifts, boats and the creative tab. */
+/** Crystals, bakery treats, creature drops, spawn eggs, Maddie's gifts, boats and the creative tab. */
 public final class ModItems {
 	// ---------------------------------------------------------------- crystals
 	/** A rare gem from trans crystal ore, deep underground. It makes Trans Crystal Pearls, the keys to the Fairy Realm. */
@@ -76,6 +80,40 @@ public final class ModItems {
 	// ---------------------------------------------------------------- mobs
 	public static final Item SILLY_CAT_SPAWN_EGG = register("silly_cat_spawn_egg", SpawnEggItem::new,
 			new Item.Properties().spawnEgg(ModEntities.SILLY_CAT));
+
+	// ---------------------------------------------------------------- trans fish
+	public static final Item TRANS_FISH = register("trans_fish", Item::new, new Item.Properties()
+			.food(food(2, 0.2F, false), Consumables.defaultFood().build()));
+	public static final Item COOKED_TRANS_FISH = register("cooked_trans_fish", Item::new, new Item.Properties()
+			.food(food(6, 0.7F, false), Consumables.defaultFood().build()));
+	public static final Item TRANS_FISH_BUCKET = register("trans_fish_bucket",
+			properties -> new MobBucketItem(ModEntities.TRANS_FISH, Fluids.WATER, SoundEvents.BUCKET_EMPTY_FISH, properties),
+			new Item.Properties().stacksTo(1).component(DataComponents.BUCKET_ENTITY_DATA, CustomData.EMPTY));
+	public static final Item TRANS_FISH_SPAWN_EGG = register("trans_fish_spawn_egg", SpawnEggItem::new,
+			new Item.Properties().spawnEgg(ModEntities.TRANS_FISH));
+
+	// ---------------------------------------------------------------- trans enderman and the keys to the Fairy Realm
+	/** Dropped by trans endermen; thrown, it teleports you like an ender pearl. */
+	public static final Item TRANS_PEARL = register("trans_pearl", EnderpearlItem::new, new Item.Properties()
+			.stacksTo(16)
+			.useCooldown(1.0F));
+	/** A trans pearl set with a trans crystal. Twelve of them in the frame of a Fairy Portal open the way to the Fairy Realm. */
+	public static final Item TRANS_CRYSTAL_PEARL = register("trans_crystal_pearl", Item::new, new Item.Properties()
+			.stacksTo(16)
+			.rarity(Rarity.RARE)
+			.component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
+			.component(DataComponents.LORE, lore("item.transdimension.trans_crystal_pearl.lore")));
+	public static final Item TRANS_ENDERMAN_SPAWN_EGG = register("trans_enderman_spawn_egg", SpawnEggItem::new,
+			new Item.Properties().spawnEgg(ModEntities.TRANS_ENDERMAN));
+
+	// ---------------------------------------------------------------- pastel slimes
+	/** Wobbly jelly from pastel slimes and the gel mounds of the Gumdrop Glade. */
+	public static final Item PASTEL_GEL = register("pastel_gel", Item::new, new Item.Properties());
+	/** A chewy sweet; pastel slimes adore them (feed them to tame and breed slimes). */
+	public static final Item GUMDROP = register("gumdrop", Item::new, new Item.Properties()
+			.food(food(2, 0.3F, true), Consumables.defaultFood().consumeSeconds(0.8F).build()));
+	public static final Item PASTEL_SLIME_SPAWN_EGG = register("pastel_slime_spawn_egg", SpawnEggItem::new,
+			new Item.Properties().spawnEgg(ModEntities.PASTEL_SLIME));
 
 	// ---------------------------------------------------------------- boats
 	public static final Item TRANS_BOAT = register("trans_boat",
@@ -191,6 +229,7 @@ public final class ModItems {
 		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_MOSS_BLOCK, 0.65F);
 		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_MOSS_CARPET, 0.3F);
 		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_SAPLING, 0.3F);
+		CompostableRegistry.INSTANCE.add(GUMDROP, 0.5F);
 		CompostableRegistry.INSTANCE.add(TRANS_COOKIE, 0.85F);
 		CompostableRegistry.INSTANCE.add(TRANS_CUPCAKE, 0.85F);
 		CompostableRegistry.INSTANCE.add(TRANS_DONUT, 0.85F);

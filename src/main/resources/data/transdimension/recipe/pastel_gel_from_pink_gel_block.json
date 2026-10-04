@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "pastel_gel",
+  "ingredients": [
+    "transdimension:pink_gel_block"
+  ],
+  "result": {
+    "count": 8,
+    "id": "transdimension:pastel_gel"
+  }
+}

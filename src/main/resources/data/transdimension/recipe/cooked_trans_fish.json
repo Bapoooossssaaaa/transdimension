@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "food",
+  "cookingtime": 200,
+  "experience": 0.35,
+  "ingredient": "transdimension:trans_fish",
+  "result": {
+    "id": "transdimension:cooked_trans_fish"
+  }
+}

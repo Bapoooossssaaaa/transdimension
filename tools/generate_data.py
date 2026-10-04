@@ -1304,6 +1304,84 @@ def generate_recipes():
     R("pastel_prism", shaped("pastel_prism", ["##", "##"], {"#": "prism_shard"}, 1))
 
 
+# ============================================================================================ the realm's creatures
+def entity_loot(entity, pools):
+    write(os.path.join(DATA, NS, "loot_table", "entities", f"{entity}.json"),
+          {"type": "minecraft:entity", "pools": pools, "random_sequence": f"{NS}:entities/{entity}"})
+
+
+def counted(item, lo, hi, looting=1.0):
+    """One loot entry of lo..hi of an item, plus up to `looting` more per level of Looting."""
+    return {"type": "minecraft:item", "functions": [
+        {"count": {"type": "minecraft:uniform", "max": float(hi), "min": float(lo)}, "function": "minecraft:set_count"},
+        {"count": {"type": "minecraft:uniform", "max": looting, "min": 0.0}, "enchantment": "minecraft:looting",
+         "function": "minecraft:enchanted_count_increase"}], "name": rid(item)}
+
+
+ON_FIRE_OR_SMELTING = {"condition": "minecraft:any_of", "terms": [
+    {"condition": "minecraft:entity_properties", "entity": "this", "predicate": {"minecraft:flags": {"is_on_fire": True}}},
+    {"condition": "minecraft:entity_properties", "entity": "direct_attacker", "predicate": {"minecraft:equipment": {
+        "mainhand": {"predicates": {"minecraft:enchantments": [{"enchantments": "#minecraft:smelts_loot"}]}}}}}]}
+
+
+def generate_creatures():
+    """Trans fish, trans endermen and pastel slimes: their items, spawn eggs, names, loot, recipes and tags, and the
+    slimes' gel blocks. (The entities are in ModEntities; textures come from generate_textures.py creature_textures().)"""
+    # ---- items
+    for item, english in (("trans_fish", "Raw Trans Fish"), ("cooked_trans_fish", "Cooked Trans Fish"),
+                          ("trans_fish_bucket", "Bucket of Trans Fish"), ("trans_fish_spawn_egg", "Trans Fish Spawn Egg"),
+                          ("trans_pearl", "Trans Pearl"), ("trans_crystal_pearl", "Trans Crystal Pearl"),
+                          ("trans_enderman_spawn_egg", "Trans Enderman Spawn Egg"), ("pastel_gel", "Pastel Gel"),
+                          ("gumdrop", "Gumdrop"), ("pastel_slime_spawn_egg", "Pastel Slime Spawn Egg")):
+        simple_item(item, english)
+    NAMES.update({
+        "entity.transdimension.trans_fish": "Trans Fish",
+        "entity.transdimension.trans_enderman": "Trans Enderman",
+        "entity.transdimension.pastel_slime": "Pastel Slime",
+        "item.transdimension.trans_crystal_pearl.lore": "Twelve of these awaken a Fairy Portal",
+    })
+
+    # ---- gel blocks: vanilla's slime block model (a jelly cube around a firmer core) with our textures
+    for block, english in (("pink_gel_block", "Pink Gel Block"), ("blue_gel_block", "Blue Gel Block")):
+        blockstate(block, {"variants": {"": {"model": f"{NS}:block/{block}"}}})
+        model(block, {"parent": "minecraft:block/slime_block", "textures": {"particle": block_tex(block), "texture": block_tex(block)}})
+        item_def(block, f"{NS}:block/{block}")
+        name(block, english)
+        loot(block, loot_self(block))
+
+    # ---- loot
+    entity_loot("trans_fish", [
+        {"entries": [{"type": "minecraft:item", "functions": [{"conditions": [ON_FIRE_OR_SMELTING], "function": "minecraft:furnace_smelt"}],
+                      "name": rid("trans_fish")}], "rolls": 1.0},
+        {"conditions": [{"chance": 0.05, "condition": "minecraft:random_chance"}],
+         "entries": [{"type": "minecraft:item", "name": "minecraft:bone_meal"}], "rolls": 1.0}])
+    entity_loot("trans_enderman", [{"entries": [counted("trans_pearl", 0, 1)], "rolls": 1.0}])
+    entity_loot("pastel_slime", [{"entries": [counted("pastel_gel", 0, 2)], "rolls": 1.0}])
+
+    # ---- recipes
+    recipe("cooked_trans_fish", {"type": "minecraft:smelting", "category": "food", "cookingtime": 200, "experience": 0.35,
+                                 "ingredient": rid("trans_fish"), "result": {"id": rid("cooked_trans_fish")}})
+    recipe("cooked_trans_fish_from_smoking", {"type": "minecraft:smoking", "category": "food", "cookingtime": 100, "experience": 0.35,
+                                              "ingredient": rid("trans_fish"), "result": {"id": rid("cooked_trans_fish")}})
+    recipe("cooked_trans_fish_from_campfire_cooking", {"type": "minecraft:campfire_cooking", "category": "food", "cookingtime": 600,
+                                                       "experience": 0.35, "ingredient": rid("trans_fish"),
+                                                       "result": {"id": rid("cooked_trans_fish")}})
+    recipe("trans_crystal_pearl", shapeless("trans_crystal_pearl", ["trans_pearl", "trans_crystal"], 1, category="misc"))
+    recipe("gumdrop", shapeless("gumdrop", ["pastel_gel", "minecraft:sugar"], 3, category="misc"))
+    for block, dye in (("pink_gel_block", "minecraft:pink_dye"), ("blue_gel_block", "minecraft:light_blue_dye")):
+        recipe(block, shaped(block, ["GGG", "GDG", "GGG"], {"G": "pastel_gel", "D": dye}, 1, category="misc"))
+        recipe(f"pastel_gel_from_{block}", shapeless("pastel_gel", [block], 8, category="misc", group="pastel_gel"))
+
+    # ---- tags: the trans fish is a fish to everything that cares
+    tag("item", "fishes", "trans_fish", "cooked_trans_fish")
+    for food in ("cat_food", "ocelot_food"):
+        tag("item", food, "trans_fish")
+    tag("item", "wolf_food", "trans_fish", "cooked_trans_fish")
+    tag("item", "nautilus_bucket_food", "trans_fish_bucket")
+    for t in ("aquatic", "axolotl_hunt_targets", "can_breathe_under_water", "not_scary_for_pufferfish", "cannot_be_pushed_onto_boats"):
+        tag("entity_type", t, "trans_fish")
+
+
 # ============================================================================================ other tags, names, sounds
 def generate_misc():
     for b in ("trans_dirt",):
@@ -1572,6 +1650,17 @@ def generate_advancements():
       "Shear some Flowering Blush Leaves from a heart tree", {"leaves": has("flowering_blush_leaves")}, frame="goal")
     A("star_gazer", "petal_pusher", "star_bloom", "Star Gazer", "Pick a glowing Starbloom", {"star": has("star_bloom")})
 
+    # ---- creatures
+    A("fishy_pride", "goober", "trans_fish_bucket", "Fishy Pride", "Catch a trans fish in a bucket",
+      {"bucket": {"trigger": "minecraft:filled_bucket", "conditions": {"item": {"items": rid("trans_fish_bucket")}}}})
+    A("squishy_sweetheart", "goober", "gumdrop", "Squishy Sweetheart", "Tame a Pastel Slime with Gumdrops",
+      {"tamed": {"trigger": "minecraft:tame_animal", "conditions": {"entity": [{
+          "condition": "minecraft:entity_properties", "entity": "this", "predicate": {"minecraft:entity_type": rid("pastel_slime")}}]}}})
+    A("pearly_white", "goober", "trans_pearl", "Pearly White", "Get a Trans Pearl from a trans enderman",
+      {"pearl": has("trans_pearl")})
+    A("pearl_of_the_realm", "pearly_white", "trans_crystal_pearl", "Pearl of the Realm",
+      "Set a Trans Crystal into a Trans Pearl", {"crystal_pearl": has("trans_crystal_pearl")})
+
 
 def generate_sounds():
     def event(name, volume=1.0, pitch=1.0):
@@ -1659,6 +1748,7 @@ def main():
     generate_woods_and_flowers()
     generate_recipes()
     generate_woods_and_flowers_recipes()
+    generate_creatures()
     generate_misc()
     generate_sounds()
     generate_advancements()

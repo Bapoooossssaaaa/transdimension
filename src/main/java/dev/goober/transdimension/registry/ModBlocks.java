@@ -59,6 +59,7 @@ import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.ShortDryGrassBlock;
 import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.SlimeBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.StainedGlassBlock;
 import net.minecraft.world.level.block.StainedGlassPaneBlock;
@@ -400,6 +401,13 @@ public final class ModBlocks {
 			BlockBehaviour.Properties.ofFullCopy(Blocks.MOSS_BLOCK));
 	public static final Block TRANS_MOSS_CARPET = register("trans_moss_carpet", CarpetBlock::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.MOSS_CARPET));
+
+	// ---------------------------------------------------------------- pastel gel (the slimes' glade)
+	/** Bouncy, see-through jelly in the pastel slimes' colours; soft mounds of it dot the Gumdrop Glade. */
+	public static final Block PINK_GEL_BLOCK = register("pink_gel_block", SlimeBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.SLIME_BLOCK).mapColor(MapColor.COLOR_PINK));
+	public static final Block BLUE_GEL_BLOCK = register("blue_gel_block", SlimeBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.SLIME_BLOCK).mapColor(MapColor.COLOR_LIGHT_BLUE));
 
 	// ---------------------------------------------------------------- glass, wool and light
 	/** Clear glass with a pink and blue frame; what trans sand smelts into. */

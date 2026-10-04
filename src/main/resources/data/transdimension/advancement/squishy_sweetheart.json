@@ -1,0 +1,35 @@
+{
+  "parent": "transdimension:goober",
+  "criteria": {
+    "tamed": {
+      "trigger": "minecraft:tame_animal",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:entity_type": "transdimension:pastel_slime"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:gumdrop"
+    },
+    "title": {
+      "translate": "advancements.transdimension.squishy_sweetheart.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.squishy_sweetheart.description"
+    }
+  },
+  "requirements": [
+    [
+      "tamed"
+    ]
+  ]
+}

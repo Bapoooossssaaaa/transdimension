@@ -19,6 +19,7 @@
 		]
 	},
 	"mixins": [
+		"transdimension.mixins.json",
 		{
 			"config": "transdimension.client.mixins.json",
 			"environment": "client"

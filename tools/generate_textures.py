@@ -2714,6 +2714,405 @@ def trans_mob_textures():
         yield rel, (trans_axolotl(img, variant) if variant in AXOLOTL_COLOURS else trans_mob(img))
 
 
+# ============================================================================================ the realm's creatures (round 4)
+# Trans fish, trans endermen and pastel slimes: their entity textures (layouts match the models in
+# src/client/.../client/entity/), item sprites, spawn eggs and the slimes' gel blocks.
+FISH_STRIPES = [[hexc(c) for c in ("2F86C4", "4FB3EA", "5BCEFA", "A6E6FC")],
+                [hexc(c) for c in ("C2668B", "E58FAE", "F5A9B8", "FBD0DA")],
+                [hexc(c) for c in ("B8B6CC", "DDDCEA", "F4F3FA", "FFFFFF")],
+                [hexc(c) for c in ("C2668B", "E58FAE", "F5A9B8", "FBD0DA")],
+                [hexc(c) for c in ("2F86C4", "4FB3EA", "5BCEFA", "A6E6FC")]]
+FISH_EYE = hexc("1B2650")
+GEL_PINK = [hexc(c) for c in ("B04E78", "D9759A", "F5A9B8", "FBD0DA", "FFF0F4")]
+GEL_BLUE = [hexc(c) for c in ("2A6FB0", "3E9BD8", "6CC6F2", "A6E1FA", "E3F7FF")]
+PEARL_WHITE = [hexc(c) for c in ("6E7FA8", "A9B8D8", "D7E2F2", "F2F5FB", "FFFFFF")]
+CRYSTAL_PEARL = [hexc(c) for c in ("1F3F7A", "3A6FB8", "5BCEFA", "B9C6F2", "F5A9B8", "FCD6E0", "FFFFFF")]
+
+
+def paint_face(img, u, v, w, h, colour_at):
+    """Fills a w x h rectangle of a model texture; colour_at(x, y) returns an RGB, an RGBA or None (left clear)."""
+    for y in range(h):
+        for x in range(w):
+            c = colour_at(x, y)
+            if c is not None:
+                img.putpixel((u + x, v + y), (*c, 255) if len(c) == 3 else c)
+
+
+def trans_fish():
+    """32x32 for TransFishModel: a body five pixels tall, one per flag stripe, a pearly face with a blue crown and a pink
+    chin, a pink nose, a forked flag tail, a white top fin with a pink edge and little pink side fins."""
+    rng = random.Random(31)
+    img = new(32, 32)
+
+    def stripe(y, t):
+        return sample(FISH_STRIPES[min(4, max(0, y))], t)
+
+    def scales(x, y, t):
+        # every other pixel a touch darker, offset per row: a faint scale pattern
+        return t - (0.12 if (x + y) % 2 == 0 else 0.0) - 0.06 * rng.random()
+
+    # body (2x5x6) at (0,0)
+    paint_face(img, 6, 0, 2, 6, lambda x, y: sample(FISH_STRIPES[0], 0.75 - 0.1 * (y % 2)))
+    paint_face(img, 8, 0, 2, 6, lambda x, y: sample(FISH_STRIPES[0], 0.45))
+    paint_face(img, 0, 6, 6, 5, lambda x, y: stripe(y, scales(x, y, 0.72)))
+    paint_face(img, 8, 6, 6, 5, lambda x, y: stripe(y, scales(x, y, 0.72)))
+    paint_face(img, 6, 6, 2, 5, lambda x, y: stripe(y, 0.8))
+    paint_face(img, 14, 6, 2, 5, lambda x, y: stripe(y, 0.6))
+
+    # head (2x4x3) at (0,11)
+    def head_side(x, y, eye_x):
+        if y == 0:
+            return sample(FISH_STRIPES[0], 0.7)
+        if (x, y) == (eye_x, 1):
+            return FISH_EYE
+        if y == 3:
+            return sample(FISH_STRIPES[1], 0.7)
+        return sample(FISH_STRIPES[2], 0.75 - 0.15 * (y == 2))
+    paint_face(img, 3, 11, 2, 3, lambda x, y: sample(FISH_STRIPES[0], 0.75))
+    paint_face(img, 5, 11, 2, 3, lambda x, y: sample(FISH_STRIPES[1], 0.6))
+    paint_face(img, 0, 14, 3, 4, lambda x, y: head_side(x, y, 0))
+    paint_face(img, 5, 14, 3, 4, lambda x, y: head_side(x, y, 2))
+    paint_face(img, 3, 14, 2, 4, lambda x, y: sample(FISH_STRIPES[1], 0.8) if y >= 2 else sample(FISH_STRIPES[2], 0.8))
+    paint_face(img, 8, 14, 2, 4, lambda x, y: sample(FISH_STRIPES[2], 0.6))
+    # nose (2x2x1) at (10,11)
+    paint_face(img, 10, 11, 6, 3, lambda x, y: sample(FISH_STRIPES[1], 0.55 + 0.15 * (y == 1)))
+
+    # tail fin (0x5x4) at (16,0): both sides 4x5, forked at the tip
+    def tail(x, y, flip):
+        cx = 3 - x if flip else x           # 0 next to the body, 3 at the tip
+        if cx == 3 and y in (1, 2, 3):
+            return None
+        return stripe(y, 0.85 - 0.1 * cx)
+    paint_face(img, 16, 4, 4, 5, lambda x, y: tail(x, y, flip=True))
+    paint_face(img, 20, 4, 4, 5, lambda x, y: tail(x, y, flip=False))
+
+    # top fin (0x2x4) at (16,9): both sides 4x2, rounded at the ends
+    def fin(x, y, flip):
+        cx = 3 - x if flip else x
+        if y == 0 and cx in (0, 3):
+            return None
+        return sample(FISH_STRIPES[1], 0.85) if y == 0 else sample(FISH_STRIPES[2], 0.85)
+    paint_face(img, 16, 13, 4, 2, lambda x, y: fin(x, y, flip=False))
+    paint_face(img, 20, 13, 4, 2, lambda x, y: fin(x, y, flip=True))
+    # side fins (2x0x2) at (24,0)
+    paint_face(img, 26, 0, 4, 2, lambda x, y: sample(FISH_STRIPES[1], 0.95 - 0.2 * (x % 2)))
+    return img
+
+
+def diagonal_flag(img, pts, toast=0.0):
+    """Recolours the given pixels of a diagonal fish sprite (head at the top right) into five flag stripes along its body."""
+    across = [p[0] + p[1] for p in pts]
+    lo, hi = min(across), max(across)
+    llo, lhi = lum_range(img, mask=lambda p, px: p in pts)
+    out = img.copy()
+    for p in pts:
+        px = img.getpixel(p)
+        band = min(4, int((p[0] + p[1] - lo) / (hi - lo + 1) * 5))
+        t = 0.15 + 0.85 * (lum(px) - llo) / (lhi - llo)
+        c = sample(FISH_STRIPES[band], t)
+        if toast:
+            c = mix(c, sample([hexc("8A5A2B"), hexc("C98F4E"), hexc("E8C38C")], t), toast)
+        out.putpixel(p, (*c, px[3]))
+    return out
+
+
+def _is_dark(px):
+    return lum(px) < 0.12
+
+
+def trans_fish_item(cooked=False):
+    img = vitem("cooked_cod" if cooked else "cod")
+    body = {p for p in pixels(img) if img.getpixel(p)[3] and not _is_dark(img.getpixel(p))}
+    out = diagonal_flag(img, body, toast=0.38 if cooked else 0.0)
+    for p in pixels(img):
+        if img.getpixel(p)[3] and _is_dark(img.getpixel(p)):
+            out.putpixel(p, (*(hexc("4A2A1A") if cooked else FISH_EYE), 255))
+    return out
+
+
+def trans_fish_bucket():
+    img = vitem("cod_bucket")
+    fish = {p for p in pixels(img) if img.getpixel(p)[3] and colour_family(img.getpixel(p)) == "warm"}
+    out = diagonal_flag(img, fish)
+    for p in pixels(img):
+        px = img.getpixel(p)
+        if px[3] and colour_family(px) == "blue":
+            out.putpixel(p, (*sample(R_BLUE, 0.35 + 0.6 * lum(px)), px[3]))
+        elif px[3] and _is_dark(px) and p[1] < 8:
+            out.putpixel(p, (*FISH_EYE, 255))
+    return out
+
+
+def trans_fish_spawn_egg():
+    img = vitem("cod_spawn_egg")
+    out = img.copy()
+    fish = [p for p in pixels(img) if img.getpixel(p)[3] and colour_family(img.getpixel(p)) in ("warm", "yellow", "white", "gray")]
+    ys = [p[1] for p in fish]
+    lo, hi = min(ys), max(ys)
+    llo, lhi = lum_range(img)
+    for p in fish:
+        px = img.getpixel(p)
+        band = min(4, int((p[1] - lo) / (hi - lo + 1) * 5))
+        out.putpixel(p, (*sample(FISH_STRIPES[band], 0.2 + 0.8 * (lum(px) - llo) / (lhi - llo)), px[3]))
+    for p in pixels(img):
+        px = img.getpixel(p)
+        if px[3] and colour_family(px) == "blue":
+            out.putpixel(p, (*sample(R_BLUE, 0.3 + 0.6 * lum(px)), px[3]))
+        elif px[3] and _is_dark(px):
+            out.putpixel(p, (*FISH_EYE, 255))
+    return out
+
+
+# ---- the trans enderman: vanilla's enderman layout, snow white with soft pink and blue blended in, pink eyes
+E_WHITE = hexc("F6F4FB")
+E_SHADOW = hexc("E3E0F0")
+E_PINK = hexc("F9D3E0")
+E_BLUE = hexc("CFEAFB")
+E_EYE = hexc("FF5FAE")
+E_EYE_EDGE = hexc("FFA6D2")
+E_EYES = {(9, 12): E_EYE, (14, 12): E_EYE, (8, 12): E_EYE_EDGE, (10, 12): E_EYE_EDGE, (13, 12): E_EYE_EDGE, (15, 12): E_EYE_EDGE}
+
+
+def _enderman_tint(x, y):
+    """(tint colour, strength) at a texel: limbs go white, pink, then blue towards the hands and feet; the body is pink at
+    the chest fading to blue at the hips; the head is white with a faint blue crown."""
+    if x >= 56:
+        t = y / 31
+        if t < 0.25:
+            return E_PINK, 0.0
+        if t < 0.55:
+            return E_PINK, (t - 0.25) / 0.3 * 0.55
+        return E_BLUE, min(1.0, (t - 0.55) / 0.35) * 0.85
+    if x >= 32 and y >= 16:
+        t = (y - 16) / 15
+        return (E_PINK, 0.55 * (1 - t / 0.6)) if t < 0.6 else (E_BLUE, (t - 0.6) / 0.4 * 0.7)
+    if y < 16:
+        return E_BLUE, 0.35 if y < 8 else 0.0
+    return E_PINK, 0.25
+
+
+def trans_enderman():
+    with _zip(ENTITY_ZIP).open("base entity textures/enderman/enderman.png") as f:
+        src = Image.open(f).convert("RGBA")
+    rng = random.Random(23)
+    out = new(64, 32)
+    for (x, y) in pixels(src):
+        px = src.getpixel((x, y))
+        if px[3] == 0:
+            continue
+        tint, strength = _enderman_tint(x, y)
+        if px[:3] == (0, 0, 0):            # vanilla's dark pattern becomes a soft tinted line, never dark
+            base = mix(mix(E_SHADOW, tint, 0.35 + 0.65 * strength), tint, 0.2)
+        else:                               # the body colour: near white, gently tinted
+            base = mix(E_WHITE, tint, strength * 0.75)
+        out.putpixel((x, y), (*shade(base, 1.0 + (rng.random() - 0.5) * 0.04), 255))
+    for p, c in E_EYES.items():
+        out.putpixel(p, (*c, 255))
+    return out
+
+
+def trans_enderman_eyes():
+    """Just the eyes, for the full-bright eyes model."""
+    img = new(64, 32)
+    for p, c in E_EYES.items():
+        img.putpixel(p, (*c, 255))
+    return img
+
+
+# ---- pastel slimes: a sleepy-faced cube after the owner's reference creature (slit eyes and a little mouth on a lighter
+# lower band), a clear jelly coat, and a bow for tamed slimes
+SLIMES = {
+    "pink": {"top": [hexc(c) for c in ("D9789A", "EB93AE", "F5A9B8", "F9BECB", "FCD3DC")],
+             "band": [hexc(c) for c in ("F2B6C6", "F8C8D4", "FCDAE2", "FFE8EE", "FFF3F6")],
+             "eye": hexc("5E2152"), "mouth": hexc("7A2E66"), "blush": hexc("F08FAE"),
+             "bow": [hexc(c) for c in ("2F8FD0", "5BCEFA", "A6E6FC")]},
+    "blue": {"top": [hexc(c) for c in ("4F8FD6", "68A8E8", "7FBDF2", "98CEF6", "B3DDF9")],
+             "band": [hexc(c) for c in ("7FCFEF", "93DCF5", "A9E6F9", "C2EFFB", "DDF7FD")],
+             "eye": hexc("2E2378"), "mouth": hexc("3C2F8F"), "blush": hexc("9FB6F2"),
+             "bow": [hexc(c) for c in ("D9708F", "F5A9B8", "FCD3DC")]},
+}
+SLIME_SIZE = 12
+SLIME_BAND = 6      # first row of the lighter lower band (and of the eyes)
+
+
+def _slime_body_pixel(colours, rng, y, side):
+    if side == "top":
+        return sample(colours["top"], 0.62 + 0.25 * rng.random())
+    if side == "bottom":
+        return sample(colours["band"], 0.05 + 0.2 * rng.random())
+    darker = {"front": 0.0, "side": -0.1, "back": -0.06}[side]
+    if y >= SLIME_BAND:
+        t = 0.75 - 0.5 * (y - SLIME_BAND) / (SLIME_SIZE - SLIME_BAND) + 0.15 * rng.random() + darker
+        return sample(colours["band"], t)
+    t = 0.38 + 0.25 * (1 - y / SLIME_BAND) + 0.22 * rng.random() + darker
+    return sample(colours["top"], t)
+
+
+def pastel_slime(kind):
+    """64x64 for PastelSlimeModel: body cube 0,0 · jelly coat 0,24 · bow loops 48,0 · bow knot 48,8."""
+    c = SLIMES[kind]
+    rng = random.Random(7 if kind == "pink" else 9)
+    img = new(64, 64)
+    n = SLIME_SIZE
+    for name, (u, v) in {"top": (12, 0), "bottom": (24, 0), "side_r": (0, 12), "front": (12, 12), "side_l": (24, 12),
+                         "back": (36, 12)}.items():
+        side = "side" if name.startswith("side") else name
+        paint_face(img, u, v, n, n, lambda x, y: _slime_body_pixel(c, rng, y, side))
+    # the face: sleepy slit eyes on the band's first row, a tiny mouth, a faint blush
+    u, v = 12, 12
+    for x in (1, 2, 3, 8, 9, 10):
+        img.putpixel((u + x, v + SLIME_BAND), (*c["eye"], 255))
+    for x in (5, 6):
+        img.putpixel((u + x, v + SLIME_BAND + 2), (*c["mouth"], 255))
+    for x in (1, 2, 9, 10):
+        img.putpixel((u + x, v + SLIME_BAND + 1), (*mix(c["blush"], sample(c["band"], 0.6), 0.35), 255))
+    # the jelly coat: nearly clear, a little thicker at the edges, with a glossy glint on every face but the bottom
+    light = mix(sample(c["band"], 1.0), WHITE, 0.3)
+    for name, (u, v) in {"top": (12, 24), "bottom": (24, 24), "side_r": (0, 36), "front": (12, 36), "side_l": (24, 36),
+                         "back": (36, 36)}.items():
+        paint_face(img, u, v, n, n, lambda x, y: (*light, 78 if x in (0, n - 1) or y in (0, n - 1) else 30))
+        if name != "bottom":
+            for (x, y) in ((1, 1), (2, 1), (3, 1), (1, 2), (1, 3)):
+                img.putpixel((u + x, v + y), (255, 255, 255, 170))
+    # the bow: loops (4x3x1) at (48,0), knot (2x2x2) at (48,8)
+    bow = c["bow"]
+    paint_face(img, 48, 0, 10, 4, lambda x, y: sample(bow, 0.3 + 0.6 * rng.random()))
+    paint_face(img, 49, 1, 4, 3, lambda x, y: sample(bow, 0.45 + 0.4 * (x / 3) + (0.15 if y == 0 else 0)))
+    paint_face(img, 48, 8, 8, 4, lambda x, y: WHITE if (x + y) % 4 else mix(WHITE, bow[1], 0.25))
+    return img
+
+
+def _egg_recolour(name, ramp_for):
+    """Recolours a vanilla spawn egg: ramp_for(px, pos) picks (ramp, lo, hi) for each pixel; brightness is mapped within
+    each group."""
+    img = vitem(name)
+    out = img.copy()
+    groups = {}
+    for p in pixels(img):
+        px = img.getpixel(p)
+        if px[3]:
+            groups.setdefault(ramp_for(px, p), []).append(p)
+    for (ramp, lo_t, hi_t), pts in groups.items():
+        values = [lum(img.getpixel(p)) for p in pts]
+        lo, hi = min(values), max(values) + 1e-6
+        for p in pts:
+            px = img.getpixel(p)
+            out.putpixel(p, (*sample(ramp, lo_t + (hi_t - lo_t) * (lum(px) - lo) / (hi - lo)), px[3]))
+    return out
+
+
+def trans_enderman_spawn_egg():
+    """The enderman's egg in pearl white, its purple spots turned pink and blue."""
+    pink, blue, pearl = tuple(GEL_PINK), tuple(GEL_BLUE), tuple(PEARL_WHITE)
+    return _egg_recolour("enderman_spawn_egg", lambda px, p: (pink if (p[0] + p[1]) % 2 == 0 else blue, 0.4, 0.95)
+                         if colour_family(px) in ("purple", "warm", "blue") else (pearl, 0.35, 1.0))
+
+
+def pastel_slime_spawn_egg():
+    pink, blue = tuple(GEL_PINK), tuple(GEL_BLUE)
+    return _egg_recolour("slime_spawn_egg", lambda px, p: (pink, 0.25, 1.0) if lum(px) > 0.42 else (blue, 0.3, 0.85))
+
+
+def trans_pearl_item():
+    """An ender pearl turned pearl white, with a soft pink sheen at the top and blue at the bottom."""
+    img = vitem("ender_pearl")
+    lo, hi = lum_range(img)
+    out = img.copy()
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))
+        if not px[3]:
+            continue
+        c = sample(PEARL_WHITE, 0.15 + 0.85 * (lum(px) - lo) / (hi - lo))
+        c = mix(c, PINK, max(0.0, 0.35 - 0.03 * (x + y))) if x + y < 12 else mix(c, BLUE, min(0.35, 0.03 * (x + y - 12)))
+        out.putpixel((x, y), (*c, px[3]))
+    return out
+
+
+def trans_crystal_pearl_item():
+    """An eye of ender re-cut as a crystal: blue to lavender to pink, with a bright star where the pupil was."""
+    img = vitem("ender_eye")
+    lo, hi = lum_range(img)
+    out = img.copy()
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))
+        if px[3]:
+            out.putpixel((x, y), (*sample(CRYSTAL_PEARL, 0.1 + 0.8 * (lum(px) - lo) / (hi - lo)), px[3]))
+    star = {(7, 7): WHITE, (8, 7): WHITE, (7, 8): WHITE, (8, 8): WHITE, (7, 6): hexc("FCE6EE"), (8, 9): hexc("E6F8FF"),
+            (6, 8): hexc("FCE6EE"), (9, 7): hexc("E6F8FF")}
+    for p, c in star.items():
+        if out.getpixel(p)[3]:
+            out.putpixel(p, (*c, 255))
+    return out
+
+
+def pastel_gel_item():
+    """A slime ball swirled pink and blue."""
+    img = vitem("slime_ball")
+    lo, hi = lum_range(img)
+    out = img.copy()
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))
+        if px[3]:
+            ramp = GEL_PINK if (x - 8) * 0.8 + (y - 8) < 0.5 + 1.5 * ((x + y) % 3 == 0) else GEL_BLUE
+            out.putpixel((x, y), (*sample(ramp, 0.1 + 0.9 * (lum(px) - lo) / (hi - lo)), px[3]))
+    return out
+
+
+def gumdrop_item():
+    """Two sugared gumdrops, a pink one in front of a blue one."""
+    rows = [
+        "................",
+        "................",
+        "................",
+        "......bbbb......",
+        ".....bBBBbb.....",
+        "....bBwBBBbb....",
+        "....bBBBsBbb....",
+        "...bbBsBBBBbb...",
+        "...bbpppppbbb...",
+        "..bbpPPwPPpbb...",
+        "..bpPwPPPsPpb...",
+        "..bpPPPsPPPpd...",
+        "..ppPsPPPPPPp...",
+        "..pPPPPPPsPPp...",
+        "..dpppppppppd...",
+        "................",
+    ]
+    palette = {"b": hexc("3E9BD8"), "B": hexc("7FD0F8"), "p": hexc("D9759A"), "P": hexc("F5A9B8"),
+               "w": WHITE, "s": hexc("FFF0F6"), "d": hexc("A84A6E")}
+    return from_ascii(rows, palette)
+
+
+def gel_block(ramp):
+    """Vanilla's slime block (a jelly cube around a firmer core) in pastel pink or blue."""
+    img = vblock("slime_block")
+    lo, hi = lum_range(img)
+    out = img.copy()
+    for p in pixels(img):
+        px = img.getpixel(p)
+        if px[3]:
+            out.putpixel(p, (*sample(ramp, 0.05 + 0.95 * (lum(px) - lo) / (hi - lo)), px[3]))
+    return out
+
+
+def creature_textures():
+    """(path under textures/, image) for everything above."""
+    yield "entity/trans_fish/trans_fish.png", trans_fish()
+    yield "entity/trans_enderman/trans_enderman.png", trans_enderman()
+    yield "entity/trans_enderman/trans_enderman_eyes.png", trans_enderman_eyes()
+    for kind in SLIMES:
+        yield f"entity/pastel_slime/{kind}.png", pastel_slime(kind)
+    items = {"trans_fish": trans_fish_item(), "cooked_trans_fish": trans_fish_item(cooked=True),
+             "trans_fish_bucket": trans_fish_bucket(), "trans_fish_spawn_egg": trans_fish_spawn_egg(),
+             "trans_pearl": trans_pearl_item(), "trans_crystal_pearl": trans_crystal_pearl_item(),
+             "trans_enderman_spawn_egg": trans_enderman_spawn_egg(), "pastel_gel": pastel_gel_item(), "gumdrop": gumdrop_item(),
+             "pastel_slime_spawn_egg": pastel_slime_spawn_egg()}
+    for name, img in items.items():
+        yield f"item/{name}.png", img
+    yield "block/pink_gel_block.png", gel_block(GEL_PINK)
+    yield "block/blue_gel_block.png", gel_block(GEL_BLUE)
+
+
 # ============================================================================================ sky + icon
 HEARTS = {
     5: [".#.#.", "#####", "#####", ".###.", "..#.."],
@@ -2902,6 +3301,8 @@ def main():
         save_mcmeta(f"entity/{kind}/profession/trans_baker.png", {"villager": {"hat": "full"}})
 
     save(silly_cat(), "entity/silly_cat/silly_cat.png")
+    for rel, img in creature_textures():
+        save(img, rel)
     save(maddie_skin(), "entity/maddie/maddie.png")
     save(trans_wings_model_texture(), "entity/trans_wings.png")
     for kind in ("boat", "chest_boat"):

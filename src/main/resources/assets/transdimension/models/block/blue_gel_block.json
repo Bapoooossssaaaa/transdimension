@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/slime_block",
+  "textures": {
+    "particle": "transdimension:block/blue_gel_block",
+    "texture": "transdimension:block/blue_gel_block"
+  }
+}

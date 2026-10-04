@@ -1,0 +1,29 @@
+{
+  "parent": "transdimension:goober",
+  "criteria": {
+    "bucket": {
+      "trigger": "minecraft:filled_bucket",
+      "conditions": {
+        "item": {
+          "items": "transdimension:trans_fish_bucket"
+        }
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_fish_bucket"
+    },
+    "title": {
+      "translate": "advancements.transdimension.fishy_pride.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.fishy_pride.description"
+    }
+  },
+  "requirements": [
+    [
+      "bucket"
+    ]
+  ]
+}

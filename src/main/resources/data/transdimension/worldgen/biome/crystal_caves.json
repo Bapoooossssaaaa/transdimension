@@ -138,7 +138,7 @@
         "weight": 100
       },
       {
-        "type": "minecraft:enderman",
+        "type": "transdimension:trans_enderman",
         "maxCount": 4,
         "minCount": 1,
         "weight": 10
