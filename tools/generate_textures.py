@@ -712,6 +712,139 @@ def prism_shard_item():
     return gradient_map(vitem("amethyst_shard"), R_PRISM, curve=lambda t: 0.08 + 0.92 * t)
 
 
+# ============================================================================================ trans vegetation
+# The realm's own grass, ferns, bushes, seagrass, kelp, lily pads and corals (vanilla's would show their usual green,
+# yellow and brown). Grass blades come in the flag's pink, blue and white; ferns are blue; bushes and kelp lilac;
+# seagrass, lily pads and sugar grass pink. Corals come in blush pink, sky blue and pearl white.
+V_PINK = [hexc(c) for c in ("8E3E64", "C2668B", "E58FAE", "F5A9B8", "FBD0DA", "FFF0F4")]
+V_BLUE = [hexc(c) for c in ("1E4E86", "2F7DBE", "4FAFE6", "7FD0F8", "B5E6FC", "E6F8FF")]
+V_WHITE = [hexc(c) for c in ("7E7A9A", "A6A3C0", "C9C7DD", "E3E2EF", "F4F3FA", "FFFFFF")]
+V_LILAC = [hexc(c) for c in ("4E3E86", "7462B4", "9C8AD6", "C0B2EC", "E0D8F8", "F6F2FF")]
+V_SUGAR = [hexc(c) for c in ("B8728C", "D896A8", "EDB9C6", "F8D9E1", "FFF1F5")]
+GRASS_FAMILIES = [V_PINK, V_PINK, V_BLUE, V_WHITE]
+
+
+def blades(img, families, seed=3, lo_t=0.18, hi_t=1.0):
+    """Colours each blade of a grass texture with its own colour family (blades that touch are split into strips three
+    pixels wide), shading from a darker base to light tips."""
+    rng = random.Random(seed)
+    w, h = img.size
+    lo, hi = lum_range(img)
+    labels, _ = components(img, lambda p, px: px[3] > 0, wrap=False)
+    strips = {p: (label, p[0] // 3) for p, label in labels.items()}
+    choice = {k: families[rng.randrange(len(families))] for k in sorted(set(strips.values()))}
+    out = img.copy()
+    for p, k in strips.items():
+        px = img.getpixel(p)
+        t = (lum(px) - lo) / (hi - lo)
+        height = 1 - p[1] / (h - 1)
+        out.putpixel(p, (*sample(choice[k], lo_t + (hi_t - lo_t) * (0.55 * t + 0.45 * height)), px[3]))
+    return out
+
+
+def recolour(img, ramp, lo_t=0.0, hi_t=1.0):
+    return gradient_map(img, ramp, curve=lambda t: lo_t + (hi_t - lo_t) * t)
+
+
+def animated(img, ramp, lo_t=0.0, hi_t=1.0):
+    """Gradient-maps every frame of a vertical animation strip with one brightness range, so frames match."""
+    w, h = img.size
+    lo, hi = lum_range(img)
+    out = img.copy()
+    for y in range(0, h, w):
+        frame = gradient_map(img.crop((0, y, w, y + w)), ramp, lo=lo, hi=hi, curve=lambda t: lo_t + (hi_t - lo_t) * t)
+        out.paste(frame, (0, y))
+    return out
+
+
+def pastel_bush():
+    img = vblock("bush")
+    out = recolour(img, V_LILAC, 0.15, 1.0)
+    rng = random.Random(11)
+    for p in pixels(img):
+        px = img.getpixel(p)
+        if px[3] and lum(px) > 0.62 and rng.random() < 0.18:
+            out.putpixel(p, (*sample(V_PINK, 0.85), 255))          # little blossoms on the brightest leaves
+    return out
+
+
+def trans_firefly_bush_emissive():
+    """The fireflies glow pink and blue in turn."""
+    img = vblock("firefly_bush_emissive")
+    out = img.copy()
+    for p in pixels(img):
+        px = img.getpixel(p)
+        if px[3]:
+            family = V_PINK if (p[0] + p[1] % 16) % 2 == 0 else V_BLUE
+            out.putpixel(p, (*sample(family, 0.55 + 0.45 * lum(px)), px[3]))
+    return out
+
+
+def trans_lily_pad():
+    img = vblock("lily_pad")
+    out = recolour(img, V_PINK, 0.15, 0.95)
+    for p, c in {(9, 5): WHITE, (8, 6): WHITE, (10, 6): WHITE, (9, 7): WHITE, (9, 6): BLUE}.items():
+        if img.getpixel(p)[3]:
+            out.putpixel(p, (*c, 255))                               # a tiny white flower with a blue heart
+    return out
+
+
+CORAL_RAMPS = {
+    "blush": [hexc(c) for c in ("6E2A50", "A8477A", "D56C9E", "F08EB8", "F9BCD4", "FFE6F0")],
+    "sky": [hexc(c) for c in ("173E7A", "2463AE", "3E8FDA", "5BCEFA", "A6E6FC", "E6F8FF")],
+    "pearl": [hexc(c) for c in ("6A6390", "938CB8", "BDB8DA", "DDDAEF", "F2F1FA", "FFFFFF")],
+}
+CORAL_SHAPES = {"blush": "brain", "sky": "tube", "pearl": "bubble"}
+DEAD_CORAL = [hexc(c) for c in ("6B6670", "8B8690", "A8A3AD", "C2BDC6", "D8D4DB")]
+
+
+def coral_texture(colour, part, dead=False):
+    """part: "" (the coral), "_fan" or "_block". Dead coral is bleached grey with a hint of its old colour."""
+    shape = CORAL_SHAPES[colour]
+    if dead:
+        tint = CORAL_RAMPS[colour][3]
+        return recolour(vblock(f"dead_{shape}_coral{part}"), [mix(c, tint, 0.12) for c in DEAD_CORAL])
+    return recolour(vblock(f"{shape}_coral{part}"), CORAL_RAMPS[colour])
+
+
+def vegetation_textures():
+    """(name, image, mcmeta or None) for every vegetation block texture."""
+    out = [
+        ("trans_short_grass", blades(vblock("short_grass"), GRASS_FAMILIES, seed=5), None),
+        ("tall_trans_grass_bottom", blades(vblock("tall_grass_bottom"), GRASS_FAMILIES, seed=8), None),
+        ("tall_trans_grass_top", blades(vblock("tall_grass_top"), GRASS_FAMILIES, seed=7), None),
+        ("trans_fern", recolour(vblock("fern"), V_BLUE, 0.1, 0.95), None),
+        ("large_trans_fern_bottom", recolour(vblock("large_fern_bottom"), V_BLUE, 0.1, 0.95), None),
+        ("large_trans_fern_top", recolour(vblock("large_fern_top"), V_BLUE, 0.1, 0.95), None),
+        ("pastel_bush", pastel_bush(), None),
+        ("trans_firefly_bush", recolour(vblock("firefly_bush"), V_LILAC, 0.0, 0.85), None),
+        ("trans_firefly_bush_emissive", trans_firefly_bush_emissive(), {"animation": {"frametime": 3}}),
+        ("short_sugar_grass", recolour(vblock("short_dry_grass"), V_SUGAR), None),
+        ("tall_sugar_grass", recolour(vblock("tall_dry_grass"), V_SUGAR), None),
+        ("trans_seagrass", animated(vblock("seagrass"), V_PINK, 0.05, 0.95), {"animation": {"frametime": 2}}),
+        ("tall_trans_seagrass_bottom", animated(vblock("tall_seagrass_bottom"), V_PINK, 0.05, 0.95), {"animation": {"frametime": 2}}),
+        ("tall_trans_seagrass_top", animated(vblock("tall_seagrass_top"), V_PINK, 0.05, 0.95), {"animation": {"frametime": 2}}),
+        ("trans_kelp", animated(vblock("kelp"), V_LILAC, 0.05, 1.0),
+         {"animation": {"frametime": 2}, "texture": {"alpha_cutoff_bias": 0.1}}),
+        ("trans_kelp_plant", animated(vblock("kelp_plant"), V_LILAC, 0.05, 1.0),
+         {"animation": {"frametime": 2}, "texture": {"alpha_cutoff_bias": 0.1}}),
+        ("trans_lily_pad", trans_lily_pad(), None),
+    ]
+    for colour in CORAL_RAMPS:
+        for part in ("", "_fan", "_block"):
+            out.append((f"{colour}_coral{part}", coral_texture(colour, part), None))
+            out.append((f"dead_{colour}_coral{part}", coral_texture(colour, part, dead=True), None))
+    return out
+
+
+def vegetation_items():
+    return {
+        "trans_seagrass": gradient_map(vitem("seagrass"), V_PINK, curve=lambda t: 0.05 + 0.9 * t),
+        "trans_kelp": gradient_map(vitem("kelp"), V_LILAC, curve=lambda t: 0.05 + 0.95 * t),
+        "trans_firefly_bush": gradient_map(vitem("firefly_bush"), V_LILAC, curve=lambda t: 0.85 * t),
+    }
+
+
 # ============================================================================================ glass, wool, light
 def tinted_glass(base, colour, alpha_boost=1.15):
     out = base.copy()
@@ -2599,6 +2732,10 @@ def main():
     blocks.update({name: cat_plush(name) for name in PLUSHES})
     for name, img in blocks.items():
         save(img, f"block/{name}.png")
+    for name, img, meta in vegetation_textures():
+        save(img, f"block/{name}.png")
+        if meta:
+            save_mcmeta(f"block/{name}.png", meta)
     for name in ("trans_crystal_cluster", "trans_sapling", "pride_blossom", *FLOWERS, "pride_peony_top", "pride_peony_bottom",
                  "trans_petals", "trans_petals_stem"):
         save_mcmeta(f"block/{name}.png", CUTOUT)
@@ -2619,6 +2756,7 @@ def main():
         "trans_wand": trans_wand(), "trans_wings": trans_wings_item(), "trans_magic_bolt": trans_magic_bolt(),
         "maddie_spawn_egg": maddie_spawn_egg(),
     }
+    items.update(vegetation_items())
     for name, img in items.items():
         save(img, f"item/{name}.png")
 

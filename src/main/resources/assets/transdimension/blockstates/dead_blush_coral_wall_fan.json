@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "transdimension:block/dead_blush_coral_wall_fan"
+    },
+    "facing=east": {
+      "model": "transdimension:block/dead_blush_coral_wall_fan",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "transdimension:block/dead_blush_coral_wall_fan",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "transdimension:block/dead_blush_coral_wall_fan",
+      "y": 270
+    }
+  }
+}

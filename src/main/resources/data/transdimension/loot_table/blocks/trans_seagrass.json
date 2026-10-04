@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "conditions": [
+        {
+          "condition": "minecraft:match_tool",
+          "predicate": {
+            "items": "minecraft:shears"
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "transdimension:trans_seagrass"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "transdimension:blocks/trans_seagrass"
+}

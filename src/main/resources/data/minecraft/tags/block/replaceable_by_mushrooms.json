@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:large_trans_fern",
+    "transdimension:pastel_bush",
+    "transdimension:short_sugar_grass",
+    "transdimension:tall_sugar_grass",
+    "transdimension:tall_trans_grass",
+    "transdimension:tall_trans_seagrass",
+    "transdimension:trans_fern",
+    "transdimension:trans_firefly_bush",
+    "transdimension:trans_seagrass",
+    "transdimension:trans_short_grass"
+  ]
+}

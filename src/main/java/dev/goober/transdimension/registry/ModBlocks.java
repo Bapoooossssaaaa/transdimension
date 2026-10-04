@@ -2,8 +2,10 @@ package dev.goober.transdimension.registry;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
@@ -21,33 +23,49 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.PlaceOnWaterBlockItem;
+import net.minecraft.world.item.StandingAndWallBlockItem;
 import net.minecraft.world.level.block.AmethystClusterBlock;
+import net.minecraft.world.level.block.BaseCoralFanBlock;
+import net.minecraft.world.level.block.BaseCoralPlantBlock;
+import net.minecraft.world.level.block.BaseCoralWallFanBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableFeaturePlacerBlock;
+import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.CakeBlock;
 import net.minecraft.world.level.block.CarpetBlock;
 import net.minecraft.world.level.block.ColoredFallingBlock;
+import net.minecraft.world.level.block.CoralBlock;
+import net.minecraft.world.level.block.CoralFanBlock;
+import net.minecraft.world.level.block.CoralPlantBlock;
+import net.minecraft.world.level.block.CoralWallFanBlock;
 import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.FireflyBushBlock;
 import net.minecraft.world.level.block.FlowerBedBlock;
 import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.LanternBlock;
+import net.minecraft.world.level.block.LilyPadBlock;
 import net.minecraft.world.level.block.PressurePlateBlock;
 import net.minecraft.world.level.block.RedStoneOreBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SaplingBlock;
+import net.minecraft.world.level.block.ShortDryGrassBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.StainedGlassBlock;
 import net.minecraft.world.level.block.StainedGlassPaneBlock;
 import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.TallDryGrassBlock;
 import net.minecraft.world.level.block.TallFlowerBlock;
+import net.minecraft.world.level.block.TallSeagrassBlock;
 import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.UntintedParticleLeavesBlock;
@@ -65,6 +83,10 @@ import dev.goober.transdimension.block.PlushSpotBlock;
 import dev.goober.transdimension.block.PrideOvenBlock;
 import dev.goober.transdimension.block.TransBedBlock;
 import dev.goober.transdimension.block.TransGrassBlock;
+import dev.goober.transdimension.block.TransGrassPlantBlock;
+import dev.goober.transdimension.block.TransKelpBlock;
+import dev.goober.transdimension.block.TransKelpPlantBlock;
+import dev.goober.transdimension.block.TransSeagrassBlock;
 
 /**
  * All Trans Realm blocks. Most copy the "feel" (hardness, sounds, tool) of a vanilla
@@ -287,6 +309,43 @@ public final class ModBlocks {
 	public static final Block TRANS_PETALS = register("trans_petals", FlowerBedBlock::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.PINK_PETALS));
 
+	// ---------------------------------------------------------------- trans vegetation: grass, ferns, bushes
+	public static final Block TALL_TRANS_GRASS = register("tall_trans_grass", DoublePlantBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.TALL_GRASS));
+	public static final Block LARGE_TRANS_FERN = register("large_trans_fern", DoublePlantBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.LARGE_FERN));
+	/** Pastel blades of grass in the flag's colours; bone meal grows it into tall trans grass. */
+	public static final Block TRANS_SHORT_GRASS = register("trans_short_grass", properties -> new TransGrassPlantBlock(() -> TALL_TRANS_GRASS, properties),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.SHORT_GRASS));
+	public static final Block TRANS_FERN = register("trans_fern", properties -> new TransGrassPlantBlock(() -> LARGE_TRANS_FERN, properties),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.FERN));
+	public static final Block POTTED_TRANS_FERN = potted("potted_trans_fern", TRANS_FERN);
+	public static final Block PASTEL_BUSH = register("pastel_bush", BushBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BUSH));
+	/** A bush full of glowing pink and blue fireflies. */
+	public static final Block TRANS_FIREFLY_BUSH = register("trans_firefly_bush", FireflyBushBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.FIREFLY_BUSH));
+	/** Pale pink dry grass for the Sugar Dunes. */
+	public static final Block SHORT_SUGAR_GRASS = register("short_sugar_grass", ShortDryGrassBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.SHORT_DRY_GRASS));
+	public static final Block TALL_SUGAR_GRASS = register("tall_sugar_grass", TallDryGrassBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.TALL_DRY_GRASS));
+
+	// ---------------------------------------------------------------- trans water plants and corals
+	public static final Block TALL_TRANS_SEAGRASS = registerWithoutItem("tall_trans_seagrass", TallSeagrassBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.TALL_SEAGRASS));
+	public static final Block TRANS_SEAGRASS = register("trans_seagrass", TransSeagrassBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.SEAGRASS));
+	public static final Block TRANS_KELP_PLANT = registerWithoutItem("trans_kelp_plant", TransKelpPlantBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.KELP_PLANT));
+	public static final Block TRANS_KELP = register("trans_kelp", TransKelpBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.KELP));
+	public static final Block TRANS_LILY_PAD = register("trans_lily_pad", LilyPadBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.LILY_PAD),
+			PlaceOnWaterBlockItem::new);
+	public static final CoralSet BLUSH_CORAL = coral("blush");
+	public static final CoralSet SKY_CORAL = coral("sky");
+	public static final CoralSet PEARL_CORAL = coral("pearl");
+	/** Every trans coral colour; the reef feature picks from these. */
+	public static final List<CoralSet> CORALS = List.of(BLUSH_CORAL, SKY_CORAL, PEARL_CORAL);
+
 	// ---------------------------------------------------------------- pastel lush caves
 	/** Pink and blue moss; bone meal spreads it (and flowers) around, like vanilla moss. */
 	public static final Block TRANS_MOSS_BLOCK = register("trans_moss_block",
@@ -360,6 +419,42 @@ public final class ModBlocks {
 		return ResourceKey.create(Registries.CONFIGURED_FEATURE, TransDimension.id(name));
 	}
 
+	/**
+	 * One colour of trans coral: the block, the coral, the fan and the wall fan, each with the dead twin it bleaches into
+	 * out of water. Wall fans copy the standing fan's properties and have their own loot tables (they drop the fan).
+	 */
+	public record CoralSet(Block block, Block deadBlock, Block plant, Block deadPlant, Block fan, Block deadFan, Block wallFan,
+			Block deadWallFan) {
+	}
+
+	private static CoralSet coral(String colour) {
+		String name = colour + "_coral";
+		Block deadBlock = register("dead_" + name + "_block", Block::new, BlockBehaviour.Properties.ofFullCopy(Blocks.DEAD_TUBE_CORAL_BLOCK));
+		Block block = register(name + "_block", properties -> new CoralBlock(deadBlock, properties),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.TUBE_CORAL_BLOCK));
+		Block deadPlant = register("dead_" + name, BaseCoralPlantBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.DEAD_TUBE_CORAL));
+		Block plant = register(name, properties -> new CoralPlantBlock(deadPlant, properties),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.TUBE_CORAL));
+		Block deadFan = registerWithoutItem("dead_" + name + "_fan", BaseCoralFanBlock::new,
+				BlockBehaviour.Properties.ofFullCopy(Blocks.DEAD_TUBE_CORAL_FAN));
+		Block deadWallFan = registerWithoutItem("dead_" + name + "_wall_fan", BaseCoralWallFanBlock::new,
+				BlockBehaviour.Properties.ofFullCopy(Blocks.DEAD_TUBE_CORAL_FAN));
+		Block fan = registerWithoutItem(name + "_fan", properties -> new CoralFanBlock(deadFan, properties),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.TUBE_CORAL_FAN));
+		Block wallFan = registerWithoutItem(name + "_wall_fan", properties -> new CoralWallFanBlock(deadWallFan, properties),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.TUBE_CORAL_FAN));
+		fanItem(deadFan, deadWallFan);
+		fanItem(fan, wallFan);
+		return new CoralSet(block, deadBlock, plant, deadPlant, fan, deadFan, wallFan, deadWallFan);
+	}
+
+	/** The item of a coral fan: it places the standing fan on floors and the wall fan on walls, like vanilla's. */
+	private static void fanItem(Block standing, Block wall) {
+		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, BuiltInRegistries.BLOCK.getKey(standing));
+		Registry.register(BuiltInRegistries.ITEM, key, new StandingAndWallBlockItem(standing, wall, Direction.DOWN,
+				new Item.Properties().useBlockDescriptionPrefix().setId(key)));
+	}
+
 	private static Block plush(String name) {
 		return register(name, properties -> new FurnitureBlock(FurnitureBlock.PLUSH_SHAPE, properties),
 				BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(0.5F).sound(SoundType.WOOL).noOcclusion()
@@ -418,13 +513,23 @@ public final class ModBlocks {
 
 	private static Block register(String name, Function<BlockBehaviour.Properties, Block> factory,
 			BlockBehaviour.Properties properties, Item.Properties itemProperties) {
+		return register(name, factory, properties, itemProperties, BlockItem::new);
+	}
+
+	private static Block register(String name, Function<BlockBehaviour.Properties, Block> factory, BlockBehaviour.Properties properties,
+			BiFunction<Block, Item.Properties, Item> itemFactory) {
+		return register(name, factory, properties, new Item.Properties(), itemFactory);
+	}
+
+	private static Block register(String name, Function<BlockBehaviour.Properties, Block> factory,
+			BlockBehaviour.Properties properties, Item.Properties itemProperties, BiFunction<Block, Item.Properties, Item> itemFactory) {
 		Identifier id = TransDimension.id(name);
 		BlockItemId ids = BlockItemId.create(id, id);
 
 		Block block = factory.apply(properties.setId(ids.block()));
 		Registry.register(BuiltInRegistries.BLOCK, ids.block(), block);
 
-		BlockItem blockItem = new BlockItem(block, itemProperties.useBlockDescriptionPrefix().setId(ids.item()));
+		Item blockItem = itemFactory.apply(block, itemProperties.useBlockDescriptionPrefix().setId(ids.item()));
 		Registry.register(BuiltInRegistries.ITEM, ids.item(), blockItem);
 		return block;
 	}

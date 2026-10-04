@@ -79,12 +79,13 @@
     ],
     [
       "transdimension:trees_trans_meadow",
-      "minecraft:patch_tall_grass_2",
+      "transdimension:tall_trans_grass",
       "transdimension:pride_blossoms",
       "transdimension:trans_flowers",
       "transdimension:pride_peonies",
       "transdimension:trans_petals_meadow",
-      "minecraft:patch_grass_meadow",
+      "transdimension:trans_grass_meadow",
+      "transdimension:pastel_bushes",
       "transdimension:trans_boulders"
     ],
     []

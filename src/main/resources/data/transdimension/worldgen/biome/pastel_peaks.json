@@ -81,7 +81,7 @@
     ],
     [
       "transdimension:trans_crystal_spikes_rare",
-      "minecraft:patch_grass_taiga",
+      "transdimension:trans_grass_taiga",
       "transdimension:trans_boulders"
     ],
     [

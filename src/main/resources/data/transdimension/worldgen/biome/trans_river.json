@@ -71,8 +71,8 @@
       "minecraft:spring_lava"
     ],
     [
-      "minecraft:seagrass_river",
-      "minecraft:patch_waterlily",
+      "transdimension:trans_seagrass_river",
+      "transdimension:trans_lily_pads",
       "minecraft:patch_sugar_cane"
     ],
     []

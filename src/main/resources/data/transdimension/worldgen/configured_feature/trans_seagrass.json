@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:random_selector",
+  "config": {
+    "default": {
+      "feature": "transdimension:trans_seagrass_short",
+      "placement": []
+    },
+    "features": [
+      {
+        "chance": 0.35,
+        "feature": {
+          "feature": "transdimension:trans_seagrass_tall",
+          "placement": []
+        }
+      }
+    ]
+  }
+}

@@ -83,14 +83,14 @@
     ],
     [
       "transdimension:trees_lavender_marsh",
-      "minecraft:seagrass_swamp",
+      "transdimension:trans_seagrass_swamp",
       "transdimension:lavender_flowers",
-      "minecraft:patch_grass_normal",
-      "minecraft:patch_waterlily",
+      "transdimension:trans_grass_normal",
+      "transdimension:trans_lily_pads",
       "minecraft:patch_sugar_cane_swamp",
       "minecraft:brown_mushroom_swamp",
       "minecraft:red_mushroom_swamp",
-      "minecraft:patch_firefly_bush_swamp"
+      "transdimension:trans_firefly_bushes_swamp"
     ],
     []
   ],

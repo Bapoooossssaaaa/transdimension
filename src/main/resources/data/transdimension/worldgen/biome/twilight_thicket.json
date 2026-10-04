@@ -81,7 +81,7 @@
       "transdimension:trees_twilight_thicket",
       "transdimension:lavender_flowers",
       "transdimension:trans_crystal_clusters_surface",
-      "minecraft:patch_grass_forest",
+      "transdimension:trans_grass_forest",
       "minecraft:brown_mushroom_normal",
       "minecraft:red_mushroom_swamp"
     ],

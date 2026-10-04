@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cross_emissive",
+  "textures": {
+    "cross": "transdimension:block/trans_firefly_bush",
+    "cross_emissive": "transdimension:block/trans_firefly_bush_emissive"
+  }
+}

@@ -76,10 +76,10 @@
       "minecraft:spring_lava"
     ],
     [
-      "minecraft:warm_ocean_vegetation",
-      "minecraft:seagrass_warm",
+      "transdimension:trans_coral_reefs",
+      "transdimension:trans_seagrass_warm",
       "minecraft:sea_pickle",
-      "minecraft:kelp_warm"
+      "transdimension:trans_kelp_warm"
     ],
     []
   ],

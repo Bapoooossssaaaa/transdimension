@@ -847,6 +847,144 @@ def generate_blocks():
     name("trans_cake", "Trans Cake")
 
 
+# ============================================================================================ trans vegetation
+def plant_tags(block, edible=False):
+    for t in ("replaceable", "replaceable_by_mushrooms", "replaceable_by_trees"):
+        tag("block", t, block)
+    if edible:
+        tag("block", "edible_for_sheep", block)
+
+
+def cross_model(block, texture=None, item_texture=None, item=True):
+    """A plant drawn as two crossed planes (no biome tint: trans plants carry their own colours)."""
+    model(block, {"parent": "minecraft:block/cross", "textures": {"cross": block_tex(texture or block)}})
+    if item:
+        model(block, {"parent": "minecraft:item/generated", "textures": {"layer0": item_texture or block_tex(texture or block)}}, kind="item")
+        item_def(block, f"{NS}:item/{block}")
+
+
+def double_plant(block, english, vanilla):
+    blockstate(block, {"variants": {"half=lower": {"model": f"{NS}:block/{block}_bottom"},
+                                    "half=upper": {"model": f"{NS}:block/{block}_top"}}})
+    for half in ("bottom", "top"):
+        model(f"{block}_{half}", {"parent": "minecraft:block/cross", "textures": {"cross": block_tex(f"{block}_{half}")}})
+    model(block, {"parent": "minecraft:item/generated", "textures": {"layer0": block_tex(f"{block}_top")}}, kind="item")
+    item_def(block, f"{NS}:item/{block}")
+    name(block, english)
+    return block
+
+
+def generate_vegetation():
+    # ---- grass, ferns, bushes
+    blockstate("trans_short_grass", {"variants": {"": {"model": f"{NS}:block/trans_short_grass"}}})
+    cross_model("trans_short_grass")
+    name("trans_short_grass", "Trans Grass")
+    loot_like_vanilla("trans_short_grass", "short_grass")
+    plant_tags("trans_short_grass", edible=True)
+    double_plant("tall_trans_grass", "Tall Trans Grass", "tall_grass")
+    loot_like_vanilla("tall_trans_grass", "tall_grass", {"minecraft:short_grass": "trans_short_grass"})
+    plant_tags("tall_trans_grass")
+    cross_plant("trans_fern", "Trans Fern", "potted_trans_fern", "Potted Trans Fern")
+    loot_like_vanilla("trans_fern", "fern")
+    plant_tags("trans_fern", edible=True)
+    double_plant("large_trans_fern", "Large Trans Fern", "large_fern")
+    loot_like_vanilla("large_trans_fern", "large_fern", {"minecraft:fern": "trans_fern"})
+    plant_tags("large_trans_fern")
+    for block, english, vanilla, edible in (("pastel_bush", "Pastel Bush", "bush", False),
+                                            ("short_sugar_grass", "Short Sugar Grass", "short_dry_grass", True),
+                                            ("tall_sugar_grass", "Tall Sugar Grass", "tall_dry_grass", True)):
+        blockstate(block, {"variants": {"": {"model": f"{NS}:block/{block}"}}})
+        cross_model(block)
+        name(block, english)
+        loot_like_vanilla(block, vanilla)
+        plant_tags(block, edible=edible)
+    # The firefly bush: a cross plus a glowing (light emission 15) cross of pink and blue fireflies, like vanilla's.
+    blockstate("trans_firefly_bush", {"variants": {"": {"model": f"{NS}:block/trans_firefly_bush"}}})
+    model("trans_firefly_bush", {"parent": "minecraft:block/cross_emissive", "textures": {
+        "cross": block_tex("trans_firefly_bush"), "cross_emissive": block_tex("trans_firefly_bush_emissive")}})
+    model("trans_firefly_bush", {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/trans_firefly_bush"}}, kind="item")
+    item_def("trans_firefly_bush", f"{NS}:item/trans_firefly_bush")
+    name("trans_firefly_bush", "Trans Firefly Bush")
+    loot_like_vanilla("trans_firefly_bush", "firefly_bush")
+    for t in ("replaceable_by_mushrooms", "replaceable_by_trees"):
+        tag("block", t, "trans_firefly_bush")
+
+    # ---- seagrass, kelp, lily pads
+    blockstate("trans_seagrass", {"variants": {"": {"model": f"{NS}:block/trans_seagrass"}}})
+    model("trans_seagrass", {"parent": "minecraft:block/template_seagrass", "textures": {"texture": block_tex("trans_seagrass")}})
+    model("trans_seagrass", {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/trans_seagrass"}}, kind="item")
+    item_def("trans_seagrass", f"{NS}:item/trans_seagrass")
+    name("trans_seagrass", "Trans Seagrass")
+    loot_like_vanilla("trans_seagrass", "seagrass")
+    plant_tags("trans_seagrass")
+    tag("item", "turtle_food", "trans_seagrass")
+    blockstate("tall_trans_seagrass", {"variants": {"half=lower": {"model": f"{NS}:block/tall_trans_seagrass_bottom"},
+                                                    "half=upper": {"model": f"{NS}:block/tall_trans_seagrass_top"}}})
+    for half in ("bottom", "top"):
+        model(f"tall_trans_seagrass_{half}", {"parent": "minecraft:block/template_seagrass",
+                                              "textures": {"texture": block_tex(f"tall_trans_seagrass_{half}")}})
+    name("tall_trans_seagrass", "Tall Trans Seagrass")
+    loot_like_vanilla("tall_trans_seagrass", "tall_seagrass", {"minecraft:seagrass": "trans_seagrass"})
+    plant_tags("tall_trans_seagrass")
+
+    blockstate("trans_kelp", {"variants": {"": {"model": f"{NS}:block/trans_kelp"}}})
+    cross_model("trans_kelp", item_texture=f"{NS}:item/trans_kelp")
+    name("trans_kelp", "Trans Kelp")
+    loot_like_vanilla("trans_kelp", "kelp")
+    blockstate("trans_kelp_plant", {"variants": {"": {"model": f"{NS}:block/trans_kelp_plant"}}})
+    cross_model("trans_kelp_plant", item=False)
+    name("trans_kelp_plant", "Trans Kelp Plant")
+    loot_like_vanilla("trans_kelp_plant", "kelp_plant", {"minecraft:kelp": "trans_kelp"})
+
+    blockstate("trans_lily_pad", {"variants": {"": [{"model": f"{NS}:block/trans_lily_pad", **({"y": y} if y else {})}
+                                                    for y in (0, 90, 180, 270)]}})
+    model("trans_lily_pad", {"parent": "minecraft:block/lily_pad", "textures": {
+        "particle": block_tex("trans_lily_pad"), "texture": block_tex("trans_lily_pad")}})
+    model("trans_lily_pad", {"parent": "minecraft:item/generated", "textures": {"layer0": block_tex("trans_lily_pad")}}, kind="item")
+    item_def("trans_lily_pad", f"{NS}:item/trans_lily_pad")
+    name("trans_lily_pad", "Trans Lily Pad")
+    loot_like_vanilla("trans_lily_pad", "lily_pad")
+    tag("block", "inside_step_sound_blocks", "trans_lily_pad")
+    tag("block", "frog_prefer_jump_to", "trans_lily_pad")
+
+    # ---- corals: blush pink, sky blue and pearl white, each with a dead twin. They are kept out of vanilla's coral
+    # tags (vanilla's warm ocean reefs pick their blocks from those tags); the realm's reefs use our own feature.
+    for colour, english in (("blush", "Blush"), ("sky", "Sky"), ("pearl", "Pearl")):
+        for dead in (False, True):
+            prefix = "dead_" if dead else ""
+            label = f"Dead {english}" if dead else english
+            block = f"{prefix}{colour}_coral_block"
+            cube(block, f"{label} Coral Block", drop=None)
+            if dead:
+                loot_like_vanilla(block, "dead_tube_coral_block")
+            else:
+                loot_like_vanilla(block, "tube_coral_block", {"minecraft:dead_tube_coral_block": f"dead_{colour}_coral_block"})
+            plant = f"{prefix}{colour}_coral"
+            blockstate(plant, {"variants": {"": {"model": f"{NS}:block/{plant}"}}})
+            cross_model(plant)
+            name(plant, f"{label} Coral")
+            loot_like_vanilla(plant, "dead_tube_coral" if dead else "tube_coral")
+            fan = f"{prefix}{colour}_coral_fan"
+            wall = f"{prefix}{colour}_coral_wall_fan"
+            blockstate(fan, {"variants": {"": {"model": f"{NS}:block/{fan}"}}})
+            model(fan, {"parent": "minecraft:block/coral_fan", "textures": {"fan": block_tex(fan)}})
+            model(fan, {"parent": "minecraft:item/generated", "textures": {"layer0": block_tex(fan)}}, kind="item")
+            item_def(fan, f"{NS}:item/{fan}")
+            name(fan, f"{label} Coral Fan")
+            loot_like_vanilla(fan, "dead_tube_coral_fan" if dead else "tube_coral_fan")
+            blockstate(wall, {"variants": {f"facing={f}": {"model": f"{NS}:block/{wall}", **({"y": y} if y else {})}
+                                           for f, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270))}})
+            model(wall, {"parent": "minecraft:block/coral_wall_fan", "textures": {"fan": block_tex(fan)}})
+            name(wall, f"{label} Coral Wall Fan")
+            # Wall fans drop the fan item (vanilla's borrow the fan's loot table; ours have their own).
+            loot_like_vanilla(wall, "dead_tube_coral_fan" if dead else "tube_coral_fan",
+                              {f"minecraft:{'dead_' if dead else ''}tube_coral_fan": fan})
+            tag("block", "trans_corals", plant, fan, ns=NS)
+            tag("block", "trans_wall_corals", wall, ns=NS)
+        tag("block", "trans_coral_blocks", f"{colour}_coral_block", ns=NS)
+
+
+
 def furniture_blockstate(block):
     blockstate(block, {"variants": {
         "facing=north": {"model": f"{NS}:block/{block}"},
@@ -1036,6 +1174,9 @@ def generate_recipes():
                                   ("flag_lily", "white_dye", 1), ("lavender_puff", "purple_dye", 1), ("trans_orchid", "pink_dye", 1),
                                   ("heart_bloom", "pink_dye", 2), ("pride_peony", "pink_dye", 2), ("trans_petals", "pink_dye", 1)):
         R(f"{dye}_from_{flower_id}", shapeless(f"minecraft:{dye}", [flower_id], count, category="misc", group=dye))
+    R("dried_kelp_from_smelting_trans_kelp", smelting("minecraft:dried_kelp", "trans_kelp", 0.1, category="food"))
+    for plant, dye in (("trans_lily_pad", "pink_dye"), ("pastel_bush", "purple_dye")):
+        R(f"{dye}_from_{plant}", shapeless(f"minecraft:{dye}", [plant], 1, category="misc", group=dye))
     R("trans_moss_carpet", shaped("trans_moss_carpet", ["##"], {"#": "trans_moss_block"}, 3, category="misc", group="carpet"))
     R("trans_sapling_from_blossoms", shapeless("trans_sapling", ["minecraft:cherry_sapling", "transdimension:pride_blossom", "transdimension:prism_shard"], 1, category="misc"))
     R("pastel_prism", shaped("pastel_prism", ["##", "##"], {"#": "prism_shard"}, 1))
@@ -1381,6 +1522,7 @@ def remove_stale():
 def main():
     remove_stale()
     generate_blocks()
+    generate_vegetation()
     generate_recipes()
     generate_misc()
     generate_sounds()

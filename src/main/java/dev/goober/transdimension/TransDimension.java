@@ -15,6 +15,7 @@ import dev.goober.transdimension.registry.ModBlockEntities;
 import dev.goober.transdimension.registry.ModBlocks;
 import dev.goober.transdimension.registry.ModEffects;
 import dev.goober.transdimension.registry.ModEntities;
+import dev.goober.transdimension.registry.ModFeatures;
 import dev.goober.transdimension.registry.ModItems;
 import dev.goober.transdimension.registry.ModSounds;
 import dev.goober.transdimension.registry.ModVillagers;
@@ -38,6 +39,7 @@ public class TransDimension implements ModInitializer {
 		ModSounds.initialize();
 		ModBlocks.initialize();
 		ModBlockEntities.initialize();
+		ModFeatures.initialize();
 		ModAttachments.initialize();
 		ModEntities.initialize();
 		ModItems.initialize();

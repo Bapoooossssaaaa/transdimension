@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "transdimension:block/large_trans_fern_top"
+  }
+}

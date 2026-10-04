@@ -76,8 +76,8 @@
       "minecraft:spring_lava"
     ],
     [
-      "minecraft:seagrass_deep",
-      "minecraft:kelp_cold"
+      "transdimension:trans_seagrass_deep",
+      "transdimension:trans_kelp_cold"
     ],
     []
   ],

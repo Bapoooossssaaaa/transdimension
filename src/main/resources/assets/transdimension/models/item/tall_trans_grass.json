@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "transdimension:block/tall_trans_grass_top"
+  }
+}

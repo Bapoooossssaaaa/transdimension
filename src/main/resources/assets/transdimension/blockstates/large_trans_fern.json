@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "half=lower": {
+      "model": "transdimension:block/large_trans_fern_bottom"
+    },
+    "half=upper": {
+      "model": "transdimension:block/large_trans_fern_top"
+    }
+  }
+}

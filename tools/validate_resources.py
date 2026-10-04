@@ -66,11 +66,17 @@ def vanilla_has(registry, ident):
 def java_names():
     blocks, items, no_item = set(), set(), set()
     src = open(os.path.join(JAVA, "registry", "ModBlocks.java"), encoding="utf-8").read()
-    for m in re.finditer(r'\b(?:register|stairs|slab|wall|glass|pane|copy|ore|flower|leaves|plush)\("([a-z0-9_]+)"', src):
+    for m in re.finditer(r'\b(?:register|stairs|slab|wall|glass|pane|copy|ore|flower|leaves|plush)\("([a-z0-9_]+)"[,)]', src):
         blocks.add(m.group(1))
-    for m in re.finditer(r'\b(?:registerWithoutItem|potted)\("([a-z0-9_]+)"', src):
+    for m in re.finditer(r'\b(?:registerWithoutItem|potted)\("([a-z0-9_]+)"[,)]', src):
         no_item.add(m.group(1))
         blocks.add(m.group(1))
+    # Coral colours registered through ModBlocks.coral("<colour>"): fans get their item from fanItem(), wall fans none.
+    for m in re.finditer(r'\bcoral\("([a-z]+)"\)', src):
+        c = m.group(1)
+        for prefix in ("", "dead_"):
+            blocks.update({f"{prefix}{c}_coral_block", f"{prefix}{c}_coral", f"{prefix}{c}_coral_fan", f"{prefix}{c}_coral_wall_fan"})
+            no_item.add(f"{prefix}{c}_coral_wall_fan")
     items |= blocks - no_item
     src = open(os.path.join(JAVA, "registry", "ModItems.java"), encoding="utf-8").read()
     for m in re.finditer(r'register\("([a-z0-9_]+)"', src):
@@ -275,6 +281,18 @@ TWINS = {
     "pearl_leaves": "cherry_leaves", "sky_leaves": "cherry_leaves", "blush_leaves": "cherry_leaves", "twilight_leaves": "cherry_leaves",
     "trans_bed": "red_bed", "plush_spot": "smoker",
 }
+TWINS.update({
+    "trans_short_grass": "short_grass", "tall_trans_grass": "tall_grass", "trans_fern": "fern", "large_trans_fern": "large_fern",
+    "pastel_bush": "bush", "trans_firefly_bush": "firefly_bush", "short_sugar_grass": "short_dry_grass",
+    "tall_sugar_grass": "tall_dry_grass", "trans_seagrass": "seagrass", "tall_trans_seagrass": "tall_seagrass",
+    "trans_kelp": "kelp", "trans_kelp_plant": "kelp_plant", "trans_lily_pad": "lily_pad",
+})
+for b in list(BLOCKS):
+    for suffix, twin in (("_coral_wall_fan", "tube_coral_wall_fan"), ("_coral_fan", "tube_coral_fan"), ("_coral_block", "tube_coral_block"),
+                         ("_coral", "tube_coral")):
+        if b.endswith(suffix):
+            TWINS.setdefault(b, ("dead_" if b.startswith("dead_") else "") + twin)
+            break
 # Furniture-like blocks only have a horizontal "facing" (borrowed from the smoker); the bed adds a "heart" property.
 FACING_ONLY = {"pride_oven", "trans_chair", "trans_table", "plush_spot"}
 EXTRA_PROPS = {"trans_bed": {"heart": ["none", "left", "right"]}}

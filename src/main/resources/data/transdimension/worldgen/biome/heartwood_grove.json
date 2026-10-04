@@ -82,9 +82,9 @@
       "transdimension:trans_bushes",
       "transdimension:pride_blossoms",
       "transdimension:trans_flowers",
-      "minecraft:patch_grass_jungle",
-      "minecraft:patch_large_fern",
-      "minecraft:patch_firefly_bush_near_water",
+      "transdimension:trans_grass_jungle",
+      "transdimension:large_trans_ferns",
+      "transdimension:trans_firefly_bushes_near_water",
       "minecraft:vines"
     ],
     []

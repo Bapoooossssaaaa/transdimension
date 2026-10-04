@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "transdimension:block/trans_lily_pad"
+      },
+      {
+        "model": "transdimension:block/trans_lily_pad",
+        "y": 90
+      },
+      {
+        "model": "transdimension:block/trans_lily_pad",
+        "y": 180
+      },
+      {
+        "model": "transdimension:block/trans_lily_pad",
+        "y": 270
+      }
+    ]
+  }
+}

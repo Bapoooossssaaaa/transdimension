@@ -173,6 +173,21 @@ public final class ModItems {
 			CompostableRegistry.INSTANCE.add(leaves, 0.3F);
 			FlammableBlockRegistry.getDefaultInstance().add(leaves, 30, 60);
 		}
+		// Trans vegetation composts and burns like vanilla's.
+		for (Block plant : List.of(ModBlocks.TRANS_SHORT_GRASS, ModBlocks.TRANS_SEAGRASS, ModBlocks.TRANS_KELP, ModBlocks.PASTEL_BUSH,
+				ModBlocks.SHORT_SUGAR_GRASS, ModBlocks.TALL_SUGAR_GRASS)) {
+			CompostableRegistry.INSTANCE.add(plant, 0.3F);
+		}
+		for (Block plant : List.of(ModBlocks.TALL_TRANS_GRASS, ModBlocks.TRANS_FIREFLY_BUSH)) {
+			CompostableRegistry.INSTANCE.add(plant, 0.5F);
+		}
+		for (Block plant : List.of(ModBlocks.TRANS_FERN, ModBlocks.LARGE_TRANS_FERN, ModBlocks.TRANS_LILY_PAD)) {
+			CompostableRegistry.INSTANCE.add(plant, 0.65F);
+		}
+		for (Block plant : List.of(ModBlocks.TRANS_SHORT_GRASS, ModBlocks.TALL_TRANS_GRASS, ModBlocks.TRANS_FERN, ModBlocks.LARGE_TRANS_FERN,
+				ModBlocks.PASTEL_BUSH, ModBlocks.TRANS_FIREFLY_BUSH, ModBlocks.SHORT_SUGAR_GRASS, ModBlocks.TALL_SUGAR_GRASS)) {
+			FlammableBlockRegistry.getDefaultInstance().add(plant, 60, 100);
+		}
 		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_MOSS_BLOCK, 0.65F);
 		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_MOSS_CARPET, 0.3F);
 		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_SAPLING, 0.3F);

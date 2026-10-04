@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:simple_block",
+  "config": {
+    "to_place": {
+      "type": "minecraft:weighted_state_provider",
+      "entries": [
+        {
+          "data": {
+            "Name": "transdimension:short_sugar_grass"
+          },
+          "weight": 1
+        },
+        {
+          "data": {
+            "Name": "transdimension:tall_sugar_grass"
+          },
+          "weight": 1
+        }
+      ]
+    }
+  }
+}

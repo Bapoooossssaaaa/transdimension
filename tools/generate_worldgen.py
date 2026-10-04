@@ -219,7 +219,7 @@ def generate_features():
     # ---- pastel lush caves: vanilla's lush cave patches grown in trans moss
     cf("trans_moss_vegetation", {"type": "minecraft:simple_block", "config": {"to_place": {"type": "minecraft:weighted_state_provider", "entries": [
         {"data": state("minecraft:flowering_azalea"), "weight": 4}, {"data": state("trans_moss_carpet"), "weight": 25},
-        {"data": state("minecraft:short_grass"), "weight": 40}, {"data": state("minecraft:tall_grass", half="lower"), "weight": 6},
+        {"data": state("trans_short_grass"), "weight": 40}, {"data": state("tall_trans_grass", half="lower"), "weight": 6},
         {"data": state("pride_blossom"), "weight": 4}, {"data": state("sky_bell"), "weight": 3}, {"data": state("pearl_daisy"), "weight": 3},
         {"data": state("heart_bloom"), "weight": 1}]}}})
 
@@ -282,6 +282,86 @@ def generate_features():
     # Tall Pride Peonies (simple_block places both halves of a double plant).
     cf("pride_peony_patch", {"type": "minecraft:simple_block", "config": {"to_place": simple(state("pride_peony", half="lower"))}})
     pf("pride_peonies", f"{NS}:pride_peony_patch", [{"type": "minecraft:rarity_filter", "chance": 4}] + blossoms + patch(24, xz=5))
+
+    # ---- trans vegetation: the realm's own grass, ferns, bushes, water plants and corals instead of vanilla's
+    def spread(count, xz=7, y=3, extra=None):
+        predicate = {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"}
+        if extra:
+            predicate = {"type": "minecraft:all_of", "predicates": [predicate, extra]}
+        return [{"type": "minecraft:count", "count": count}, {"type": "minecraft:random_offset",
+                "xz_spread": {"type": "minecraft:trapezoid", "max": xz, "min": -xz, "plateau": 0},
+                "y_spread": {"type": "minecraft:trapezoid", "max": y, "min": -y, "plateau": 0}},
+                {"type": "minecraft:block_predicate_filter", "predicate": predicate}]
+
+    def surface(heightmap="WORLD_SURFACE_WG"):
+        return [{"type": "minecraft:in_square"}, {"type": "minecraft:heightmap", "heightmap": heightmap}, {"type": "minecraft:biome"}]
+
+    def weighted(*pairs):
+        return {"type": "minecraft:weighted_state_provider", "entries": [{"data": st, "weight": w} for st, w in pairs]}
+
+    cf("trans_grass", {"type": "minecraft:simple_block", "config": {"to_place": simple(state("trans_short_grass"))}})
+    cf("trans_grass_jungle", {"type": "minecraft:simple_block", "config": {"to_place": weighted(
+        (state("trans_short_grass"), 3), (state("trans_fern"), 1))}})
+    cf("trans_taiga_grass", {"type": "minecraft:simple_block", "config": {"to_place": weighted(
+        (state("trans_short_grass"), 1), (state("trans_fern"), 4))}})
+    cf("tall_trans_grass", {"type": "minecraft:simple_block", "config": {"to_place": simple(state("tall_trans_grass", half="lower"))}})
+    cf("large_trans_fern", {"type": "minecraft:simple_block", "config": {"to_place": simple(state("large_trans_fern", half="lower"))}})
+    cf("pastel_bush", {"type": "minecraft:simple_block", "config": {"to_place": simple(state("pastel_bush"))}})
+    cf("trans_firefly_bush", {"type": "minecraft:simple_block", "config": {"to_place": simple(state("trans_firefly_bush"))}})
+    cf("sugar_grass", {"type": "minecraft:simple_block", "config": {"to_place": weighted(
+        (state("short_sugar_grass"), 1), (state("tall_sugar_grass"), 1))}})
+    cf("trans_lily_pad", {"type": "minecraft:simple_block", "config": {"to_place": simple(state("trans_lily_pad"))}})
+    noisy = lambda above, below: [{"type": "minecraft:noise_threshold_count", "above_noise": above, "below_noise": below, "noise_level": -0.8}]
+    pf("trans_grass_meadow", f"{NS}:trans_grass", noisy(10, 5) + surface() + spread(16))
+    pf("trans_grass_forest", f"{NS}:trans_grass", [{"type": "minecraft:count", "count": 2}] + surface() + spread(32))
+    pf("trans_grass_plain", f"{NS}:trans_grass", noisy(10, 5) + surface() + spread(32))
+    pf("trans_grass_normal", f"{NS}:trans_grass", [{"type": "minecraft:count", "count": 5}] + surface() + spread(32))
+    pf("trans_grass_jungle", f"{NS}:trans_grass_jungle", [{"type": "minecraft:count", "count": 25}] + surface() + spread(32))
+    pf("trans_grass_taiga", f"{NS}:trans_taiga_grass", [{"type": "minecraft:count", "count": 7}] + surface() + spread(32))
+    pf("tall_trans_grass", f"{NS}:tall_trans_grass", noisy(7, 0) + [{"type": "minecraft:rarity_filter", "chance": 32}]
+       + surface("MOTION_BLOCKING") + spread(96))
+    pf("large_trans_ferns", f"{NS}:large_trans_fern", [{"type": "minecraft:rarity_filter", "chance": 5}] + surface("MOTION_BLOCKING")
+       + spread(96))
+    pf("pastel_bushes", f"{NS}:pastel_bush", [{"type": "minecraft:rarity_filter", "chance": 4}] + surface("MOTION_BLOCKING") + spread(24, xz=5))
+    water_nearby = {"type": "minecraft:any_of", "predicates": [
+        {"type": "minecraft:matching_fluids", "fluids": ["minecraft:water", "minecraft:flowing_water"], "offset": off}
+        for off in ([1, -1, 0], [-1, -1, 0], [0, -1, 1], [0, -1, -1])]}
+    pf("trans_firefly_bushes_near_water", f"{NS}:trans_firefly_bush", [{"type": "minecraft:count", "count": 2}]
+       + surface("MOTION_BLOCKING_NO_LEAVES") + [{"type": "minecraft:block_predicate_filter", "predicate": {
+           "type": "minecraft:all_of", "predicates": [{"type": "minecraft:matching_block_tag", "tag": "minecraft:air"},
+                                                      {"type": "minecraft:would_survive", "state": state("trans_firefly_bush")},
+                                                      water_nearby]}}] + spread(20, xz=4))
+    pf("trans_firefly_bushes_swamp", f"{NS}:trans_firefly_bush", [{"type": "minecraft:rarity_filter", "chance": 8}]
+       + surface("MOTION_BLOCKING") + spread(20, xz=4))
+    pf("sugar_grass", f"{NS}:sugar_grass", [{"type": "minecraft:rarity_filter", "chance": 3}] + surface("MOTION_BLOCKING") + spread(64))
+    pf("trans_lily_pads", f"{NS}:trans_lily_pad", [{"type": "minecraft:count", "count": 4}] + surface() + spread(10))
+
+    # Water plants: placed on the sea floor, only into water. Tall seagrass and kelp are columns of blocks.
+    in_water = {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:matching_blocks", "blocks": "minecraft:water"}}
+    sea_floor = [{"type": "minecraft:in_square"}, {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR_WG"}]
+    cf("trans_seagrass_short", {"type": "minecraft:simple_block", "config": {"to_place": simple(state("trans_seagrass"))}})
+    cf("trans_seagrass_tall", {"type": "minecraft:block_column", "config": {
+        "allowed_placement": {"type": "minecraft:matching_blocks", "blocks": "minecraft:water"}, "direction": "up", "prioritize_tip": False,
+        "layers": [{"height": 1, "provider": simple(state("tall_trans_seagrass", half="lower"))},
+                   {"height": 1, "provider": simple(state("tall_trans_seagrass", half="upper"))}]}})
+    cf("trans_seagrass", {"type": "minecraft:random_selector", "config": {
+        "default": {"feature": f"{NS}:trans_seagrass_short", "placement": []},
+        "features": [{"chance": 0.35, "feature": {"feature": f"{NS}:trans_seagrass_tall", "placement": []}}]}})
+    cf("trans_kelp", {"type": "minecraft:block_column", "config": {
+        "allowed_placement": {"type": "minecraft:matching_blocks", "blocks": "minecraft:water"}, "direction": "up", "prioritize_tip": True,
+        "layers": [{"height": {"type": "minecraft:biased_to_bottom", "max_inclusive": 14, "min_inclusive": 2},
+                    "provider": simple(state("trans_kelp_plant"))},
+                   {"height": 1, "provider": {"type": "minecraft:randomized_int_state_provider", "property": "age",
+                                              "source": simple(state("trans_kelp", age=0)),
+                                              "values": {"type": "minecraft:uniform", "max_inclusive": 23, "min_inclusive": 20}}}]}})
+    for name, count in (("trans_seagrass_warm", 80), ("trans_seagrass_deep", 48), ("trans_seagrass_river", 48), ("trans_seagrass_swamp", 64)):
+        pf(name, f"{NS}:trans_seagrass", sea_floor + [{"type": "minecraft:count", "count": count}, in_water, {"type": "minecraft:biome"}])
+    for name, ratio in (("trans_kelp_warm", 80), ("trans_kelp_cold", 120)):
+        pf(name, f"{NS}:trans_kelp", [{"type": "minecraft:noise_based_count", "noise_factor": 80.0, "noise_to_count_ratio": ratio}]
+           + sea_floor + [in_water, {"type": "minecraft:biome"}])
+    cf("trans_coral_reef", {"type": f"{NS}:trans_coral_reef", "config": {}})
+    pf("trans_coral_reefs", f"{NS}:trans_coral_reef", [{"type": "minecraft:noise_based_count", "noise_factor": 400.0,
+                                                        "noise_to_count_ratio": 20}] + sea_floor + [{"type": "minecraft:biome"}])
 
     # ---- crystals
     cf("trans_crystal_spike", {"type": "minecraft:spike", "config": {
@@ -486,14 +566,14 @@ def generate_biomes():
           sky="#8ed8fa", fog="#f7c4cf", music_sound="minecraft:music.overworld.meadow",
           particles=particles("minecraft:cherry_leaves", 0.0008),
           features=land(f"{NS}:trees_trans_meadow", f"{NS}:pride_blossoms", f"{NS}:trans_flowers", f"{NS}:pride_peonies",
-                        f"{NS}:trans_petals_meadow", "minecraft:patch_grass_meadow", "minecraft:patch_tall_grass_2", f"{NS}:trans_boulders"),
+                        f"{NS}:trans_petals_meadow", f"{NS}:pastel_bushes", f"{NS}:trans_grass_meadow", f"{NS}:tall_trans_grass", f"{NS}:trans_boulders"),
           creatures=common_creatures + [spawn("minecraft:rabbit", 6, 2, 3), spawn("minecraft:horse", 4, 2, 4), spawn("silly_cat", 8, 1, 2)])
 
     biome("trans_forest", temperature=0.6, downfall=0.8, grass="#f0a3c0", foliage="#f5a9b8", water="#6fcbf5", water_fog="#2a74a8",
           sky="#9cd3fa", fog="#f5b8d0", music_sound="minecraft:music.overworld.cherry_grove",
           particles=particles("minecraft:cherry_leaves", 0.004),
           features=land(f"{NS}:trees_blossom_forest", f"{NS}:pride_blossoms_dense", f"{NS}:trans_flowers", f"{NS}:pride_peonies",
-                        f"{NS}:trans_petals_forest", "minecraft:patch_grass_forest", "minecraft:brown_mushroom_normal"),
+                        f"{NS}:trans_petals_forest", f"{NS}:pastel_bushes", f"{NS}:trans_grass_forest", "minecraft:brown_mushroom_normal"),
           creatures=[spawn("minecraft:sheep", 10, 4, 4), spawn("minecraft:pig", 8, 4, 4), spawn("minecraft:chicken", 8, 4, 4),
                      spawn("minecraft:wolf", 5, 2, 4), spawn("minecraft:fox", 4, 2, 4), spawn("minecraft:rabbit", 4, 2, 3),
                      spawn("silly_cat", 10, 1, 3)])
@@ -502,8 +582,8 @@ def generate_biomes():
           sky="#b3c4fa", fog="#e6b0d8", music_sound="minecraft:music.overworld.jungle",
           particles=particles("minecraft:firefly", 0.002),
           features=land(f"{NS}:trees_heartwood_grove", f"{NS}:trans_bushes", f"{NS}:pride_blossoms", f"{NS}:trans_flowers",
-                        "minecraft:patch_large_fern",
-                        "minecraft:patch_grass_jungle", "minecraft:patch_firefly_bush_near_water", "minecraft:vines"),
+                        f"{NS}:large_trans_ferns",
+                        f"{NS}:trans_grass_jungle", f"{NS}:trans_firefly_bushes_near_water", "minecraft:vines"),
           creatures=[spawn("minecraft:parrot", 8, 1, 2), spawn("minecraft:chicken", 6, 4, 4), spawn("minecraft:rabbit", 4, 2, 3),
                      spawn("minecraft:ocelot", 2, 1, 1), spawn("silly_cat", 12, 1, 3)])
 
@@ -511,7 +591,7 @@ def generate_biomes():
           water_fog="#2a8ec0", sky="#ffc7d6", fog="#ffe3ea", music_sound="minecraft:music.overworld.desert",
           particles=particles("minecraft:end_rod", 0.0006),
           extra_attributes={"minecraft:gameplay/snow_golem_melts": True},
-          features=land("minecraft:patch_cactus_desert", "minecraft:patch_dead_bush_2", "minecraft:patch_dry_grass_desert",
+          features=land("minecraft:patch_cactus_desert", "minecraft:patch_dead_bush_2", f"{NS}:sugar_grass",
                         f"{NS}:trans_crystal_spikes_rare", local=["minecraft:fossil_upper"]),
           creatures=[spawn("minecraft:rabbit", 4, 2, 3), spawn("minecraft:camel", 1, 1, 1)],
           monsters=[spawn("minecraft:spider", 100, 4, 4), spawn("minecraft:husk", 95, 4, 4), spawn("minecraft:skeleton", 100, 4, 4),
@@ -521,16 +601,16 @@ def generate_biomes():
           sky="#afa6f0", fog="#c8b8f0", music_sound="minecraft:music.overworld.swamp",
           particles=particles("minecraft:spore_blossom_air", 0.002),
           extra_attributes={"minecraft:visual/water_fog_end_distance": {"argument": 0.85, "modifier": "multiply"}},
-          features=land(f"{NS}:trees_lavender_marsh", f"{NS}:lavender_flowers", "minecraft:patch_waterlily", "minecraft:seagrass_swamp",
+          features=land(f"{NS}:trees_lavender_marsh", f"{NS}:lavender_flowers", f"{NS}:trans_lily_pads", f"{NS}:trans_seagrass_swamp",
                         "minecraft:patch_sugar_cane_swamp", "minecraft:brown_mushroom_swamp", "minecraft:red_mushroom_swamp",
-                        "minecraft:patch_firefly_bush_swamp", "minecraft:patch_grass_normal"),
+                        f"{NS}:trans_firefly_bushes_swamp", f"{NS}:trans_grass_normal"),
           creatures=[spawn("minecraft:frog", 10, 2, 5), spawn("silly_cat", 4, 1, 2)],
           water_ambient=[spawn("minecraft:tropical_fish", 4, 1, 3)])
 
     biome("frosted_fields", temperature=-0.3, downfall=0.5, grass="#d6eeff", foliage="#cfe8ff", water="#9be3fc", water_fog="#3d8fc0",
           sky="#cde8ff", fog="#eaf4ff", music_sound="minecraft:music.overworld.grove",
           particles=particles("minecraft:snowflake", 0.002),
-          features=land(f"{NS}:trees_frosted_fields", f"{NS}:frost_flowers", f"{NS}:frosted_ice_spikes", "minecraft:patch_grass_taiga",
+          features=land(f"{NS}:trees_frosted_fields", f"{NS}:frost_flowers", f"{NS}:frosted_ice_spikes", f"{NS}:trans_grass_taiga",
                         top=["minecraft:freeze_top_layer"]),
           creatures=[spawn("minecraft:rabbit", 8, 2, 3), spawn("minecraft:fox", 6, 2, 4), spawn("minecraft:polar_bear", 1, 1, 2),
                      spawn("minecraft:wolf", 2, 2, 4), spawn("silly_cat", 3, 1, 1)],
@@ -541,14 +621,14 @@ def generate_biomes():
           sky="#9fb8ff", fog="#d9c8ff", music_sound="minecraft:music.overworld.flower_forest",
           particles=particles("minecraft:end_rod", 0.0025),
           features=land(f"{NS}:trees_crystal_grove", f"{NS}:trans_crystal_spikes", f"{NS}:trans_crystal_clusters_surface",
-                        f"{NS}:pride_blossoms", "minecraft:patch_grass_plain",
+                        f"{NS}:pride_blossoms", f"{NS}:trans_grass_plain",
                         ores=ORES + [f"{NS}:ore_trans_crystal_extra"], local=[f"{NS}:trans_crystal_geode_common"]),
           creatures=[spawn("minecraft:rabbit", 6, 2, 3), spawn("minecraft:sheep", 6, 2, 4), spawn("silly_cat", 8, 1, 2)])
 
     biome("pastel_peaks", temperature=-0.5, downfall=0.7, grass="#e9ddf7", foliage="#e0d0f5", water="#9bc8fc", water_fog="#3d6fc0",
           sky="#a9c4ff", fog="#e8e0ff", music_sound="minecraft:music.overworld.jagged_peaks",
           particles=particles("minecraft:snowflake", 0.001),
-          features=land(f"{NS}:trans_boulders", f"{NS}:trans_crystal_spikes_rare", "minecraft:patch_grass_taiga",
+          features=land(f"{NS}:trans_boulders", f"{NS}:trans_crystal_spikes_rare", f"{NS}:trans_grass_taiga",
                         ores=ORES + [f"{NS}:ore_trans_crystal_extra", f"{NS}:trans_ore_emerald"], top=["minecraft:freeze_top_layer"]),
           creatures=[spawn("minecraft:goat", 8, 1, 3), spawn("minecraft:rabbit", 3, 2, 3), spawn("silly_cat", 1, 1, 1)])
 
@@ -560,45 +640,45 @@ def generate_biomes():
     ocean_floor = {1: [], 2: [], 3: UNDERGROUND, 6: ORES + ["minecraft:disk_sand"], 7: CAVE_DECOR, 8: SPRINGS}
     biome("trans_ocean", temperature=0.5, downfall=0.5, grass="#f5a9b8", foliage="#f5a9b8", water="#5bcefa", water_fog="#1e7fb8",
           sky="#7fd4fa", fog="#f7d0d8", music_sound="minecraft:music.game", underwater_music=True,
-          features={**ocean_floor, 9: ["minecraft:warm_ocean_vegetation", "minecraft:seagrass_warm", "minecraft:sea_pickle", "minecraft:kelp_warm"]},
+          features={**ocean_floor, 9: [f"{NS}:trans_coral_reefs", f"{NS}:trans_seagrass_warm", "minecraft:sea_pickle", f"{NS}:trans_kelp_warm"]},
           creatures=[], monsters=OCEAN_MONSTERS,
           water_creatures=[spawn("minecraft:squid", 4, 1, 4), spawn("minecraft:dolphin", 2, 1, 2)],
           water_ambient=[spawn("minecraft:tropical_fish", 25, 8, 8), spawn("minecraft:cod", 10, 3, 6), spawn("minecraft:pufferfish", 5, 1, 3)])
     biome("deep_trans_ocean", temperature=0.5, downfall=0.5, grass="#f5a9b8", foliage="#f5a9b8", water="#3e9fd8", water_fog="#0f3f78",
           sky="#7fd4fa", fog="#f7d0d8", music_sound="minecraft:music.game", underwater_music=True,
-          features={**ocean_floor, 9: ["minecraft:seagrass_deep", "minecraft:kelp_cold"]},
+          features={**ocean_floor, 9: [f"{NS}:trans_seagrass_deep", f"{NS}:trans_kelp_cold"]},
           creatures=[], monsters=OCEAN_MONSTERS,
           water_creatures=[spawn("minecraft:squid", 6, 1, 4), spawn("minecraft:dolphin", 1, 1, 2)],
           water_ambient=[spawn("minecraft:cod", 10, 3, 6), spawn("minecraft:salmon", 5, 1, 5)],
           underground_water=[spawn("minecraft:glow_squid", 10, 4, 6)])
     biome("trans_river", temperature=0.6, downfall=0.6, grass="#f5a9b8", foliage="#f5a9b8", water="#f5a9b8", water_fog="#c86a88",
           sky="#8ed8fa", fog="#f7c4cf", music_sound="minecraft:music.overworld.meadow",
-          features={**ocean_floor, 9: ["minecraft:seagrass_river", "minecraft:patch_sugar_cane", "minecraft:patch_waterlily"]},
+          features={**ocean_floor, 9: [f"{NS}:trans_seagrass_river", "minecraft:patch_sugar_cane", f"{NS}:trans_lily_pads"]},
           creatures=[], water_creatures=[spawn("minecraft:squid", 2, 1, 4)], water_ambient=[spawn("minecraft:salmon", 5, 1, 5)])
 
     # ---- themed forests
     biome("pearlwood_forest", temperature=0.3, downfall=0.6, grass="#eef0ff", foliage="#ffffff", water="#a6e1fa", water_fog="#4a8fc0",
           sky="#d8ecff", fog="#f4f2ff", music_sound="minecraft:music.overworld.forest",
           particles=particles("minecraft:white_ash", 0.004),
-          features=land(f"{NS}:trees_pearlwood_forest", f"{NS}:frost_flowers", f"{NS}:pride_blossoms", "minecraft:patch_grass_forest"),
+          features=land(f"{NS}:trees_pearlwood_forest", f"{NS}:frost_flowers", f"{NS}:pride_blossoms", f"{NS}:trans_grass_forest"),
           creatures=[spawn("minecraft:rabbit", 6, 2, 3), spawn("minecraft:fox", 4, 2, 4), spawn("minecraft:wolf", 3, 2, 4),
                      spawn("minecraft:chicken", 6, 4, 4), spawn("silly_cat", 8, 1, 2)])
     biome("bluebell_woods", temperature=0.6, downfall=0.7, grass="#bfe3ff", foliage="#8fd0ff", water="#5bcefa", water_fog="#1f6fa8",
           sky="#9ad6ff", fog="#d6ecff", music_sound="minecraft:music.overworld.flower_forest",
-          features=land(f"{NS}:trees_bluebell_woods", f"{NS}:sky_bell_carpets", f"{NS}:pride_blossoms", "minecraft:patch_grass_forest"),
+          features=land(f"{NS}:trees_bluebell_woods", f"{NS}:sky_bell_carpets", f"{NS}:pride_blossoms", f"{NS}:trans_grass_forest"),
           creatures=[spawn("minecraft:pig", 8, 4, 4), spawn("minecraft:rabbit", 6, 2, 3), spawn("minecraft:wolf", 4, 2, 4),
                      spawn("minecraft:sheep", 6, 4, 4), spawn("silly_cat", 8, 1, 2)])
     biome("twilight_thicket", temperature=0.7, downfall=0.9, grass="#8e7ab8", foliage="#7d6aa8", water="#6a7fd8", water_fog="#2a2f6e",
           sky="#6c6aa8", fog="#8b7cb8", music_sound="minecraft:music.overworld.old_growth_taiga",
           particles=particles("minecraft:firefly", 0.006),
           features=land(f"{NS}:trees_twilight_thicket", f"{NS}:trans_crystal_clusters_surface", f"{NS}:lavender_flowers",
-                        "minecraft:patch_grass_forest", "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_swamp"),
+                        f"{NS}:trans_grass_forest", "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_swamp"),
           creatures=[spawn("minecraft:rabbit", 4, 2, 3), spawn("minecraft:fox", 3, 2, 3), spawn("silly_cat", 6, 1, 2)])
     biome("candy_floss_grove", temperature=0.8, downfall=0.6, grass="#ffc8dc", foliage="#ffc0d8", water="#9fe3ff", water_fog="#3a8fc8",
           sky="#bfe8ff", fog="#ffe0ee", music_sound="minecraft:music.overworld.cherry_grove",
           particles=particles("minecraft:cherry_leaves", 0.002),
           features=land(f"{NS}:trees_candy_floss_grove", f"{NS}:heart_blooms", f"{NS}:trans_flowers", f"{NS}:trans_petals_forest",
-                        "minecraft:patch_grass_plain"),
+                        f"{NS}:pastel_bushes", f"{NS}:trans_grass_plain"),
           creatures=common_creatures + [spawn("minecraft:rabbit", 6, 2, 3), spawn("silly_cat", 14, 1, 3)])
 
     # ---- pastel lush caves
@@ -606,7 +686,7 @@ def generate_biomes():
           sky="#9fb8ff", fog="#d9c8ff", music_sound="minecraft:music.overworld.lush_caves",
           particles=particles("minecraft:spore_blossom_air", 0.003),
           features={3: UNDERGROUND, 6: ORES + [f"{NS}:trans_ore_clay"], 7: CAVE_DECOR, 8: SPRINGS,
-                    9: ["minecraft:patch_tall_grass_2", f"{NS}:trans_lush_caves_ceiling_vegetation", "minecraft:cave_vines",
+                    9: [f"{NS}:tall_trans_grass", f"{NS}:trans_lush_caves_ceiling_vegetation", "minecraft:cave_vines",
                         "minecraft:lush_caves_clay", f"{NS}:trans_lush_caves_vegetation", "minecraft:spore_blossom",
                         "minecraft:classic_vines_cave_feature"]},
           creatures=[], axolotls=[spawn("minecraft:axolotl", 10, 4, 6)],
@@ -641,19 +721,19 @@ FEATURE_RANK = [
     f"{NS}:trees_trans_meadow", f"{NS}:trees_blossom_forest", f"{NS}:trees_heartwood_grove", f"{NS}:trees_crystal_grove",
     f"{NS}:trees_frosted_fields", f"{NS}:trees_lavender_marsh", f"{NS}:trans_bushes",
     f"{NS}:trees_pearlwood_forest", f"{NS}:trees_bluebell_woods", f"{NS}:trees_twilight_thicket", f"{NS}:trees_candy_floss_grove",
-    "minecraft:patch_tall_grass_2", f"{NS}:trans_lush_caves_ceiling_vegetation", "minecraft:cave_vines", "minecraft:lush_caves_clay",
+    f"{NS}:tall_trans_grass", f"{NS}:trans_lush_caves_ceiling_vegetation", "minecraft:cave_vines", "minecraft:lush_caves_clay",
     f"{NS}:trans_lush_caves_vegetation", "minecraft:spore_blossom", "minecraft:classic_vines_cave_feature",
-    "minecraft:warm_ocean_vegetation", "minecraft:seagrass_warm", "minecraft:seagrass_deep", "minecraft:seagrass_river",
-    "minecraft:seagrass_swamp", "minecraft:sea_pickle", "minecraft:kelp_warm", "minecraft:kelp_cold",
+    f"{NS}:trans_coral_reefs", f"{NS}:trans_seagrass_warm", f"{NS}:trans_seagrass_deep", f"{NS}:trans_seagrass_river",
+    f"{NS}:trans_seagrass_swamp", "minecraft:sea_pickle", f"{NS}:trans_kelp_warm", f"{NS}:trans_kelp_cold",
     f"{NS}:pride_blossoms_dense", f"{NS}:pride_blossoms", f"{NS}:trans_flowers", f"{NS}:lavender_flowers", f"{NS}:frost_flowers",
     f"{NS}:pride_peonies", f"{NS}:sky_bell_carpets", f"{NS}:heart_blooms", f"{NS}:trans_petals_forest", f"{NS}:trans_petals_meadow",
     f"{NS}:trans_crystal_clusters_surface",
-    "minecraft:patch_grass_meadow", "minecraft:patch_grass_forest", "minecraft:patch_grass_jungle", "minecraft:patch_grass_plain",
-    "minecraft:patch_grass_normal", "minecraft:patch_grass_taiga", "minecraft:patch_large_fern",
-    "minecraft:patch_cactus_desert", "minecraft:patch_dead_bush_2", "minecraft:patch_dry_grass_desert",
-    "minecraft:patch_waterlily", "minecraft:patch_sugar_cane", "minecraft:patch_sugar_cane_swamp",
+    f"{NS}:trans_grass_meadow", f"{NS}:trans_grass_forest", f"{NS}:trans_grass_jungle", f"{NS}:trans_grass_plain",
+    f"{NS}:trans_grass_normal", f"{NS}:trans_grass_taiga", f"{NS}:large_trans_ferns",
+    f"{NS}:pastel_bushes", "minecraft:patch_cactus_desert", "minecraft:patch_dead_bush_2", f"{NS}:sugar_grass",
+    f"{NS}:trans_lily_pads", "minecraft:patch_sugar_cane", "minecraft:patch_sugar_cane_swamp",
     "minecraft:brown_mushroom_normal", "minecraft:brown_mushroom_swamp", "minecraft:red_mushroom_swamp",
-    "minecraft:patch_firefly_bush_near_water", "minecraft:patch_firefly_bush_swamp", "minecraft:vines", f"{NS}:trans_boulders",
+    f"{NS}:trans_firefly_bushes_near_water", f"{NS}:trans_firefly_bushes_swamp", "minecraft:vines", f"{NS}:trans_boulders",
     # top layer
     "minecraft:freeze_top_layer",
 ]

@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "transdimension:trans_lily_pad",
     "transdimension:trans_petals"
   ]
 }

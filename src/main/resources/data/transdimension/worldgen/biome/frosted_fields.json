@@ -81,7 +81,7 @@
       "transdimension:frosted_ice_spikes",
       "transdimension:trees_frosted_fields",
       "transdimension:frost_flowers",
-      "minecraft:patch_grass_taiga"
+      "transdimension:trans_grass_taiga"
     ],
     [
       "minecraft:freeze_top_layer"

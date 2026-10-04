@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "transdimension:blush_coral_block",
     "transdimension:chiseled_trans_deepslate",
     "transdimension:chiseled_trans_sandstone",
     "transdimension:chiseled_trans_stone_bricks",
@@ -12,7 +13,11 @@
     "transdimension:cracked_trans_deepslate_tiles",
     "transdimension:cracked_trans_stone_bricks",
     "transdimension:cut_trans_sandstone",
+    "transdimension:dead_blush_coral_block",
+    "transdimension:dead_pearl_coral_block",
+    "transdimension:dead_sky_coral_block",
     "transdimension:pastel_prism",
+    "transdimension:pearl_coral_block",
     "transdimension:polished_trans_andesite",
     "transdimension:polished_trans_andesite_slab",
     "transdimension:polished_trans_andesite_stairs",
@@ -27,6 +32,7 @@
     "transdimension:polished_trans_granite_slab",
     "transdimension:polished_trans_granite_stairs",
     "transdimension:pride_oven",
+    "transdimension:sky_coral_block",
     "transdimension:trans_andesite",
     "transdimension:trans_andesite_slab",
     "transdimension:trans_andesite_stairs",

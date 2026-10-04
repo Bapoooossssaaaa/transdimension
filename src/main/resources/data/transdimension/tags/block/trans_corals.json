@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:blush_coral",
+    "transdimension:blush_coral_fan",
+    "transdimension:dead_blush_coral",
+    "transdimension:dead_blush_coral_fan",
+    "transdimension:dead_pearl_coral",
+    "transdimension:dead_pearl_coral_fan",
+    "transdimension:dead_sky_coral",
+    "transdimension:dead_sky_coral_fan",
+    "transdimension:pearl_coral",
+    "transdimension:pearl_coral_fan",
+    "transdimension:sky_coral",
+    "transdimension:sky_coral_fan"
+  ]
+}

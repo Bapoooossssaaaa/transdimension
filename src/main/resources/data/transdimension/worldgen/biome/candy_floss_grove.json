@@ -82,7 +82,8 @@
       "transdimension:trans_flowers",
       "transdimension:heart_blooms",
       "transdimension:trans_petals_forest",
-      "minecraft:patch_grass_plain"
+      "transdimension:trans_grass_plain",
+      "transdimension:pastel_bushes"
     ],
     []
   ],
