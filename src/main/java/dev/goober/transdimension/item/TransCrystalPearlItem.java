@@ -43,26 +43,26 @@ public class TransCrystalPearlItem extends Item {
 			return InteractionResult.SUCCESS;
 		}
 		if (!serverLevel.dimension().equals(TransDimension.TRANS_REALM)) {
-			player.displayClientMessage(Component.translatable("item.transdimension.trans_crystal_pearl.quiet"), true);
+			player.sendOverlayMessage(Component.translatable("item.transdimension.trans_crystal_pearl.quiet"));
 			return InteractionResult.SUCCESS;
 		}
 		BlockPos sanctum = this.findSanctum(serverLevel, player.blockPosition());
 		if (sanctum == null) {
-			player.displayClientMessage(Component.translatable("item.transdimension.trans_crystal_pearl.nothing"), true);
+			player.sendOverlayMessage(Component.translatable("item.transdimension.trans_crystal_pearl.nothing"));
 			return InteractionResult.SUCCESS;
 		}
 		double dx = sanctum.getX() + 0.5 - player.getX();
 		double dz = sanctum.getZ() + 0.5 - player.getZ();
 		double distance = Math.sqrt(dx * dx + dz * dz);
 		if (distance < 24.0) {
-			player.displayClientMessage(Component.translatable("item.transdimension.trans_crystal_pearl.here"), true);
+			player.sendOverlayMessage(Component.translatable("item.transdimension.trans_crystal_pearl.here"));
 		} else {
 			// Yaw-style angle: 0 = south, 90 = west, 180 = north, 270 = east (like the player's facing).
 			float angle = (float) (Mth.atan2(-dx, dz) * Mth.RAD_TO_DEG);
 			int sector = Math.floorMod(Math.round(angle / 45.0F), 8);
 			Component direction = Component.translatable("direction.transdimension." + DIRECTIONS[sector]);
 			int rounded = (int) (Math.round(distance / 50.0) * 50);
-			player.displayClientMessage(Component.translatable("item.transdimension.trans_crystal_pearl.tug", direction, rounded), true);
+			player.sendOverlayMessage(Component.translatable("item.transdimension.trans_crystal_pearl.tug", direction, rounded));
 			// A trail of sparkles streaming off towards it.
 			Vec3 start = player.getEyePosition().add(0.0, -0.3, 0.0);
 			Vec3 step = new Vec3(dx, 0.0, dz).normalize().scale(0.5);

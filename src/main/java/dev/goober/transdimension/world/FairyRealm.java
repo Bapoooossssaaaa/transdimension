@@ -253,11 +253,11 @@ public final class FairyRealm {
 	/** A crystal pearl offered at the altar calls the Trans Fairy back for a rematch. */
 	public static boolean summonAtAltar(ServerLevel level, BlockPos altar, Player player) {
 		if (fairyNearby(level, altar)) {
-			player.displayClientMessage(Component.translatable("message.transdimension.fairy_already_here"), true);
+			player.sendOverlayMessage(Component.translatable("message.transdimension.fairy_already_here"));
 			return false;
 		}
 		spawnFairy(level, Vec3.atCenterOf(altar).add(0.0, 6.0, 0.0));
-		player.displayClientMessage(Component.translatable("message.transdimension.fairy_summoned"), true);
+		player.sendOverlayMessage(Component.translatable("message.transdimension.fairy_summoned"));
 		return true;
 	}
 

@@ -28,13 +28,13 @@ You only need to rerun the script you changed (plus the validator). The validato
 
 The cloud environment can't download Minecraft or Fabric, so **the owner builds locally on Windows** (`gradlew build`) and pastes the errors. When fixing compile errors:
 - Read the error, fix only that, and check `HANDOFF.md` → "Unverified APIs" for what might be wrong next.
-- 26.2 names learned the hard way: `ChunkPos#pack()` (not `toLong`), no `Entity#getTags` on players (use a Fabric attachment), `LivingEntity#knockback` takes a `DamageSource`, no `Options#hideGui`, `Blocks.WOOL.pink()` / `Blocks.BED.red()` for dyed blocks, `Screen#extractBackground(GuiGraphicsExtractor, ...)`, `minecraft.gui.setScreen`.
-- Read from source for round 4 (not yet compiled): `new ServerBossEvent(UUID, Component, color, overlay)`, `Animal#mobInteract` is public, `Block#entityInside(..., InsideBlockEffectApplier, boolean)`, `hurtMarked` (renamed only in 26.3), `ServerLevel#getStructureManager`, `RenderTypes` in `client.renderer.rendertype`.
+- 26.2 names learned the hard way: `ChunkPos#pack()` (not `toLong`), no `Entity#getTags` on players (use a Fabric attachment), `LivingEntity#knockback` takes a `DamageSource`, no `Options#hideGui`, `Blocks.WOOL.pink()` / `Blocks.BED.red()` for dyed blocks, `Screen#extractBackground(GuiGraphicsExtractor, ...)`, `minecraft.gui.setScreen`, `Player#sendOverlayMessage(Component)` / `sendSystemMessage(Component)` (no `displayClientMessage`).
+- Read from source for round 4 and confirmed by the compiler: `new ServerBossEvent(UUID, Component, color, overlay)`, `Animal#mobInteract` is public, `Block#entityInside(..., InsideBlockEffectApplier, boolean)`, `hurtMarked` (renamed only in 26.3), `ServerLevel#getStructureManager`. Client side, not yet compiled: `RenderTypes` in `client.renderer.rendertype`.
 - Fabric API source, if a session has it, is the best reference. Never guess silently: say which names are unverified.
 
 ## Status (latest first)
 
-- **Round 4 is written but has not been compiled**: rebuilt wings, trans vegetation, four woods, new flowers and biomes, crystals as a rare gem, trans fish, trans endermen, pastel slime pets, and the Fairy Realm endgame (sanctums, portal, the Trans Fairy boss, the fairy jar). Start with `HANDOFF.md` → "Unverified APIs (round 4)".
+- **Round 4: the main source set gets through the compiler** (its only errors were `displayClientMessage`, now fixed); **the client source set is next**. Round 4 added: rebuilt wings, trans vegetation, four woods, new flowers and biomes, crystals as a rare gem, trans fish, trans endermen, pastel slime pets, and the Fairy Realm endgame (sanctums, portal, the Trans Fairy boss, the fairy jar). For client errors, start with `HANDOFF.md` → "Unverified APIs (round 4)".
 - Recent work: the BSL preset; the clouds now use the flag's exact blue `#5BCEFA` and pink `#F5A9B8`.
 - Round 3 (beds, boats, plushes, Maddie, wand, wings, Egg House, paintings, advancements) is written. The **main source set compiles**. The **client source set** got past one error (`hideGui`) and may still have more. Nothing in round 3 has been play-tested.
 - Rounds 1 and 2 compiled and ran on 26.2 next to Sodium, Iris and Xaero's maps.
