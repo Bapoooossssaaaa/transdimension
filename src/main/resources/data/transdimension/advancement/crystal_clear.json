@@ -1,0 +1,31 @@
+{
+  "parent": "transdimension:trans_crystal",
+  "criteria": {
+    "pickaxe": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_pickaxe"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_pickaxe"
+    },
+    "title": {
+      "translate": "advancements.transdimension.crystal_clear.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.crystal_clear.description"
+    }
+  },
+  "requirements": [
+    [
+      "pickaxe"
+    ]
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "parent": "transdimension:trans_wings",
+  "criteria": {
+    "high": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "dimension": "transdimension:trans_realm",
+                "position": {
+                  "y": {
+                    "min": 250.0
+                  }
+                }
+              },
+              "minecraft:equipment": {
+                "chest": {
+                  "items": "transdimension:trans_wings"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:feather"
+    },
+    "title": {
+      "translate": "advancements.transdimension.sky_dancer.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.sky_dancer.description"
+    },
+    "frame": "challenge"
+  },
+  "requirements": [
+    [
+      "high"
+    ]
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "asset_id": "transdimension:trans_heart",
+  "width": 2,
+  "height": 2,
+  "title": {
+    "color": "yellow",
+    "translate": "painting.transdimension.trans_heart.title"
+  },
+  "author": {
+    "color": "gray",
+    "translate": "painting.transdimension.trans_heart.author"
+  }
+}

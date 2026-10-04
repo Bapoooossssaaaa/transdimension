@@ -1,0 +1,13 @@
+{
+  "asset_id": "transdimension:the_egg_house",
+  "width": 2,
+  "height": 2,
+  "title": {
+    "color": "yellow",
+    "translate": "painting.transdimension.the_egg_house.title"
+  },
+  "author": {
+    "color": "gray",
+    "translate": "painting.transdimension.the_egg_house.author"
+  }
+}

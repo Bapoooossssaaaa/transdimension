@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "transdimension:block/stripped_trans_log_x"
+    },
+    "axis=y": {
+      "model": "transdimension:block/stripped_trans_log_y"
+    },
+    "axis=z": {
+      "model": "transdimension:block/stripped_trans_log_z"
+    }
+  }
+}

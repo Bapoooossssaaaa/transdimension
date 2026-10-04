@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "transdimension:block/trans_deepslate_brick_slab"
+    },
+    "type=double": {
+      "model": "transdimension:block/trans_deepslate_bricks"
+    },
+    "type=top": {
+      "model": "transdimension:block/trans_deepslate_brick_slab_top"
+    }
+  }
+}

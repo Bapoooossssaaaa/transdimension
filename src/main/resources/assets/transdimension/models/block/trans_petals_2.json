@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/flowerbed_2",
+  "textures": {
+    "flowerbed": "transdimension:block/trans_petals",
+    "stem": "transdimension:block/trans_petals_stem"
+  }
+}

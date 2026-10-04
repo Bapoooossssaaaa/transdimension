@@ -1,0 +1,361 @@
+{
+  "parent": "transdimension:pastel_peaks",
+  "criteria": {
+    "trans_meadow": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:trans_meadow"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "trans_forest": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:trans_forest"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "trans_beach": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:trans_beach"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "trans_ocean": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:trans_ocean"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "deep_trans_ocean": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:deep_trans_ocean"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "trans_river": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:trans_river"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "sugar_dunes": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:sugar_dunes"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "lavender_marsh": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:lavender_marsh"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "frosted_fields": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:frosted_fields"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "crystal_grove": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:crystal_grove"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "pastel_peaks": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:pastel_peaks"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "heartwood_grove": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:heartwood_grove"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "crystal_caves": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:crystal_caves"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "pearlwood_forest": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:pearlwood_forest"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "bluebell_woods": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:bluebell_woods"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "twilight_thicket": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:twilight_thicket"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "candy_floss_grove": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:candy_floss_grove"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "pastel_lush_caves": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:pastel_lush_caves"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:filled_map"
+    },
+    "title": {
+      "translate": "advancements.transdimension.pastel_passport.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.pastel_passport.description"
+    },
+    "frame": "challenge"
+  },
+  "requirements": [
+    [
+      "trans_meadow"
+    ],
+    [
+      "trans_forest"
+    ],
+    [
+      "trans_beach"
+    ],
+    [
+      "trans_ocean"
+    ],
+    [
+      "deep_trans_ocean"
+    ],
+    [
+      "trans_river"
+    ],
+    [
+      "sugar_dunes"
+    ],
+    [
+      "lavender_marsh"
+    ],
+    [
+      "frosted_fields"
+    ],
+    [
+      "crystal_grove"
+    ],
+    [
+      "pastel_peaks"
+    ],
+    [
+      "heartwood_grove"
+    ],
+    [
+      "crystal_caves"
+    ],
+    [
+      "pearlwood_forest"
+    ],
+    [
+      "bluebell_woods"
+    ],
+    [
+      "twilight_thicket"
+    ],
+    [
+      "candy_floss_grove"
+    ],
+    [
+      "pastel_lush_caves"
+    ]
+  ]
+}

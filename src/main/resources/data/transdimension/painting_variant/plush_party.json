@@ -1,0 +1,13 @@
+{
+  "asset_id": "transdimension:plush_party",
+  "width": 2,
+  "height": 1,
+  "title": {
+    "color": "yellow",
+    "translate": "painting.transdimension.plush_party.title"
+  },
+  "author": {
+    "color": "gray",
+    "translate": "painting.transdimension.plush_party.author"
+  }
+}

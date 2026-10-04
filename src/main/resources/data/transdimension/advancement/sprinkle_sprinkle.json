@@ -1,0 +1,29 @@
+{
+  "parent": "transdimension:fresh_from_the_oven",
+  "criteria": {
+    "donut": {
+      "trigger": "minecraft:consume_item",
+      "conditions": {
+        "item": {
+          "items": "transdimension:trans_donut"
+        }
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_donut"
+    },
+    "title": {
+      "translate": "advancements.transdimension.sprinkle_sprinkle.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.sprinkle_sprinkle.description"
+    }
+  },
+  "requirements": [
+    [
+      "donut"
+    ]
+  ]
+}

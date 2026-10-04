@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "transdimension:trans_diorite",
+    "minecraft:quartz"
+  ],
+  "result": {
+    "count": 1,
+    "id": "transdimension:trans_granite"
+  }
+}

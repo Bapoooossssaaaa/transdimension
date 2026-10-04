@@ -1,0 +1,31 @@
+{
+  "parent": "transdimension:goober",
+  "criteria": {
+    "wool": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_wool"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_wool"
+    },
+    "title": {
+      "translate": "advancements.transdimension.flag_fluff.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.flag_fluff.description"
+    }
+  },
+  "requirements": [
+    [
+      "wool"
+    ]
+  ]
+}

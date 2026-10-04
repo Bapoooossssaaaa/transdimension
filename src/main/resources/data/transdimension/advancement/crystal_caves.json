@@ -1,0 +1,37 @@
+{
+  "parent": "transdimension:goober",
+  "criteria": {
+    "crystal_caves": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:crystal_caves"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_crystal_cluster"
+    },
+    "title": {
+      "translate": "advancements.transdimension.crystal_caves.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.crystal_caves.description"
+    }
+  },
+  "requirements": [
+    [
+      "crystal_caves"
+    ]
+  ]
+}

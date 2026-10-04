@@ -1,0 +1,13 @@
+{
+  "asset_id": "transdimension:flag_of_the_realm",
+  "width": 3,
+  "height": 2,
+  "title": {
+    "color": "yellow",
+    "translate": "painting.transdimension.flag_of_the_realm.title"
+  },
+  "author": {
+    "color": "gray",
+    "translate": "painting.transdimension.flag_of_the_realm.author"
+  }
+}

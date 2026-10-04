@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "transdimension:block/trans_cobblestone",
+    "top": "transdimension:block/trans_cobblestone",
+    "side": "transdimension:block/trans_cobblestone"
+  }
+}

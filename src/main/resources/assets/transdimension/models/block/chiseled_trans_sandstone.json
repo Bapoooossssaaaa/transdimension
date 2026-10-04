@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "transdimension:block/trans_sandstone_top",
+    "side": "transdimension:block/chiseled_trans_sandstone"
+  }
+}

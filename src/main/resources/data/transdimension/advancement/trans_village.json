@@ -1,0 +1,37 @@
+{
+  "parent": "transdimension:goober",
+  "criteria": {
+    "found_trans_village": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "structures": "transdimension:trans_village"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_door"
+    },
+    "title": {
+      "translate": "advancements.transdimension.trans_village.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.trans_village.description"
+    }
+  },
+  "requirements": [
+    [
+      "found_trans_village"
+    ]
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "parent": "transdimension:trans_planks",
+  "criteria": {
+    "glass": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_glass"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_glass"
+    },
+    "title": {
+      "translate": "advancements.transdimension.trans_glass.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.trans_glass.description"
+    }
+  },
+  "requirements": [
+    [
+      "glass"
+    ]
+  ]
+}

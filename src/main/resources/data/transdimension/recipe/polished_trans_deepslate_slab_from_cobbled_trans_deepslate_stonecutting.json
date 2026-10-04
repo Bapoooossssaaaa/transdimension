@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "transdimension:cobbled_trans_deepslate",
+  "result": {
+    "count": 2,
+    "id": "transdimension:polished_trans_deepslate_slab"
+  }
+}

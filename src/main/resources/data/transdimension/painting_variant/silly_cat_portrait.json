@@ -1,0 +1,13 @@
+{
+  "asset_id": "transdimension:silly_cat_portrait",
+  "width": 3,
+  "height": 3,
+  "title": {
+    "color": "yellow",
+    "translate": "painting.transdimension.silly_cat_portrait.title"
+  },
+  "author": {
+    "color": "gray",
+    "translate": "painting.transdimension.silly_cat_portrait.author"
+  }
+}

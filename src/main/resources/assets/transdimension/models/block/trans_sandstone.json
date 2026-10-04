@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "transdimension:block/trans_sandstone_bottom",
+    "side": "transdimension:block/trans_sandstone",
+    "top": "transdimension:block/trans_sandstone_top"
+  }
+}

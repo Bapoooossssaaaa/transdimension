@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:random_selector",
+  "config": {
+    "default": "transdimension:candy_floss_tree_pink_checked",
+    "features": [
+      {
+        "chance": 0.5,
+        "feature": "transdimension:candy_floss_tree_blue_checked"
+      }
+    ]
+  }
+}

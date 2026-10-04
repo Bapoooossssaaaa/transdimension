@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:random_selector",
+  "config": {
+    "default": "transdimension:pearlwood_tree_checked",
+    "features": [
+      {
+        "chance": 0.3,
+        "feature": "transdimension:pearlwood_tree_short_checked"
+      }
+    ]
+  }
+}

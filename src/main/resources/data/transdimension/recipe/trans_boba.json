@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:milk_bucket",
+    "minecraft:sugar",
+    "minecraft:dried_kelp",
+    "transdimension:pride_blossom"
+  ],
+  "result": {
+    "id": "transdimension:trans_boba"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "parent": "transdimension:sprinkle_sprinkle",
+  "criteria": {
+    "trans_cookie": {
+      "trigger": "minecraft:consume_item",
+      "conditions": {
+        "item": {
+          "items": "transdimension:trans_cookie"
+        }
+      }
+    },
+    "trans_donut": {
+      "trigger": "minecraft:consume_item",
+      "conditions": {
+        "item": {
+          "items": "transdimension:trans_donut"
+        }
+      }
+    },
+    "trans_cupcake": {
+      "trigger": "minecraft:consume_item",
+      "conditions": {
+        "item": {
+          "items": "transdimension:trans_cupcake"
+        }
+      }
+    },
+    "trans_macaron": {
+      "trigger": "minecraft:consume_item",
+      "conditions": {
+        "item": {
+          "items": "transdimension:trans_macaron"
+        }
+      }
+    },
+    "trans_boba": {
+      "trigger": "minecraft:consume_item",
+      "conditions": {
+        "item": {
+          "items": "transdimension:trans_boba"
+        }
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_cupcake"
+    },
+    "title": {
+      "translate": "advancements.transdimension.sweet_tooth.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.sweet_tooth.description"
+    },
+    "frame": "challenge"
+  },
+  "requirements": [
+    [
+      "trans_cookie"
+    ],
+    [
+      "trans_donut"
+    ],
+    [
+      "trans_cupcake"
+    ],
+    [
+      "trans_macaron"
+    ],
+    [
+      "trans_boba"
+    ]
+  ]
+}

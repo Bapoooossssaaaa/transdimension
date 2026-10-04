@@ -1,0 +1,38 @@
+{
+  "parent": "transdimension:goober",
+  "criteria": {
+    "egg_house": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "structures": "transdimension:egg_house_island"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:egg"
+    },
+    "title": {
+      "translate": "advancements.transdimension.egg_house.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.egg_house.description"
+    },
+    "frame": "goal"
+  },
+  "requirements": [
+    [
+      "egg_house"
+    ]
+  ]
+}

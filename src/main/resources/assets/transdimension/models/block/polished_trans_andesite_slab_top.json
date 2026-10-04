@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "transdimension:block/polished_trans_andesite",
+    "top": "transdimension:block/polished_trans_andesite",
+    "side": "transdimension:block/polished_trans_andesite"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:trans_coal_ore",
+    "transdimension:trans_copper_ore",
+    "transdimension:trans_deepslate_coal_ore",
+    "transdimension:trans_deepslate_copper_ore",
+    "transdimension:trans_deepslate_iron_ore",
+    "transdimension:trans_deepslate_lapis_ore",
+    "transdimension:trans_iron_ore",
+    "transdimension:trans_lapis_ore"
+  ]
+}

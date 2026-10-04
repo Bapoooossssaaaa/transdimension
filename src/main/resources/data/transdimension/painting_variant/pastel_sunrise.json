@@ -1,0 +1,13 @@
+{
+  "asset_id": "transdimension:pastel_sunrise",
+  "width": 4,
+  "height": 2,
+  "title": {
+    "color": "yellow",
+    "translate": "painting.transdimension.pastel_sunrise.title"
+  },
+  "author": {
+    "color": "gray",
+    "translate": "painting.transdimension.pastel_sunrise.author"
+  }
+}

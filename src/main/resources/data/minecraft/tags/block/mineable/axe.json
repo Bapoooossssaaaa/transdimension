@@ -1,0 +1,20 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:stripped_trans_log",
+    "transdimension:stripped_trans_wood",
+    "transdimension:trans_button",
+    "transdimension:trans_chair",
+    "transdimension:trans_door",
+    "transdimension:trans_fence",
+    "transdimension:trans_fence_gate",
+    "transdimension:trans_log",
+    "transdimension:trans_planks",
+    "transdimension:trans_pressure_plate",
+    "transdimension:trans_slab",
+    "transdimension:trans_stairs",
+    "transdimension:trans_table",
+    "transdimension:trans_trapdoor",
+    "transdimension:trans_wood"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "transdimension:block/polished_trans_diorite_slab"
+    },
+    "type=double": {
+      "model": "transdimension:block/polished_trans_diorite"
+    },
+    "type=top": {
+      "model": "transdimension:block/polished_trans_diorite_slab_top"
+    }
+  }
+}

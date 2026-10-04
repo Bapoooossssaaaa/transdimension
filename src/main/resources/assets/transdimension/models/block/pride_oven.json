@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "bottom": "transdimension:block/pride_oven_bottom",
+    "front": "transdimension:block/pride_oven_front",
+    "side": "transdimension:block/pride_oven_side",
+    "top": "transdimension:block/pride_oven_top"
+  }
+}

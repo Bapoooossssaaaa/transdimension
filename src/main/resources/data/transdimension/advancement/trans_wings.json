@@ -1,0 +1,32 @@
+{
+  "parent": "transdimension:meet_maddie",
+  "criteria": {
+    "wings": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_wings"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_wings"
+    },
+    "title": {
+      "translate": "advancements.transdimension.trans_wings.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.trans_wings.description"
+    },
+    "frame": "goal"
+  },
+  "requirements": [
+    [
+      "wings"
+    ]
+  ]
+}

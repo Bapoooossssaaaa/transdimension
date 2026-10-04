@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "transdimension:trans_diorite",
+    "transdimension:trans_cobblestone"
+  ],
+  "result": {
+    "count": 2,
+    "id": "transdimension:trans_andesite"
+  }
+}

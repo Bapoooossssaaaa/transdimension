@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:potted_flag_lily",
+    "transdimension:potted_heart_bloom",
+    "transdimension:potted_lavender_puff",
+    "transdimension:potted_pearl_daisy",
+    "transdimension:potted_pride_blossom",
+    "transdimension:potted_sky_bell",
+    "transdimension:potted_trans_orchid",
+    "transdimension:potted_trans_sapling",
+    "transdimension:potted_trans_tulip"
+  ]
+}

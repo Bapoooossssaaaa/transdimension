@@ -1,0 +1,29 @@
+{
+  "parent": "transdimension:goober",
+  "criteria": {
+    "slobbered": {
+      "trigger": "minecraft:effects_changed",
+      "conditions": {
+        "effects": {
+          "transdimension:slobbered": {}
+        }
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:silly_cat_spawn_egg"
+    },
+    "title": {
+      "translate": "advancements.transdimension.slobbered.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.slobbered.description"
+    }
+  },
+  "requirements": [
+    [
+      "slobbered"
+    ]
+  ]
+}

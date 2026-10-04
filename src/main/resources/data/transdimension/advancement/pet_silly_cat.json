@@ -1,0 +1,35 @@
+{
+  "parent": "transdimension:slobbered",
+  "criteria": {
+    "petted": {
+      "trigger": "minecraft:player_interacted_with_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:entity_type": "transdimension:silly_cat"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_cookie"
+    },
+    "title": {
+      "translate": "advancements.transdimension.pet_silly_cat.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.pet_silly_cat.description"
+    }
+  },
+  "requirements": [
+    [
+      "petted"
+    ]
+  ]
+}

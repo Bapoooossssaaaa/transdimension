@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "transdimension:trans_andesite",
+  "result": {
+    "count": 2,
+    "id": "transdimension:trans_andesite_slab"
+  }
+}

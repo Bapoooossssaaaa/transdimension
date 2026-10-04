@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:wheat",
+    "minecraft:sugar",
+    "#minecraft:eggs",
+    "transdimension:pride_blossom"
+  ],
+  "result": {
+    "id": "transdimension:trans_donut",
+    "count": 2
+  }
+}

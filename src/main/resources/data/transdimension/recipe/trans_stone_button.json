@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "redstone",
+  "ingredients": [
+    "transdimension:trans_stone"
+  ],
+  "result": {
+    "count": 1,
+    "id": "transdimension:trans_stone_button"
+  }
+}

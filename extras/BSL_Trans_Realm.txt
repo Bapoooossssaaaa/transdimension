@@ -1,0 +1,94 @@
+# Trans Realm preset for BSL Shaders (Iris or OptiFine)
+#
+# How to use:
+#   1. Put this file in .minecraft/shaderpacks/, next to your BSL zip.
+#   2. Rename it to the zip's exact file name plus ".txt",
+#      e.g. BSL_v10.0.zip -> BSL_v10.0.zip.txt
+#   3. Pick BSL under Video Settings > Shader Packs.
+#
+# What it does:
+#   - Clouds: BSL's own clouds are off, so the realm's heart clouds show, cycling through the flag
+#     (blue, pink, white, pink, blue). If you see no clouds at all, open BSL's settings, find Clouds
+#     under Atmosphere and pick the vanilla option.
+#   - Sky and fog follow the game's own sky colours, so the Trans Realm keeps its trans-blue sky, pink fog and
+#     pink-and-blue sunsets while the Overworld stays normal.
+#   - Water takes each biome's colour: blue seas, pink rivers, lavender crystal pools.
+#   - Pink sunrises and sunsets, pink-white daylight, lavender nights, lilac shadows, pink torchlight.
+#   - Brighter colours, a soft pink colour grade, extra bloom and glow.
+#
+# Lighting strengths stay at BSL's defaults. Options your BSL version doesn't have are skipped, and changing
+# anything in the shader menu rewrites this file.
+
+# Clouds
+CLOUDS=false
+
+# Sky, fog and water from the game (follows the realm's own colours)
+SKY_VANILLA=true
+WATER_MODE=1
+
+# Sky colour used where the game's isn't
+SKY_R=92
+SKY_G=204
+SKY_B=248
+
+# Sunlight: morning, day, evening, night
+LIGHT_MR=252
+LIGHT_MG=144
+LIGHT_MB=184
+LIGHT_DR=255
+LIGHT_DG=232
+LIGHT_DB=244
+LIGHT_ER=244
+LIGHT_EG=128
+LIGHT_EB=184
+LIGHT_NR=168
+LIGHT_NG=160
+LIGHT_NB=255
+
+# Ambient (shadow) light: pink at dawn and dusk, blue by day, lavender at night
+AMBIENT_MR=216
+AMBIENT_MG=160
+AMBIENT_MB=220
+AMBIENT_DR=168
+AMBIENT_DG=204
+AMBIENT_DB=252
+AMBIENT_ER=216
+AMBIENT_EG=152
+AMBIENT_EB=220
+AMBIENT_NR=148
+AMBIENT_NG=128
+AMBIENT_NB=236
+
+# Torches and lanterns
+BLOCKLIGHT_R=255
+BLOCKLIGHT_G=172
+BLOCKLIGHT_B=204
+
+# Water colour used where the biome's isn't
+WATER_R=92
+WATER_G=204
+WATER_B=248
+
+# Atmosphere
+STARS=true
+AURORA=true
+LIGHT_SHAFT=true
+LIGHT_SHAFT_STRENGTH=1.25
+ROUND_SUN_MOON=true
+
+# Camera
+BLOOM=true
+BLOOM_STRENGTH=1.50
+LENS_FLARE=true
+LENS_FLARE_STRENGTH=1.25
+DIRTY_LENS=false
+VIGNETTE=true
+SATURATION=1.10
+VIBRANCE=1.25
+
+# Colour grading: a soft pink tint over everything
+COLOR_GRADING=true
+CG_TR=255
+CG_TG=176
+CG_TB=216
+CG_TM=0.20

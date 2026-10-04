@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:trans_andesite",
+    "transdimension:trans_deepslate",
+    "transdimension:trans_diorite",
+    "transdimension:trans_dirt",
+    "transdimension:trans_granite",
+    "transdimension:trans_grass_block",
+    "transdimension:trans_gravel",
+    "transdimension:trans_sand",
+    "transdimension:trans_sandstone",
+    "transdimension:trans_stone"
+  ]
+}

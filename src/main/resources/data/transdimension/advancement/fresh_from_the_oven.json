@@ -1,0 +1,36 @@
+{
+  "parent": "transdimension:trans_village",
+  "criteria": {
+    "bought": {
+      "trigger": "minecraft:villager_trade",
+      "conditions": {
+        "item": {
+          "items": [
+            "transdimension:trans_cookie",
+            "transdimension:trans_donut",
+            "transdimension:trans_cupcake",
+            "transdimension:trans_macaron",
+            "transdimension:trans_boba",
+            "transdimension:trans_cake"
+          ]
+        }
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:pride_oven"
+    },
+    "title": {
+      "translate": "advancements.transdimension.fresh_from_the_oven.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.fresh_from_the_oven.description"
+    }
+  },
+  "requirements": [
+    [
+      "bought"
+    ]
+  ]
+}

@@ -1,0 +1,203 @@
+{
+  "attributes": {
+    "minecraft:audio/background_music": {
+      "default": {
+        "max_delay": 24000,
+        "min_delay": 12000,
+        "sound": "minecraft:music.overworld.meadow"
+      }
+    },
+    "minecraft:visual/fog_color": "#f7c4cf",
+    "minecraft:visual/sky_color": "#8ed8fa",
+    "minecraft:visual/water_fog_color": "#1f6fa8",
+    "minecraft:visual/ambient_particles": [
+      {
+        "particle": {
+          "type": "minecraft:cherry_leaves"
+        },
+        "probability": 0.0008
+      }
+    ]
+  },
+  "carvers": [
+    "minecraft:cave",
+    "minecraft:cave_extra_underground",
+    "minecraft:canyon"
+  ],
+  "downfall": 0.6,
+  "effects": {
+    "foliage_color": "#f5a9b8",
+    "grass_color": "#f5a9b8",
+    "water_color": "#5bcefa"
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [
+      "minecraft:monster_room",
+      "minecraft:monster_room_deep"
+    ],
+    [],
+    [],
+    [
+      "transdimension:trans_ore_dirt",
+      "transdimension:trans_ore_gravel",
+      "transdimension:trans_ore_granite_upper",
+      "transdimension:trans_ore_granite_lower",
+      "transdimension:trans_ore_diorite_upper",
+      "transdimension:trans_ore_diorite_lower",
+      "transdimension:trans_ore_andesite_upper",
+      "transdimension:trans_ore_andesite_lower",
+      "transdimension:trans_ore_coal_upper",
+      "transdimension:trans_ore_coal_lower",
+      "transdimension:trans_ore_iron_upper",
+      "transdimension:trans_ore_iron_middle",
+      "transdimension:trans_ore_iron_small",
+      "transdimension:trans_ore_gold",
+      "transdimension:trans_ore_gold_lower",
+      "transdimension:trans_ore_redstone",
+      "transdimension:trans_ore_redstone_lower",
+      "transdimension:trans_ore_diamond",
+      "transdimension:trans_ore_diamond_medium",
+      "transdimension:trans_ore_diamond_large",
+      "transdimension:trans_ore_diamond_buried",
+      "transdimension:trans_ore_lapis",
+      "transdimension:trans_ore_lapis_buried",
+      "transdimension:trans_ore_copper",
+      "transdimension:ore_trans_crystal",
+      "transdimension:ore_trans_crystal_deep",
+      "minecraft:disk_clay"
+    ],
+    [
+      "minecraft:glow_lichen"
+    ],
+    [
+      "minecraft:spring_water",
+      "minecraft:spring_lava"
+    ],
+    [
+      "transdimension:trees_trans_meadow",
+      "minecraft:patch_tall_grass_2",
+      "transdimension:pride_blossoms",
+      "transdimension:trans_flowers",
+      "transdimension:pride_peonies",
+      "transdimension:trans_petals_meadow",
+      "minecraft:patch_grass_meadow",
+      "transdimension:trans_boulders"
+    ],
+    []
+  ],
+  "has_precipitation": true,
+  "spawn_costs": {},
+  "spawners": {
+    "ambient": [
+      {
+        "type": "minecraft:bat",
+        "maxCount": 8,
+        "minCount": 8,
+        "weight": 10
+      }
+    ],
+    "axolotls": [],
+    "creature": [
+      {
+        "type": "minecraft:sheep",
+        "maxCount": 4,
+        "minCount": 4,
+        "weight": 12
+      },
+      {
+        "type": "minecraft:pig",
+        "maxCount": 4,
+        "minCount": 4,
+        "weight": 10
+      },
+      {
+        "type": "minecraft:chicken",
+        "maxCount": 4,
+        "minCount": 4,
+        "weight": 10
+      },
+      {
+        "type": "minecraft:cow",
+        "maxCount": 4,
+        "minCount": 4,
+        "weight": 8
+      },
+      {
+        "type": "minecraft:rabbit",
+        "maxCount": 3,
+        "minCount": 2,
+        "weight": 6
+      },
+      {
+        "type": "minecraft:horse",
+        "maxCount": 4,
+        "minCount": 2,
+        "weight": 4
+      },
+      {
+        "type": "transdimension:silly_cat",
+        "maxCount": 2,
+        "minCount": 1,
+        "weight": 8
+      }
+    ],
+    "misc": [],
+    "monster": [
+      {
+        "type": "minecraft:spider",
+        "maxCount": 4,
+        "minCount": 4,
+        "weight": 100
+      },
+      {
+        "type": "minecraft:zombie",
+        "maxCount": 4,
+        "minCount": 4,
+        "weight": 95
+      },
+      {
+        "type": "minecraft:zombie_villager",
+        "maxCount": 1,
+        "minCount": 1,
+        "weight": 5
+      },
+      {
+        "type": "minecraft:skeleton",
+        "maxCount": 4,
+        "minCount": 4,
+        "weight": 100
+      },
+      {
+        "type": "minecraft:creeper",
+        "maxCount": 4,
+        "minCount": 4,
+        "weight": 100
+      },
+      {
+        "type": "minecraft:slime",
+        "maxCount": 4,
+        "minCount": 4,
+        "weight": 100
+      },
+      {
+        "type": "minecraft:enderman",
+        "maxCount": 4,
+        "minCount": 1,
+        "weight": 10
+      },
+      {
+        "type": "minecraft:witch",
+        "maxCount": 1,
+        "minCount": 1,
+        "weight": 5
+      }
+    ],
+    "underground_water_creature": [],
+    "water_ambient": [],
+    "water_creature": []
+  },
+  "temperature": 0.7
+}

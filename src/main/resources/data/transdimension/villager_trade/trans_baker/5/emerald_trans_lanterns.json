@@ -1,0 +1,13 @@
+{
+  "gives": {
+    "count": 2,
+    "id": "transdimension:trans_lantern"
+  },
+  "max_uses": 8.0,
+  "reputation_discount": 0.05,
+  "wants": {
+    "count": 3.0,
+    "id": "minecraft:emerald"
+  },
+  "xp": 30.0
+}

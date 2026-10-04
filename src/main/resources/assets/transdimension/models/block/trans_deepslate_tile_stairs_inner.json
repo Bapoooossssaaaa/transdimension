@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "transdimension:block/trans_deepslate_tiles",
+    "top": "transdimension:block/trans_deepslate_tiles",
+    "side": "transdimension:block/trans_deepslate_tiles"
+  }
+}

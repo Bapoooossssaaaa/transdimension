@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "transdimension:block/cobbled_trans_deepslate_slab"
+    },
+    "type=double": {
+      "model": "transdimension:block/cobbled_trans_deepslate"
+    },
+    "type=top": {
+      "model": "transdimension:block/cobbled_trans_deepslate_slab_top"
+    }
+  }
+}

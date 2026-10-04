@@ -1,0 +1,16 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:trans_crystal_block",
+    "transdimension:trans_crystal_ore",
+    "transdimension:trans_deepslate_crystal_ore",
+    "transdimension:trans_deepslate_diamond_ore",
+    "transdimension:trans_deepslate_emerald_ore",
+    "transdimension:trans_deepslate_gold_ore",
+    "transdimension:trans_deepslate_redstone_ore",
+    "transdimension:trans_diamond_ore",
+    "transdimension:trans_emerald_ore",
+    "transdimension:trans_gold_ore",
+    "transdimension:trans_redstone_ore"
+  ]
+}

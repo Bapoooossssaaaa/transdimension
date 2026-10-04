@@ -1,0 +1,13 @@
+{
+  "asset_id": "transdimension:crystal_bloom",
+  "width": 1,
+  "height": 1,
+  "title": {
+    "color": "yellow",
+    "translate": "painting.transdimension.crystal_bloom.title"
+  },
+  "author": {
+    "color": "gray",
+    "translate": "painting.transdimension.crystal_bloom.author"
+  }
+}

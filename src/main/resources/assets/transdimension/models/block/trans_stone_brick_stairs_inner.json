@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "transdimension:block/trans_stone_bricks",
+    "top": "transdimension:block/trans_stone_bricks",
+    "side": "transdimension:block/trans_stone_bricks"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "S": "transdimension:trans_slab",
+    "L": "transdimension:stripped_trans_log",
+    "P": "transdimension:trans_planks"
+  },
+  "pattern": [
+    "SSS",
+    " L ",
+    " P "
+  ],
+  "result": {
+    "count": 1,
+    "id": "transdimension:trans_table"
+  }
+}

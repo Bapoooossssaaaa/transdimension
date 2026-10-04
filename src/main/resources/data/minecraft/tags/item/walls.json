@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:cobbled_trans_deepslate_wall",
+    "transdimension:polished_trans_deepslate_wall",
+    "transdimension:trans_andesite_wall",
+    "transdimension:trans_cobblestone_wall",
+    "transdimension:trans_deepslate_brick_wall",
+    "transdimension:trans_deepslate_tile_wall",
+    "transdimension:trans_diorite_wall",
+    "transdimension:trans_granite_wall",
+    "transdimension:trans_sandstone_wall",
+    "transdimension:trans_stone_brick_wall"
+  ]
+}

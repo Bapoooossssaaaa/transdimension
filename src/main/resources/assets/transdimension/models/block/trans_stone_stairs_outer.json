@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "bottom": "transdimension:block/trans_stone",
+    "top": "transdimension:block/trans_stone",
+    "side": "transdimension:block/trans_stone"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "criteria": {
+    "entered_trans_realm": {
+      "trigger": "minecraft:changed_dimension",
+      "conditions": {
+        "to": "transdimension:trans_realm"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_crystal"
+    },
+    "title": {
+      "translate": "advancements.transdimension.goober.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.goober.description"
+    },
+    "background": "transdimension:gui/advancements/backgrounds/trans"
+  },
+  "requirements": [
+    [
+      "entered_trans_realm"
+    ]
+  ]
+}

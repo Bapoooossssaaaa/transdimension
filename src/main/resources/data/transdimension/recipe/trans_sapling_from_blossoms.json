@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:cherry_sapling",
+    "transdimension:pride_blossom",
+    "transdimension:trans_crystal"
+  ],
+  "result": {
+    "count": 1,
+    "id": "transdimension:trans_sapling"
+  }
+}

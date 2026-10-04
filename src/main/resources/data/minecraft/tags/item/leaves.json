@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:blush_leaves",
+    "transdimension:pearl_leaves",
+    "transdimension:sky_leaves",
+    "transdimension:trans_leaves",
+    "transdimension:twilight_leaves"
+  ]
+}

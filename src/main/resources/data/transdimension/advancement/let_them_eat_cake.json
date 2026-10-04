@@ -1,0 +1,31 @@
+{
+  "parent": "transdimension:fresh_from_the_oven",
+  "criteria": {
+    "cake": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_cake"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:trans_cake"
+    },
+    "title": {
+      "translate": "advancements.transdimension.let_them_eat_cake.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.let_them_eat_cake.description"
+    }
+  },
+  "requirements": [
+    [
+      "cake"
+    ]
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "textures": {
+    "particle": "transdimension:block/trans_cake_side",
+    "bottom": "transdimension:block/trans_cake_bottom",
+    "top": "transdimension:block/trans_cake_top",
+    "side": "transdimension:block/trans_cake_side",
+    "inside": "transdimension:block/trans_cake_inner"
+  },
+  "elements": [
+    {
+      "from": [
+        7,
+        0,
+        1
+      ],
+      "to": [
+        15,
+        8,
+        15
+      ],
+      "faces": {
+        "down": {
+          "texture": "#bottom",
+          "cullface": "down"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "north": {
+          "texture": "#side"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "west": {
+          "texture": "#inside"
+        },
+        "east": {
+          "texture": "#side"
+        }
+      }
+    }
+  ]
+}

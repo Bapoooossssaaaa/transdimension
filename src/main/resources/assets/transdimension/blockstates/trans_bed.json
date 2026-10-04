@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=north,part=head": {
+      "model": "transdimension:block/trans_bed_head"
+    },
+    "facing=north,heart=none,part=foot": {
+      "model": "transdimension:block/trans_bed_foot"
+    },
+    "facing=north,heart=left,part=foot": {
+      "model": "transdimension:block/trans_bed_foot_left"
+    },
+    "facing=north,heart=right,part=foot": {
+      "model": "transdimension:block/trans_bed_foot_right"
+    },
+    "facing=east,part=head": {
+      "model": "transdimension:block/trans_bed_head",
+      "y": 90
+    },
+    "facing=east,heart=none,part=foot": {
+      "model": "transdimension:block/trans_bed_foot",
+      "y": 90
+    },
+    "facing=east,heart=left,part=foot": {
+      "model": "transdimension:block/trans_bed_foot_left",
+      "y": 90
+    },
+    "facing=east,heart=right,part=foot": {
+      "model": "transdimension:block/trans_bed_foot_right",
+      "y": 90
+    },
+    "facing=south,part=head": {
+      "model": "transdimension:block/trans_bed_head",
+      "y": 180
+    },
+    "facing=south,heart=none,part=foot": {
+      "model": "transdimension:block/trans_bed_foot",
+      "y": 180
+    },
+    "facing=south,heart=left,part=foot": {
+      "model": "transdimension:block/trans_bed_foot_left",
+      "y": 180
+    },
+    "facing=south,heart=right,part=foot": {
+      "model": "transdimension:block/trans_bed_foot_right",
+      "y": 180
+    },
+    "facing=west,part=head": {
+      "model": "transdimension:block/trans_bed_head",
+      "y": 270
+    },
+    "facing=west,heart=none,part=foot": {
+      "model": "transdimension:block/trans_bed_foot",
+      "y": 270
+    },
+    "facing=west,heart=left,part=foot": {
+      "model": "transdimension:block/trans_bed_foot_left",
+      "y": 270
+    },
+    "facing=west,heart=right,part=foot": {
+      "model": "transdimension:block/trans_bed_foot_right",
+      "y": 270
+    }
+  }
+}
