@@ -773,6 +773,11 @@ def trans_wool():
     return flag_rows(vblock("white_wool"), lambda i: FLAG_RAMPS[i], curve=lambda t: 0.1 + 0.9 * t)
 
 
+def trans_wool_top():
+    """The top and bottom of trans wool: the same fluffy wool, all in the flag's blue."""
+    return flag_rows(vblock("white_wool"), lambda i: FLAG_RAMPS[0], curve=lambda t: 0.1 + 0.9 * t)
+
+
 def trans_lantern():
     """A navy metal lantern with a pink-and-white glow (three animated frames, like vanilla)."""
     img = vblock("lantern")
@@ -2161,124 +2166,32 @@ def skin_face(box, face):
             "front": (u + d, v + d, w, h), "left": (u + d + w, v + d, d, h), "back": (u + 2 * d + w, v + d, w, h)}[face]
 
 
+# Maddie wears the owner's own skin (a 64x64 slim-arm player skin at the repository root). The spawn egg face below
+# uses its colours: ash blonde hair, green eyes.
+MADDIE_SKIN = os.path.join(ROOT, "maddieskintexture.png")
 MADDIE = {
-    "skin": hexc("F6D7C3"), "skin2": hexc("E9BFA7"), "skin3": hexc("D49F86"),
-    "hair": hexc("F7B5C8"), "hair2": hexc("EE93AE"), "hair3": hexc("D06F8F"), "streak": hexc("7FD3F7"), "streak2": hexc("4FB3E6"),
-    "white": hexc("FFFFFF"), "iris": hexc("3E8FD8"), "iris2": hexc("1D5A9E"), "lash": hexc("4A2A3A"), "blush": hexc("F29BB0"),
-    "mouth": hexc("C8577A"), "top": hexc("DCD3F2"), "top2": hexc("C8BCE8"), "top3": hexc("B3A5DC"),
-    "hair_light": hexc("FBD3DE"),
-    "skirt": hexc("8ED3F5"), "skirt2": hexc("5DB4E6"), "skirt3": hexc("3E8FD8"), "sock": hexc("FFFFFF"),
-    "sock2": hexc("E6E1EF"), "shoe": hexc("F5A9B8"), "shoe2": hexc("D9779A"), "clip": hexc("5BCEFA"),
+    "hair": hexc("D3C3BD"), "hair2": hexc("B9A7A4"), "hair3": hexc("A38A86"), "hair_light": hexc("EFD6CF"),
+    "skin": hexc("FDE0D5"), "skin2": hexc("FAE5DD"), "white": hexc("FFFFFF"), "iris": hexc("87C588"), "iris2": hexc("63746D"),
+    "lash": hexc("5E5C55"), "blush": hexc("F3C9C1"), "mouth": hexc("E596A8"),
 }
 
 
 def maddie_skin():
-    """Maddie: long pastel pink hair with a sky blue streak, blue eyes, a lavender top with a little trans flag heart,
-    a pleated sky blue skirt, white socks with a pink band and pink shoes."""
-    M = MADDIE
-    img = new(64, 64)
-    rng = random.Random(7)
-
-    def paint(box, face, fn):
-        x0, y0, w, h = skin_face(box, face)
-        for y in range(h):
-            for x in range(w):
-                c = fn(x, y, w, h)
-                if c is not None:
-                    img.putpixel((x0 + x, y0 + y), (*c, 255))
-
-    def hair(x, y, w, h):
-        """Soft vertical strands, a little darker towards the ends."""
-        strand = (x * 5 + (x // 3)) % 4 == 0
-        if strand:
-            return M["hair3"] if y > h * 0.7 else M["hair2"]
-        return M["hair2"] if y > h * 0.8 and x % 2 else M["hair"]
-
-    # ---- head: hair all round, a face in front
-    for face in ("top", "right", "left", "back"):
-        paint("head", face, hair)
-    paint("head", "bottom", lambda x, y, w, h: M["skin2"] if y < 4 else M["hair2"])
-    face_rows = [
-        "HHHHHHHH",
-        "HHhHHHHH",
-        "HssssssH",
-        "HLLssLLH",
-        "HwissiwH",
-        "HwIssIwH",
-        "HbsmmsbH",
-        "HssssssH",
-    ]
-    key = {"H": M["hair"], "h": M["streak"], "s": M["skin"], "L": M["lash"], "w": M["white"], "i": M["iris"],
-           "I": M["iris2"], "b": M["blush"], "m": M["mouth"]}
-    paint("head", "front", lambda x, y, w, h: key[face_rows[y][x]])
-    # The sky blue streak runs from the front over the top and down the back.
-    for face, col in (("top", 2), ("back", 5)):
-        paint("head", face, lambda x, y, w, h, col=col: M["streak2"] if x == col and y % 3 == 0 else
-              (M["streak"] if x == col else None))
-    # ---- hat layer: volume for the hair, bangs that overhang the face, a heart clip on the left
-    for face in ("right", "left", "back"):
-        paint("hat", face, lambda x, y, w, h: hair(x, y, w, h) if y < 7 else None)
-    paint("hat", "top", lambda x, y, w, h: M["hair_light"] if (x + y) % 5 == 0 else M["hair"])
-    paint("hat", "front", lambda x, y, w, h: M["hair"] if y == 0 or (x in (0, 7) and y < 7) else None)
-    paint("hat", "left", lambda x, y, w, h: M["clip"] if (x, y) in ((5, 2), (6, 2), (5, 3), (6, 3), (6, 1)) else None)
-    # ---- body: white top with a flag heart, pink waistband, skirt
-    def top(x, y, w, h, heart=False):
-        if y == 7:
-            return M["shoe"]
-        if y >= 8:
-            return M["skirt2"] if x % 2 == 1 else M["skirt"]
-        if heart:
-            rows = [".BB..BB.", ".PPPPPP.", ".WWWWWW.", "..PPPP..", "...BB..."]
-            if 1 <= y <= 5 and rows[y - 1][x] != ".":
-                return {"B": M["skirt"], "P": M["shoe"], "W": M["white"]}[rows[y - 1][x]]
-        return M["top2"] if (y == 6 or x in (0, w - 1)) else M["top"]
-    paint("body", "front", lambda x, y, w, h: top(x, y, w, h, heart=True))
-    for face in ("right", "left", "back"):
-        paint("body", face, top)
-    paint("body", "top", lambda x, y, w, h: M["top2"])
-    paint("body", "bottom", lambda x, y, w, h: M["skirt2"])
-    # Long hair falls down her back (on the jacket layer, so it stands out a little).
-    paint("jacket", "back", lambda x, y, w, h: hair(x, y, w, h) if y < 7 - (x in (0, 7)) else None)
-    paint("jacket", "top", lambda x, y, w, h: M["hair"] if y >= 2 else None)
-    # ---- arms: short white sleeves, then skin
-    for arm, sleeve in (("right_arm", "right_sleeve"), ("left_arm", "left_sleeve")):
-        for face in ("front", "back", "right", "left"):
-            paint(arm, face, lambda x, y, w, h: M["top"] if y < 3 else (M["top2"] if y == 3 else
-                  (M["skin2"] if y == 11 else M["skin"])))
-        paint(arm, "top", lambda x, y, w, h: M["top"])
-        paint(arm, "bottom", lambda x, y, w, h: M["skin2"])
-        for face in ("front", "back", "right", "left"):
-            paint(sleeve, face, lambda x, y, w, h: M["top2"] if y == 3 else (M["top"] if y < 3 else None))
-    # ---- legs: skirt, a bit of knee, socks with a pink band, pink shoes
-    def leg(x, y, w, h):
-        if y < 4:
-            return M["skirt3"] if (x == 1 and y == 3) else (M["skirt2"] if x % 2 == 1 else M["skirt"])
-        if y == 4:
-            return M["skin"]
-        if y == 5:
-            return M["shoe"]
-        if y < 10:
-            return M["sock2"] if x in (0, w - 1) else M["sock"]
-        return M["shoe2"] if y == 11 else M["shoe"]
-    for lg, pants in (("right_leg", "right_pants"), ("left_leg", "left_pants")):
-        for face in ("front", "back", "right", "left"):
-            paint(lg, face, leg)
-            paint(pants, face, lambda x, y, w, h: (M["skirt2"] if x % 2 else M["skirt"]) if y < 3 else
-                  (M["skirt3"] if y == 3 else None))
-        paint(lg, "top", lambda x, y, w, h: M["skirt"])
-        paint(lg, "bottom", lambda x, y, w, h: M["shoe2"])
+    """Maddie's skin, as the owner made it (64x64, slim arms, every outer layer used)."""
+    img = Image.open(MADDIE_SKIN).convert("RGBA")
+    assert img.size == (64, 64), "maddieskintexture.png must be a 64x64 skin"
     return img
 
 
 def maddie_spawn_egg():
-    """Spawn eggs are faces in 26.2: Maddie's, with her pink hair and blue streak."""
+    """Spawn eggs are faces in 26.2: Maddie's, with her ash blonde hair, side-swept bangs and green eyes."""
     rows = [
         "................",
         "....HHHHHHHH....",
-        "...HHHHHhHHHH...",
-        "..HHHHHHhHHHHH..",
-        "..HHHHHHHhHHHH..",
-        "..HHssssssssHH..",
+        "...HHhHHHHhHH...",
+        "..HHhHHHHHHhHH..",
+        "..HDHHHDDHHHDH..",
+        "..HDssssssssDH..",
         "..HsLLssssLLsH..",
         "..HswIssssIwsH..",
         "..HswJssssJwsH..",
@@ -2287,12 +2200,12 @@ def maddie_spawn_egg():
         "..HHsssssssssH..",
         "..HHHssssssHHH..",
         "...HHH....HHH...",
-        "....HH....HH....",
+        "....HD....DH....",
         "................",
     ]
     M = MADDIE
-    key = {"H": M["hair"], "h": M["streak"], "s": M["skin"], "L": M["lash"], "w": M["white"], "I": M["iris"],
-           "J": M["iris2"], "b": M["blush"], "m": M["mouth"]}
+    key = {"H": M["hair"], "D": M["hair3"], "h": M["hair_light"], "s": M["skin"], "L": M["lash"], "w": M["white"],
+           "I": M["iris"], "J": M["iris2"], "b": M["blush"], "m": M["mouth"]}
     img = new()
     for y, row in enumerate(rows):
         for x, ch in enumerate(row):
@@ -2636,7 +2549,7 @@ def main():
         "trans_pink_stained_glass_pane_top": tinted_glass(vblock("white_stained_glass_pane_top"), PINK, 1.0),
         "trans_blue_stained_glass": trans_blue_stained_glass(),
         "trans_blue_stained_glass_pane_top": tinted_glass(vblock("white_stained_glass_pane_top"), BLUE, 1.0),
-        "trans_wool": trans_wool(), "trans_lantern": trans_lantern(),
+        "trans_wool": trans_wool(), "trans_wool_top": trans_wool_top(), "trans_lantern": trans_lantern(),
         # bakery
         "trans_cake_top": trans_cake_top(), "trans_cake_side": trans_cake_side(), "trans_cake_inner": trans_cake_inner(),
         "trans_cake_bottom": trans_cake_bottom(), "pride_oven_front": pride_oven_front(), "pride_oven_side": pride_oven_side(),

@@ -746,7 +746,13 @@ def generate_blocks():
     glass("trans_blue_stained_glass", "Trans Blue Stained Glass")
     pane("trans_blue_stained_glass_pane", "Trans Blue Stained Glass Pane", "trans_blue_stained_glass")
 
-    cube("trans_wool", "Trans Pride Wool", tool=None)
+    # Flag stripes on the sides, plain trans blue on the top and bottom.
+    blockstate("trans_wool", {"variants": {"": {"model": f"{NS}:block/trans_wool"}}})
+    model("trans_wool", {"parent": "minecraft:block/cube_bottom_top", "textures": {
+        "bottom": block_tex("trans_wool_top"), "side": block_tex("trans_wool"), "top": block_tex("trans_wool_top")}})
+    item_def("trans_wool", f"{NS}:block/trans_wool")
+    name("trans_wool", "Trans Pride Wool")
+    loot("trans_wool", loot_self("trans_wool"))
     tag("block", "wool", "trans_wool")
     tag("item", "wool", "trans_wool")
     blockstate("trans_carpet", {"variants": {"": {"model": f"{NS}:block/trans_carpet"}}})
@@ -1039,8 +1045,8 @@ def generate_misc():
     tag("item", "grass_blocks", "trans_grass_block")
     tag("block", "sand", "trans_sand")
     tag("item", "sand", "trans_sand")
-    tag("block", "smelts_to_glass", "trans_sand")
-    tag("item", "smelts_to_glass", "trans_sand")
+    # Trans sand is deliberately NOT in #minecraft:smelts_to_glass: vanilla's glass recipe uses that tag, and the
+    # furnace would pick it over ours. Trans sand smelts into trans glass (see generate_recipes).
     rocks = ("trans_stone", "trans_granite", "trans_diorite", "trans_andesite", "trans_deepslate")
     tag("block", "base_stone_overworld", *rocks)
     tag("block", "overworld_carver_replaceables", *rocks, "trans_dirt", "trans_grass_block", "trans_sand", "trans_sandstone", "trans_gravel")

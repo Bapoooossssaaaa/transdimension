@@ -422,9 +422,10 @@ def worldgen_files():
         "terrain_adaptation": "none",
         "use_expansion_hack": False,
     })
-    # Rare: at most one island per 48x48 chunk cell (768 blocks), never closer than 24 chunks to the next.
+    # Very rare: at most one island per 152x152 chunk cell (2432 blocks), never closer than 76 chunks to the next.
+    # That is ten times rarer than the first version's 48-chunk grid ((152 / 48)^2 = 10).
     write(os.path.join(wg, "structure_set", "egg_house_island.json"), {
-        "placement": {"type": "minecraft:random_spread", "salt": 52011997, "separation": 24, "spacing": 48},
+        "placement": {"type": "minecraft:random_spread", "salt": 52011997, "separation": 76, "spacing": 152},
         "structures": [{"structure": T + "egg_house_island", "weight": 1}]})
     write(os.path.join(DATA, NS, "tags", "worldgen", "biome", "has_structure", "egg_house_island.json"), {
         "values": [T + b for b in ("trans_meadow", "trans_forest", "frosted_fields", "sugar_dunes", "lavender_marsh",

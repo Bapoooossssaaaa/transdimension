@@ -37,7 +37,7 @@ Overworld-style hills, caves, rivers and oceans with eighteen biomes. The ground
 
 ### Maddie and the Egg House
 
-Somewhere high in the realm's sky floats a little island with a house on it: the **Egg House**, the owner's own build, copied block for block into the mod with trans planks, glass, lanterns and beds. Islands are rare (at most one every 768 blocks); one in ten village house chests holds a **map to Maddie's Egg House**, and `/locate structure transdimension:egg_house_island` works too.
+Somewhere high in the realm's sky floats a little island with a house on it: the **Egg House**, the owner's own build, copied block for block into the mod with trans planks, glass, lanterns and beds. Islands are very rare (at most one every 2,432 blocks); one in ten village house chests holds a **map to Maddie's Egg House**, and `/locate structure transdimension:egg_house_island` works too.
 
 **Maddie** lives there. Talk to her and a dialogue box opens with her portrait. Ask what she has for you and she gives you two gifts:
 
