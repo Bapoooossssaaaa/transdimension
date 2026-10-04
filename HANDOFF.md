@@ -108,6 +108,18 @@ The compiler has checked every round-4 API (see the status above). Only the mixi
 | --- | --- | --- |
 | `EnderManMixin` | the `Level#addParticle` call in `EnderMan#aiStep` | The mixin is `require = 0`: worst case the sparkles are purple. |
 
+## Unverified APIs (round 5)
+
+Written after round 4 compiled, not yet compiled themselves.
+
+| Where | API | If it doesn't compile |
+| --- | --- | --- |
+| `TransFishRenderer` | extends vanilla's `CodRenderer(Context)` (`net.minecraft.client.renderer.entity`), overriding `createRenderState`, `extractRenderState(Cod, LivingEntityRenderState, float)` and `getTextureLocation` | Copy CodRenderer: a `MobRenderer` with `new CodModel(context.bakeLayer(ModelLayers.COD))` (`client.model.animal.fish`) and its `setupRotations` flop. |
+| `PastelSlime` | `TemptGoal(mob, speed, Predicate<ItemStack>, boolean)` with a lambda | Pass `Ingredient.of(ModItems.GUMDROP)` as before (sugar then only tames, without tempting). |
+| `Fairy` | `PathfinderMob`, `Mob.createMobAttributes()`, `Mob.checkMobSpawnRules`, `EntityGetter#getNearestPlayer(Entity, double)`, `Mth.rotLerp`, `Inventory#add`, `spawnAtLocation(ServerLevel, ItemStack)` (confirmed by NeoForge's Fox patch), `getSoundVolume()` | |
+| `ModItems.BOTTLED_FAIRY` | `DataComponents.DEATH_PROTECTION` (confirmed) with `DeathProtection.TOTEM_OF_UNDYING` | Build the totem's effects by hand: `new DeathProtection(List.of(...))` as vanilla's totem does. |
+| `FairyRenderer` | `LivingEntityRenderer#scale(S, PoseStack)`, `EntityRenderer#getBlockLightLevel(T, BlockPos)` | Drop either override: the fairy is just smaller, or lit by the world instead of glowing. |
+
 ## Unverified APIs (round 3)
 
 These come from primers, older versions or the shape of 26.2 data, not from 26.2 source. The compiler has since confirmed the Java names; what still matters here is mixin targets, reflected names and data formats, which only show up when the game runs.

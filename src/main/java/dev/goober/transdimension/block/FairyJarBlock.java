@@ -21,7 +21,7 @@ import dev.goober.transdimension.block.entity.FairyJarBlockEntity;
  * by the client's FairyJarRenderer, which is why the jar has a (data-less) block entity.
  */
 public class FairyJarBlock extends Block implements EntityBlock {
-	private static final VoxelShape SHAPE = Shapes.or(Block.box(4.0, 0.0, 4.0, 12.0, 10.0, 12.0), Block.box(5.0, 10.0, 5.0, 11.0, 12.0, 11.0));
+	private static final VoxelShape SHAPE = Shapes.or(Block.box(3.0, 0.0, 3.0, 13.0, 11.0, 13.0), Block.box(3.5, 11.0, 3.5, 12.5, 14.5, 12.5));
 	/** The light's colours, in the order it cycles through them (FairyJarRenderer uses the same timing). */
 	public static final int[] COLOURS = {0xF5A9B8, 0xFFFFFF, 0x5BCEFA};
 	/** Ticks the light spends on each colour. */

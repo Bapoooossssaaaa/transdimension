@@ -35,6 +35,7 @@ import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.item.component.DeathProtection;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
@@ -179,6 +180,14 @@ public final class ModItems {
 	// ---------------------------------------------------------------- the Fairy Realm
 	public static final Item TRANS_FAIRY_SPAWN_EGG = register("trans_fairy_spawn_egg", SpawnEggItem::new,
 			new Item.Properties().spawnEgg(ModEntities.TRANS_FAIRY).rarity(Rarity.EPIC));
+
+	// ---------------------------------------------------------------- wild fairies
+	/** A fairy caught in a glass bottle: hold it and it saves you from death once, like a totem. */
+	public static final Item BOTTLED_FAIRY = register("bottled_fairy", Item::new, new Item.Properties().stacksTo(1).rarity(Rarity.RARE)
+			.component(DataComponents.DEATH_PROTECTION, DeathProtection.TOTEM_OF_UNDYING)
+			.component(DataComponents.LORE, lore("item.transdimension.bottled_fairy.lore", "item.transdimension.bottled_fairy.lore2")));
+	public static final Item FAIRY_SPAWN_EGG = register("fairy_spawn_egg", SpawnEggItem::new,
+			new Item.Properties().spawnEgg(ModEntities.FAIRY));
 
 	// ---------------------------------------------------------------- boats
 	public static final Item TRANS_BOAT = register("trans_boat",

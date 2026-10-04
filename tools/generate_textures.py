@@ -3056,6 +3056,35 @@ def pastel_slime_spawn_egg():
     return _egg_recolour("slime_spawn_egg", lambda px, p: (pink, 0.25, 1.0) if lum(px) > 0.42 else (blue, 0.3, 0.85))
 
 
+def fairy_spawn_egg():
+    """The allay's egg in pearl white, its spots pink and blue."""
+    pink, blue, pearl = tuple(GEL_PINK), tuple(GEL_BLUE), tuple(PEARL_WHITE)
+    return _egg_recolour("allay_spawn_egg", lambda px, p: (pink if (p[0] + p[1]) % 2 == 0 else blue, 0.35, 0.95)
+                         if lum(px) > 0.55 else (pearl, 0.4, 1.0))
+
+
+def bottled_fairy_item():
+    """A glass bottle with a little fairy glowing inside; its light fills the bottle with a soft pink-blue shimmer."""
+    img = vitem("glass_bottle")
+    out = img.copy()
+    # The inside of the bottle: the clear pixels reachable from its middle, below the neck.
+    inside, todo = set(), [(8, 11)]
+    while todo:
+        x, y = todo.pop()
+        if (x, y) in inside or not (0 <= x < 16 and 7 <= y < 16) or img.getpixel((x, y))[3] != 0:
+            continue
+        inside.add((x, y))
+        todo += [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
+    for x, y in inside:
+        out.putpixel((x, y), (*mix(mix(PINK, BLUE, (x - 5) / 6), WHITE, 0.35), 175))
+    for (x, y), c in {(7, 10): WHITE, (8, 10): mix(PINK, WHITE, 0.4), (7, 11): mix(BLUE, WHITE, 0.4), (8, 11): PINK}.items():
+        out.putpixel((x, y), (*c, 255))
+    for (x, y) in ((5, 9), (6, 9), (6, 10), (9, 9), (10, 9), (9, 10)):
+        if (x, y) in inside:
+            out.putpixel((x, y), (255, 255, 255, 220))
+    return out
+
+
 def trans_pearl_item():
     """An ender pearl turned pearl white, with a soft pink sheen at the top and blue at the bottom."""
     img = vitem("ender_pearl")
@@ -3151,7 +3180,8 @@ def creature_textures():
              "trans_fish_bucket": trans_fish_bucket(), "trans_fish_spawn_egg": trans_fish_spawn_egg(),
              "trans_pearl": trans_pearl_item(), "trans_crystal_pearl": trans_crystal_pearl_item(),
              "trans_enderman_spawn_egg": trans_enderman_spawn_egg(), "pastel_gel": pastel_gel_item(), "gumdrop": gumdrop_item(),
-             "pastel_slime_spawn_egg": pastel_slime_spawn_egg()}
+             "pastel_slime_spawn_egg": pastel_slime_spawn_egg(), "fairy_spawn_egg": fairy_spawn_egg(),
+             "bottled_fairy": bottled_fairy_item()}
     for name, img in items.items():
         yield f"item/{name}.png", img
     yield "block/pink_gel_block.png", gel_block(GEL_PINK)
@@ -3426,18 +3456,43 @@ def fairy_jar_lid():
 
 
 def fairy_light(colour):
-    """16x16 for the jar's light: the glowing core cube (0,0), the wings (0,6), the halo (0,9; mostly see-through)."""
-    img = new(16, 16)
+    """32x32 for the fairy light (FairyLightModel: wild fairies and the Fairy Jar): the glowing cube (0,0), the upper
+    wings (0,8; 5x5, both faces), the hind wings (0,14; 3x3) and the halo shell (0,20; mostly see-through). Wings are
+    see-through with a bright rim, like a fairy's."""
+    img = new(32, 32)
     core = hexc(colour)
-    for y in range(6):
-        for x in range(12):
-            img.putpixel((x, y), (*mix(core, WHITE, 0.35 + 0.25 * ((x + y) % 2)), 255))
-    for y in range(6, 9):
-        for x in range(6):
-            img.putpixel((x, y), (*mix(core, WHITE, 0.7), 210))
-    for y in range(9, 15):
-        for x in range(12):
-            img.putpixel((x, y), (*mix(core, WHITE, 0.2), 70))
+    rim = mix(core, WHITE, 0.25)
+    glow = mix(core, WHITE, 0.75)
+
+    def cube_faces(v, paint):
+        for name, (u0, v0) in {"top": (4, v), "bottom": (8, v), "west": (0, v + 4), "north": (4, v + 4), "east": (8, v + 4),
+                               "south": (12, v + 4)}.items():
+            for y in range(4):
+                for x in range(4):
+                    img.putpixel((u0 + x, v0 + y), paint(x, y))
+
+    def body(x, y):
+        inner = 1 <= x <= 2 and 1 <= y <= 2
+        if (x, y) == (1, 1):
+            return (255, 255, 255, 255)
+        return (*(glow if inner else rim), 255)
+    cube_faces(0, body)
+
+    def wing(u, v, shape):
+        cells = {(x, y) for y, row in enumerate(shape) for x, ch in enumerate(row) if ch == "X"}
+        w = len(shape[0])
+        for face_u in (u, u + w):
+            for (x, y) in cells:
+                edge = any((x + dx, y + dy) not in cells for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+                c = (255, 255, 255, 235) if edge else (*mix(core, WHITE, 0.45 + 0.1 * ((x + y) % 2)), 150)
+                img.putpixel((face_u + x, v + y), c)
+    wing(0, 8, [".XXX.", "XXXXX", "XXXXX", ".XXXX", "..XX."])
+    wing(0, 14, ["XX.", "XXX", ".XX"])
+
+    def halo(x, y):
+        edge = x in (0, 3) or y in (0, 3)
+        return (*mix(core, WHITE, 0.3), 60 if edge else 35)
+    cube_faces(20, halo)
     return img
 
 

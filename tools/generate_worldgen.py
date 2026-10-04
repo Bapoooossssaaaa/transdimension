@@ -620,7 +620,7 @@ CAVE_DECOR = ["minecraft:glow_lichen"]
 
 def biome(name, *, temperature, downfall, grass, foliage, water, water_fog, sky, fog, music_sound,
           features, creatures=(), monsters=MONSTERS, water_creatures=(), water_ambient=(), underground_water=(),
-          particles=None, precipitation=True, frozen=False, extra_attributes=None, underwater_music=False, axolotls=()):
+          particles=None, precipitation=True, frozen=False, extra_attributes=None, underwater_music=False, axolotls=(), fairies=4):
     attributes = {
         "minecraft:audio/background_music": music(music_sound, underwater_music),
         "minecraft:visual/fog_color": fog,
@@ -643,7 +643,8 @@ def biome(name, *, temperature, downfall, grass, foliage, water, water_fog, sky,
         "has_precipitation": precipitation,
         "spawn_costs": {},
         "spawners": {
-            "ambient": BATS, "axolotls": list(axolotls), "creature": list(creatures), "misc": [], "monster": list(monsters),
+            # Wild fairies are rare however heavy their weight: one in fifteen spawn tries works, and never near another.
+            "ambient": BATS + ([spawn("fairy", fairies, 1, 1)] if fairies else []), "axolotls": list(axolotls), "creature": list(creatures), "misc": [], "monster": list(monsters),
             "underground_water_creature": list(underground_water), "water_ambient": list(water_ambient),
             "water_creature": list(water_creatures)},
         "temperature": temperature,
@@ -694,7 +695,7 @@ def generate_biomes():
           creatures=[spawn("minecraft:parrot", 8, 1, 2), spawn("minecraft:chicken", 6, 4, 4), spawn("minecraft:rabbit", 4, 2, 3),
                      spawn("minecraft:ocelot", 2, 1, 1), spawn("silly_cat", 12, 1, 3)])
 
-    biome("sugar_dunes", temperature=2.0, downfall=0.0, precipitation=False, grass="#ffd6de", foliage="#ffd6de", water="#7fdbfa",
+    biome("sugar_dunes", fairies=0, temperature=2.0, downfall=0.0, precipitation=False, grass="#ffd6de", foliage="#ffd6de", water="#7fdbfa",
           water_fog="#2a8ec0", sky="#ffc7d6", fog="#ffe3ea", music_sound="minecraft:music.overworld.desert",
           particles=particles("minecraft:end_rod", 0.0006),
           extra_attributes={"minecraft:gameplay/snow_golem_melts": True},
@@ -739,27 +740,27 @@ def generate_biomes():
                         ores=ORES + [f"{NS}:ore_trans_crystal_extra", f"{NS}:trans_ore_emerald"], top=["minecraft:freeze_top_layer"]),
           creatures=[spawn("minecraft:goat", 8, 1, 3), spawn("minecraft:rabbit", 3, 2, 3), spawn("silly_cat", 1, 1, 1)])
 
-    biome("trans_beach", temperature=0.8, downfall=0.4, grass="#f5a9b8", foliage="#f5a9b8", water="#5bcefa", water_fog="#1f6fa8",
+    biome("trans_beach", fairies=0, temperature=0.8, downfall=0.4, grass="#f5a9b8", foliage="#f5a9b8", water="#5bcefa", water_fog="#1f6fa8",
           sky="#7fd4fa", fog="#f7d0d8", music_sound="minecraft:music.overworld.meadow",
           features=land("minecraft:patch_sugar_cane"),
           creatures=[spawn("minecraft:turtle", 5, 2, 5), spawn("silly_cat", 2, 1, 1)])
 
     ocean_floor = {1: [], 2: [], 3: UNDERGROUND, 6: ORES + ["minecraft:disk_sand"], 7: CAVE_DECOR, 8: SPRINGS}
-    biome("trans_ocean", temperature=0.5, downfall=0.5, grass="#f5a9b8", foliage="#f5a9b8", water="#5bcefa", water_fog="#1e7fb8",
+    biome("trans_ocean", fairies=0, temperature=0.5, downfall=0.5, grass="#f5a9b8", foliage="#f5a9b8", water="#5bcefa", water_fog="#1e7fb8",
           sky="#7fd4fa", fog="#f7d0d8", music_sound="minecraft:music.game", underwater_music=True,
           features={**ocean_floor, 9: [f"{NS}:trans_coral_reefs_rare", f"{NS}:trans_seagrass_warm", "minecraft:sea_pickle", f"{NS}:trans_kelp_warm"]},
           creatures=[], monsters=OCEAN_MONSTERS,
           water_creatures=[spawn("minecraft:squid", 4, 1, 4), spawn("minecraft:dolphin", 2, 1, 2)],
           water_ambient=[spawn("trans_fish", 20, 3, 6), spawn("minecraft:tropical_fish", 25, 8, 8), spawn("minecraft:cod", 6, 3, 6),
                          spawn("minecraft:pufferfish", 5, 1, 3)])
-    biome("deep_trans_ocean", temperature=0.5, downfall=0.5, grass="#f5a9b8", foliage="#f5a9b8", water="#3e9fd8", water_fog="#0f3f78",
+    biome("deep_trans_ocean", fairies=0, temperature=0.5, downfall=0.5, grass="#f5a9b8", foliage="#f5a9b8", water="#3e9fd8", water_fog="#0f3f78",
           sky="#7fd4fa", fog="#f7d0d8", music_sound="minecraft:music.game", underwater_music=True,
           features={**ocean_floor, 9: [f"{NS}:trans_seagrass_deep", f"{NS}:trans_kelp_cold"]},
           creatures=[], monsters=OCEAN_MONSTERS,
           water_creatures=[spawn("minecraft:squid", 6, 1, 4), spawn("minecraft:dolphin", 1, 1, 2)],
           water_ambient=[spawn("trans_fish", 12, 3, 6), spawn("minecraft:cod", 8, 3, 6), spawn("minecraft:salmon", 5, 1, 5)],
           underground_water=[spawn("minecraft:glow_squid", 10, 4, 6)])
-    biome("trans_river", temperature=0.6, downfall=0.6, grass="#f5a9b8", foliage="#f5a9b8", water="#f5a9b8", water_fog="#c86a88",
+    biome("trans_river", fairies=0, temperature=0.6, downfall=0.6, grass="#f5a9b8", foliage="#f5a9b8", water="#f5a9b8", water_fog="#c86a88",
           sky="#8ed8fa", fog="#f7c4cf", music_sound="minecraft:music.overworld.meadow",
           features={**ocean_floor, 9: [f"{NS}:trans_seagrass_river", "minecraft:patch_sugar_cane", f"{NS}:trans_lily_pads"]},
           creatures=[], water_creatures=[spawn("minecraft:squid", 2, 1, 4)],
@@ -793,13 +794,13 @@ def generate_biomes():
           creatures=common_creatures + [spawn("minecraft:rabbit", 6, 2, 3), spawn("silly_cat", 14, 1, 3)])
 
     # ---- round 4: flower fields, moonlit meadows, the slimes' glade, the reef and the blooming caverns
-    biome("pride_flower_fields", temperature=0.7, downfall=0.7, grass="#f7b5cc", foliage="#f5a9b8", water="#7fd6fa", water_fog="#2a7fb5",
+    biome("pride_flower_fields", fairies=10, temperature=0.7, downfall=0.7, grass="#f7b5cc", foliage="#f5a9b8", water="#7fd6fa", water_fog="#2a7fb5",
           sky="#9fd8ff", fog="#fbd0dc", music_sound="minecraft:music.overworld.flower_forest",
           particles=particles("minecraft:cherry_leaves", 0.003),
           features=land(f"{NS}:heart_trees", f"{NS}:hedge_bushes", f"{NS}:tall_trans_flowers_dense", f"{NS}:field_flowers",
                         f"{NS}:pride_blossoms_dense", f"{NS}:trans_petals_meadow", f"{NS}:pastel_bushes", f"{NS}:trans_grass_meadow"),
           creatures=common_creatures + [spawn("minecraft:rabbit", 6, 2, 3), spawn("minecraft:horse", 3, 2, 4), spawn("silly_cat", 10, 1, 3)])
-    biome("moonlit_meadow", temperature=0.4, downfall=0.6, grass="#dfe6ff", foliage="#eef0ff", water="#8fc8f5", water_fog="#2a4f8f",
+    biome("moonlit_meadow", fairies=10, temperature=0.4, downfall=0.6, grass="#dfe6ff", foliage="#eef0ff", water="#8fc8f5", water_fog="#2a4f8f",
           sky="#7c90d8", fog="#c8d2f5", music_sound="minecraft:music.overworld.grove",
           particles=particles("minecraft:firefly", 0.004),
           features=land(f"{NS}:trees_moonlit_meadow", f"{NS}:star_blooms_dense", f"{NS}:forget_me_nots", f"{NS}:frost_flowers",
@@ -813,13 +814,13 @@ def generate_biomes():
                         f"{NS}:trans_grass_plain", f"{NS}:pink_gel_mounds", f"{NS}:blue_gel_mounds"),
           creatures=[spawn("pastel_slime", 16, 2, 4), spawn("minecraft:rabbit", 4, 2, 3), spawn("minecraft:chicken", 4, 4, 4),
                      spawn("silly_cat", 4, 1, 2)])
-    biome("pastel_reef", temperature=0.8, downfall=0.5, grass="#f5a9b8", foliage="#f5a9b8", water="#6fe0f2", water_fog="#1f9fb8",
+    biome("pastel_reef", fairies=0, temperature=0.8, downfall=0.5, grass="#f5a9b8", foliage="#f5a9b8", water="#6fe0f2", water_fog="#1f9fb8",
           sky="#7fd4fa", fog="#f7d0d8", music_sound="minecraft:music.game", underwater_music=True,
           features={**ocean_floor, 9: [f"{NS}:trans_coral_reefs_dense", f"{NS}:trans_seagrass_warm", "minecraft:sea_pickle"]},
           creatures=[], monsters=OCEAN_MONSTERS,
           water_creatures=[spawn("minecraft:dolphin", 3, 1, 2)],
           water_ambient=[spawn("trans_fish", 25, 4, 8), spawn("minecraft:tropical_fish", 30, 8, 8), spawn("minecraft:pufferfish", 6, 1, 3)])
-    biome("blooming_caverns", temperature=0.6, downfall=0.6, grass="#f5a9c0", foliage="#f5a9b8", water="#8fd8ff", water_fog="#2e7fb0",
+    biome("blooming_caverns", fairies=8, temperature=0.6, downfall=0.6, grass="#f5a9c0", foliage="#f5a9b8", water="#8fd8ff", water_fog="#2e7fb0",
           sky="#9fb8ff", fog="#f0c8e0", music_sound="minecraft:music.overworld.lush_caves",
           particles=particles("minecraft:spore_blossom_air", 0.004),
           features={3: UNDERGROUND, 6: ORES, 7: CAVE_DECOR, 8: SPRINGS,
@@ -827,7 +828,7 @@ def generate_biomes():
           creatures=[])
 
     # ---- the Fairy Realm: islands floating over a sea of clouds, no monsters but the fairy's
-    biome("fairy_realm", temperature=0.7, downfall=0.5, grass="#f7b8d0", foliage="#f5a9b8", water="#8fdcff", water_fog="#3a9fd0",
+    biome("fairy_realm", fairies=12, temperature=0.7, downfall=0.5, grass="#f7b8d0", foliage="#f5a9b8", water="#8fdcff", water_fog="#3a9fd0",
           sky="#a8dcff", fog="#fbd6e6", music_sound="minecraft:music.overworld.cherry_grove",
           particles=particles("minecraft:cherry_leaves", 0.003),
           features={9: [f"{NS}:fairy_islands"]},

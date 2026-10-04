@@ -20,6 +20,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityType;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.entity.Fairy;
 import dev.goober.transdimension.entity.FairyCrystalSpike;
 import dev.goober.transdimension.entity.Maddie;
 import dev.goober.transdimension.entity.PastelSlime;
@@ -73,6 +74,17 @@ public final class ModEntities {
 					.eyeHeight(0.5F)
 					.clientTrackingRange(10)
 					.build(PASTEL_SLIME_KEY));
+
+	public static final ResourceKey<EntityType<?>> FAIRY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("fairy"));
+	/** Rare wild fairies: glowing winged cubes that drift about the realms (ambient, so they come and go). */
+	public static final EntityType<Fairy> FAIRY = Registry.register(BuiltInRegistries.ENTITY_TYPE, FAIRY_KEY,
+			FabricEntityType.Builder.createMob(Fairy::new, MobCategory.AMBIENT, mob -> mob
+							.spawnPlacement(SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Fairy::checkFairySpawnRules)
+							.defaultAttributes(Fairy::createAttributes))
+					.sized(0.4F, 0.4F)
+					.eyeHeight(0.2F)
+					.clientTrackingRange(8)
+					.build(FAIRY_KEY));
 
 	public static final ResourceKey<EntityType<?>> TRANS_BOAT_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("trans_boat"));
 	public static final ResourceKey<EntityType<?>> TRANS_CHEST_BOAT_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("trans_chest_boat"));

@@ -1341,12 +1341,16 @@ def generate_creatures():
                           ("trans_fish_bucket", "Bucket of Trans Fish"), ("trans_fish_spawn_egg", "Trans Fish Spawn Egg"),
                           ("trans_pearl", "Trans Pearl"), ("trans_crystal_pearl", "Trans Crystal Pearl"),
                           ("trans_enderman_spawn_egg", "Trans Enderman Spawn Egg"), ("pastel_gel", "Pastel Gel"),
-                          ("gumdrop", "Gumdrop"), ("pastel_slime_spawn_egg", "Pastel Slime Spawn Egg")):
+                          ("gumdrop", "Gumdrop"), ("pastel_slime_spawn_egg", "Pastel Slime Spawn Egg"),
+                          ("bottled_fairy", "Bottled Fairy"), ("fairy_spawn_egg", "Fairy Spawn Egg")):
         simple_item(item, english)
     NAMES.update({
         "entity.transdimension.trans_fish": "Trans Fish",
         "entity.transdimension.trans_enderman": "Trans Enderman",
         "entity.transdimension.pastel_slime": "Pastel Slime",
+        "entity.transdimension.fairy": "Fairy",
+        "item.transdimension.bottled_fairy.lore": "Hold it and it saves you from death once",
+        "item.transdimension.bottled_fairy.lore2": "Use a glass bottle on a wild fairy to catch one",
         "item.transdimension.trans_crystal_pearl.lore": "Twelve of these awaken a Fairy Portal",
         "item.transdimension.gumdrop.lore": "Pastel slimes adore these: feed one a few to tame it",
     })
@@ -1367,6 +1371,10 @@ def generate_creatures():
          "entries": [{"type": "minecraft:item", "name": "minecraft:bone_meal"}], "rolls": 1.0}])
     entity_loot("trans_enderman", [{"entries": [counted("trans_pearl", 0, 1)], "rolls": 1.0}])
     entity_loot("pastel_slime", [{"entries": [counted("pastel_gel", 0, 2)], "rolls": 1.0}])
+    # Fairies are much nicer met than fought (they give gifts), but they do leave some glitter behind.
+    entity_loot("fairy", [{"entries": [counted("minecraft:glowstone_dust", 1, 2)], "rolls": 1.0},
+                          {"conditions": [{"chance": 0.25, "condition": "minecraft:random_chance"}],
+                           "entries": [{"type": "minecraft:item", "name": rid("trans_crystal")}], "rolls": 1.0}])
 
     # ---- recipes
     recipe("cooked_trans_fish", {"type": "minecraft:smelting", "category": "food", "cookingtime": 200, "experience": 0.35,
@@ -1463,20 +1471,20 @@ def generate_fairy_realm_data():
     # ---- the Fairy Jar: a trans glass jar with a flag-striped cloth lid. In the world its light is drawn by FairyJarRenderer;
     # the item shows a little winged light sitting inside instead.
     jar = [
-        {"from": [4, 0, 4], "to": [12, 10, 12], "faces": _faces("#glass", (4, 6, 12, 16), (4, 4, 12, 12), cull=("down",))},
-        {"from": [5, 10, 5], "to": [11, 11, 11], "faces": _faces("#glass", (5, 5, 11, 6), (5, 5, 11, 11), skip=("down",))},
-        {"from": [4.5, 11, 4.5], "to": [11.5, 12.5, 11.5], "faces": _faces("#lid", (0, 6, 16, 9), (4, 4, 12, 12))},
-        {"from": [7, 12.5, 7], "to": [9, 13.5, 9], "faces": _faces("#lid", (7, 7, 9, 8), (7, 7, 9, 9), skip=("down",))},
+        {"from": [3, 0, 3], "to": [13, 11, 13], "faces": _faces("#glass", (3, 5, 13, 16), (3, 3, 13, 13), cull=("down",))},
+        {"from": [4, 11, 4], "to": [12, 12, 12], "faces": _faces("#glass", (4, 4, 12, 5), (4, 4, 12, 12), skip=("down",))},
+        {"from": [3.5, 12, 3.5], "to": [12.5, 13.5, 12.5], "faces": _faces("#lid", (0, 6, 16, 9), (4, 4, 12, 12))},
+        {"from": [7, 13.5, 7], "to": [9, 14.5, 9], "faces": _faces("#lid", (7, 7, 9, 8), (7, 7, 9, 9), skip=("down",))},
     ]
     jar_tex = {"particle": block_tex("fairy_jar_glass"), "glass": block_tex("fairy_jar_glass"), "lid": block_tex("fairy_jar_lid")}
     model("fairy_jar", {"parent": "minecraft:block/block", "textures": jar_tex, "elements": jar})
     blockstate("fairy_jar", {"variants": {"": {"model": f"{NS}:block/fairy_jar"}}})
     light = [
-        {"from": [6.5, 3.5, 6.5], "to": [9.5, 6.5, 9.5], "light_emission": 15, "shade": False,
+        {"from": [6, 3.5, 6], "to": [10, 7.5, 10], "light_emission": 15, "shade": False,
          "faces": _faces("#light", (0, 0, 6, 6), (0, 0, 6, 6))},
-        {"from": [3.5, 5, 9], "to": [6.5, 8, 9], "light_emission": 15, "shade": False,
+        {"from": [3, 6, 10.2], "to": [6.5, 9.5, 10.2], "light_emission": 15, "shade": False,
          "faces": {f: {"uv": [8, 0, 14, 6], "texture": "#light"} for f in ("north", "south")}},
-        {"from": [9.5, 5, 9], "to": [12.5, 8, 9], "light_emission": 15, "shade": False,
+        {"from": [9.5, 6, 10.2], "to": [13, 9.5, 10.2], "light_emission": 15, "shade": False,
          "faces": {f: {"uv": [8, 0, 14, 6], "texture": "#light"} for f in ("north", "south")}},
     ]
     model("fairy_jar", {"parent": "minecraft:block/block", "textures": {**jar_tex, "light": block_tex("fairy_jar_light")},
@@ -1807,6 +1815,8 @@ def generate_advancements():
     A("squishy_sweetheart", "goober", "gumdrop", "Squishy Sweetheart", "Tame a Pastel Slime with Gumdrops or sugar",
       {"tamed": {"trigger": "minecraft:tame_animal", "conditions": {"entity": [{
           "condition": "minecraft:entity_properties", "entity": "this", "predicate": {"minecraft:entity_type": rid("pastel_slime")}}]}}})
+    A("bottled_magic", "goober", "bottled_fairy", "Bottled Magic", "Catch a wild fairy in a glass bottle",
+      {"bottle": has("bottled_fairy")})
     A("pearly_white", "goober", "trans_pearl", "Pearly White", "Get a Trans Pearl from a trans enderman",
       {"pearl": has("trans_pearl")})
     A("pearl_of_the_realm", "pearly_white", "trans_crystal_pearl", "Pearl of the Realm",

@@ -6,14 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
 import net.minecraft.client.model.Model;
-import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.PartPose;
-import net.minecraft.client.model.geom.builders.CubeDeformation;
-import net.minecraft.client.model.geom.builders.CubeListBuilder;
-import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -30,15 +23,15 @@ import net.minecraft.world.phys.Vec3;
 import dev.goober.transdimension.TransDimension;
 import dev.goober.transdimension.block.FairyJarBlock;
 import dev.goober.transdimension.block.entity.FairyJarBlockEntity;
+import dev.goober.transdimension.client.entity.FairyLightModel;
 
 /**
- * The Fairy Jar's dancing light: a little glowing cube with fluttering wings that loops about inside the jar, spinning
- * slowly, inside a soft halo. It glows pink, then white, then blue (in step with {@link FairyJarBlock#COLOURS}).
- * Each jar dances out of step with its neighbours. Textures: tools/generate_textures.py {@code fairy_light()}.
+ * The Fairy Jar's dancing fairy: the same glowing winged light as a wild fairy ({@link FairyLightModel}), looping about
+ * inside the jar, turning slowly, inside a soft halo. It glows pink, then white, then blue (in step with
+ * {@link FairyJarBlock#COLOURS}); its wings stay swept back a little so they fit inside the glass. Each jar dances out
+ * of step with its neighbours. Textures: tools/generate_textures.py {@code fairy_light()}.
  */
 public class FairyJarRenderer implements BlockEntityRenderer<FairyJarBlockEntity, FairyJarRenderer.State> {
-	public static final ModelLayerLocation LAYER = new ModelLayerLocation(TransDimension.id("fairy_light"), "main");
-	public static final ModelLayerLocation HALO_LAYER = new ModelLayerLocation(TransDimension.id("fairy_light"), "halo");
 	private static final Identifier[] TEXTURES = {TransDimension.id("textures/entity/fairy_light/pink.png"),
 			TransDimension.id("textures/entity/fairy_light/white.png"), TransDimension.id("textures/entity/fairy_light/blue.png")};
 	private static final int FULL_BRIGHT = 0xF000F0;
@@ -47,28 +40,8 @@ public class FairyJarRenderer implements BlockEntityRenderer<FairyJarBlockEntity
 	private final LightModel halo;
 
 	public FairyJarRenderer(BlockEntityRendererProvider.Context context) {
-		this.light = new LightModel(context.bakeLayer(LAYER));
-		this.halo = new LightModel(context.bakeLayer(HALO_LAYER));
-	}
-
-	public static LayerDefinition createLayer() {
-		MeshDefinition mesh = new MeshDefinition();
-		PartDefinition light = mesh.getRoot().addOrReplaceChild("light", CubeListBuilder.create()
-				.texOffs(0, 0).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F), PartPose.ZERO);
-		light.addOrReplaceChild("right_wing", CubeListBuilder.create()
-				.texOffs(0, 6).mirror().addBox(-3.0F, -2.0F, 0.0F, 3.0F, 3.0F, 0.0F), PartPose.offset(-0.8F, -0.8F, 1.6F));
-		light.addOrReplaceChild("left_wing", CubeListBuilder.create()
-				.texOffs(0, 6).addBox(0.0F, -2.0F, 0.0F, 3.0F, 3.0F, 0.0F), PartPose.offset(0.8F, -0.8F, 1.6F));
-		return LayerDefinition.create(mesh, 16, 16);
-	}
-
-	public static LayerDefinition createHaloLayer() {
-		MeshDefinition mesh = new MeshDefinition();
-		PartDefinition light = mesh.getRoot().addOrReplaceChild("light", CubeListBuilder.create()
-				.texOffs(0, 9).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, new CubeDeformation(1.0F)), PartPose.ZERO);
-		light.addOrReplaceChild("right_wing", CubeListBuilder.create(), PartPose.ZERO);
-		light.addOrReplaceChild("left_wing", CubeListBuilder.create(), PartPose.ZERO);
-		return LayerDefinition.create(mesh, 16, 16);
+		this.light = new LightModel(context.bakeLayer(FairyLightModel.LAYER));
+		this.halo = new LightModel(context.bakeLayer(FairyLightModel.HALO_LAYER));
 	}
 
 	@Override
@@ -90,14 +63,16 @@ public class FairyJarRenderer implements BlockEntityRenderer<FairyJarBlockEntity
 	public void submit(State state, PoseStack poseStack, SubmitNodeCollector nodeCollector, CameraRenderState camera) {
 		float t = state.time;
 		poseStack.pushPose();
-		// A lazy figure-of-eight loop inside the jar, bobbing up and down, turning as it goes.
-		poseStack.translate(0.5F + 0.13F * Mth.sin(t * 0.07F), 0.42F + 0.11F * Mth.sin(t * 0.13F), 0.5F + 0.13F * Mth.sin(t * 0.14F));
+		// A lazy little loop inside the jar, bobbing up and down, turning as it goes.
+		poseStack.translate(0.5F + 0.04F * Mth.sin(t * 0.07F), 0.36F + 0.05F * Mth.sin(t * 0.13F), 0.5F + 0.04F * Mth.sin(t * 0.14F));
 		poseStack.mulPose(Axis.YP.rotation(t * 0.06F));
-		poseStack.mulPose(Axis.XP.rotation(Mth.sin(t * 0.09F) * 0.3F));
+		poseStack.mulPose(Axis.XP.rotation(Mth.sin(t * 0.09F) * 0.15F));
+		// Model space is upside down (like an entity's) with the light 20 pixels down; flip it and centre the light here.
 		float size = 1.0F / 16.0F;
-		poseStack.scale(size, size, size);
+		poseStack.scale(-size, -size, size);
+		poseStack.translate(0.0F, -FairyLightModel.LIGHT_Y, 0.0F);
 		Identifier texture = TEXTURES[state.colour];
-		nodeCollector.submitModel(this.light, state, poseStack, RenderTypes.entityCutout(texture), FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
+		nodeCollector.submitModel(this.light, state, poseStack, RenderTypes.entityTranslucent(texture), FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
 				0, null);
 		nodeCollector.submitModel(this.halo, state, poseStack, RenderTypes.entityTranslucent(texture), FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
 				0, null);
@@ -111,24 +86,19 @@ public class FairyJarRenderer implements BlockEntityRenderer<FairyJarBlockEntity
 		public float time;
 	}
 
-	/** The light: a cube with two tiny wings that flap fast. */
+	/** The fairy light as a block entity model; its wings never open wider than the jar. */
 	static class LightModel extends Model<State> {
-		private final ModelPart rightWing;
-		private final ModelPart leftWing;
+		private final FairyLightModel.Parts parts;
 
 		LightModel(ModelPart root) {
-			super(root, RenderTypes::entityCutout);
-			ModelPart light = root.getChild("light");
-			this.rightWing = light.getChild("right_wing");
-			this.leftWing = light.getChild("left_wing");
+			super(root, RenderTypes::entityTranslucent);
+			this.parts = new FairyLightModel.Parts(root);
 		}
 
 		@Override
 		public void setupAnim(State state) {
 			super.setupAnim(state);
-			float flap = 0.5F + 0.45F * Mth.sin(state.time * 1.6F);
-			this.rightWing.yRot = flap;
-			this.leftWing.yRot = -flap;
+			this.parts.flutter(state.time, 0.75F);
 		}
 	}
 }

@@ -59,9 +59,10 @@ Somewhere high in the realm's sky floats a little island with a house on it: the
 
 ### Creatures of the realm
 
-- **Trans fish** swim in schools in the realm's seas, rivers and reef: little fish striped like the flag, with a pearly face and a forked flag tail. Catch them in a bucket, or cook them.
+- **Trans fish** swim in schools in the realm's seas, rivers and reef: cod in trans colours (blue-, pink- and white-backed, so a school comes out mixed). Catch them in a bucket, or cook them.
 - **Trans endermen** replace the endermen in the realm: snow white with soft pink and blue blended in, glowing pink eyes, and light blue sparkles instead of purple ones. They behave like endermen (don't stare!) but leave blocks alone, and drop **Trans Pearls**, which you can throw like ender pearls.
 - **Pastel slimes** live in the Gumdrop Glade: pink, blue, white and lavender cubes (and, rarely, one striped like the flag) with a sleepy little face and a clear jelly coat that squash and stretch as they bounce about. They're friendly. Feed them **Gumdrops** (pastel gel and sugar) or plain **sugar** to tame them: a tamed slime wears a bow, follows you around, sits when you use it with an empty hand, and two of them make a baby. They drop **pastel gel**, which also makes bouncy pink and blue **gel blocks**.
+- **Wild fairies** are rare: little glowing cubes with see-through wings, like the one in the Fairy Jar, each glowing blue, pink or white. They drift about a few blocks above the ground (most often in the Pride Flower Fields, the Moonlit Meadow, the Blooming Caverns and the Fairy Realm), hover round you out of curiosity, and dart off if you sprint at them. Use one with anything and it leaves you a gift (crystals, pearls, sweets, a golden apple, sometimes something special) and vanishes; use an empty **glass bottle** on one to catch it as a **Bottled Fairy**, which saves you from death once (like a totem) while you hold it.
 
 ### The Silly Cat
 
@@ -102,11 +103,11 @@ Built from Minecraft's own plains village pieces, rebuilt in trans blocks: strip
 2. **Light the portal.** Craft **Trans Crystal Pearls** (a Trans Pearl from a trans enderman plus a Trans Crystal) and set one into each empty frame. When all twelve glow, the middle fills with a shimmering pool of pink, lilac, blue and white light, swirling like opal and twinkling with stars.
 3. **The Fairy Realm.** Drop into the pool and you arrive on a lush floating island high above a sea of heart clouds, with more islands drifting all around. A path leads to a round arena paved in the flag's colours, ringed by crystal-topped pillars, with trees, flowers and a waterfall around it.
 4. **The Trans Fairy.** She waits above her altar: a fairy queen with long pink hair, a crystal tiara, a gown in the flag's stripes, a star wand and four glittering wings. She flies circles around the arena and fights back: volleys of sparkling hearts from her wand, swooping dives straight through you, ice crystals bursting out of the ground under your feet (watch for the swirling frost), and once she's hurt she calls trans endermen to help and rains hearts from the sky. Each third of her health makes her faster.
-5. **The prize.** Beat her and a portal home opens on the arena's north side. She drops the **Fairy Jar**: a trans glass jar with a lid, and inside it a little cube of light with wings that dances about, glowing pink, white and blue in turn. Put it anywhere in your builds. Offer a crystal pearl to the **Fairy Altar** in the arena to call her back for another round.
+5. **The prize.** Beat her and a portal home opens on the arena's north side. She drops the **Fairy Jar**: a trans glass jar with a lid, and inside it a fairy (a little cube of light with see-through wings) that dances about, glowing pink, white and blue in turn. Put it anywhere in your builds. Offer a crystal pearl to the **Fairy Altar** in the arena to call her back for another round.
 
 ### Advancements
 
-The **Trans Dimension** tab has 46 advancements: exploring every biome, finding the Egg House, meeting Maddie and using her gifts (fly above Y 250!), petting Silly Cats, building beds that make a heart, finding crystals and wearing a full set of crystal armor, the bakery's treats, collecting every flower and all nine plushes, heart trees and Starblooms, catching trans fish, taming pastel slimes, and the whole road to the Fairy Realm and its fairy.
+The **Trans Dimension** tab has 47 advancements: exploring every biome, finding the Egg House, meeting Maddie and using her gifts (fly above Y 250!), petting Silly Cats, building beds that make a heart, finding crystals and wearing a full set of crystal armor, the bakery's treats, collecting every flower and all nine plushes, heart trees and Starblooms, catching trans fish, taming pastel slimes, bottling a fairy, and the whole road to the Fairy Realm and its fairy.
 
 ## Playing
 

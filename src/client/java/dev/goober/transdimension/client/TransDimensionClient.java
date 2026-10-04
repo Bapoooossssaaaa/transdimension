@@ -35,6 +35,8 @@ import net.fabricmc.fabric.api.resource.v1.reloader.ResourceReloaderKeys;
 
 import dev.goober.transdimension.TransDimension;
 import dev.goober.transdimension.client.block.FairyJarRenderer;
+import dev.goober.transdimension.client.entity.FairyLightModel;
+import dev.goober.transdimension.client.entity.FairyRenderer;
 import dev.goober.transdimension.client.entity.FairyCrystalSpikeRenderer;
 import dev.goober.transdimension.client.entity.MaddieRenderer;
 import dev.goober.transdimension.client.entity.PastelSlimeModel;
@@ -108,8 +110,9 @@ public class TransDimensionClient implements ClientModInitializer {
 		EntityRenderers.register(ModEntities.TRANS_FAIRY, TransFairyRenderer::new);
 		ModelLayerRegistry.registerModelLayer(FairyCrystalSpikeRenderer.LAYER, FairyCrystalSpikeRenderer::createLayer);
 		EntityRenderers.register(ModEntities.FAIRY_CRYSTAL_SPIKE, FairyCrystalSpikeRenderer::new);
-		ModelLayerRegistry.registerModelLayer(FairyJarRenderer.LAYER, FairyJarRenderer::createLayer);
-		ModelLayerRegistry.registerModelLayer(FairyJarRenderer.HALO_LAYER, FairyJarRenderer::createHaloLayer);
+		ModelLayerRegistry.registerModelLayer(FairyLightModel.LAYER, FairyLightModel::createLayer);
+		ModelLayerRegistry.registerModelLayer(FairyLightModel.HALO_LAYER, FairyLightModel::createHaloLayer);
+		EntityRenderers.register(ModEntities.FAIRY, FairyRenderer::new);
 		BlockEntityRenderers.register(ModBlockEntities.FAIRY_JAR, FairyJarRenderer::new);
 
 		// Trans boats use vanilla's boat models with our textures.
