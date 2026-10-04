@@ -1339,6 +1339,7 @@ def generate_creatures():
         "entity.transdimension.trans_enderman": "Trans Enderman",
         "entity.transdimension.pastel_slime": "Pastel Slime",
         "item.transdimension.trans_crystal_pearl.lore": "Twelve of these awaken a Fairy Portal",
+        "item.transdimension.gumdrop.lore": "Pastel slimes adore these: feed one a few to tame it",
     })
 
     # ---- gel blocks: vanilla's slime block model (a jelly cube around a firmer core) with our textures
@@ -1774,7 +1775,7 @@ def generate_advancements():
     # ---- creatures
     A("fishy_pride", "goober", "trans_fish_bucket", "Fishy Pride", "Catch a trans fish in a bucket",
       {"bucket": {"trigger": "minecraft:filled_bucket", "conditions": {"item": {"items": rid("trans_fish_bucket")}}}})
-    A("squishy_sweetheart", "goober", "gumdrop", "Squishy Sweetheart", "Tame a Pastel Slime with Gumdrops",
+    A("squishy_sweetheart", "goober", "gumdrop", "Squishy Sweetheart", "Tame a Pastel Slime with Gumdrops or sugar",
       {"tamed": {"trigger": "minecraft:tame_animal", "conditions": {"entity": [{
           "condition": "minecraft:entity_properties", "entity": "this", "predicate": {"minecraft:entity_type": rid("pastel_slime")}}]}}})
     A("pearly_white", "goober", "trans_pearl", "Pearly White", "Get a Trans Pearl from a trans enderman",

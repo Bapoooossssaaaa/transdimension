@@ -110,9 +110,10 @@ public final class ModItems {
 	// ---------------------------------------------------------------- pastel slimes
 	/** Wobbly jelly from pastel slimes and the gel mounds of the Gumdrop Glade. */
 	public static final Item PASTEL_GEL = register("pastel_gel", Item::new, new Item.Properties());
-	/** A chewy sweet; pastel slimes adore them (feed them to tame and breed slimes). */
+	/** A chewy sweet; pastel slimes adore them (feed them to tame and breed slimes; sugar tames them too, less often). */
 	public static final Item GUMDROP = register("gumdrop", Item::new, new Item.Properties()
-			.food(food(2, 0.3F, true), Consumables.defaultFood().consumeSeconds(0.8F).build()));
+			.food(food(2, 0.3F, true), Consumables.defaultFood().consumeSeconds(0.8F).build())
+			.component(DataComponents.LORE, lore("item.transdimension.gumdrop.lore")));
 	public static final Item PASTEL_SLIME_SPAWN_EGG = register("pastel_slime_spawn_egg", SpawnEggItem::new,
 			new Item.Properties().spawnEgg(ModEntities.PASTEL_SLIME));
 

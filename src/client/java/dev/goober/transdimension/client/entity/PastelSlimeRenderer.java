@@ -11,8 +11,13 @@ import dev.goober.transdimension.entity.PastelSlime;
 public class PastelSlimeRenderer extends MobRenderer<PastelSlime, PastelSlimeRenderState, PastelSlimeModel> {
 	public static final ModelLayerLocation LAYER = new ModelLayerLocation(TransDimension.id("pastel_slime"), "main");
 	public static final ModelLayerLocation JELLY_LAYER = new ModelLayerLocation(TransDimension.id("pastel_slime"), "jelly");
-	private static final Identifier PINK = TransDimension.id("textures/entity/pastel_slime/pink.png");
-	private static final Identifier BLUE = TransDimension.id("textures/entity/pastel_slime/blue.png");
+	/** By variant: pink, blue, white, lavender and the striped trans one (see {@link PastelSlime#VARIANTS}). */
+	private static final Identifier[] TEXTURES = {
+			TransDimension.id("textures/entity/pastel_slime/pink.png"),
+			TransDimension.id("textures/entity/pastel_slime/blue.png"),
+			TransDimension.id("textures/entity/pastel_slime/white.png"),
+			TransDimension.id("textures/entity/pastel_slime/lavender.png"),
+			TransDimension.id("textures/entity/pastel_slime/trans.png")};
 
 	public PastelSlimeRenderer(EntityRendererProvider.Context context) {
 		super(context, new PastelSlimeModel(context.bakeLayer(LAYER)), 0.45F);
@@ -20,7 +25,7 @@ public class PastelSlimeRenderer extends MobRenderer<PastelSlime, PastelSlimeRen
 	}
 
 	static Identifier texture(int variant) {
-		return variant == PastelSlime.BLUE ? BLUE : PINK;
+		return TEXTURES[variant >= 0 && variant < TEXTURES.length ? variant : PastelSlime.PINK];
 	}
 
 	@Override

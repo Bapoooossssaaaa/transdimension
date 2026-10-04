@@ -61,7 +61,7 @@ Somewhere high in the realm's sky floats a little island with a house on it: the
 
 - **Trans fish** swim in schools in the realm's seas, rivers and reef: little fish striped like the flag, with a pearly face and a forked flag tail. Catch them in a bucket, or cook them.
 - **Trans endermen** replace the endermen in the realm: snow white with soft pink and blue blended in, glowing pink eyes, and light blue sparkles instead of purple ones. They behave like endermen (don't stare!) but leave blocks alone, and drop **Trans Pearls**, which you can throw like ender pearls.
-- **Pastel slimes** live in the Gumdrop Glade: pink and blue cubes with a sleepy little face and a clear jelly coat that squash and stretch as they bounce about. They're friendly. Feed them **Gumdrops** (pastel gel and sugar) to tame them: a tamed slime wears a bow, follows you around, sits when you use it with an empty hand, and two of them make a baby. They drop **pastel gel**, which also makes bouncy pink and blue **gel blocks**.
+- **Pastel slimes** live in the Gumdrop Glade: pink, blue, white and lavender cubes (and, rarely, one striped like the flag) with a sleepy little face and a clear jelly coat that squash and stretch as they bounce about. They're friendly. Feed them **Gumdrops** (pastel gel and sugar) or plain **sugar** to tame them: a tamed slime wears a bow, follows you around, sits when you use it with an empty hand, and two of them make a baby. They drop **pastel gel**, which also makes bouncy pink and blue **gel blocks**.
 
 ### The Silly Cat
 

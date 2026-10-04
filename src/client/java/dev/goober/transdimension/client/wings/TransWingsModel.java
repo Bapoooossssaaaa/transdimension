@@ -18,8 +18,8 @@ import dev.goober.transdimension.TransDimension;
  *
  * <p>Each wing is built like a bird's: an arm bone from the shoulder blade with a row of covert feathers and four
  * secondary feathers hanging from it, and a hand bone from the wrist with its own coverts and five long primary
- * feathers. Every feather is its own part, so the wing can fold (bones zig-zag, feathers hang down the back in a
- * neat teardrop that ends at the hips) and spread (bones straight out, feathers fanned into a wing with a white leading
+ * feathers. Every feather is its own part, so the wing can fold (the arm rises to the shoulder, the hand folds back
+ * down beside it and the feathers taper to a point at the hips) and spread (bones straight out, feathers fanned into a wing with a white leading
  * edge, pink inner feathers and blue tips). Feathers sit at slightly different depths so overlapping ones never
  * flicker, and the two wings sit at different depths where they meet on the spine. The left wing mirrors the right.
  *
@@ -43,8 +43,8 @@ public class TransWingsModel extends EntityModel<HumanoidRenderState> {
 	private static final float[] SECONDARY_X = {-0.8F, -2.0F, -3.2F, -4.4F};
 	private static final float[] SECONDARY_Z = {-0.4F, -0.3F, -0.2F, -0.1F};
 	private static final int[] SECONDARY_LENGTH = {7, 8, 9, 10};
-	/** Secondary angles against the arm when folded (hanging down the back) and spread (trailing behind the arm). */
-	static final float[] SECONDARY_FOLDED = {1.40F, 1.32F, 1.24F, 1.15F};
+	/** Secondary angles against the arm when folded (hanging down and in from the raised arm) and spread (trailing behind it). */
+	static final float[] SECONDARY_FOLDED = {-1.05F, -0.95F, -0.85F, -0.75F};
 	static final float[] SECONDARY_SPREAD = {0.02F, 0.07F, 0.13F, 0.20F};
 
 	// Primary feathers on the hand, inner first.
@@ -52,7 +52,7 @@ public class TransWingsModel extends EntityModel<HumanoidRenderState> {
 	private static final float[] PRIMARY_Z = {0.0F, 0.1F, 0.2F, 0.3F, 0.4F};
 	private static final int[] PRIMARY_LENGTH = {11, 12, 13, 14, 13};
 	/** Primary angles against the hand when folded and spread (fanning out to the wingtip). */
-	static final float[] PRIMARY_FOLDED = {-1.60F, -1.53F, -1.46F, -1.39F, -1.30F};
+	static final float[] PRIMARY_FOLDED = {2.10F, 2.02F, 1.94F, 1.86F, 1.78F};
 	static final float[] PRIMARY_SPREAD = {0.18F, 0.45F, 0.75F, 1.05F, 1.32F};
 
 	private final Wing right;

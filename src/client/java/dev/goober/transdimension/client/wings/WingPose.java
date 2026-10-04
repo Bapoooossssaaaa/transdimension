@@ -23,8 +23,11 @@ import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 public record WingPose(float rootX, float rootY, float rootZ, float handY, float handZ, float fan, float flex) {
 	public static final RenderStateDataKey<WingPose> KEY = RenderStateDataKey.create(() -> "transdimension:wing_pose");
 
-	/** Resting on the back: the arm points down, the hand folds back up beside it, feathers hang to the hips. */
-	public static final WingPose FOLDED = new WingPose(0.24F, 0.10F, -1.30F, 0.0F, 2.75F, 0.0F, 0.0F);
+	/**
+	 * Resting on the back like a bird's folded wing: the arm rises to just above the shoulder, the hand folds back down
+	 * beside it, and the feathers taper to a point at the hips (wide at the top, narrow at the bottom, not a skirt).
+	 */
+	public static final WingPose FOLDED = new WingPose(0.20F, 0.15F, 0.70F, 0.0F, -2.83F, 0.0F, 0.0F);
 	/** In the air but not gliding: raised, open and swept back a little. */
 	public static final WingPose AIRBORNE = new WingPose(0.10F, 0.30F, 0.45F, 0.0F, -0.50F, 0.9F, 0.0F);
 	/** Gliding: straight out to the sides, slightly forward, tips a touch up, every feather fanned. */

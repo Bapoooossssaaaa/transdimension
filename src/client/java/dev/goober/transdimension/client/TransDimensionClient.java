@@ -45,7 +45,6 @@ import dev.goober.transdimension.client.entity.TransEndermanModel;
 import dev.goober.transdimension.client.entity.TransEndermanRenderer;
 import dev.goober.transdimension.client.entity.TransFairyModel;
 import dev.goober.transdimension.client.entity.TransFairyRenderer;
-import dev.goober.transdimension.client.entity.TransFishModel;
 import dev.goober.transdimension.client.entity.TransFishRenderer;
 import dev.goober.transdimension.client.screen.MaddieDialogueScreen;
 import dev.goober.transdimension.client.wings.TransWingsLayer;
@@ -93,7 +92,6 @@ public class TransDimensionClient implements ClientModInitializer {
 		EntityRenderers.register(ModEntities.SILLY_CAT, SillyCatRenderer::new);
 
 		// The realm's creatures: trans fish, trans endermen (with glowing eyes) and pastel slimes (with a jelly coat).
-		ModelLayerRegistry.registerModelLayer(TransFishRenderer.LAYER, TransFishModel::createBodyLayer);
 		EntityRenderers.register(ModEntities.TRANS_FISH, TransFishRenderer::new);
 		ModelLayerRegistry.registerModelLayer(TransEndermanRenderer.LAYER, TransEndermanModel::createBodyLayer);
 		ModelLayerRegistry.registerModelLayer(TransEndermanRenderer.EYES_LAYER, TransEndermanModel::createEyesLayer);

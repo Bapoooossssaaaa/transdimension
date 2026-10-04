@@ -31,7 +31,7 @@ import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
@@ -43,18 +43,27 @@ import dev.goober.transdimension.registry.ModEntities;
 import dev.goober.transdimension.registry.ModItems;
 
 /**
- * A pastel slime: a soft, friendly cube (pink or blue) with a sleepy little face, who lives in the Gumdrop Glade. It
+ * A pastel slime: a soft, friendly cube with a sleepy little face, who lives in the Gumdrop Glade. Slimes come in pink,
+ * blue, white and lavender, and now and then one is striped like the flag. It
  * never hurts anyone. It doesn't walk, it bounces: it sits still between hops, squashing when it lands and stretching
  * when it takes off, and every hop carries it towards wherever it wants to go.
  *
- * <p>Feed it Gumdrops to tame it (one in three tries); a tamed slime wears a bow, follows you around and sits when you
- * use it with an empty hand. Two tamed slimes fed Gumdrops have a baby, pink or blue like one of its parents.
+ * <p>Feed it Gumdrops (one in three tries) or sugar (one in six) to tame it; slimes follow anyone holding either. A tamed
+ * slime wears a bow, follows you around and sits when you use it with an empty hand. Two tamed slimes fed Gumdrops have
+ * a baby the colour of one of its parents, or once in a while a striped one.
  */
 public class PastelSlime extends TamableAnimal {
 	public static final int PINK = 0;
 	public static final int BLUE = 1;
+	public static final int WHITE = 2;
+	public static final int LAVENDER = 3;
+	/** The rare one, striped blue, pink, white, pink, blue. */
+	public static final int TRANS = 4;
+	public static final int VARIANTS = 5;
+	/** How often each variant turns up in the wild (out of 100). */
+	private static final int[] WILD_WEIGHTS = {30, 30, 18, 17, 5};
 	/** Dust colours for the little splash when a slime lands, by variant. */
-	private static final int[] SPLASH_COLOURS = {0xF5A9B8, 0x7FD0F8};
+	private static final int[] SPLASH_COLOURS = {0xF5A9B8, 0x7FD0F8, 0xF4F3F9, 0xC4B2EC, 0xF5A9B8};
 	private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(PastelSlime.class, EntityDataSerializers.INT);
 	/** Air time of a hop, in ticks (vanilla jump strength); a hop's push is sized so it lands where it was heading. */
 	private static final float HOP_AIR_TICKS = 7.0F;
@@ -84,12 +93,11 @@ public class PastelSlime extends TamableAnimal {
 
 	@Override
 	protected void registerGoals() {
-		Ingredient gumdrop = Ingredient.of(ModItems.GUMDROP);
 		this.goalSelector.addGoal(1, new FloatGoal(this));
 		this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
 		this.goalSelector.addGoal(3, new PanicGoal(this, 1.4));
 		this.goalSelector.addGoal(4, new BreedGoal(this, 1.0));
-		this.goalSelector.addGoal(5, new TemptGoal(this, 1.1, gumdrop, false));
+		this.goalSelector.addGoal(5, new TemptGoal(this, 1.1, stack -> stack.is(ModItems.GUMDROP) || stack.is(Items.SUGAR), false));
 		this.goalSelector.addGoal(6, new FollowOwnerGoal(this, 1.15, 8.0F, 2.5F));
 		this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 0.9));
 		this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 6.0F));
@@ -107,7 +115,7 @@ public class PastelSlime extends TamableAnimal {
 	}
 
 	public void setVariant(int variant) {
-		this.entityData.set(VARIANT, variant == BLUE ? BLUE : PINK);
+		this.entityData.set(VARIANT, variant >= 0 && variant < VARIANTS ? variant : PINK);
 		this.variantRolled = true;
 	}
 
@@ -116,7 +124,7 @@ public class PastelSlime extends TamableAnimal {
 		super.tick();
 		Level level = this.level();
 		if (!level.isClientSide() && !this.variantRolled) {
-			this.setVariant(this.random.nextBoolean() ? PINK : BLUE);
+			this.setVariant(wildVariant(this.random.nextInt(100)));
 		}
 		// Squash on landing, stretch on take-off, then ease back into a cube.
 		this.oSquish = this.squish;
@@ -202,10 +210,11 @@ public class PastelSlime extends TamableAnimal {
 	@Override
 	public InteractionResult mobInteract(Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
-		if (!this.isTame() && stack.is(ModItems.GUMDROP)) {
+		boolean gumdrop = stack.is(ModItems.GUMDROP);
+		if (!this.isTame() && (gumdrop || stack.is(Items.SUGAR))) {
 			if (!this.level().isClientSide()) {
 				stack.consume(1, player);
-				if (this.random.nextInt(3) == 0) {
+				if (this.random.nextInt(gumdrop ? 3 : 6) == 0) {
 					this.tame(player);
 					this.getNavigation().stop();
 					this.setOrderedToSit(true);
@@ -229,6 +238,17 @@ public class PastelSlime extends TamableAnimal {
 		return super.mobInteract(player, hand);
 	}
 
+	/** Picks a wild slime's colour from a roll of 0..99, using {@link #WILD_WEIGHTS}. */
+	private static int wildVariant(int roll) {
+		for (int variant = 0; variant < VARIANTS; variant++) {
+			roll -= WILD_WEIGHTS[variant];
+			if (roll < 0) {
+				return variant;
+			}
+		}
+		return PINK;
+	}
+
 	@Override
 	public boolean isFood(ItemStack stack) {
 		return stack.is(ModItems.GUMDROP);
@@ -240,7 +260,7 @@ public class PastelSlime extends TamableAnimal {
 		PastelSlime baby = ModEntities.PASTEL_SLIME.create(level, EntitySpawnReason.BREEDING);
 		if (baby != null) {
 			int variant = partner instanceof PastelSlime other && this.random.nextBoolean() ? other.getVariant() : this.getVariant();
-			baby.setVariant(variant);
+			baby.setVariant(this.random.nextInt(12) == 0 ? TRANS : variant);
 			if (this.getOwner() instanceof Player owner) {
 				baby.tame(owner);
 			}

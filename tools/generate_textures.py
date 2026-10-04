@@ -2738,64 +2738,47 @@ def paint_face(img, u, v, w, h, colour_at):
                 img.putpixel((u + x, v + y), (*c, 255) if len(c) == 3 else c)
 
 
-def trans_fish():
-    """32x32 for TransFishModel: a body five pixels tall, one per flag stripe, a pearly face with a blue crown and a pink
-    chin, a pink nose, a forked flag tail, a white top fin with a pink edge and little pink side fins."""
-    rng = random.Random(31)
+# Colourways of the trans fish, which wear vanilla's cod texture recoloured: (back, side rows top to bottom, belly,
+# fins). Read round the fish (back, sides, belly) each is a run of the flag's colours.
+FISH_COLOURWAYS = {
+    "blue": (0, (0, 1, 2, 1), 0, 1),
+    "pink": (1, (1, 2, 0, 2), 1, 0),
+    "white": (2, (2, 1, 0, 1), 2, 1),
+}
+
+
+def trans_fish(colourway):
+    """vanilla's cod texture in trans stripes, keeping the cod's own shading and scales (TransFishRenderer extends
+    CodRenderer, so the fish keeps vanilla's model and animations). The layout is vanilla's: nose (0,0), body (0,0),
+    head (11,0), fins from x 21."""
+    cod = vextra("entity/fish/cod.png")
+    back, rows, belly, fins = FISH_COLOURWAYS[colourway]
+    ramps = [FISH_STRIPES[0], FISH_STRIPES[1], FISH_STRIPES[2]]
+    opaque = [p for p in pixels(cod) if cod.getpixel(p)[3]]
+    lo, hi = min(lum(cod.getpixel(p)) for p in opaque if lum(cod.getpixel(p)) > 0.2), max(lum(cod.getpixel(p)) for p in opaque)
+
+    def part(x, y):
+        """Which colour a pixel takes: an index into ramps, from where it sits on the cod's texture."""
+        if x <= 5 and y <= 3:                         # nose: top/bottom faces on row 0, sides rows 1-3
+            return (back if x <= 2 else belly) if y == 0 else rows[y - 1]
+        if 7 <= x <= 10 and y <= 6:                   # body top (x 7-8) and bottom (x 9-10)
+            return back if x <= 8 else belly
+        if x <= 17 and 7 <= y <= 10:                  # body sides
+            return rows[y - 7]
+        if 11 <= x <= 20 and y <= 2:                  # head top (x 14-15) and bottom (x 16-17)
+            return back if x <= 15 else belly
+        if 11 <= x <= 20 and 3 <= y <= 6:             # head sides
+            return rows[y - 3]
+        return fins
+
     img = new(32, 32)
-
-    def stripe(y, t):
-        return sample(FISH_STRIPES[min(4, max(0, y))], t)
-
-    def scales(x, y, t):
-        # every other pixel a touch darker, offset per row: a faint scale pattern
-        return t - (0.12 if (x + y) % 2 == 0 else 0.0) - 0.06 * rng.random()
-
-    # body (2x5x6) at (0,0)
-    paint_face(img, 6, 0, 2, 6, lambda x, y: sample(FISH_STRIPES[0], 0.75 - 0.1 * (y % 2)))
-    paint_face(img, 8, 0, 2, 6, lambda x, y: sample(FISH_STRIPES[0], 0.45))
-    paint_face(img, 0, 6, 6, 5, lambda x, y: stripe(y, scales(x, y, 0.72)))
-    paint_face(img, 8, 6, 6, 5, lambda x, y: stripe(y, scales(x, y, 0.72)))
-    paint_face(img, 6, 6, 2, 5, lambda x, y: stripe(y, 0.8))
-    paint_face(img, 14, 6, 2, 5, lambda x, y: stripe(y, 0.6))
-
-    # head (2x4x3) at (0,11)
-    def head_side(x, y, eye_x):
-        if y == 0:
-            return sample(FISH_STRIPES[0], 0.7)
-        if (x, y) == (eye_x, 1):
-            return FISH_EYE
-        if y == 3:
-            return sample(FISH_STRIPES[1], 0.7)
-        return sample(FISH_STRIPES[2], 0.75 - 0.15 * (y == 2))
-    paint_face(img, 3, 11, 2, 3, lambda x, y: sample(FISH_STRIPES[0], 0.75))
-    paint_face(img, 5, 11, 2, 3, lambda x, y: sample(FISH_STRIPES[1], 0.6))
-    paint_face(img, 0, 14, 3, 4, lambda x, y: head_side(x, y, 0))
-    paint_face(img, 5, 14, 3, 4, lambda x, y: head_side(x, y, 2))
-    paint_face(img, 3, 14, 2, 4, lambda x, y: sample(FISH_STRIPES[1], 0.8) if y >= 2 else sample(FISH_STRIPES[2], 0.8))
-    paint_face(img, 8, 14, 2, 4, lambda x, y: sample(FISH_STRIPES[2], 0.6))
-    # nose (2x2x1) at (10,11)
-    paint_face(img, 10, 11, 6, 3, lambda x, y: sample(FISH_STRIPES[1], 0.55 + 0.15 * (y == 1)))
-
-    # tail fin (0x5x4) at (16,0): both sides 4x5, forked at the tip
-    def tail(x, y, flip):
-        cx = 3 - x if flip else x           # 0 next to the body, 3 at the tip
-        if cx == 3 and y in (1, 2, 3):
-            return None
-        return stripe(y, 0.85 - 0.1 * cx)
-    paint_face(img, 16, 4, 4, 5, lambda x, y: tail(x, y, flip=True))
-    paint_face(img, 20, 4, 4, 5, lambda x, y: tail(x, y, flip=False))
-
-    # top fin (0x2x4) at (16,9): both sides 4x2, rounded at the ends
-    def fin(x, y, flip):
-        cx = 3 - x if flip else x
-        if y == 0 and cx in (0, 3):
-            return None
-        return sample(FISH_STRIPES[1], 0.85) if y == 0 else sample(FISH_STRIPES[2], 0.85)
-    paint_face(img, 16, 13, 4, 2, lambda x, y: fin(x, y, flip=False))
-    paint_face(img, 20, 13, 4, 2, lambda x, y: fin(x, y, flip=True))
-    # side fins (2x0x2) at (24,0)
-    paint_face(img, 26, 0, 4, 2, lambda x, y: sample(FISH_STRIPES[1], 0.95 - 0.2 * (x % 2)))
+    for p in opaque:
+        px = cod.getpixel(p)
+        if lum(px) < 0.2:
+            img.putpixel(p, (*FISH_EYE, 255))
+            continue
+        t = (lum(px) - lo) / (hi - lo)
+        img.putpixel(p, (*sample(ramps[part(*p)], 0.1 + 0.85 * t), 255))
     return img
 
 
@@ -2930,12 +2913,30 @@ SLIMES = {
              "band": [hexc(c) for c in ("7FCFEF", "93DCF5", "A9E6F9", "C2EFFB", "DDF7FD")],
              "eye": hexc("2E2378"), "mouth": hexc("3C2F8F"), "blush": hexc("9FB6F2"),
              "bow": [hexc(c) for c in ("D9708F", "F5A9B8", "FCD3DC")]},
+    "white": {"top": [hexc(c) for c in ("C6C0DA", "D8D4E7", "E8E6F1", "F4F3F9", "FFFFFF")],
+              "band": [hexc(c) for c in ("EEEAF6", "F4F2F9", "F9F8FC", "FFFFFF", "FFFFFF")],
+              "eye": hexc("4A3F6E"), "mouth": hexc("5E4A80"), "blush": hexc("F5B5C8"),
+              "bow": [hexc(c) for c in ("D9708F", "F5A9B8", "FCD3DC")]},
+    "lavender": {"top": [hexc(c) for c in ("9C84D4", "B09BE1", "C3B1EB", "D3C5F2", "E2D8F8")],
+                 "band": [hexc(c) for c in ("D2C6F1", "DCD2F5", "E7DFF9", "F0EBFC", "F8F5FE")],
+                 "eye": hexc("3A2470"), "mouth": hexc("4A2F86"), "blush": hexc("E7A6D6"),
+                 "bow": [hexc(c) for c in ("2F8FD0", "5BCEFA", "A6E6FC")]},
+    # The rare one: striped like the flag, its sleepy face on the white stripe.
+    "trans": {"top": [hexc(c) for c in ("4F8FD6", "68A8E8", "7FBDF2", "98CEF6", "B3DDF9")],
+              "band": [hexc(c) for c in ("EEEAF6", "F4F2F9", "F9F8FC", "FFFFFF", "FFFFFF")],
+              "eye": hexc("2E2378"), "mouth": hexc("7A2E66"), "blush": hexc("F08FAE"),
+              "bow": [hexc(c) for c in ("C9C4DA", "F4F3F9", "FFFFFF")],
+              "stripes": ["blue", "blue", "pink", "pink", "pink", "white", "white", "pink", "pink", "pink", "blue", "blue"]},
 }
 SLIME_SIZE = 12
 SLIME_BAND = 6      # first row of the lighter lower band (and of the eyes)
 
 
 def _slime_body_pixel(colours, rng, y, side):
+    if "stripes" in colours and side not in ("top", "bottom"):
+        ramp = {"blue": SLIMES["blue"]["top"], "pink": SLIMES["pink"]["top"], "white": SLIMES["white"]["band"]}[colours["stripes"][y]]
+        darker = {"front": 0.0, "side": -0.1, "back": -0.06}[side]
+        return sample(ramp, 0.5 + 0.25 * rng.random() + darker)
     if side == "top":
         return sample(colours["top"], 0.62 + 0.25 * rng.random())
     if side == "bottom":
@@ -3097,7 +3098,9 @@ def gel_block(ramp):
 
 def creature_textures():
     """(path under textures/, image) for everything above."""
-    yield "entity/trans_fish/trans_fish.png", trans_fish()
+    yield "entity/trans_fish/blue.png", trans_fish("blue")
+    yield "entity/trans_fish/pink.png", trans_fish("pink")
+    yield "entity/trans_fish/white.png", trans_fish("white")
     yield "entity/trans_enderman/trans_enderman.png", trans_enderman()
     yield "entity/trans_enderman/trans_enderman_eyes.png", trans_enderman_eyes()
     for kind in SLIMES:
