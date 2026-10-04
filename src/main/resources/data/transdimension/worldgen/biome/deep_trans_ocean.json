@@ -65,8 +65,9 @@
       "transdimension:ore_trans_crystal",
       "transdimension:ore_trans_crystal_deep",
       "transdimension:ore_trans_crystal_large",
-      "minecraft:disk_clay",
-      "minecraft:disk_sand"
+      "transdimension:trans_disk_clay",
+      "transdimension:trans_disk_gravel",
+      "transdimension:trans_disk_sand"
     ],
     [
       "transdimension:trans_glow_lichen",

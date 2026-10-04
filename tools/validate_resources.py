@@ -315,6 +315,7 @@ for b in list(BLOCKS):
 FACING_ONLY = {"pride_oven", "trans_chair", "trans_table", "plush_spot", "fairy_portal_frame"}
 EXTRA_PROPS = {"trans_bed": {"heart": ["none", "left", "right"]}, "fairy_portal_frame": {"pearl": ["false", "true"]}}
 TWINS["fairy_portal_frame"] = "smoker"
+TWINS["trans_sea_pickle"] = "sea_pickle"
 for b in BLOCKS:
     if b.endswith("_plush"):
         TWINS[b] = "smoker"

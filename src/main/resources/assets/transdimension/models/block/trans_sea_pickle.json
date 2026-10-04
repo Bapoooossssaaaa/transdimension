@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/sea_pickle",
+  "textures": {
+    "all": "transdimension:block/trans_sea_pickle",
+    "particle": "transdimension:block/trans_sea_pickle"
+  }
+}

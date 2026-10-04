@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "transdimension:trans_clay",
     "transdimension:trans_dirt",
     "transdimension:trans_grass_block",
     "transdimension:trans_gravel",

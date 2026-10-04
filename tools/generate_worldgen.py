@@ -572,6 +572,31 @@ def generate_features():
         {"type": "minecraft:height_range", "height": {"type": "minecraft:very_biased_to_bottom", "inner": 8,
                                                        "min_inclusive": {"above_bottom": 0}, "max_inclusive": {"below_top": 8}}},
         {"type": "minecraft:biome"}])
+    # Clay and gravel disks under water, and pink sea pickles on the reefs.
+    under_water = [{"type": "minecraft:in_square"}, {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR_WG"},
+                   {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:matching_fluids", "fluids": "minecraft:water"}},
+                   {"type": "minecraft:biome"}]
+    for block, radius, half, targets in (("trans_clay", (2, 3), 1, ("trans_dirt", "trans_clay")),
+                                         ("trans_gravel", (2, 5), 2, ("trans_dirt", "trans_grass_block", "trans_sand")),
+                                         ("trans_sand", (2, 6), 2, ("trans_dirt", "trans_grass_block"))):
+        name = block.replace("trans_", "trans_disk_")
+        cf(name, {"type": "minecraft:disk", "config": {
+            "half_height": half, "radius": {"type": "minecraft:uniform", "min_inclusive": radius[0], "max_inclusive": radius[1]},
+            "state_provider": simple(state(block)),
+            "target": {"type": "minecraft:matching_blocks", "blocks": [f"{NS}:{t}" for t in targets]}}})
+        pf(name, f"{NS}:{name}", under_water)
+    cf("trans_sea_pickle", {"type": "minecraft:simple_block", "config": {"to_place": {"type": "minecraft:weighted_state_provider", "entries": [
+        {"data": state("trans_sea_pickle", pickles=n, waterlogged=True), "weight": w} for n, w in ((1, 4), (2, 3), (3, 2), (4, 1))]}}})
+    pf("trans_sea_pickles", f"{NS}:trans_sea_pickle", [
+        {"type": "minecraft:rarity_filter", "chance": 4}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR_WG"},
+        {"type": "minecraft:count", "count": 12},
+        {"type": "minecraft:random_offset", "xz_spread": {"type": "minecraft:trapezoid", "max": 4, "min": -4, "plateau": 0},
+         "y_spread": {"type": "minecraft:trapezoid", "max": 1, "min": -1, "plateau": 0}},
+        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:all_of", "predicates": [
+            {"type": "minecraft:matching_blocks", "blocks": "minecraft:water"},
+            {"type": "minecraft:solid", "offset": [0, -1, 0]}]}},
+        {"type": "minecraft:biome"}])
     # Trans dungeons (TransDungeonFeature): vanilla's monster room placements, made of trans stone.
     cf("trans_dungeon", {"type": f"{NS}:trans_dungeon", "config": {}})
     pf("trans_dungeon", f"{NS}:trans_dungeon", [
@@ -609,6 +634,7 @@ ORE_SWAPS = {
     **{f"minecraft:{o}_ore": f"{NS}:trans_{o}_ore" for o in ORE_NAMES},
     **{f"minecraft:deepslate_{o}_ore": f"{NS}:trans_deepslate_{o}_ore" for o in ORE_NAMES},
     "minecraft:dirt": f"{NS}:trans_dirt", "minecraft:gravel": f"{NS}:trans_gravel", "minecraft:granite": f"{NS}:trans_granite",
+    "minecraft:clay": f"{NS}:trans_clay",
     "minecraft:diorite": f"{NS}:trans_diorite", "minecraft:andesite": f"{NS}:trans_andesite",
     "minecraft:stone_ore_replaceables": f"{NS}:trans_stone_ore_replaceables",
     "minecraft:deepslate_ore_replaceables": f"{NS}:trans_deepslate_ore_replaceables",
@@ -669,7 +695,9 @@ BATS = [spawn("minecraft:bat", 10, 8, 8)]
 
 # Trans dungeons (TransDungeonFeature) instead of vanilla's cobblestone monster rooms, placed the same way.
 UNDERGROUND = [f"{NS}:trans_dungeon", f"{NS}:trans_dungeon_deep"]
-ORES = TRANS_ORES + [f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_large", "minecraft:disk_clay"]
+# Clay and gravel disks under shallow water (vanilla's only replace vanilla dirt, so they never showed up in the realm).
+ORES = TRANS_ORES + [f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_large", f"{NS}:trans_disk_clay",
+                     f"{NS}:trans_disk_gravel"]
 # The realm's own springs: vanilla's only break out of vanilla stone, and the realm's lava is pink.
 SPRINGS = [f"{NS}:spring_trans_water", f"{NS}:spring_pink_lava"]
 # Every cave: glow lichen on trans rock (vanilla's only grows on vanilla stone), and deep down, now and then, a patch of
@@ -804,10 +832,10 @@ def generate_biomes():
           features=land("minecraft:patch_sugar_cane"),
           creatures=[spawn("minecraft:turtle", 5, 2, 5), spawn("silly_cat", 2, 1, 1)])
 
-    ocean_floor = {1: [], 2: [], 3: UNDERGROUND, 6: ORES + ["minecraft:disk_sand"], 7: CAVE_DECOR, 8: SPRINGS}
+    ocean_floor = {1: [], 2: [], 3: UNDERGROUND, 6: ORES + [f"{NS}:trans_disk_sand"], 7: CAVE_DECOR, 8: SPRINGS}
     biome("trans_ocean", fairies=0, temperature=0.5, downfall=0.5, grass="#f5a9b8", foliage="#f5a9b8", water="#5bcefa", water_fog="#1e7fb8",
           sky="#7fd4fa", fog="#f7d0d8", music_sound="minecraft:music.game", underwater_music=True,
-          features={**ocean_floor, 9: [f"{NS}:trans_coral_reefs_rare", f"{NS}:trans_seagrass_warm", "minecraft:sea_pickle", f"{NS}:trans_kelp_warm"]},
+          features={**ocean_floor, 9: [f"{NS}:trans_coral_reefs_rare", f"{NS}:trans_seagrass_warm", f"{NS}:trans_sea_pickles", f"{NS}:trans_kelp_warm"]},
           creatures=[], monsters=OCEAN_MONSTERS,
           water_creatures=[spawn("minecraft:squid", 4, 1, 4), spawn("minecraft:dolphin", 2, 1, 2)],
           water_ambient=[spawn("trans_fish", 20, 3, 6), spawn("minecraft:tropical_fish", 25, 8, 8), spawn("minecraft:cod", 6, 3, 6),
@@ -875,7 +903,7 @@ def generate_biomes():
                      spawn("silly_cat", 4, 1, 2)])
     biome("pastel_reef", fairies=0, temperature=0.8, downfall=0.5, grass="#f5a9b8", foliage="#f5a9b8", water="#6fe0f2", water_fog="#1f9fb8",
           sky="#7fd4fa", fog="#f7d0d8", music_sound="minecraft:music.game", underwater_music=True,
-          features={**ocean_floor, 9: [f"{NS}:trans_coral_reefs_dense", f"{NS}:trans_seagrass_warm", "minecraft:sea_pickle"]},
+          features={**ocean_floor, 9: [f"{NS}:trans_coral_reefs_dense", f"{NS}:trans_seagrass_warm", f"{NS}:trans_sea_pickles"]},
           creatures=[], monsters=OCEAN_MONSTERS,
           water_creatures=[spawn("minecraft:dolphin", 3, 1, 2)],
           water_ambient=[spawn("trans_fish", 25, 4, 8), spawn("minecraft:tropical_fish", 30, 8, 8), spawn("minecraft:pufferfish", 6, 1, 3)])
@@ -923,7 +951,7 @@ FEATURE_RANK = [
     # ores
     *TRANS_ORES, f"{NS}:trans_ore_copper_large", f"{NS}:trans_ore_emerald", f"{NS}:trans_ore_clay",
     f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_large", f"{NS}:ore_trans_crystal_extra",
-    "minecraft:disk_clay", "minecraft:disk_sand",
+    f"{NS}:trans_disk_clay", f"{NS}:trans_disk_gravel", f"{NS}:trans_disk_sand",
     # underground decoration
     f"{NS}:trans_glow_lichen", f"{NS}:deep_cave_moss", f"{NS}:deep_cave_ceiling_moss",
     f"{NS}:trans_crystal_clusters_cave_floor", f"{NS}:trans_crystal_clusters_cave_ceiling",
@@ -940,7 +968,7 @@ FEATURE_RANK = [
     f"{NS}:trans_lush_caves_vegetation", f"{NS}:blooming_cave_ceiling", f"{NS}:blooming_cave_floor", "minecraft:spore_blossom",
     "minecraft:classic_vines_cave_feature",
     f"{NS}:trans_coral_reefs", f"{NS}:trans_coral_reefs_dense", f"{NS}:trans_coral_reefs_rare", f"{NS}:trans_seagrass_warm", f"{NS}:trans_seagrass_deep", f"{NS}:trans_seagrass_river",
-    f"{NS}:trans_seagrass_swamp", "minecraft:sea_pickle", f"{NS}:trans_kelp_warm", f"{NS}:trans_kelp_cold",
+    f"{NS}:trans_seagrass_swamp", f"{NS}:trans_sea_pickles", f"{NS}:trans_kelp_warm", f"{NS}:trans_kelp_cold",
     f"{NS}:pride_blossoms_dense", f"{NS}:pride_blossoms", f"{NS}:trans_flowers", f"{NS}:meadow_flowers", f"{NS}:forest_flowers", f"{NS}:heartwood_flowers",
     f"{NS}:crystal_flowers", f"{NS}:candy_flowers", f"{NS}:lavender_flowers", f"{NS}:frost_flowers",
     f"{NS}:pride_peonies", f"{NS}:tall_trans_flowers_dense", f"{NS}:tall_trans_flowers", f"{NS}:field_flowers",

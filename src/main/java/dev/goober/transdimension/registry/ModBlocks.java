@@ -33,6 +33,7 @@ import net.minecraft.world.level.block.BaseCoralWallFanBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.SeaPickleBlock;
 import net.minecraft.world.level.block.BonemealableFeaturePlacerBlock;
 import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.ButtonBlock;
@@ -215,6 +216,11 @@ public final class ModBlocks {
 	public static final Block TRANS_GRAVEL = register("trans_gravel",
 			properties -> new ColoredFallingBlock(new ColorRGBA(0xFFB9AEB4), properties),
 			BlockBehaviour.Properties.ofFullCopy(Blocks.GRAVEL));
+	/** Pastel lilac clay from the realm's riverbeds and lakes; it breaks into clay balls like vanilla clay. */
+	public static final Block TRANS_CLAY = copy("trans_clay", Blocks.CLAY);
+	/** Pink sea pickles with glowing blue tips, on the realm's reefs (vanilla's sea pickle block). */
+	public static final Block TRANS_SEA_PICKLE = register("trans_sea_pickle", SeaPickleBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.SEA_PICKLE));
 
 	// ---------------------------------------------------------------- vanilla ores in trans stone and trans deepslate
 	public static final Block TRANS_COAL_ORE = ore("trans_coal_ore", UniformInt.of(0, 2), Blocks.COAL_ORE);

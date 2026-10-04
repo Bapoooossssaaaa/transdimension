@@ -454,21 +454,29 @@ def trans_andesite(name="andesite"):
 
 
 def trans_gravel():
-    """Pebbles in grey, pink, blue and white."""
+    """Pebbles in pink, blue and white, set in grey grit."""
     img = vblock("gravel")
     lo, hi = lum_range(img)
     norm = lambda px: (lum(px) - lo) / (hi - lo)
     pebble = lambda p, px: norm(px) > 0.42
     labels, count = components(img, pebble)
     rng = random.Random(31)
-    ramps = [R_STONE, mix_ramp(R_STONE, light_ramp(PINK, 0.5), 0.55), mix_ramp(R_STONE, light_ramp(BLUE, 0.5), 0.5),
-             mix_ramp(R_STONE, R_PEARL, 0.6), R_STONE]
-    choice = [ramps[rng.randrange(len(ramps))] for _ in range(count)]
+    # Most pebbles are pink, blue or white (it used to be mostly grey, which didn't look trans).
+    ramps = [mix_ramp(R_STONE, light_ramp(PINK, 0.5), 0.6), mix_ramp(R_STONE, light_ramp(BLUE, 0.5), 0.55),
+             mix_ramp(R_STONE, R_PEARL, 0.7), R_STONE, mix_ramp(R_STONE, light_ramp(PINK, 0.5), 0.4)]
+    # Vanilla's pebbles touch, so each one is split into 3x3 chunks, each its own colour.
+    choice = {}
     out = img.copy()
     for p in pixels(img):
         px = img.getpixel(p)
         t = norm(px)
-        c = sample(choice[labels[p]], 0.1 + 0.9 * t) if p in labels else sample(R_MORTAR, t * 1.3)
+        if p in labels:
+            key = (labels[p], p[0] // 3, p[1] // 3)
+            if key not in choice:
+                choice[key] = ramps[rng.randrange(len(ramps))]
+            c = sample(choice[key], 0.1 + 0.9 * t)
+        else:
+            c = sample(R_MORTAR, t * 1.3)
         out.putpixel(p, (*c, px[3]))
     return out
 
@@ -837,6 +845,20 @@ def pink_lava_bucket():
     img = vitem("lava_bucket")
     hot = lambda p, px: px[3] > 0 and max(px[:3]) - min(px[:3]) > 60
     return gradient_map(img, R_PINK_LAVA, mask=hot, curve=lambda t: 0.2 + 0.8 * t)
+
+
+# ============================================================================================ clay and sea pickles
+R_CLAY = [hexc(c) for c in ("A28AB6", "B59FC8", "C8B5D8", "D9C9E5", "E8DCF0")]
+# Sea pickles: pink bodies, light blue glowing tips.
+R_PICKLE = [hexc(c) for c in ("7E2F52", "B95679", "E58FAE", "A9DDF6", "DDF4FD")]
+
+
+def trans_clay():
+    return gradient_map(vblock("clay"), R_CLAY)
+
+
+def trans_sea_pickle(item=False):
+    return gradient_map(vitem("sea_pickle") if item else vblock("sea_pickle"), R_PICKLE)
 
 
 def pastel_bush():
@@ -3749,6 +3771,7 @@ def main():
         "trans_cake_top": trans_cake_top(), "trans_cake_side": trans_cake_side(), "trans_cake_inner": trans_cake_inner(),
         "trans_cake_bottom": trans_cake_bottom(), "pride_oven_front": pride_oven_front(), "pride_oven_side": pride_oven_side(),
         "pride_oven_top": pride_oven_top(), "pride_oven_bottom": pride_oven_bottom(),
+        "trans_clay": trans_clay(), "trans_sea_pickle": trans_sea_pickle(),
     }
     blocks.update({name: cat_plush(name) for name in PLUSHES})
     for name, img in blocks.items():
@@ -3786,6 +3809,7 @@ def main():
 
     items = {
         "trans_crystal": trans_crystal_item(), "prism_shard": prism_shard_item(), "pink_lava_bucket": pink_lava_bucket(),
+        "trans_sea_pickle": trans_sea_pickle(item=True),
         "trans_sword": trans_tool("sword"), "trans_pickaxe": trans_tool("pickaxe"), "trans_axe": trans_tool("axe"),
         "trans_shovel": trans_tool("shovel"), "trans_hoe": trans_tool("hoe"),
         "trans_helmet": trans_armor_item("helmet"), "trans_chestplate": trans_armor_item("chestplate"),

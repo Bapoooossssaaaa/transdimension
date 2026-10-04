@@ -1,0 +1,140 @@
+{
+  "variants": {
+    "pickles=1,waterlogged=false": [
+      {
+        "model": "transdimension:block/trans_dead_sea_pickle"
+      },
+      {
+        "model": "transdimension:block/trans_dead_sea_pickle",
+        "y": 90
+      },
+      {
+        "model": "transdimension:block/trans_dead_sea_pickle",
+        "y": 180
+      },
+      {
+        "model": "transdimension:block/trans_dead_sea_pickle",
+        "y": 270
+      }
+    ],
+    "pickles=1,waterlogged=true": [
+      {
+        "model": "transdimension:block/trans_sea_pickle"
+      },
+      {
+        "model": "transdimension:block/trans_sea_pickle",
+        "y": 90
+      },
+      {
+        "model": "transdimension:block/trans_sea_pickle",
+        "y": 180
+      },
+      {
+        "model": "transdimension:block/trans_sea_pickle",
+        "y": 270
+      }
+    ],
+    "pickles=2,waterlogged=false": [
+      {
+        "model": "transdimension:block/trans_two_dead_sea_pickles"
+      },
+      {
+        "model": "transdimension:block/trans_two_dead_sea_pickles",
+        "y": 90
+      },
+      {
+        "model": "transdimension:block/trans_two_dead_sea_pickles",
+        "y": 180
+      },
+      {
+        "model": "transdimension:block/trans_two_dead_sea_pickles",
+        "y": 270
+      }
+    ],
+    "pickles=2,waterlogged=true": [
+      {
+        "model": "transdimension:block/trans_two_sea_pickles"
+      },
+      {
+        "model": "transdimension:block/trans_two_sea_pickles",
+        "y": 90
+      },
+      {
+        "model": "transdimension:block/trans_two_sea_pickles",
+        "y": 180
+      },
+      {
+        "model": "transdimension:block/trans_two_sea_pickles",
+        "y": 270
+      }
+    ],
+    "pickles=3,waterlogged=false": [
+      {
+        "model": "transdimension:block/trans_three_dead_sea_pickles"
+      },
+      {
+        "model": "transdimension:block/trans_three_dead_sea_pickles",
+        "y": 90
+      },
+      {
+        "model": "transdimension:block/trans_three_dead_sea_pickles",
+        "y": 180
+      },
+      {
+        "model": "transdimension:block/trans_three_dead_sea_pickles",
+        "y": 270
+      }
+    ],
+    "pickles=3,waterlogged=true": [
+      {
+        "model": "transdimension:block/trans_three_sea_pickles"
+      },
+      {
+        "model": "transdimension:block/trans_three_sea_pickles",
+        "y": 90
+      },
+      {
+        "model": "transdimension:block/trans_three_sea_pickles",
+        "y": 180
+      },
+      {
+        "model": "transdimension:block/trans_three_sea_pickles",
+        "y": 270
+      }
+    ],
+    "pickles=4,waterlogged=false": [
+      {
+        "model": "transdimension:block/trans_four_dead_sea_pickles"
+      },
+      {
+        "model": "transdimension:block/trans_four_dead_sea_pickles",
+        "y": 90
+      },
+      {
+        "model": "transdimension:block/trans_four_dead_sea_pickles",
+        "y": 180
+      },
+      {
+        "model": "transdimension:block/trans_four_dead_sea_pickles",
+        "y": 270
+      }
+    ],
+    "pickles=4,waterlogged=true": [
+      {
+        "model": "transdimension:block/trans_four_sea_pickles"
+      },
+      {
+        "model": "transdimension:block/trans_four_sea_pickles",
+        "y": 90
+      },
+      {
+        "model": "transdimension:block/trans_four_sea_pickles",
+        "y": 180
+      },
+      {
+        "model": "transdimension:block/trans_four_sea_pickles",
+        "y": 270
+      }
+    ]
+  }
+}

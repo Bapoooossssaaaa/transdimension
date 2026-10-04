@@ -122,6 +122,7 @@ Written after round 4 compiled, not yet compiled themselves. Mixins: `NoiseBased
 | `TransDungeonFeature` | `RandomizableContainer.setBlockEntityLootTable(level, random, pos, key)`, `SpawnerBlockEntity#setEntityId(EntityType, RandomSource)`, `BlockTags.FEATURES_CANNOT_REPLACE`, `getMinY()` (confirmed) | It is vanilla's `MonsterRoomFeature` with other blocks: copy whatever that class does in 26.2. |
 | `PinkLavaFluid`, `ModFluids` | extends `LavaFluid`, overriding `getFlowing`/`getSource`/`getBucket`/`createLegacyBlock`/`isSame`; inner `Flowing`/`Source` exactly like Fabric's 26.2 test fluids (`fabric-rendering-fluids-v1` testmod); `new LiquidBlock(fluid, properties) {}`; `BucketItem(Fluid, Properties)`, `Properties#craftRemainder` | If `LavaFluid` can't be extended, extend `FlowingFluid` like the Fabric test fluids (pink lava then won't start fires). |
 | client fluid model | `FluidRenderingRegistry.register(still, flowing, new FluidModel.Unbaked(new Material(id), new Material(id), null, null))` (from Fabric's 26.2 test mod) | |
+| `ModBlocks.TRANS_SEA_PICKLE` | `SeaPickleBlock::new` (a public `(Properties)` constructor) | Subclass it: `properties -> new SeaPickleBlock(properties) {}`. |
 | `NoiseBasedChunkGeneratorMixin` | `@Inject` at RETURN of the static `createFluidPicker(NoiseGeneratorSettings)`; `Aquifer.FluidStatus` is a record (1.21.2 primer) | `require = 0`: worst case the deep lava (below y -54) stays orange. |
 
 ## Unverified APIs (round 3)

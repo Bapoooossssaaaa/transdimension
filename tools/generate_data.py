@@ -1371,6 +1371,24 @@ def generate_creatures():
          "entries": [{"type": "minecraft:item", "name": "minecraft:bone_meal"}], "rolls": 1.0}])
     entity_loot("trans_enderman", [{"entries": [counted("trans_pearl", 0, 1)], "rolls": 1.0}])
     entity_loot("pastel_slime", [{"entries": [counted("pastel_gel", 0, 2)], "rolls": 1.0}])
+    # Trans clay (breaks into clay balls, smelts into pink terracotta) and trans sea pickles (vanilla's models, our texture).
+    cube("trans_clay", "Trans Clay")
+    mine("trans_clay", "shovel")
+    loot_like_vanilla("trans_clay", "clay")
+    recipe("pink_terracotta_from_trans_clay", smelting("minecraft:pink_terracotta", "trans_clay"))
+    with open(os.path.join(TEMPLATES, "blockstates", "sea_pickle.json"), encoding="utf-8") as f:
+        pickle_state = f.read()
+    pickle_models = sorted(set(re.findall(r'"minecraft:block/([a-z_]+)"', pickle_state)))
+    for m in pickle_models:
+        pickle_state = pickle_state.replace(f'"minecraft:block/{m}"', f'"{NS}:block/trans_{m}"')
+        model(f"trans_{m}", {"parent": f"minecraft:block/{m}", "textures": {"all": block_tex("trans_sea_pickle"),
+                                                                            "particle": block_tex("trans_sea_pickle")}})
+    blockstate("trans_sea_pickle", json.loads(pickle_state))
+    model("trans_sea_pickle", {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/trans_sea_pickle"}}, kind="item")
+    item_def("trans_sea_pickle", f"{NS}:item/trans_sea_pickle")
+    name("trans_sea_pickle", "Trans Sea Pickle")
+    loot_like_vanilla("trans_sea_pickle", "sea_pickle")
+
     # Pink lava: the realm's lava (PinkLavaFluid). Its block only needs a particle texture; it counts as lava by tag.
     blockstate("pink_lava", {"variants": {"": {"model": f"{NS}:block/pink_lava"}}})
     model("pink_lava", {"textures": {"particle": block_tex("pink_lava_still")}})

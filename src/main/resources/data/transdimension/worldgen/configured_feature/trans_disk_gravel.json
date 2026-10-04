@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:disk",
+  "config": {
+    "half_height": 2,
+    "radius": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 2,
+      "max_inclusive": 5
+    },
+    "state_provider": {
+      "type": "minecraft:simple_state_provider",
+      "state": {
+        "Name": "transdimension:trans_gravel"
+      }
+    },
+    "target": {
+      "type": "minecraft:matching_blocks",
+      "blocks": [
+        "transdimension:trans_dirt",
+        "transdimension:trans_grass_block",
+        "transdimension:trans_sand"
+      ]
+    }
+  }
+}
