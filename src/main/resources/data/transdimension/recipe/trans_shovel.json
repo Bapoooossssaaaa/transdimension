@@ -1,15 +1,7 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "category": "equipment",
-  "key": {
-    "X": "transdimension:trans_crystal",
-    "#": "minecraft:stick"
-  },
-  "pattern": [
-    "X",
-    "#",
-    "#"
-  ],
+  "type": "minecraft:smithing_transform",
+  "base": "minecraft:diamond_shovel",
+  "addition": "transdimension:crystal_alloy",
   "result": {
     "id": "transdimension:trans_shovel"
   }

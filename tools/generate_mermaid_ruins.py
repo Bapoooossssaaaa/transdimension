@@ -462,7 +462,7 @@ def ruin_data():
                 item("cooked_trans_fish", 6, 1, 3), item("minecraft:dried_kelp", 5, 2, 6), item("minecraft:emerald", 4, 1, 2),
                 item("minecraft:gold_ingot", 3, 1, 2)]},
             {"rolls": 1.0, "entries": [
-                {"type": "minecraft:empty", "weight": 4}, item("trans_crystal", 5, 1, 2), item("minecraft:golden_apple", 2),
+                {"type": "minecraft:empty", "weight": 4}, item("minecraft:diamond", 5, 1, 2), item("minecraft:golden_apple", 2),
                 item("minecraft:heart_of_the_sea", 1),
                 item("minecraft:book", 4, functions=[{"function": "minecraft:enchant_randomly", "options": [
                     "minecraft:aqua_affinity", "minecraft:depth_strider", "minecraft:respiration", "minecraft:luck_of_the_sea",

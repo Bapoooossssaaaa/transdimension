@@ -67,10 +67,14 @@ public final class FairyRealm {
 	}
 
 	public static void initialize() {
+		FairyCutscene.initialize();
 		// Arriving by any other means (commands, /goober round trips) still finds the arena.
 		ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register((player, origin, destination) -> {
 			if (destination.dimension().equals(TransDimension.FAIRY_REALM)) {
 				ensureArena(destination);
+				if (!FairyCutscene.running() && !fairyNearby(destination, ALTAR)) {
+					player.sendSystemMessage(Component.translatable("message.transdimension.fairy_altar_hint"));
+				}
 				// On peaceful the fairy can't stay (no monsters), so the way home opens straight away.
 				if (destination.getDifficulty() == Difficulty.PEACEFUL && !destination.getBlockState(RETURN_PORTAL).is(ModBlocks.FAIRY_PORTAL)) {
 					fillPortal(destination, RETURN_PORTAL);
@@ -194,7 +198,7 @@ public final class FairyRealm {
 
 	// ------------------------------------------------------------------------------------------------ the arena
 
-	/** Places the arena island and calls the Trans Fairy the first time it's needed. */
+	/** Places the arena island the first time it's needed. The Trans Fairy waits to be called at the altar (FairyCutscene). */
 	public static void ensureArena(ServerLevel level) {
 		FairyRealmState state = level.getAttachedOrElse(ModAttachments.FAIRY_REALM_STATE, FairyRealmState.NEW);
 		if (state.built()) {
@@ -215,7 +219,6 @@ public final class FairyRealm {
 			template.placeInWorld(level, ARENA_ORIGIN, ARENA_ORIGIN, new StructurePlaceSettings(), level.getRandom(), Block.UPDATE_CLIENTS);
 		}
 		level.setAttached(ModAttachments.FAIRY_REALM_STATE, state.withBuilt());
-		spawnFairy(level, FAIRY_SPAWN);
 	}
 
 	/** If the template ever goes missing, a pad of trans stone bricks still gives the fight somewhere to happen. */
@@ -232,10 +235,11 @@ public final class FairyRealm {
 		level.setBlock(ALTAR, ModBlocks.FAIRY_ALTAR.defaultBlockState(), Block.UPDATE_CLIENTS);
 	}
 
-	public static void spawnFairy(ServerLevel level, Vec3 at) {
+	@Nullable
+	public static TransFairy spawnFairy(ServerLevel level, Vec3 at) {
 		TransFairy fairy = ModEntities.TRANS_FAIRY.create(level, EntitySpawnReason.EVENT);
 		if (fairy == null) {
-			return;
+			return null;
 		}
 		fairy.snapTo(at.x, at.y, at.z, 180.0F, 0.0F);
 		fairy.setHome(ALTAR.below());
@@ -243,6 +247,7 @@ public final class FairyRealm {
 		level.addFreshEntity(fairy);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.HOSTILE, 2.0F, 0.8F);
 		sparkle(level, at, 80, 1.2);
+		return fairy;
 	}
 
 	/** True while a Trans Fairy is anywhere near the arena. */
@@ -250,14 +255,28 @@ public final class FairyRealm {
 		return !level.getEntitiesOfClass(TransFairy.class, new AABB(pos).inflate(64.0), TransFairy::isAlive).isEmpty();
 	}
 
-	/** A crystal pearl offered at the altar calls the Trans Fairy back for a rematch. */
-	public static boolean summonAtAltar(ServerLevel level, BlockPos altar, Player player) {
-		if (fairyNearby(level, altar)) {
-			player.sendOverlayMessage(Component.translatable("message.transdimension.fairy_already_here"));
+	/**
+	 * A Trans Crystal or Crystal Pearl offered at the altar (used on it, or thrown onto it by {@code thrower} = null).
+	 * The first time it starts the cutscene in which the Trans Fairy arrives; after that it calls her straight back for
+	 * a rematch. Returns whether the offering was taken (not while she's here or the scene is playing).
+	 */
+	public static boolean offerAtAltar(ServerLevel level, @Nullable Player player) {
+		if (FairyCutscene.running() || fairyNearby(level, ALTAR)) {
+			if (player != null) {
+				player.sendOverlayMessage(Component.translatable("message.transdimension.fairy_already_here"));
+			}
 			return false;
 		}
-		spawnFairy(level, Vec3.atCenterOf(altar).add(0.0, 6.0, 0.0));
-		player.sendOverlayMessage(Component.translatable("message.transdimension.fairy_summoned"));
+		if (!level.getAttachedOrElse(ModAttachments.FAIRY_REALM_STATE, FairyRealmState.NEW).maddieGone()) {
+			FairyCutscene.start(level);
+			return true;
+		}
+		spawnFairy(level, FAIRY_SPAWN);
+		for (ServerPlayer watcher : level.players()) {
+			if (watcher.distanceToSqr(Vec3.atCenterOf(ALTAR)) < 64.0 * 64.0) {
+				watcher.sendOverlayMessage(Component.translatable("message.transdimension.fairy_summoned"));
+			}
+		}
 		return true;
 	}
 

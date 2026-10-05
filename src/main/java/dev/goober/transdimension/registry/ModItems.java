@@ -95,8 +95,11 @@ public final class ModItems {
 	public static final Item TRANS_CRYSTAL = register("trans_crystal", Item::new, new Item.Properties());
 	/** Common sparkly shards from prism clusters in the crystal caves and groves; decoration and crafting. */
 	public static final Item PRISM_SHARD = register("prism_shard", Item::new, new Item.Properties());
+	/** A Trans Crystal fused with prism shards, like a netherite ingot: it upgrades diamond gear to crystal gear. */
+	public static final Item CRYSTAL_ALLOY = register("crystal_alloy", Item::new, new Item.Properties()
+			.component(DataComponents.LORE, lore("item.transdimension.crystal_alloy.lore")));
 
-	// ---------------------------------------------------------------- crystal gear (crafted from Trans Crystals)
+	// ---------------------------------------------------------------- crystal gear (diamond gear upgraded with Crystal Alloy)
 	public static final Item TRANS_SWORD = register("trans_sword", Item::new,
 			new Item.Properties().sword(TRANS_TOOL_MATERIAL, 3.0F, -2.4F));
 	public static final Item TRANS_PICKAXE = register("trans_pickaxe", Item::new,

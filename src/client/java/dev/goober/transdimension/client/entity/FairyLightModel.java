@@ -15,9 +15,8 @@ import net.minecraft.util.Mth;
 import dev.goober.transdimension.TransDimension;
 
 /**
- * The little winged light shared by wild fairies and the Fairy Jar: a glowing 4-pixel cube with a pair of see-through
- * fairy wings, one on each side, that flutter up and down. {@link #createHaloLayer()} is a soft glowing shell drawn
- * over the cube.
+ * The wild fairy: a glowing 4-pixel cube with a pair of see-through fairy wings, one on each side, that flutter up and
+ * down. {@link #createHaloLayer()} is a soft glowing shell drawn over the cube.
  *
  * <p>Texture (32x32, tools/generate_textures.py {@code fairy_light()}): cube 0,0 · wing 0,8 · halo 0,20. Every part
  * hangs off "light", which sits {@link #LIGHT_Y} pixels down the model (the ground is 24), so the fairy floats inside
@@ -64,7 +63,7 @@ public class FairyLightModel extends EntityModel<FairyRenderState> {
 		this.parts.flutter(state.ageInTicks, 0.25F);
 	}
 
-	/** The light's moving parts, shared with the Fairy Jar's model. */
+	/** The light's moving parts. */
 	public static final class Parts {
 		static final String[] WINGS = {"right_wing", "left_wing"};
 		private final ModelPart rightWing;
@@ -78,7 +77,7 @@ public class FairyLightModel extends EntityModel<FairyRenderState> {
 
 		/**
 		 * The wings beat quickly up and down. {@code sweep} is how far back they're swept (0 = straight out to the
-		 * sides, about 1 = well back, which keeps them inside the Fairy Jar).
+		 * sides, about 1 = well back).
 		 */
 		public void flutter(float time, float sweep) {
 			float beat = Mth.sin(time * 1.9F);

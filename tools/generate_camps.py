@@ -261,13 +261,13 @@ def loot_tables():
     # 26.3's secret chest: its treasure maps (26.3 items) become trans treasures.
     chest_table("trans_camp_secret", [
         (2, [item("minecraft:diamond"), potion("healing"), potion("leaping"), potion("night_vision"), potion("swiftness"),
-             item("trans_crystal")]),
+             item("minecraft:diamond")]),
         (uniform(4, 6), [item("minecraft:map"), item("minecraft:copper_ingot", 1, 2), item("minecraft:gold_ingot", 1, 2),
                          item("minecraft:iron_ingot"), item("trans_pearl", 1, 2)]),
         (uniform(0, 1), [item("minecraft:iron_axe"), item("minecraft:iron_boots"), item("minecraft:iron_leggings"),
                          item("minecraft:iron_spear")]),
         # (No Bottled Fairy: those only come from catching a fairy in a bottle.)
-        (1, [item("trans_crystal", 1, 2, weight=4), item("minecraft:golden_apple", weight=3)]),
+        (1, [item("minecraft:diamond", 1, 2, weight=4), item("minecraft:golden_apple", weight=3)]),
     ])
     # 26.3's barrel: cushions instead of its cushions, hay instead of its straw beds.
     chest_table("trans_camp_barrel", [

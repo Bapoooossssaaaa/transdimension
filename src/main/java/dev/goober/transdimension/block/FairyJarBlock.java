@@ -6,23 +6,20 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import dev.goober.transdimension.block.entity.FairyJarBlockEntity;
-
 /**
  * The trophy for beating the Trans Fairy: a trans glass jar with a lid, and inside it a little cube of light with wings
- * that dances about, glowing pink, white and blue in turn. The jar itself is a block model; the dancing light is drawn
- * by the client's FairyJarRenderer, which is why the jar has a (data-less) block entity.
+ * glowing pink, white and blue in turn. The light is part of the jar's block model (its texture cycles through the
+ * colours), so it shows with any renderer; it used to be drawn by a block entity renderer, which never appeared in the
+ * owner's game.
  */
-public class FairyJarBlock extends Block implements EntityBlock {
+public class FairyJarBlock extends Block {
 	private static final VoxelShape SHAPE = Shapes.or(Block.box(3.0, 0.0, 3.0, 13.0, 11.0, 13.0), Block.box(3.5, 11.0, 3.5, 12.5, 14.5, 12.5));
-	/** The light's colours, in the order it cycles through them (FairyJarRenderer uses the same timing). */
+	/** The light's colours, in the order its texture cycles through them (tools/generate_textures.py fairy_jar_light). */
 	public static final int[] COLOURS = {0xF5A9B8, 0xFFFFFF, 0x5BCEFA};
 	/** Ticks the light spends on each colour. */
 	public static final int COLOUR_TICKS = 30;
@@ -34,11 +31,6 @@ public class FairyJarBlock extends Block implements EntityBlock {
 	@Override
 	protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
 		return SHAPE;
-	}
-
-	@Override
-	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-		return new FairyJarBlockEntity(pos, state);
 	}
 
 	@Override

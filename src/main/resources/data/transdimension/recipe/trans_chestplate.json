@@ -1,14 +1,7 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "category": "equipment",
-  "key": {
-    "X": "transdimension:trans_crystal"
-  },
-  "pattern": [
-    "X X",
-    "XXX",
-    "XXX"
-  ],
+  "type": "minecraft:smithing_transform",
+  "base": "minecraft:diamond_chestplate",
+  "addition": "transdimension:crystal_alloy",
   "result": {
     "id": "transdimension:trans_chestplate"
   }

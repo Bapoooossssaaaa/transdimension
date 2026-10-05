@@ -16,7 +16,7 @@ import dev.goober.transdimension.registry.ModSounds;
  *   <li>letterbox bars close in over a starry indigo night,</li>
  *   <li>the five stripes of the trans flag unfurl from the centre and wave in the wind,</li>
  *   <li>a big pixel heart pops in with an elastic bounce, sends out glowing rings and a burst of sparkles,</li>
- *   <li>the title types itself out, followed by the subtitle,</li>
+ *   <li>the title types itself out, followed by the SUBTITLE,</li>
  *   <li>then the stripes fly off in alternating directions, the bars open, and a soft flash reveals the realm.</li>
  * </ol>
  *
@@ -35,16 +35,9 @@ public final class TransIntroOverlay {
 			"...###...",
 			"....#....",
 	};
-	private static final String REALM_TITLE = "Welcome to the Trans Realm";
-	private static final String REALM_SUBTITLE = "You are valid. You are loved. ❤";
-	private static final String REALM_HINT = "Say \"Goober\" again to go home";
-	private static final String FAIRY_TITLE = "The Fairy Realm";
-	private static final String FAIRY_SUBTITLE = "The Trans Fairy awaits in her arena ✦";
-	private static final String FAIRY_HINT = "Beat her to open the portal home";
-
-	private static String title = REALM_TITLE;
-	private static String subtitle = REALM_SUBTITLE;
-	private static String hint = REALM_HINT;
+	private static final String TITLE = "Welcome to the Trans Realm";
+	private static final String SUBTITLE = "You are valid. You are loved. ❤";
+	private static final String HINT = "Say \"Goober\" again to go home";
 
 	private static long startNanos = -1L;
 	private static int ticks = -1;
@@ -52,15 +45,8 @@ public final class TransIntroOverlay {
 	private TransIntroOverlay() {
 	}
 
+	/** Plays the arrival cinematic (only for the Trans Realm: the Fairy Realm has none, as the owner found it annoying). */
 	public static void start() {
-		start(false);
-	}
-
-	/** Plays the arrival cinematic, titled for the Trans Realm or the Fairy Realm. */
-	public static void start(boolean fairyRealm) {
-		title = fairyRealm ? FAIRY_TITLE : REALM_TITLE;
-		subtitle = fairyRealm ? FAIRY_SUBTITLE : REALM_SUBTITLE;
-		hint = fairyRealm ? FAIRY_HINT : REALM_HINT;
 		startNanos = System.nanoTime();
 		ticks = 0;
 	}
@@ -155,16 +141,16 @@ public final class TransIntroOverlay {
 		// 4) Text: the title types itself out, then the subtitle and hint fade in.
 		Font font = Minecraft.getInstance().font;
 		float textOut = 1.0F - clamp01((t - 126.0F) / 10.0F);
-		int typed = Mth.clamp((int) ((t - 66.0F) * 0.75F), 0, title.length());
+		int typed = Mth.clamp((int) ((t - 66.0F) * 0.75F), 0, TITLE.length());
 		if (typed > 0 && textOut > 0.0F) {
 			int a = Math.round(255 * textOut);
-			drawText(graphics, font, title.substring(0, typed), width / 2.0F, height * 0.56F, 2.4F, (a << 24) | 0xFFFFFF, (a << 24) | 0x2B3A67);
+			drawText(graphics, font, TITLE.substring(0, typed), width / 2.0F, height * 0.56F, 2.4F, (a << 24) | 0xFFFFFF, (a << 24) | 0x2B3A67);
 		}
 		float subtitleIn = clamp01((t - 104.0F) / 10.0F) * textOut;
 		if (subtitleIn > 0.02F) {
 			int a = Math.max(8, Math.round(255 * subtitleIn));
-			drawText(graphics, font, subtitle, width / 2.0F, height * 0.70F, 1.5F, (a << 24) | 0xFBD3DD, (a << 24) | 0x5A2440);
-			drawText(graphics, font, hint, width / 2.0F, height * 0.80F, 1.0F, (a << 24) | 0xD6F4FE, (a << 24) | 0x173055);
+			drawText(graphics, font, SUBTITLE, width / 2.0F, height * 0.70F, 1.5F, (a << 24) | 0xFBD3DD, (a << 24) | 0x5A2440);
+			drawText(graphics, font, HINT, width / 2.0F, height * 0.80F, 1.0F, (a << 24) | 0xD6F4FE, (a << 24) | 0x173055);
 		}
 
 		// 5) Letterbox bars close at the start and open at the end.

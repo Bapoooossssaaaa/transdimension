@@ -14,14 +14,11 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -61,6 +58,11 @@ import dev.goober.transdimension.world.FairyRealm;
  *
  * <p>The current action is synced to clients ({@link #ACTION}) so the model can pose her: wand raised for a volley,
  * diving for a swoop, wand down for the spikes, arms up to summon.
+ *
+ * <p>The first time she's called she arrives in the middle of a cutscene ({@code FairyCutscene}): while {@link #INTRO}
+ * is set she only hovers and watches, can't be hurt, and fires the one shot the scene asks for ({@link #castAt}). Her
+ * health bar is the client's own trans bar ({@code TransFairyBossBar}), drawn from her synced health once the intro is
+ * over, so she has no vanilla boss bar.
  */
 public class TransFairy extends Monster {
 	public static final int HOVER = 0;
@@ -70,10 +72,11 @@ public class TransFairy extends Monster {
 	public static final int SUMMON = 4;
 	public static final int STARFALL = 5;
 	private static final EntityDataAccessor<Integer> ACTION = SynchedEntityData.defineId(TransFairy.class, EntityDataSerializers.INT);
+	/** True during the cutscene that brings her in (not saved: after a reload she just fights). */
+	private static final EntityDataAccessor<Boolean> INTRO = SynchedEntityData.defineId(TransFairy.class, EntityDataSerializers.BOOLEAN);
 	private static final int[] SPARKLES = {0xF5A9B8, 0x5BCEFA, 0xFFFFFF};
 	private static final int MAX_MINIONS = 4;
 
-	private final ServerBossEvent bossEvent;
 	/** The middle of her arena; she orbits it. Set when she's called, or to wherever she first appears. */
 	@Nullable
 	private BlockPos home;
@@ -89,13 +92,12 @@ public class TransFairy extends Monster {
 	private final List<Entity> minions = new ArrayList<>();
 	/** Client side: the tick the current action started, for the model's poses. */
 	private int clientActionStart;
+	/** What she watches during the cutscene. */
+	@Nullable
+	private Vec3 introLook;
 
 	public TransFairy(EntityType<? extends Monster> entityType, Level level) {
 		super(entityType, level);
-		this.bossEvent = new ServerBossEvent(Mth.createInsecureUUID(this.random), this.getDisplayName(), BossEvent.BossBarColor.PINK,
-				BossEvent.BossBarOverlay.NOTCHED_10);
-		this.bossEvent.setDarkenScreen(false);
-		this.bossEvent.setCreateWorldFog(false);
 		this.setNoGravity(true);
 		this.xpReward = 300;
 	}
@@ -121,6 +123,37 @@ public class TransFairy extends Monster {
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);
 		builder.define(ACTION, HOVER);
+		builder.define(INTRO, false);
+	}
+
+	/** True while the cutscene that brings her in is still playing (her health bar stays hidden till it ends). */
+	public boolean isIntro() {
+		return this.entityData.get(INTRO);
+	}
+
+	public void setIntro(boolean intro) {
+		this.entityData.set(INTRO, intro);
+	}
+
+	/** During the cutscene she turns to watch this point. */
+	public void lookAtDuringIntro(Vec3 point) {
+		this.introLook = point;
+	}
+
+	/** A single spell from her wand at {@code target} (the cutscene's shot at Maddie). */
+	public void castAt(LivingEntity target) {
+		if (!(this.level() instanceof ServerLevel level)) {
+			return;
+		}
+		this.face(target.getEyePosition());
+		Vec3 from = this.getEyePosition().add(this.getLookAngle().scale(0.8));
+		Vec3 aim = target.getBoundingBox().getCenter().subtract(from);
+		TransMagicBolt bolt = new TransMagicBolt(level, this, ItemStack.EMPTY);
+		bolt.setPos(from.x, from.y, from.z);
+		bolt.shoot(aim.x, aim.y, aim.z, 1.1F, 0.0F);
+		level.addFreshEntity(bolt);
+		this.playSound(SoundEvents.AMETHYST_BLOCK_CHIME, 2.0F, 1.0F);
+		this.playSound(SoundEvents.ILLUSIONER_CAST_SPELL, 1.5F, 1.4F);
 	}
 
 	public int getAction() {
@@ -189,7 +222,15 @@ public class TransFairy extends Monster {
 		if (this.home == null) {
 			this.home = this.blockPosition();
 		}
-		this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
+		if (this.isIntro()) {
+			// The cutscene: she hangs in the air over the altar, watching, until it hands her the fight.
+			this.setTarget(null);
+			this.setDeltaMovement(this.getDeltaMovement().scale(0.7));
+			if (this.introLook != null) {
+				this.face(this.introLook);
+			}
+			return;
+		}
 		this.minions.removeIf(minion -> !minion.isAlive());
 
 		LivingEntity target = this.getTarget();
@@ -517,7 +558,7 @@ public class TransFairy extends Monster {
 
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
-		if (source.is(DamageTypeTags.IS_FALL) || source.is(DamageTypeTags.IS_DROWNING) || source.getEntity() == this
+		if (this.isIntro() || source.is(DamageTypeTags.IS_FALL) || source.is(DamageTypeTags.IS_DROWNING) || source.getEntity() == this
 				|| this.minions.contains(source.getEntity())) {
 			return false;
 		}
@@ -547,18 +588,6 @@ public class TransFairy extends Monster {
 	@Override
 	public boolean isPushable() {
 		return false;
-	}
-
-	@Override
-	public void startSeenByPlayer(ServerPlayer player) {
-		super.startSeenByPlayer(player);
-		this.bossEvent.addPlayer(player);
-	}
-
-	@Override
-	public void stopSeenByPlayer(ServerPlayer player) {
-		super.stopSeenByPlayer(player);
-		this.bossEvent.removePlayer(player);
 	}
 
 	// ------------------------------------------------------------------------------------------------ sounds and saving
@@ -607,8 +636,5 @@ public class TransFairy extends Monster {
 		super.readAdditionalSaveData(valueInput);
 		valueInput.getInt("home_x").ifPresent(x -> this.home = new BlockPos(x, valueInput.getIntOr("home_y", 0), valueInput.getIntOr("home_z", 0)));
 		this.phase = valueInput.getIntOr("phase", 1);
-		if (this.hasCustomName()) {
-			this.bossEvent.setName(this.getDisplayName());
-		}
 	}
 }

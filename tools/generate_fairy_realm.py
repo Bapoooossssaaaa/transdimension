@@ -410,7 +410,7 @@ def sanctum_data():
         "type": "minecraft:chest",
         "pools": [
             {"rolls": {"type": "minecraft:uniform", "min": 3.0, "max": 6.0}, "entries": [
-                item(T + "trans_crystal", 8, 1, 3), item(T + "trans_crystal_pearl", 5, 1, 2), item(T + "trans_pearl", 8, 1, 4),
+                item("minecraft:diamond", 8, 1, 3), item(T + "trans_crystal_pearl", 5, 1, 2), item(T + "trans_pearl", 8, 1, 4),
                 item(T + "prism_shard", 10, 3, 8), item(T + "gumdrop", 6, 2, 6), item(T + "star_bloom", 4, 1, 3),
                 item(T + "pastel_prism", 4, 1, 4), item("minecraft:experience_bottle", 5, 1, 4), item("minecraft:golden_apple", 2),
                 {"type": "minecraft:item", "name": "minecraft:book", "weight": 4,

@@ -9,7 +9,6 @@ import net.minecraft.client.model.object.boat.BoatModel;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.FluidModel;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.entity.BoatRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
@@ -38,7 +37,6 @@ import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.fabric.api.resource.v1.reloader.ResourceReloaderKeys;
 
 import dev.goober.transdimension.TransDimension;
-import dev.goober.transdimension.client.block.FairyJarRenderer;
 import dev.goober.transdimension.client.entity.FairyLightModel;
 import dev.goober.transdimension.client.entity.FairyRenderer;
 import dev.goober.transdimension.client.entity.FairyCrystalSpikeRenderer;
@@ -59,10 +57,10 @@ import dev.goober.transdimension.client.wings.TransWingsModel;
 import dev.goober.transdimension.client.wings.WingAnimations;
 import dev.goober.transdimension.client.wings.WingPose;
 import dev.goober.transdimension.client.wings.WingsController;
+import dev.goober.transdimension.network.FairyCutscenePayload;
 import dev.goober.transdimension.network.FairyRescuePayload;
 import dev.goober.transdimension.network.OpenMaddieDialoguePayload;
 import dev.goober.transdimension.network.WingFlapPayload;
-import dev.goober.transdimension.registry.ModBlockEntities;
 import dev.goober.transdimension.registry.ModBlocks;
 import dev.goober.transdimension.registry.ModEntities;
 import dev.goober.transdimension.registry.ModFluids;
@@ -115,7 +113,7 @@ public class TransDimensionClient implements ClientModInitializer {
 		ModelLayerRegistry.registerModelLayer(PastelSlimeRenderer.JELLY_LAYER, PastelSlimeModel::createJellyLayer);
 		EntityRenderers.register(ModEntities.PASTEL_SLIME, PastelSlimeRenderer::new);
 
-		// The Fairy Realm: the Trans Fairy (wings and wand star in a glowing layer), her ice crystals, and the Fairy Jar's light.
+		// The Fairy Realm: the Trans Fairy (wings and wand star in a glowing layer), her ice crystals, and the wild fairies.
 		ModelLayerRegistry.registerModelLayer(TransFairyRenderer.LAYER, TransFairyModel::createBodyLayer);
 		ModelLayerRegistry.registerModelLayer(TransFairyRenderer.GLOW_LAYER, TransFairyModel::createGlowLayer);
 		EntityRenderers.register(ModEntities.TRANS_FAIRY, TransFairyRenderer::new);
@@ -124,7 +122,6 @@ public class TransDimensionClient implements ClientModInitializer {
 		ModelLayerRegistry.registerModelLayer(FairyLightModel.LAYER, FairyLightModel::createLayer);
 		ModelLayerRegistry.registerModelLayer(FairyLightModel.HALO_LAYER, FairyLightModel::createHaloLayer);
 		EntityRenderers.register(ModEntities.FAIRY, FairyRenderer::new);
-		BlockEntityRenderers.register(ModBlockEntities.FAIRY_JAR, FairyJarRenderer::new);
 
 		// The invisible seat you ride while sitting on furniture.
 		EntityRenderers.register(ModEntities.SEAT, SeatRenderer::new);
@@ -139,6 +136,7 @@ public class TransDimensionClient implements ClientModInitializer {
 		ModelLayerRegistry.registerModelLayer(MaddieRenderer.LAYER, MaddieRenderer::createLayer);
 		EntityRenderers.register(ModEntities.MADDIE, MaddieRenderer::new);
 		EntityRenderers.register(ModEntities.TRANS_MAGIC_BOLT, context -> new ThrownItemRenderer<>(context, 1.25F, true));
+		EntityRenderers.register(ModEntities.CRYSTAL_EYE, context -> new ThrownItemRenderer<>(context, 1.0F, true));
 		ModelLayerRegistry.registerModelLayer(TransWingsModel.LAYER, TransWingsModel::createLayer);
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, entityRenderer, registrationHelper, context) -> {
 			if (entityRenderer instanceof AvatarRenderer<?> avatarRenderer) {
@@ -151,6 +149,8 @@ public class TransDimensionClient implements ClientModInitializer {
 
 		ClientPlayNetworking.registerGlobalReceiver(OpenMaddieDialoguePayload.TYPE, (payload, context) ->
 				context.client().gui.setScreen(new MaddieDialogueScreen(payload.entityId(), payload.gifted())));
+		// The Fairy Realm cutscene's letterbox bars and subtitles.
+		ClientPlayNetworking.registerGlobalReceiver(FairyCutscenePayload.TYPE, (payload, context) -> FairyCutsceneOverlay.handle(payload));
 		// A Bottled Fairy saved you: it pops up on screen the way a totem does (the sparkles come from the server).
 		ClientPlayNetworking.registerGlobalReceiver(FairyRescuePayload.TYPE, (payload, context) ->
 				context.client().gameRenderer.displayItemActivation(new ItemStack(ModItems.BOTTLED_FAIRY)));
@@ -162,6 +162,9 @@ public class TransDimensionClient implements ClientModInitializer {
 
 		// Cat spit sits under the hotbar like the pumpkin overlay; the dimension intro draws on top of everything.
 		HudElementRegistry.attachElementBefore(VanillaHudElements.HOTBAR, TransDimension.id("saliva"), SalivaOverlay::extract);
+		// The Trans Fairy's own boss bar sits where vanilla's would; the Fairy Realm cutscene's bars cover everything.
+		HudElementRegistry.attachElementAfter(VanillaHudElements.BOSS_BAR, TransDimension.id("trans_fairy_bar"), TransFairyBossBar::extract);
+		HudElementRegistry.addLast(TransDimension.id("fairy_cutscene"), FairyCutsceneOverlay::extract);
 		HudElementRegistry.addLast(TransDimension.id("trans_intro"), TransIntroOverlay::extract);
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -171,9 +174,12 @@ public class TransDimensionClient implements ClientModInitializer {
 			boolean inRealm = TransDimension.TRANS_REALM.equals(dimension) || inFairyRealm;
 
 			if (!Objects.equals(dimension, lastDimension)) {
-				if (inRealm) {
-					TransIntroOverlay.start(inFairyRealm);
+				// The intro plays on arriving in the Trans Realm from outside, not on going to or coming back from the Fairy Realm.
+				boolean cameFromRealms = TransDimension.TRANS_REALM.equals(lastDimension) || TransDimension.FAIRY_REALM.equals(lastDimension);
+				if (TransDimension.TRANS_REALM.equals(dimension) && !cameFromRealms) {
+					TransIntroOverlay.start();
 				}
+				FairyCutsceneOverlay.reset();
 				lastDimension = dimension;
 			}
 

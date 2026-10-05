@@ -20,6 +20,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityType;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.entity.CrystalEye;
 import dev.goober.transdimension.entity.Fairy;
 import dev.goober.transdimension.entity.FairyCrystalSpike;
 import dev.goober.transdimension.entity.Maddie;
@@ -123,6 +124,15 @@ public final class ModEntities {
 					.clientTrackingRange(6)
 					.updateInterval(5)
 					.build(TRANS_MAGIC_BOLT_KEY));
+
+	public static final ResourceKey<EntityType<?>> CRYSTAL_EYE_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("crystal_eye"));
+	/** A thrown Trans Crystal Pearl flying towards the nearest Fairy Sanctum, like an eye of ender. */
+	public static final EntityType<CrystalEye> CRYSTAL_EYE = Registry.register(BuiltInRegistries.ENTITY_TYPE, CRYSTAL_EYE_KEY,
+			EntityType.Builder.<CrystalEye>of(CrystalEye::new, MobCategory.MISC)
+					.sized(0.25F, 0.25F)
+					.clientTrackingRange(4)
+					.updateInterval(4)
+					.build(CRYSTAL_EYE_KEY));
 
 	public static final ResourceKey<EntityType<?>> TRANS_FAIRY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("trans_fairy"));
 	public static final ResourceKey<EntityType<?>> FAIRY_CRYSTAL_SPIKE_KEY = ResourceKey.create(Registries.ENTITY_TYPE,

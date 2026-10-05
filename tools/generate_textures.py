@@ -740,6 +740,14 @@ def trans_crystal_item():
     return gradient_map(vitem("diamond"), R_TRANS, curve=lambda t: 0.04 + 0.96 * t)
 
 
+# Crystal Alloy: an ingot of crystal and prism, blue at the edges and sides, pink on top, with white shine.
+R_ALLOY = [hexc(c) for c in ("2C4F8F", "4F8FD0", "8FCBF2", "E7A6C6", "F7D3E2", "FFFFFF")]
+
+
+def crystal_alloy():
+    return gradient_map(vitem("iron_ingot"), R_ALLOY)
+
+
 # ============================================================================================ crystal gear
 def is_diamond(px):
     h, s, v = hsv(px)
@@ -3885,15 +3893,18 @@ def trans_fairy_spawn_egg():
 
 
 def fairy_jar_light():
-    """16x16 for the little winged light in the Fairy Jar's item model: the core (0,0, 6x6) shading pink to blue, a
-    rounded wing (8,0, 6x6)."""
-    img = new(16, 16)
-    for y in range(6):
-        for x in range(6):
-            img.putpixel((x, y), (*mix(mix(PINK, BLUE, x / 5), WHITE, 0.4 + 0.3 * ((x + y) % 2)), 255))
-            if (x - 2.5) ** 2 + (y - 2.5) ** 2 <= 9.5:
-                img.putpixel((8 + x, y), (*mix(WHITE, PINK, 0.35 * x / 5), 220))
-    return img
+    """The Fairy Jar's light, part of the jar's own model: three 16x16 frames in which the core (0,0, 6x6) glows pink,
+    then white, then blue (FairyJarBlock.COLOURS, COLOUR_TICKS apart, the game blending between them), brightest in the
+    middle, with a see-through rounded wing (8,0, 6x6) tinted to match."""
+    strip = new(16, 48)
+    for i, colour in enumerate((PINK, (244, 240, 255), BLUE)):
+        for y in range(6):
+            for x in range(6):
+                glow = max(0.0, 0.8 - 0.28 * math.hypot(x - 2.5, y - 2.5))
+                strip.putpixel((x, 16 * i + y), (*mix(colour, WHITE, glow), 255))
+                if (x - 2.5) ** 2 + (y - 2.5) ** 2 <= 9.5:
+                    strip.putpixel((8 + x, 16 * i + y), (*mix(WHITE, colour, 0.25 + 0.2 * x / 5), 210))
+    return strip
 
 
 def fairy_realm_textures():
@@ -3909,7 +3920,7 @@ def fairy_realm_textures():
     yield "block/fairy_portal.png", fairy_portal_frames(), {"animation": {"frametime": 2, "interpolate": True}}
     yield "block/fairy_jar_glass.png", fairy_jar_glass(), None
     yield "block/fairy_jar_lid.png", fairy_jar_lid(), None
-    yield "block/fairy_jar_light.png", fairy_jar_light(), None
+    yield "block/fairy_jar_light.png", fairy_jar_light(), {"animation": {"frametime": 30, "interpolate": True}}
     yield "item/trans_fairy_spawn_egg.png", trans_fairy_spawn_egg(), None
 
 
@@ -4101,6 +4112,7 @@ def main():
 
     items = {
         "trans_crystal": trans_crystal_item(), "prism_shard": prism_shard_item(), "pink_lava_bucket": pink_lava_bucket(),
+        "crystal_alloy": crystal_alloy(),
         "trans_sea_pickle": trans_sea_pickle(item=True), "trans_glow_berries": trans_glow_berries(),
         "trans_sword": trans_tool("sword"), "trans_pickaxe": trans_tool("pickaxe"), "trans_axe": trans_tool("axe"),
         "trans_shovel": trans_tool("shovel"), "trans_hoe": trans_tool("hoe"),

@@ -1,12 +1,12 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_trans_crystal": {
+    "has_crystal_alloy": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
-            "items": "transdimension:trans_crystal"
+            "items": "transdimension:crystal_alloy"
           }
         ]
       }
@@ -21,7 +21,7 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_trans_crystal"
+      "has_crystal_alloy"
     ]
   ],
   "rewards": {

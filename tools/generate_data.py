@@ -1491,6 +1491,13 @@ def generate_recipes():
     # crystal
     R("trans_crystal_block", shaped("trans_crystal_block", ["###", "###", "###"], {"#": "trans_crystal"}, 1))
     R("trans_crystal_from_block", shapeless("trans_crystal", ["trans_crystal_block"], 9, category="misc"))
+    # Crystal gear is diamond gear upgraded with a Crystal Alloy (a crystal and four prism shards) in a smithing table,
+    # like netherite. Since 1.21.2 a smithing recipe's template is optional, so none is needed. Enchantments carry over.
+    R("crystal_alloy", shapeless("crystal_alloy", ["trans_crystal", "prism_shard", "prism_shard", "prism_shard", "prism_shard"],
+                                 category="misc"))
+    for piece in ("sword", "pickaxe", "axe", "shovel", "hoe", "helmet", "chestplate", "leggings", "boots"):
+        R(f"trans_{piece}", {"type": "minecraft:smithing_transform", "base": f"minecraft:diamond_{piece}",
+                             "addition": rid("crystal_alloy"), "result": {"id": rid(f"trans_{piece}")}})
     for flower_id, dye, count in (("trans_tulip", "light_blue_dye", 1), ("pearl_daisy", "white_dye", 1), ("sky_bell", "light_blue_dye", 1),
                                   ("flag_lily", "white_dye", 1), ("lavender_puff", "purple_dye", 1), ("trans_orchid", "pink_dye", 1),
                                   ("heart_bloom", "pink_dye", 2), ("pride_peony", "pink_dye", 2), ("trans_petals", "pink_dye", 1)):
@@ -1618,7 +1625,7 @@ def generate_creatures():
             entry("minecraft:saddle", 20), entry("minecraft:golden_apple", 15), entry("minecraft:enchanted_golden_apple", 2),
             entry("minecraft:name_tag", 20), entry("minecraft:music_disc_cat", 10), entry("minecraft:iron_horse_armor", 12),
             entry("minecraft:golden_horse_armor", 8), entry("minecraft:diamond_horse_armor", 4), entry("minecraft:book", 10, enchant=True),
-            entry("trans_crystal", 6), entry("trans_pearl", 10, 1, 2)]},
+            entry("minecraft:diamond", 6), entry("trans_pearl", 10, 1, 2)]},
         {"rolls": {"type": "minecraft:uniform", "min": 1.0, "max": 4.0}, "entries": [
             entry("minecraft:iron_ingot", 10, 1, 4), entry("minecraft:gold_ingot", 5, 1, 4), entry("minecraft:bread", 20),
             entry("gumdrop", 15, 2, 5), entry("prism_shard", 15, 2, 6), entry("minecraft:redstone", 15, 1, 4),
@@ -1724,17 +1731,15 @@ def generate_fairy_realm_data():
     item_def("fairy_altar", f"{NS}:block/fairy_altar")
     name("fairy_altar", "Fairy Altar")
 
-    # ---- the Fairy Jar: a trans glass jar with a flag-striped cloth lid. In the world its light is drawn by FairyJarRenderer;
-    # the item shows a little winged light sitting inside instead.
+    # ---- the Fairy Jar: a trans glass jar with a flag-striped cloth lid and a little winged light inside. The light is
+    # part of the jar's model (it glows, and its texture cycles pink, white and blue), so it shows wherever the jar is.
+    # (It used to be drawn by a block entity renderer, which never showed up in the owner's game.)
     jar = [
         {"from": [3, 0, 3], "to": [13, 11, 13], "faces": _faces("#glass", (3, 5, 13, 16), (3, 3, 13, 13), cull=("down",))},
         {"from": [4, 11, 4], "to": [12, 12, 12], "faces": _faces("#glass", (4, 4, 12, 5), (4, 4, 12, 12), skip=("down",))},
         {"from": [3.5, 12, 3.5], "to": [12.5, 13.5, 12.5], "faces": _faces("#lid", (0, 6, 16, 9), (4, 4, 12, 12))},
         {"from": [7, 13.5, 7], "to": [9, 14.5, 9], "faces": _faces("#lid", (7, 7, 9, 8), (7, 7, 9, 9), skip=("down",))},
     ]
-    jar_tex = {"particle": block_tex("fairy_jar_glass"), "glass": block_tex("fairy_jar_glass"), "lid": block_tex("fairy_jar_lid")}
-    model("fairy_jar", {"parent": "minecraft:block/block", "textures": jar_tex, "elements": jar})
-    blockstate("fairy_jar", {"variants": {"": {"model": f"{NS}:block/fairy_jar"}}})
     light = [
         {"from": [6, 3.5, 6], "to": [10, 7.5, 10], "light_emission": 15, "shade": False,
          "faces": _faces("#light", (0, 0, 6, 6), (0, 0, 6, 6))},
@@ -1743,9 +1748,11 @@ def generate_fairy_realm_data():
         {"from": [9.5, 6, 10.2], "to": [13, 9.5, 10.2], "light_emission": 15, "shade": False,
          "faces": {f: {"uv": [8, 0, 14, 6], "texture": "#light"} for f in ("north", "south")}},
     ]
-    model("fairy_jar", {"parent": "minecraft:block/block", "textures": {**jar_tex, "light": block_tex("fairy_jar_light")},
-                        "elements": light + jar}, kind="item")
-    item_def("fairy_jar", f"{NS}:item/fairy_jar")
+    jar_tex = {"particle": block_tex("fairy_jar_glass"), "glass": block_tex("fairy_jar_glass"), "lid": block_tex("fairy_jar_lid"),
+               "light": block_tex("fairy_jar_light")}
+    model("fairy_jar", {"parent": "minecraft:block/block", "textures": jar_tex, "elements": light + jar})
+    blockstate("fairy_jar", {"variants": {"": {"model": f"{NS}:block/fairy_jar"}}})
+    item_def("fairy_jar", f"{NS}:block/fairy_jar")
     name("fairy_jar", "Fairy Jar")
     loot("fairy_jar", loot_self("fairy_jar"))
 
@@ -1761,20 +1768,21 @@ def generate_fairy_realm_data():
         "entity.transdimension.trans_fairy": "Trans Fairy",
         "entity.transdimension.fairy_crystal_spike": "Fairy Ice Crystal",
         "biome.transdimension.fairy_realm": "Fairy Realm",
-        "filled_map.transdimension.fairy_sanctum": "Map to a Fairy Sanctum",
-        "item.transdimension.trans_crystal_pearl.lore2": "Hold it up in the Trans Realm to find a Fairy Sanctum",
-        "item.transdimension.trans_crystal_pearl.quiet": "The pearl is quiet here. Hold it up in the Trans Realm.",
+        "item.transdimension.trans_crystal_pearl.lore2": "Throw it in the Trans Realm and follow it to a Fairy Sanctum",
+        "item.transdimension.trans_crystal_pearl.quiet": "The pearl is quiet here. Throw it in the Trans Realm.",
         "item.transdimension.trans_crystal_pearl.nothing": "The pearl can't sense any Fairy Sanctum nearby.",
-        "item.transdimension.trans_crystal_pearl.here": "The pearl blazes: a Fairy Sanctum is right here, under the shrine!",
-        "item.transdimension.trans_crystal_pearl.tug": "The pearl tugs you %s, about %s blocks away.",
+        "entity.transdimension.crystal_eye": "Trans Crystal Pearl",
+        "message.transdimension.fairy_altar_hint": "✦ The arena is quiet. Throw a Trans Crystal onto the altar to call the Trans Fairy. ✦",
+        "message.transdimension.cutscene.maddie_1": "What are you doing?!",
+        "message.transdimension.cutscene.maddie_2": "I've done something horrible...",
+        "message.transdimension.cutscene.maddie_3": "The Trans Fairy is a horrible being. Get away from her before she—",
+        "message.transdimension.pastel_slime.stay": "Your slime will wait here",
+        "message.transdimension.pastel_slime.follow": "Your slime follows you again",
         "message.transdimension.fairy_already_here": "The Trans Fairy is already here!",
         "message.transdimension.fairy_summoned": "The Trans Fairy answers your call!",
         "message.transdimension.fairy_defeated": "✦ The Trans Fairy is beaten! A portal home has opened north of the arena. ✦",
         "message.transdimension.fairy_peaceful": "The Trans Fairy rests while the world is peaceful. A portal home is open north of the arena.",
     })
-    for key, english in (("north", "north"), ("north_east", "north-east"), ("east", "east"), ("south_east", "south-east"),
-                         ("south", "south"), ("south_west", "south-west"), ("west", "west"), ("north_west", "north-west")):
-        NAMES[f"direction.transdimension.{key}"] = english
 
 
 # ============================================================================================ other tags, names, sounds
@@ -1811,7 +1819,7 @@ def generate_misc():
     tag("item", "flowers", "pride_blossom")
     tag("block", "bee_attractive", "pride_blossom")
 
-    # crystal tools and armor (crafted from Trans Crystals; their item models, recipes and equipment asset are hand-made)
+    # crystal tools and armor (upgraded from diamond with Crystal Alloy; their item models and equipment asset are hand-made)
     tag("item", "swords", "trans_sword")
     tag("item", "pickaxes", "trans_pickaxe")
     tag("item", "axes", "trans_axe")
@@ -1823,7 +1831,7 @@ def generate_misc():
     tag("item", "foot_armor", "trans_boots")
 
     # the mod's own tags
-    tag("item", "repairs_trans_gear", "trans_crystal", ns=NS)
+    tag("item", "repairs_trans_gear", "crystal_alloy", ns=NS)
     tag("block", "incorrect_for_trans_tool", "#minecraft:incorrect_for_diamond_tool", ns=NS)
     # The Pride Oven is a job site villagers can claim.
     tag("point_of_interest_type", "acquirable_job_site", "transdimension:pride_oven")
@@ -1848,6 +1856,8 @@ def generate_misc():
 
     # crystals: the rare gem has its own sprite; prism shards drop from prism clusters
     simple_item("trans_crystal", "Trans Crystal")
+    simple_item("crystal_alloy", "Crystal Alloy")
+    NAMES["item.transdimension.crystal_alloy.lore"] = "Upgrades diamond gear in a smithing table"
     simple_item("prism_shard", "Prism Shard")
 
     # Maddie and her gifts
@@ -2137,8 +2147,10 @@ def generate_recipe_unlocks():
             r = json.load(fh)
         if "key" in r:
             ingredients = [r["key"][c] for row in r["pattern"] for c in row if c != " "]
-        else:
+        elif "ingredients" in r or "ingredient" in r:
             ingredients = r.get("ingredients") or [r["ingredient"]]
+        else:
+            ingredients = [r[part] for part in ("template", "base", "addition") if part in r]
         unique = []
         for i in ingredients:
             if i not in unique:
@@ -2167,7 +2179,11 @@ def write_lang():
     path = os.path.join(ASSETS, "lang", "en_us.json")
     with open(path, encoding="utf-8") as f:
         lang = json.load(f)
-    lang = {k: v for k, v in lang.items() if "trans_water" not in k and not k.startswith("biome.")}
+    # Keys for things that are gone: trans water, the Crystal Pearl's old compass directions, Fairy Sanctum maps.
+    stale = ("item.transdimension.trans_crystal_pearl.tug", "item.transdimension.trans_crystal_pearl.here",
+             "filled_map.transdimension.fairy_sanctum")
+    lang = {k: v for k, v in lang.items() if "trans_water" not in k and not k.startswith("biome.")
+            and not k.startswith("direction.transdimension.") and k not in stale}
     for biome, english in BIOMES.items():
         lang[f"biome.transdimension.{biome}"] = english
     lang.update(NAMES)
@@ -2185,6 +2201,7 @@ def remove_stale():
         os.path.join(ASSETS, "models", "item", "pride_blossom.json"),
         os.path.join(DATA, "minecraft", "tags", "fluid", "water.json"),
         os.path.join(DATA, NS, "recipe", "glass_from_trans_sand.json"),
+        os.path.join(ASSETS, "models", "item", "fairy_jar.json"),
     ]
     for p in stale:
         if os.path.exists(p):

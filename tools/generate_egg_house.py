@@ -25,8 +25,7 @@ Outputs (under src/main/resources/data):
     transdimension/tags/worldgen/biome/has_structure/egg_house_island.json
     transdimension/tags/worldgen/structure/on_egg_house_maps.json
     transdimension/loot_table/chests/egg_house.json
-    transdimension/loot_table/chests/trans_house.json   (adds rare maps to the island and to a Fairy Sanctum to village
-                                                         house chests; Maddie's own chest always has the sanctum map)
+    transdimension/loot_table/chests/trans_house.json   (adds rare maps to the island to village house chests)
 
     python3 tools/generate_egg_house.py      (needs: pip install nbtlib)
 """
@@ -449,36 +448,27 @@ def loot_table():
         "pools": [
             {"rolls": {"type": "minecraft:uniform", "min": 2.0, "max": 5.0}, "entries": [
                 item(T + "trans_cookie", 10, 2, 6), item(T + "trans_cupcake", 6, 1, 3), item(T + "trans_macaron", 6, 1, 4),
-                item(T + "trans_donut", 5, 1, 2), item(T + "trans_boba", 3), item(T + "trans_crystal", 4, 1, 3),
+                item(T + "trans_donut", 5, 1, 2), item(T + "trans_boba", 3), item("minecraft:diamond", 4, 1, 2),
                 item(T + "trans_wool", 5, 2, 6), item(T + "pride_blossom", 5, 1, 3), item(T + "heart_bloom", 4, 1, 3),
                 item("minecraft:egg", 6, 1, 4), item("minecraft:feather", 4, 1, 5), item("minecraft:book", 3, 1, 2)]},
             {"rolls": 1.0, "entries": [{"type": "minecraft:empty", "weight": 4}, item(T + "trans_lantern", 1, 1, 2),
                                        item("minecraft:emerald", 1, 1, 3), item(T + "trans_bed", 1)]},
-            # Maddie keeps maps to the nearest Fairy Sanctum for adventurers: about one container in five holds one.
-            {"rolls": 1.0, "entries": [{"type": "minecraft:empty", "weight": 4}, sanctum_map(1)]},
         ],
         "random_sequence": T + "chests/egg_house"})
 
 
-def sanctum_map(weight):
-    """A map to the nearest Fairy Sanctum (the endgame dungeon; tools/generate_fairy_realm.py).
+def treasure_map_in_village_chests():
+    """One in ten trans village house chests holds a map to the nearest Egg House island. (Fairy Sanctums have no maps:
+    a thrown Trans Crystal Pearl leads the way, like an eye of ender.)
 
     An exploration map's destination is a structure tag written WITHOUT a '#' (vanilla's cartographer trades do the same);
     with one, 26.2 can't read the loot table at all and every chest using it comes up empty.
     """
-    return {"type": "minecraft:item", "name": "minecraft:map", "weight": weight, "functions": [
-        {"function": "minecraft:exploration_map", "destination": f"{NS}:fairy_sanctums", "decoration": "minecraft:target_x",
-         "zoom": 2, "search_radius": 100, "skip_existing_chunks": False},
-        {"function": "minecraft:set_name", "name": {"translate": "filled_map.transdimension.fairy_sanctum"}, "target": "item_name"}]}
-
-
-def treasure_map_in_village_chests():
-    """One in ten trans village house chests holds a map to the nearest Egg House island."""
     path = os.path.join(DATA, NS, "loot_table", "chests", "trans_house.json")
     with open(path, encoding="utf-8") as f:
         table = json.load(f)
     destination = f"{NS}:on_egg_house_maps"
-    # The '#' forms are what older runs wrote (they broke the whole table); drop those pools too.
+    # Older runs also added sanctum maps, and some wrote '#' forms (which broke the whole table); drop all of those.
     maps = {destination, f"{NS}:fairy_sanctums", f"#{NS}:on_egg_house_maps", f"#{NS}:fairy_sanctums"}
     table["pools"] = [p for p in table["pools"]
                       if not any(fn.get("destination") in maps for e in p["entries"] for fn in e.get("functions", []))]
@@ -489,8 +479,6 @@ def treasure_map_in_village_chests():
              "zoom": 2, "search_radius": 100, "skip_existing_chunks": False},
             {"function": "minecraft:set_name", "name": {"translate": "filled_map.transdimension.egg_house"},
              "target": "item_name"}]}]})
-    # ...and one in twelve a map to the nearest Fairy Sanctum.
-    table["pools"].append({"rolls": 1.0, "entries": [{"type": "minecraft:empty", "weight": 11}, sanctum_map(1)]})
     write(path, table)
 
 

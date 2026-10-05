@@ -33,6 +33,8 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import dev.goober.transdimension.network.OpenMaddieDialoguePayload;
 import dev.goober.transdimension.registry.ModAttachments;
 import dev.goober.transdimension.registry.ModItems;
+import dev.goober.transdimension.world.FairyCutscene;
+import dev.goober.transdimension.world.FairyRealm;
 
 /**
  * Maddie, who lives in the Egg House on its floating island. Talk to her (use her with an empty hand, or with
@@ -46,6 +48,8 @@ public class Maddie extends PathfinderMob {
 
 	@Nullable
 	private BlockPos home;
+	/** True only for the Maddie the Fairy Realm's cutscene brings in through her portal (FairyCutscene). */
+	private boolean cutsceneActor;
 
 	public Maddie(EntityType<? extends Maddie> entityType, Level level) {
 		super(entityType, level);
@@ -73,9 +77,23 @@ public class Maddie extends PathfinderMob {
 	@Override
 	public void tick() {
 		super.tick();
-		if (!this.level().isClientSide() && this.home == null) {
-			this.setHome(this.blockPosition());
+		if (this.level() instanceof ServerLevel level) {
+			// After the Trans Fairy struck her down, Maddie is gone from the realm for good (new Egg Houses stand empty too).
+			// The only Maddie ever in the Fairy Realm is the one acting in the cutscene.
+			if (!this.cutsceneActor && this.tickCount % 20 == 0 && (FairyRealm.isFairyRealm(level) || FairyCutscene.maddieGone(level))) {
+				this.discard();
+				return;
+			}
+			if (this.home == null) {
+				this.setHome(this.blockPosition());
+			}
 		}
+	}
+
+	/** Makes this Maddie the cutscene's: she stands where she's put and does nothing on her own. */
+	public void actInCutscene() {
+		this.cutsceneActor = true;
+		this.setNoAi(true);
 	}
 
 	private void setHome(BlockPos pos) {

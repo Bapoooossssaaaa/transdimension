@@ -79,7 +79,7 @@
         },
         {
           "type": "minecraft:item",
-          "name": "transdimension:trans_crystal",
+          "name": "minecraft:diamond",
           "weight": 4,
           "functions": [
             {
@@ -88,7 +88,7 @@
               "count": {
                 "type": "minecraft:uniform",
                 "min": 1.0,
-                "max": 3.0
+                "max": 2.0
               }
             }
           ]
@@ -234,37 +234,6 @@
           "type": "minecraft:item",
           "name": "transdimension:trans_bed",
           "weight": 1
-        }
-      ]
-    },
-    {
-      "rolls": 1.0,
-      "entries": [
-        {
-          "type": "minecraft:empty",
-          "weight": 4
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:map",
-          "weight": 1,
-          "functions": [
-            {
-              "function": "minecraft:exploration_map",
-              "destination": "transdimension:fairy_sanctums",
-              "decoration": "minecraft:target_x",
-              "zoom": 2,
-              "search_radius": 100,
-              "skip_existing_chunks": false
-            },
-            {
-              "function": "minecraft:set_name",
-              "name": {
-                "translate": "filled_map.transdimension.fairy_sanctum"
-              },
-              "target": "item_name"
-            }
-          ]
         }
       ]
     }

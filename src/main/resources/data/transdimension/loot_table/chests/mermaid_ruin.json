@@ -179,7 +179,7 @@
         },
         {
           "type": "minecraft:item",
-          "name": "transdimension:trans_crystal",
+          "name": "minecraft:diamond",
           "weight": 5,
           "functions": [
             {

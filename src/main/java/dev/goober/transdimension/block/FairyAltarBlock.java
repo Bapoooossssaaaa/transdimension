@@ -21,8 +21,9 @@ import dev.goober.transdimension.registry.ModItems;
 import dev.goober.transdimension.world.FairyRealm;
 
 /**
- * The crystal altar at the middle of the Fairy Realm's arena. Offer it a Trans Crystal Pearl to call the Trans Fairy
- * back for another fight (one fairy at a time). It can't be broken in survival.
+ * The crystal altar at the middle of the Fairy Realm's arena. Throw a Trans Crystal (or a Crystal Pearl) onto it, or
+ * use one on it, to call the Trans Fairy: the first time that plays the cutscene that brings her in (FairyCutscene),
+ * later it calls her back for another fight (one fairy at a time). It can't be broken in survival.
  */
 public class FairyAltarBlock extends Block {
 	private static final VoxelShape SHAPE = Shapes.or(Block.box(1.0, 0.0, 1.0, 15.0, 4.0, 15.0), Block.box(4.0, 4.0, 4.0, 12.0, 12.0, 12.0),
@@ -41,10 +42,10 @@ public class FairyAltarBlock extends Block {
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
 			BlockHitResult hitResult) {
-		if (!stack.is(ModItems.TRANS_CRYSTAL_PEARL)) {
+		if (!stack.is(ModItems.TRANS_CRYSTAL) && !stack.is(ModItems.TRANS_CRYSTAL_PEARL)) {
 			return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
 		}
-		if (level instanceof ServerLevel serverLevel && FairyRealm.summonAtAltar(serverLevel, pos, player)) {
+		if (level instanceof ServerLevel serverLevel && FairyRealm.offerAtAltar(serverLevel, player)) {
 			stack.consume(1, player);
 		}
 		return InteractionResult.SUCCESS;

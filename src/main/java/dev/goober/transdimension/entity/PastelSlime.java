@@ -4,12 +4,14 @@ import org.jspecify.annotations.Nullable;
 
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -215,9 +217,10 @@ public class PastelSlime extends TamableAnimal {
 			if (!this.level().isClientSide()) {
 				stack.consume(1, player);
 				if (this.random.nextInt(gumdrop ? 3 : 6) == 0) {
+					// A new pet follows you straight away; petting it tells it to stay.
 					this.tame(player);
 					this.getNavigation().stop();
-					this.setOrderedToSit(true);
+					this.setOrderedToSit(false);
 					this.level().broadcastEntityEvent(this, (byte) 7); // hearts
 				} else {
 					this.level().broadcastEntityEvent(this, (byte) 6); // smoke
@@ -226,9 +229,14 @@ public class PastelSlime extends TamableAnimal {
 			return InteractionResult.SUCCESS;
 		}
 		if (this.isTame() && this.isOwnedBy(player) && stack.isEmpty()) {
+			// Petting: it wobbles happily and stays put, or (petted again) follows you once more.
 			if (!this.level().isClientSide()) {
-				this.setOrderedToSit(!this.isOrderedToSit());
+				boolean stay = !this.isOrderedToSit();
+				this.setOrderedToSit(stay);
 				this.getNavigation().stop();
+				this.playSound(SoundEvents.SLIME_SQUISH_SMALL, 0.6F, 1.5F);
+				player.sendOverlayMessage(Component.translatable(stay ? "message.transdimension.pastel_slime.stay"
+						: "message.transdimension.pastel_slime.follow"));
 				if (this.level() instanceof ServerLevel serverLevel) {
 					serverLevel.sendParticles(ParticleTypes.HEART, this.getX(), this.getY() + 0.9, this.getZ(), 2, 0.2, 0.1, 0.2, 0.0);
 				}
@@ -236,6 +244,12 @@ public class PastelSlime extends TamableAnimal {
 			return InteractionResult.SUCCESS;
 		}
 		return super.mobInteract(player, hand);
+	}
+
+	/** Pastel slimes are all bounce: falls never hurt them. */
+	@Override
+	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+		return !source.is(DamageTypeTags.IS_FALL) && super.hurtServer(level, source, amount);
 	}
 
 	/** Picks a wild slime's colour from a roll of 0..99, using {@link #WILD_WEIGHTS}. */

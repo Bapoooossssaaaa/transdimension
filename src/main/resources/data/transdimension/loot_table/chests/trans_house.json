@@ -138,7 +138,7 @@
         },
         {
           "type": "minecraft:item",
-          "name": "transdimension:trans_crystal",
+          "name": "minecraft:diamond",
           "weight": 2
         }
       ]
@@ -167,37 +167,6 @@
               "function": "minecraft:set_name",
               "name": {
                 "translate": "filled_map.transdimension.egg_house"
-              },
-              "target": "item_name"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "rolls": 1.0,
-      "entries": [
-        {
-          "type": "minecraft:empty",
-          "weight": 11
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:map",
-          "weight": 1,
-          "functions": [
-            {
-              "function": "minecraft:exploration_map",
-              "destination": "transdimension:fairy_sanctums",
-              "decoration": "minecraft:target_x",
-              "zoom": 2,
-              "search_radius": 100,
-              "skip_existing_chunks": false
-            },
-            {
-              "function": "minecraft:set_name",
-              "name": {
-                "translate": "filled_map.transdimension.fairy_sanctum"
               },
               "target": "item_name"
             }
