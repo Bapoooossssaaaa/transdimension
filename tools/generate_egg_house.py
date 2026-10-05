@@ -454,16 +454,20 @@ def loot_table():
                 item("minecraft:egg", 6, 1, 4), item("minecraft:feather", 4, 1, 5), item("minecraft:book", 3, 1, 2)]},
             {"rolls": 1.0, "entries": [{"type": "minecraft:empty", "weight": 4}, item(T + "trans_lantern", 1, 1, 2),
                                        item("minecraft:emerald", 1, 1, 3), item(T + "trans_bed", 1)]},
-            # Maddie always keeps a map to the nearest Fairy Sanctum for adventurers.
-            {"rolls": 1.0, "entries": [sanctum_map(1)]},
+            # Maddie keeps maps to the nearest Fairy Sanctum for adventurers: about one container in five holds one.
+            {"rolls": 1.0, "entries": [{"type": "minecraft:empty", "weight": 4}, sanctum_map(1)]},
         ],
         "random_sequence": T + "chests/egg_house"})
 
 
 def sanctum_map(weight):
-    """A map to the nearest Fairy Sanctum (the endgame dungeon; tools/generate_fairy_realm.py)."""
+    """A map to the nearest Fairy Sanctum (the endgame dungeon; tools/generate_fairy_realm.py).
+
+    An exploration map's destination is a structure tag written WITHOUT a '#' (vanilla's cartographer trades do the same);
+    with one, 26.2 can't read the loot table at all and every chest using it comes up empty.
+    """
     return {"type": "minecraft:item", "name": "minecraft:map", "weight": weight, "functions": [
-        {"function": "minecraft:exploration_map", "destination": f"#{NS}:fairy_sanctums", "decoration": "minecraft:target_x",
+        {"function": "minecraft:exploration_map", "destination": f"{NS}:fairy_sanctums", "decoration": "minecraft:target_x",
          "zoom": 2, "search_radius": 100, "skip_existing_chunks": False},
         {"function": "minecraft:set_name", "name": {"translate": "filled_map.transdimension.fairy_sanctum"}, "target": "item_name"}]}
 
@@ -473,8 +477,9 @@ def treasure_map_in_village_chests():
     path = os.path.join(DATA, NS, "loot_table", "chests", "trans_house.json")
     with open(path, encoding="utf-8") as f:
         table = json.load(f)
-    destination = f"#{NS}:on_egg_house_maps"
-    maps = {destination, f"#{NS}:fairy_sanctums"}
+    destination = f"{NS}:on_egg_house_maps"
+    # The '#' forms are what older runs wrote (they broke the whole table); drop those pools too.
+    maps = {destination, f"{NS}:fairy_sanctums", f"#{NS}:on_egg_house_maps", f"#{NS}:fairy_sanctums"}
     table["pools"] = [p for p in table["pools"]
                       if not any(fn.get("destination") in maps for e in p["entries"] for fn in e.get("functions", []))]
     table["pools"].append({"rolls": 1.0, "entries": [

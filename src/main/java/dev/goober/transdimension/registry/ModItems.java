@@ -306,6 +306,11 @@ public final class ModItems {
 				ModBlocks.PASTEL_BUSH, ModBlocks.TRANS_FIREFLY_BUSH, ModBlocks.SHORT_SUGAR_GRASS, ModBlocks.TALL_SUGAR_GRASS)) {
 			FlammableBlockRegistry.getDefaultInstance().add(plant, 60, 100);
 		}
+		// The desert and riverside plants compost and burn like vanilla's cactus, dead bush and sugar cane.
+		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_CACTUS, 0.5F);
+		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_SUGAR_CANE, 0.5F);
+		CompostableRegistry.INSTANCE.add(ModBlocks.DRY_SUGAR_BUSH, 0.3F);
+		FlammableBlockRegistry.getDefaultInstance().add(ModBlocks.DRY_SUGAR_BUSH, 60, 100);
 		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_MOSS_BLOCK, 0.65F);
 		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_MOSS_CARPET, 0.3F);
 		CompostableRegistry.INSTANCE.add(ModBlocks.TRANS_SAPLING, 0.3F);

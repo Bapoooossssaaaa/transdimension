@@ -85,8 +85,8 @@
     ],
     [
       "transdimension:trans_crystal_spikes_rare",
-      "minecraft:patch_cactus_desert",
-      "minecraft:patch_dead_bush_2",
+      "transdimension:trans_cacti",
+      "transdimension:dry_sugar_bushes",
       "transdimension:sugar_grass"
     ],
     []

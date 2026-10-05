@@ -157,7 +157,7 @@
           "functions": [
             {
               "function": "minecraft:exploration_map",
-              "destination": "#transdimension:on_egg_house_maps",
+              "destination": "transdimension:on_egg_house_maps",
               "decoration": "minecraft:red_x",
               "zoom": 2,
               "search_radius": 100,
@@ -188,7 +188,7 @@
           "functions": [
             {
               "function": "minecraft:exploration_map",
-              "destination": "#transdimension:fairy_sanctums",
+              "destination": "transdimension:fairy_sanctums",
               "decoration": "minecraft:target_x",
               "zoom": 2,
               "search_radius": 100,

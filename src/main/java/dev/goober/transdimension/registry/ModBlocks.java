@@ -37,6 +37,7 @@ import net.minecraft.world.level.block.SeaPickleBlock;
 import net.minecraft.world.level.block.BonemealableFeaturePlacerBlock;
 import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.CactusBlock;
 import net.minecraft.world.level.block.CakeBlock;
 import net.minecraft.world.level.block.CarpetBlock;
 import net.minecraft.world.level.block.ColoredFallingBlock;
@@ -47,6 +48,7 @@ import net.minecraft.world.level.block.CoralWallFanBlock;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.DropExperienceBlock;
+import net.minecraft.world.level.block.DryVegetationBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.FireflyBushBlock;
@@ -67,6 +69,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.StainedGlassBlock;
 import net.minecraft.world.level.block.StainedGlassPaneBlock;
 import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.SugarCaneBlock;
 import net.minecraft.world.level.block.TallDryGrassBlock;
 import net.minecraft.world.level.block.TallFlowerBlock;
 import net.minecraft.world.level.block.TallSeagrassBlock;
@@ -389,6 +392,15 @@ public final class ModBlocks {
 	/** A bush full of glowing pink and blue fireflies. */
 	public static final Block TRANS_FIREFLY_BUSH = register("trans_firefly_bush", FireflyBushBlock::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.FIREFLY_BUSH));
+	/** The Sugar Dunes' cactus: white with pink spines. Vanilla's pink cactus flowers bloom on it (a block tag lets them). */
+	public static final Block TRANS_CACTUS = register("trans_cactus", properties -> new CactusBlock(properties) {},
+			BlockBehaviour.Properties.ofFullCopy(Blocks.CACTUS).mapColor(MapColor.SNOW));
+	/** The Sugar Dunes' dead bush: dry candy-pink twigs. */
+	public static final Block DRY_SUGAR_BUSH = register("dry_sugar_bush", properties -> new DryVegetationBlock(properties) {},
+			BlockBehaviour.Properties.ofFullCopy(Blocks.DEAD_BUSH).mapColor(MapColor.COLOR_PINK));
+	/** Sugar cane in the flag's colours: it grows by water like sugar cane and makes sugar and paper. */
+	public static final Block TRANS_SUGAR_CANE = register("trans_sugar_cane", properties -> new SugarCaneBlock(properties) {},
+			BlockBehaviour.Properties.ofFullCopy(Blocks.SUGAR_CANE).mapColor(MapColor.COLOR_PINK));
 	/** Pale pink dry grass for the Sugar Dunes. */
 	public static final Block SHORT_SUGAR_GRASS = register("short_sugar_grass", ShortDryGrassBlock::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.SHORT_DRY_GRASS));

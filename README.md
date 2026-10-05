@@ -21,7 +21,7 @@ The realm's **lava is pink**: pink lava burns, sets fires and makes stone and ob
 | Twilight Thicket | A dim lavender wood of tall twilight trees hung with glowing crystals, fireflies and mushrooms. |
 | Candy Floss Grove | Puffy pink and blue candy floss trees, Heart Blooms and lots of Silly Cats. |
 | Heartwood Grove | Big heartwood trees hung with lanterns, warm pink light and fireflies. |
-| Sugar Dunes | Pale pink sand dunes, sandstone underneath, the odd crystal spike and camels. Villages grow here too. |
+| Sugar Dunes | Pale pink sand dunes, sandstone underneath, **white cacti** (some with pink flowers), dry sugar bushes and sugar grass, the odd crystal spike and camels. Villages grow here too. |
 | Lavender Marsh | Purple-tinted wetland with pools, vine-draped marsh trees, lavender flowers and frogs. |
 | Frosted Fields | Snowy pale-blue plains with frosted trees, ice spikes and frost flowers. Villages grow here too. |
 | Crystal Grove | Blue grass, trans crystal spikes and clusters breaking through the surface, crystal-hung trees. |
@@ -37,7 +37,7 @@ The realm's **lava is pink**: pink lava burns, sets fires and makes stone and ob
 | Blooming Caverns | Flower caves: floors of trans moss thick with flowers and glowing Starblooms, ceilings of flowering blush leaves hung with lanterns, spore blossoms. |
 
 - **Flowers.** Vanilla's flowers are replaced in the realm by its own: Trans Tulips, Pearl Daisies, Sky Bells, Flag Lilies, Lavender Puffs, Trans Orchids, Heart Blooms, Blush Carnations, Pearl Snowdrops, Forget-Me-Nots, Trans Roses, Fairy Bells and glowing **Starblooms**, the tall Pride Peony, Sky Delphinium, Blush Foxglove and Pearl Lupine, Trans Petals and Pride Blossoms. They make dye and the small ones can be potted. **Blossom, Bluebell and Pearl Hedges** are flowering leafy blocks for gardens.
-- **Plants.** Trans grass, tall grass and ferns (they take each biome's grass colour, like the grass blocks under them), pastel bushes, firefly bushes with pink and blue fireflies, sugar grass in the dunes, trans seagrass, trans kelp, lily pads with a tiny flower, three colours of coral (blush, sky and pearl) with fans, blocks and dead versions, and pink **trans sea pickles** with glowing blue tips on the reefs.
+- **Plants.** Trans grass, tall grass and ferns (they take each biome's grass colour, like the grass blocks under them), pastel bushes, firefly bushes with pink and blue fireflies, sugar grass, white cacti and dry sugar bushes in the dunes, **trans sugar cane** by the water (blue, pink and white stalks; it makes sugar and paper), trans seagrass, trans kelp, lily pads with a tiny flower, three colours of coral (blush, sky and pearl) with fans, blocks and dead versions, and pink **trans sea pickles** with glowing blue tips on the reefs.
 - **Trees and woods.** Besides the trans wood there are four new woods, each with a full set (logs, wood, stripped, planks, stairs, slabs, fences, gates, doors, trapdoors, buttons, pressure plates, saplings): white **pearlwood**, blue **skywood**, lavender **twilight wood** and pink **blushwood**. Plant a blush sapling near flowers and it may grow into a heart tree.
 - **Water** is vanilla water recoloured per biome (blue seas, pink rivers, lavender crystal pools).
 - **Sky.** Its own day/night cycle: trans blue skies, pink fog, pink-and-blue sunrises and sunsets, and brighter stars at night.

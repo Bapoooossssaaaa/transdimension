@@ -208,6 +208,15 @@ def check_loot(obj, where):
             err(f"{where}: loot item {obj['name']} doesn't exist")
         if obj.get("type") == "minecraft:loot_table" and isinstance(obj.get("value"), str):
             pass
+        if obj.get("function") == "minecraft:exploration_map" and "destination" in obj:
+            # A plain structure tag id: with a '#', 26.2 rejects the whole loot table and its chests stay empty.
+            dest = obj["destination"]
+            ns, path = dest.split(":", 1) if ":" in dest else ("minecraft", dest)
+            if dest.startswith("#"):
+                err(f"{where}: exploration map destination {dest} must not start with '#'")
+            elif not os.path.exists(os.path.join(DATA, ns, "tags", "worldgen", "structure", path + ".json")) \
+                    and not (ns == "minecraft" and vanilla_has("tag/worldgen/structure", dest)):
+                err(f"{where}: exploration map destination {dest} isn't a structure tag")
         for v in obj.values():
             check_loot(v, where)
     elif isinstance(obj, list):
@@ -315,7 +324,8 @@ for b in list(BLOCKS):
 FACING_ONLY = {"pride_oven", "trans_chair", "trans_table", "plush_spot", "fairy_portal_frame", "trans_stool", "trans_armchair",
                "light_blue_cushion", "pink_cushion", "white_cushion"}
 TWINS.update({b: "smoker" for b in FACING_ONLY if b not in TWINS})
-TWINS.update({"trans_lamp": "redstone_lamp", "trans_dirt_path": "dirt_path", "trans_bookshelf": "bookshelf"})
+TWINS.update({"trans_lamp": "redstone_lamp", "trans_dirt_path": "dirt_path", "trans_bookshelf": "bookshelf",
+              "trans_cactus": "cactus", "dry_sugar_bush": "dead_bush", "trans_sugar_cane": "sugar_cane"})
 EXTRA_PROPS = {"trans_bed": {"heart": ["none", "left", "right"]}, "fairy_portal_frame": {"pearl": ["false", "true"]}}
 TWINS["fairy_portal_frame"] = "smoker"
 TWINS["trans_sea_pickle"] = "sea_pickle"

@@ -422,6 +422,27 @@ def generate_features():
     pf("sugar_grass", f"{NS}:sugar_grass", [{"type": "minecraft:rarity_filter", "chance": 3}] + surface("MOTION_BLOCKING") + spread(64))
     pf("trans_lily_pads", f"{NS}:trans_lily_pad", [{"type": "minecraft:count", "count": 4}] + surface() + spread(10))
 
+    # The realm's own desert and riverside plants, placed like vanilla's cactus, dead bushes and sugar cane: white cacti
+    # (one in four topped with vanilla's pink cactus flower), dry sugar bushes, and trans sugar cane beside water.
+    cf("trans_cactus", {"type": "minecraft:block_column", "config": {
+        "allowed_placement": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"}, "direction": "up", "prioritize_tip": False,
+        "layers": [{"height": {"type": "minecraft:biased_to_bottom", "min_inclusive": 1, "max_inclusive": 3},
+                    "provider": simple(state("trans_cactus", age=0))},
+                   {"height": weighted_count([(0, 3), (1, 1)]), "provider": simple(state("minecraft:cactus_flower"))}]}})
+    cf("dry_sugar_bush", {"type": "minecraft:simple_block", "config": {"to_place": simple(state("dry_sugar_bush"))}})
+    cf("trans_sugar_cane", {"type": "minecraft:block_column", "config": {
+        "allowed_placement": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"}, "direction": "up", "prioritize_tip": False,
+        "layers": [{"height": {"type": "minecraft:biased_to_bottom", "min_inclusive": 2, "max_inclusive": 4},
+                    "provider": simple(state("trans_sugar_cane", age=0))}]}})
+    survives = lambda name: {"type": "minecraft:would_survive", "state": state(name, age=0) if name != "dry_sugar_bush" else state(name)}
+    pf("trans_cacti", f"{NS}:trans_cactus", [{"type": "minecraft:rarity_filter", "chance": 6}] + surface("MOTION_BLOCKING")
+       + spread(10, extra=survives("trans_cactus")))
+    pf("dry_sugar_bushes", f"{NS}:dry_sugar_bush", [{"type": "minecraft:count", "count": 2}] + surface()
+       + spread(4, extra=survives("dry_sugar_bush")))
+    for name, chance in (("trans_sugar_cane", 6), ("trans_sugar_cane_swamp", 3)):
+        pf(name, f"{NS}:trans_sugar_cane", [{"type": "minecraft:rarity_filter", "chance": chance}] + surface("MOTION_BLOCKING")
+           + spread(20, xz=4, y=0, extra={"type": "minecraft:all_of", "predicates": [survives("trans_sugar_cane"), water_nearby]}))
+
     # Water plants: placed on the sea floor, only into water. Tall seagrass and kelp are columns of blocks.
     in_water = {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:matching_blocks", "blocks": "minecraft:water"}}
     sea_floor = [{"type": "minecraft:in_square"}, {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR_WG"}]
@@ -786,7 +807,7 @@ def generate_biomes():
           water_fog="#2a8ec0", sky="#ffc7d6", fog="#ffe3ea", music_sound="minecraft:music.overworld.desert",
           particles=particles("minecraft:end_rod", 0.0006),
           extra_attributes={"minecraft:gameplay/snow_golem_melts": True},
-          features=land("minecraft:patch_cactus_desert", "minecraft:patch_dead_bush_2", f"{NS}:sugar_grass",
+          features=land(f"{NS}:trans_cacti", f"{NS}:dry_sugar_bushes", f"{NS}:sugar_grass",
                         f"{NS}:trans_crystal_spikes_rare", local=["minecraft:fossil_upper"]),
           creatures=[spawn("minecraft:rabbit", 4, 2, 3), spawn("minecraft:camel", 1, 1, 1)],
           monsters=[spawn("minecraft:spider", 100, 4, 4), spawn("minecraft:husk", 95, 4, 4), spawn("minecraft:skeleton", 100, 4, 4),
@@ -797,7 +818,7 @@ def generate_biomes():
           particles=particles("minecraft:spore_blossom_air", 0.002),
           extra_attributes={"minecraft:visual/water_fog_end_distance": {"argument": 0.85, "modifier": "multiply"}},
           features=land(f"{NS}:trees_lavender_marsh", f"{NS}:lavender_flowers", f"{NS}:trans_lily_pads", f"{NS}:trans_seagrass_swamp",
-                        "minecraft:patch_sugar_cane_swamp", "minecraft:brown_mushroom_swamp", "minecraft:red_mushroom_swamp",
+                        f"{NS}:trans_sugar_cane_swamp", "minecraft:brown_mushroom_swamp", "minecraft:red_mushroom_swamp",
                         f"{NS}:trans_firefly_bushes_swamp", f"{NS}:trans_grass_normal"),
           creatures=[spawn("minecraft:frog", 10, 2, 5), spawn("silly_cat", 4, 1, 2)],
           water_ambient=[spawn("trans_fish", 8, 2, 4), spawn("minecraft:tropical_fish", 4, 1, 3)])
@@ -829,7 +850,7 @@ def generate_biomes():
 
     biome("trans_beach", fairies=0, temperature=0.8, downfall=0.4, grass="#f5a9b8", foliage="#f5a9b8", water="#5bcefa", water_fog="#1f6fa8",
           sky="#7fd4fa", fog="#f7d0d8", music_sound="minecraft:music.overworld.meadow",
-          features=land("minecraft:patch_sugar_cane"),
+          features=land(f"{NS}:trans_sugar_cane"),
           creatures=[spawn("minecraft:turtle", 5, 2, 5), spawn("silly_cat", 2, 1, 1)])
 
     ocean_floor = {1: [], 2: [], 3: UNDERGROUND, 6: ORES + [f"{NS}:trans_disk_sand"], 7: CAVE_DECOR, 8: SPRINGS}
@@ -849,7 +870,7 @@ def generate_biomes():
           underground_water=[spawn("minecraft:glow_squid", 10, 4, 6)])
     biome("trans_river", fairies=0, temperature=0.6, downfall=0.6, grass="#f5a9b8", foliage="#f5a9b8", water="#f5a9b8", water_fog="#c86a88",
           sky="#8ed8fa", fog="#f7c4cf", music_sound="minecraft:music.overworld.meadow",
-          features={**ocean_floor, 9: [f"{NS}:trans_seagrass_river", "minecraft:patch_sugar_cane", f"{NS}:trans_lily_pads"]},
+          features={**ocean_floor, 9: [f"{NS}:trans_seagrass_river", f"{NS}:trans_sugar_cane", f"{NS}:trans_lily_pads"]},
           creatures=[], water_creatures=[spawn("minecraft:squid", 2, 1, 4)],
           water_ambient=[spawn("trans_fish", 10, 2, 5), spawn("minecraft:salmon", 5, 1, 5)])
 
@@ -976,8 +997,8 @@ FEATURE_RANK = [
     f"{NS}:trans_crystal_clusters_surface",
     f"{NS}:trans_grass_meadow", f"{NS}:trans_grass_forest", f"{NS}:trans_grass_jungle", f"{NS}:trans_grass_plain",
     f"{NS}:trans_grass_normal", f"{NS}:trans_grass_taiga", f"{NS}:large_trans_ferns",
-    f"{NS}:pastel_bushes", "minecraft:patch_cactus_desert", "minecraft:patch_dead_bush_2", f"{NS}:sugar_grass",
-    f"{NS}:trans_lily_pads", "minecraft:patch_sugar_cane", "minecraft:patch_sugar_cane_swamp",
+    f"{NS}:pastel_bushes", f"{NS}:trans_cacti", f"{NS}:dry_sugar_bushes", f"{NS}:sugar_grass",
+    f"{NS}:trans_lily_pads", f"{NS}:trans_sugar_cane", f"{NS}:trans_sugar_cane_swamp",
     "minecraft:brown_mushroom_normal", "minecraft:brown_mushroom_swamp", "minecraft:red_mushroom_swamp",
     f"{NS}:trans_firefly_bushes_near_water", f"{NS}:trans_firefly_bushes_swamp", "minecraft:vines", f"{NS}:trans_boulders",
     f"{NS}:pink_gel_mounds", f"{NS}:blue_gel_mounds", f"{NS}:fairy_islands",

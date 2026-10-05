@@ -241,13 +241,17 @@
       "rolls": 1.0,
       "entries": [
         {
+          "type": "minecraft:empty",
+          "weight": 4
+        },
+        {
           "type": "minecraft:item",
           "name": "minecraft:map",
           "weight": 1,
           "functions": [
             {
               "function": "minecraft:exploration_map",
-              "destination": "#transdimension:fairy_sanctums",
+              "destination": "transdimension:fairy_sanctums",
               "decoration": "minecraft:target_x",
               "zoom": 2,
               "search_radius": 100,

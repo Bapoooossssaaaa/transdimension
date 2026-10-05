@@ -1043,6 +1043,30 @@ def generate_vegetation():
         name(block, english)
         loot_like_vanilla(block, vanilla)
         plant_tags(block, edible=edible)
+    # ---- the Sugar Dunes' white cactus and dry sugar bushes, and trans sugar cane by the water
+    blockstate("trans_cactus", {"variants": {"": {"model": f"{NS}:block/trans_cactus"}}})
+    model("trans_cactus", {"parent": "minecraft:block/cactus", "textures": {
+        "particle": block_tex("trans_cactus_side"), "bottom": block_tex("trans_cactus_bottom"), "top": block_tex("trans_cactus_top"),
+        "side": block_tex("trans_cactus_side")}})
+    item_def("trans_cactus", f"{NS}:block/trans_cactus")
+    name("trans_cactus", "White Cactus")
+    loot_like_vanilla("trans_cactus", "cactus")
+    # Vanilla's pink cactus flowers may sit on it (and grow on it).
+    tag("block", "support_override_cactus_flower", "trans_cactus")
+    blockstate("dry_sugar_bush", {"variants": {"": {"model": f"{NS}:block/dry_sugar_bush"}}})
+    cross_model("dry_sugar_bush")
+    name("dry_sugar_bush", "Dry Sugar Bush")
+    loot_like_vanilla("dry_sugar_bush", "dead_bush")
+    plant_tags("dry_sugar_bush")
+    blockstate("trans_sugar_cane", {"variants": {"": {"model": f"{NS}:block/trans_sugar_cane"}}})
+    cross_model("trans_sugar_cane", item_texture=f"{NS}:item/trans_sugar_cane")
+    name("trans_sugar_cane", "Trans Sugar Cane")
+    loot_like_vanilla("trans_sugar_cane", "sugar_cane")
+    R = recipe
+    R("white_dye_from_trans_cactus", smelting("minecraft:white_dye", "trans_cactus", xp=1.0, category="misc"))
+    R("sugar_from_trans_sugar_cane", shapeless("minecraft:sugar", ["trans_sugar_cane"], 1, category="misc", group="sugar"))
+    R("paper_from_trans_sugar_cane", shaped("minecraft:paper", ["###"], {"#": "trans_sugar_cane"}, 3, category="misc"))
+
     # The firefly bush: a cross plus a glowing (light emission 15) cross of pink and blue fireflies, like vanilla's.
     blockstate("trans_firefly_bush", {"variants": {"": {"model": f"{NS}:block/trans_firefly_bush"}}})
     model("trans_firefly_bush", {"parent": "minecraft:block/cross_emissive", "textures": {

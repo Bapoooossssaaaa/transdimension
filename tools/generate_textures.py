@@ -1172,6 +1172,48 @@ def furniture_textures():
     return textures
 
 
+# ============================================================================================ desert and riverside plants
+R_CACTUS = [hexc(c) for c in ("6F80AE", "98A7CF", "C4CEE9", "E6EBF7", "FFFFFF")]
+R_SPINE = [hexc(c) for c in ("D9708F", "F5A9B8", "FBD3DC")]
+R_DRY_BUSH = [hexc(c) for c in ("6B3A58", "9C5C7E", "C98AA6", "EDB9CB")]
+CACTUS_META = {"texture": {"alpha_cutoff_bias": 0.1}}  # vanilla's cactus_side/top.png.mcmeta
+
+
+def trans_cactus(face):
+    """A white cactus with soft blue shading; vanilla's pale yellow spines turn pink (the bottom has none)."""
+    img = vblock(f"cactus_{face}")
+    spine = lambda p, px: face != "bottom" and hsv(px)[1] < 0.4 and hsv(px)[2] > 0.6
+    out = gradient_map(img, R_CACTUS, mask=lambda p, px: not spine(p, px))
+    return gradient_map(img, R_SPINE, mask=spine, out=out)
+
+
+def dry_sugar_bush():
+    """Vanilla's dead bush as dry candy-pink twigs."""
+    return gradient_map(vblock("dead_bush"), R_DRY_BUSH)
+
+
+def trans_sugar_cane():
+    """Sugar cane whose four stalks come in the flag's colours (blue, pink, white, pink); leaves take their stalk's colour
+    and the joints stay lighter."""
+    img = vblock("sugar_cane")
+    ramps = [R_BLUE[1:5], R_PINK[1:5], R_PEARL[1:], R_PINK[1:5]]
+    lo, hi = lum_range(img)
+    out = img.copy()
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))
+        if px[3] == 0:
+            continue
+        stalk = min(range(4), key=lambda i: abs(x - (1.5 + 4 * i)))
+        c = sample(ramps[stalk], (lum(px) - lo) / (hi - lo))
+        out.putpixel((x, y), (*c, px[3]))
+    return out
+
+
+def trans_sugar_cane_item():
+    """The sugar cane item: a bundle shaded from blue through pink to white."""
+    return gradient_map(vitem("sugar_cane"), R_TRANS[1:])
+
+
 # ============================================================================================ treats
 def trans_cookie():
     """Vanilla's cookie, but the chocolate chips are pink and blue candy chips."""
@@ -3899,8 +3941,13 @@ def main():
     }
     blocks.update({name: cat_plush(name) for name in PLUSHES})
     blocks.update(furniture_textures())
+    blocks.update({f"trans_cactus_{face}": trans_cactus(face) for face in ("side", "top", "bottom")})
+    blocks.update({"dry_sugar_bush": dry_sugar_bush(), "trans_sugar_cane": trans_sugar_cane()})
     for name, img in blocks.items():
         save(img, f"block/{name}.png")
+    for face in ("side", "top"):
+        save_mcmeta(f"block/trans_cactus_{face}.png", CACTUS_META)
+    save(trans_sugar_cane_item(), "item/trans_sugar_cane.png")
     for prefix in WOOD_FAMILIES:
         family_blocks, family_items = wood_family_textures(prefix)
         for name, img in family_blocks.items():

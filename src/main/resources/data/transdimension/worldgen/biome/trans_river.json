@@ -76,7 +76,7 @@
     [
       "transdimension:trans_seagrass_river",
       "transdimension:trans_lily_pads",
-      "minecraft:patch_sugar_cane"
+      "transdimension:trans_sugar_cane"
     ],
     []
   ],
