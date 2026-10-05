@@ -98,8 +98,15 @@ public final class ModItems {
 	/** A Trans Crystal fused with prism shards, like a netherite ingot: it upgrades diamond gear to crystal gear. */
 	public static final Item CRYSTAL_ALLOY = register("crystal_alloy", Item::new, new Item.Properties()
 			.component(DataComponents.LORE, lore("item.transdimension.crystal_alloy.lore")));
+	/**
+	 * The template for the crystal upgrade, like the netherite one: found in mermaid ruin chests, crafted, or copied.
+	 * A plain item is enough, because the smithing table takes any item that a smithing recipe names as its template.
+	 */
+	public static final Item CRYSTAL_UPGRADE_SMITHING_TEMPLATE = register("crystal_upgrade_smithing_template", Item::new,
+			new Item.Properties().rarity(Rarity.UNCOMMON).component(DataComponents.LORE, lore(
+					"item.transdimension.crystal_upgrade_smithing_template.lore", "item.transdimension.crystal_upgrade_smithing_template.lore2")));
 
-	// ---------------------------------------------------------------- crystal gear (diamond gear upgraded with Crystal Alloy)
+	// ---------------------------------------------------------------- crystal gear (diamond gear upgraded with Crystal Alloy and the template)
 	public static final Item TRANS_SWORD = register("trans_sword", Item::new,
 			new Item.Properties().sword(TRANS_TOOL_MATERIAL, 3.0F, -2.4F));
 	public static final Item TRANS_PICKAXE = register("trans_pickaxe", Item::new,

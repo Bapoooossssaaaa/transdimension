@@ -11,12 +11,12 @@
         ]
       }
     },
-    "has_crystal_alloy": {
+    "has_trans_prismarine": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
-            "items": "transdimension:crystal_alloy"
+            "items": "transdimension:trans_prismarine"
           }
         ]
       }
@@ -24,7 +24,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "transdimension:trans_shovel"
+        "recipe": "transdimension:crystal_upgrade_smithing_template_copy"
       }
     }
   },
@@ -32,12 +32,12 @@
     [
       "has_the_recipe",
       "has_crystal_upgrade_smithing_template",
-      "has_crystal_alloy"
+      "has_trans_prismarine"
     ]
   ],
   "rewards": {
     "recipes": [
-      "transdimension:trans_shovel"
+      "transdimension:crystal_upgrade_smithing_template_copy"
     ]
   }
 }

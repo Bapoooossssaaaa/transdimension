@@ -1491,13 +1491,21 @@ def generate_recipes():
     # crystal
     R("trans_crystal_block", shaped("trans_crystal_block", ["###", "###", "###"], {"#": "trans_crystal"}, 1))
     R("trans_crystal_from_block", shapeless("trans_crystal", ["trans_crystal_block"], 9, category="misc"))
-    # Crystal gear is diamond gear upgraded with a Crystal Alloy (a crystal and four prism shards) in a smithing table,
-    # like netherite. Since 1.21.2 a smithing recipe's template is optional, so none is needed. Enchantments carry over.
+    # Crystal gear is diamond gear upgraded with a Crystal Alloy (a crystal and four prism shards) and the Crystal
+    # Upgrade template in a smithing table, like netherite. Enchantments carry over. The template is found in mermaid
+    # ruins; it can also be made from scratch (dearer) or copied like vanilla's (two for one).
     R("crystal_alloy", shapeless("crystal_alloy", ["trans_crystal", "prism_shard", "prism_shard", "prism_shard", "prism_shard"],
                                  category="misc"))
+    R("crystal_upgrade_smithing_template", shaped("crystal_upgrade_smithing_template", ["#X#", "#P#", "###"],
+                                                  {"#": "minecraft:diamond", "X": "trans_crystal", "P": "dark_trans_prismarine"},
+                                                  category="misc"))
+    R("crystal_upgrade_smithing_template_copy", shaped("crystal_upgrade_smithing_template", ["#S#", "#P#", "###"],
+                                                       {"#": "minecraft:diamond", "S": "crystal_upgrade_smithing_template",
+                                                        "P": "trans_prismarine"}, 2, category="misc"))
     for piece in ("sword", "pickaxe", "axe", "shovel", "hoe", "helmet", "chestplate", "leggings", "boots"):
-        R(f"trans_{piece}", {"type": "minecraft:smithing_transform", "base": f"minecraft:diamond_{piece}",
-                             "addition": rid("crystal_alloy"), "result": {"id": rid(f"trans_{piece}")}})
+        R(f"trans_{piece}", {"type": "minecraft:smithing_transform", "template": rid("crystal_upgrade_smithing_template"),
+                             "base": f"minecraft:diamond_{piece}", "addition": rid("crystal_alloy"),
+                             "result": {"id": rid(f"trans_{piece}")}})
     for flower_id, dye, count in (("trans_tulip", "light_blue_dye", 1), ("pearl_daisy", "white_dye", 1), ("sky_bell", "light_blue_dye", 1),
                                   ("flag_lily", "white_dye", 1), ("lavender_puff", "purple_dye", 1), ("trans_orchid", "pink_dye", 1),
                                   ("heart_bloom", "pink_dye", 2), ("pride_peony", "pink_dye", 2), ("trans_petals", "pink_dye", 1)):
@@ -1857,7 +1865,10 @@ def generate_misc():
     # crystals: the rare gem has its own sprite; prism shards drop from prism clusters
     simple_item("trans_crystal", "Trans Crystal")
     simple_item("crystal_alloy", "Crystal Alloy")
-    NAMES["item.transdimension.crystal_alloy.lore"] = "Upgrades diamond gear in a smithing table"
+    NAMES["item.transdimension.crystal_alloy.lore"] = "Upgrades diamond gear, with a Crystal Upgrade template"
+    simple_item("crystal_upgrade_smithing_template", "Crystal Upgrade Smithing Template")
+    NAMES["item.transdimension.crystal_upgrade_smithing_template.lore"] = "Diamond gear + Crystal Alloy in a smithing table"
+    NAMES["item.transdimension.crystal_upgrade_smithing_template.lore2"] = "Found in mermaid ruins"
     simple_item("prism_shard", "Prism Shard")
 
     # Maddie and her gifts

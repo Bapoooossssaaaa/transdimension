@@ -1,22 +1,22 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_crystal_upgrade_smithing_template": {
+    "has_trans_crystal": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
-            "items": "transdimension:crystal_upgrade_smithing_template"
+            "items": "transdimension:trans_crystal"
           }
         ]
       }
     },
-    "has_crystal_alloy": {
+    "has_dark_trans_prismarine": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
-            "items": "transdimension:crystal_alloy"
+            "items": "transdimension:dark_trans_prismarine"
           }
         ]
       }
@@ -24,20 +24,20 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "transdimension:trans_shovel"
+        "recipe": "transdimension:crystal_upgrade_smithing_template"
       }
     }
   },
   "requirements": [
     [
       "has_the_recipe",
-      "has_crystal_upgrade_smithing_template",
-      "has_crystal_alloy"
+      "has_trans_crystal",
+      "has_dark_trans_prismarine"
     ]
   ],
   "rewards": {
     "recipes": [
-      "transdimension:trans_shovel"
+      "transdimension:crystal_upgrade_smithing_template"
     ]
   }
 }

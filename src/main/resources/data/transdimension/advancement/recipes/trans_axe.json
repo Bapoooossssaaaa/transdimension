@@ -1,6 +1,16 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
+    "has_crystal_upgrade_smithing_template": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:crystal_upgrade_smithing_template"
+          }
+        ]
+      }
+    },
     "has_crystal_alloy": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
@@ -21,6 +31,7 @@
   "requirements": [
     [
       "has_the_recipe",
+      "has_crystal_upgrade_smithing_template",
       "has_crystal_alloy"
     ]
   ],

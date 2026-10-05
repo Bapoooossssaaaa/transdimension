@@ -1,5 +1,6 @@
 {
   "type": "minecraft:smithing_transform",
+  "template": "transdimension:crystal_upgrade_smithing_template",
   "base": "minecraft:diamond_leggings",
   "addition": "transdimension:crystal_alloy",
   "result": {

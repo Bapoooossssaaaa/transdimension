@@ -467,6 +467,8 @@ def ruin_data():
                 item("minecraft:book", 4, functions=[{"function": "minecraft:enchant_randomly", "options": [
                     "minecraft:aqua_affinity", "minecraft:depth_strider", "minecraft:respiration", "minecraft:luck_of_the_sea",
                     "minecraft:lure"]}])]},
+            # The Crystal Upgrade template, in about one chest in three (it can be copied once found).
+            {"rolls": 1.0, "entries": [{"type": "minecraft:empty", "weight": 2}, item("crystal_upgrade_smithing_template", 1)]},
         ],
         "random_sequence": LOOT})
 

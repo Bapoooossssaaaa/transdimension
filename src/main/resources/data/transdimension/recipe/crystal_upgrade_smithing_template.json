@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "minecraft:diamond",
+    "X": "transdimension:trans_crystal",
+    "P": "transdimension:dark_trans_prismarine"
+  },
+  "pattern": [
+    "#X#",
+    "#P#",
+    "###"
+  ],
+  "result": {
+    "count": 1,
+    "id": "transdimension:crystal_upgrade_smithing_template"
+  }
+}

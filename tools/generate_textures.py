@@ -748,6 +748,19 @@ def crystal_alloy():
     return gradient_map(vitem("iron_ingot"), R_ALLOY)
 
 
+# Crystal Upgrade Smithing Template: vanilla's netherite upgrade template with a deep blue plate, and the diamond in
+# its middle turned into a flag-striped crystal (blue at the bottom, pink, white on top).
+R_TEMPLATE_PLATE = [hexc(c) for c in ("13254D", "1E4580", "2D69AA", "4A90CC")]
+R_TEMPLATE_GEM = [hexc(c) for c in ("5BCEFA", "F5A9B8", "FFFFFF")]
+
+
+def crystal_upgrade_smithing_template():
+    base = vitem("netherite_upgrade_smithing_template")
+    is_gem = lambda p, px: hsv(px)[0] > 0.3 and hsv(px)[1] > 0.3  # the cyan diamond; the plate is dark red
+    out = gradient_map(base, R_TEMPLATE_PLATE, mask=lambda p, px: not is_gem(p, px))
+    return gradient_map(base, R_TEMPLATE_GEM, mask=is_gem, out=out)
+
+
 # ============================================================================================ crystal gear
 def is_diamond(px):
     h, s, v = hsv(px)
@@ -4112,7 +4125,7 @@ def main():
 
     items = {
         "trans_crystal": trans_crystal_item(), "prism_shard": prism_shard_item(), "pink_lava_bucket": pink_lava_bucket(),
-        "crystal_alloy": crystal_alloy(),
+        "crystal_alloy": crystal_alloy(), "crystal_upgrade_smithing_template": crystal_upgrade_smithing_template(),
         "trans_sea_pickle": trans_sea_pickle(item=True), "trans_glow_berries": trans_glow_berries(),
         "trans_sword": trans_tool("sword"), "trans_pickaxe": trans_tool("pickaxe"), "trans_axe": trans_tool("axe"),
         "trans_shovel": trans_tool("shovel"), "trans_hoe": trans_tool("hoe"),
