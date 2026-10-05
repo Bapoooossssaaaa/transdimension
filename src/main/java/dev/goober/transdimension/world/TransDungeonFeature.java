@@ -12,6 +12,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.RandomizableContainer;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -33,7 +34,8 @@ import dev.goober.transdimension.registry.ModBlocks;
  */
 public class TransDungeonFeature extends Feature<NoneFeatureConfiguration> {
 	public static final ResourceKey<LootTable> LOOT = ResourceKey.create(Registries.LOOT_TABLE, TransDimension.id("chests/trans_dungeon"));
-	private static final EntityType<?>[] MOBS = {EntityType.SKELETON, EntityType.ZOMBIE, EntityType.ZOMBIE, EntityType.SPIDER};
+	/** The spawner's mob (26.2 keeps vanilla's entity types in EntityTypes; EntityType is only the class). */
+	private static final EntityType<?>[] MOBS = {EntityTypes.SKELETON, EntityTypes.ZOMBIE, EntityTypes.ZOMBIE, EntityTypes.SPIDER};
 
 	public TransDungeonFeature(Codec<NoneFeatureConfiguration> codec) {
 		super(codec);

@@ -124,7 +124,7 @@ The compiler has checked every round-4 API (see the status above). Only the mixi
 
 ## Unverified APIs (round 5)
 
-Written after round 4 compiled, not yet compiled themselves. Mixins: `NoiseBasedChunkGeneratorMixin` joins `EnderManMixin` in `transdimension.mixins.json`.
+Written after round 4 compiled. The first round-5 build failed only on `EntityType.SKELETON`/`ZOMBIE`/`SPIDER` in `TransDungeonFeature` (26.2 moved vanilla's entity types to `EntityTypes`; fixed). javac checks every name in a source set before it stops, so that confirmed all the `src/main` rows below. The client rows (`TransFishRenderer`, `FairyRenderer`, the fluid model, `SeatRenderer`) and the mixin target are still unchecked. Mixins: `NoiseBasedChunkGeneratorMixin` joins `EnderManMixin` in `transdimension.mixins.json`.
 
 | Where | API | If it doesn't compile |
 | --- | --- | --- |
