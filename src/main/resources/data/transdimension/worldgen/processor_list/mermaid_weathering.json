@@ -19,14 +19,14 @@
         {
           "input_predicate": {
             "predicate_type": "minecraft:random_block_match",
-            "block": "minecraft:prismarine_bricks",
+            "block": "transdimension:trans_prismarine_bricks",
             "probability": 0.25
           },
           "location_predicate": {
             "predicate_type": "minecraft:always_true"
           },
           "output_state": {
-            "Name": "minecraft:prismarine"
+            "Name": "transdimension:trans_prismarine"
           }
         },
         {
@@ -58,7 +58,7 @@
         {
           "input_predicate": {
             "predicate_type": "minecraft:random_block_match",
-            "block": "minecraft:prismarine_bricks",
+            "block": "transdimension:trans_prismarine_bricks",
             "probability": 0.04
           },
           "location_predicate": {

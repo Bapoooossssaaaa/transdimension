@@ -18,7 +18,7 @@
     "surface": "ceiling",
     "vegetation_chance": 0.08,
     "vegetation_feature": {
-      "feature": "minecraft:cave_vine_in_moss",
+      "feature": "transdimension:trans_cave_vine_in_moss",
       "placement": []
     },
     "vertical_range": 5,

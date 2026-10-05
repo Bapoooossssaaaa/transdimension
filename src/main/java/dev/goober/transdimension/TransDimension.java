@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.goober.transdimension.event.RealmEvents;
+import dev.goober.transdimension.item.BottledFairy;
 import dev.goober.transdimension.network.ModNetworking;
 import dev.goober.transdimension.registry.ModAttachments;
 import dev.goober.transdimension.registry.ModBlockEntities;
@@ -54,6 +55,7 @@ public class TransDimension implements ModInitializer {
 		GooberTeleporter.initialize();
 		RealmEvents.initialize();
 		FairyRealm.initialize();
+		BottledFairy.initialize();
 
 		LOGGER.info("Trans Dimension loaded. Say \"Goober\" in chat to visit the Trans Realm. You are valid!");
 	}

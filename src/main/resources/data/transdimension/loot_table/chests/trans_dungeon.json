@@ -77,11 +77,6 @@
               }
             }
           ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "transdimension:bottled_fairy",
-          "weight": 2
         }
       ]
     },

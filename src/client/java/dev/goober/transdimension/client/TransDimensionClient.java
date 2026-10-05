@@ -20,6 +20,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -58,12 +59,14 @@ import dev.goober.transdimension.client.wings.TransWingsModel;
 import dev.goober.transdimension.client.wings.WingAnimations;
 import dev.goober.transdimension.client.wings.WingPose;
 import dev.goober.transdimension.client.wings.WingsController;
+import dev.goober.transdimension.network.FairyRescuePayload;
 import dev.goober.transdimension.network.OpenMaddieDialoguePayload;
 import dev.goober.transdimension.network.WingFlapPayload;
 import dev.goober.transdimension.registry.ModBlockEntities;
 import dev.goober.transdimension.registry.ModBlocks;
 import dev.goober.transdimension.registry.ModEntities;
 import dev.goober.transdimension.registry.ModFluids;
+import dev.goober.transdimension.registry.ModItems;
 
 public class TransDimensionClient implements ClientModInitializer {
 	/** Trans pink, used for trans grass outside of a world (and as the fallback colour). */
@@ -148,6 +151,9 @@ public class TransDimensionClient implements ClientModInitializer {
 
 		ClientPlayNetworking.registerGlobalReceiver(OpenMaddieDialoguePayload.TYPE, (payload, context) ->
 				context.client().gui.setScreen(new MaddieDialogueScreen(payload.entityId(), payload.gifted())));
+		// A Bottled Fairy saved you: it pops up on screen the way a totem does (the sparkles come from the server).
+		ClientPlayNetworking.registerGlobalReceiver(FairyRescuePayload.TYPE, (payload, context) ->
+				context.client().gameRenderer.displayItemActivation(new ItemStack(ModItems.BOTTLED_FAIRY)));
 		ClientPlayNetworking.registerGlobalReceiver(WingFlapPayload.TYPE, (payload, context) -> {
 			if (context.client().level != null) {
 				WingAnimations.flap(payload.entityId(), payload.action(), context.client().level.getGameTime());

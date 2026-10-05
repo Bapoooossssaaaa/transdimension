@@ -5,6 +5,7 @@
 	"mixins": [
 		"BaseFireBlockMixin",
 		"FireBlockMixin",
+		"LiquidBlockMixin",
 		"EnderManMixin",
 		"NoiseBasedChunkGeneratorMixin"
 	],

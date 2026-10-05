@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "transdimension:dark_trans_prismarine",
+  "result": {
+    "count": 1,
+    "id": "transdimension:dark_trans_prismarine_stairs"
+  }
+}

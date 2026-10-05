@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "minecraft:sea_lantern",
+    "S": "transdimension:prism_shard"
+  },
+  "pattern": [
+    "###",
+    "#S#",
+    "###"
+  ],
+  "result": {
+    "count": 8,
+    "id": "transdimension:trans_sea_lantern"
+  }
+}

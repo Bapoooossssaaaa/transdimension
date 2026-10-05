@@ -94,6 +94,8 @@ import dev.goober.transdimension.block.PinkFireBlock;
 import dev.goober.transdimension.block.PlushSpotBlock;
 import dev.goober.transdimension.block.PrideOvenBlock;
 import dev.goober.transdimension.block.TransBedBlock;
+import dev.goober.transdimension.block.TransCaveVinesBlock;
+import dev.goober.transdimension.block.TransCaveVinesPlantBlock;
 import dev.goober.transdimension.block.TransDirtPathBlock;
 import dev.goober.transdimension.block.TransGrassBlock;
 import dev.goober.transdimension.block.TransGrassPlantBlock;
@@ -424,6 +426,23 @@ public final class ModBlocks {
 	/** Every trans coral colour; the reef feature picks from these. */
 	public static final List<CoralSet> CORALS = List.of(BLUSH_CORAL, SKY_CORAL, PEARL_CORAL);
 
+	// ---------------------------------------------------------------- trans prismarine and sea lanterns (the mermaid ruins)
+	/** Prismarine that shifts slowly between pink and blue, as vanilla's shifts between teal and blue. */
+	public static final Block TRANS_PRISMARINE = copy("trans_prismarine", Blocks.PRISMARINE);
+	public static final Block TRANS_PRISMARINE_STAIRS = stairs("trans_prismarine_stairs", TRANS_PRISMARINE, Blocks.PRISMARINE_STAIRS);
+	public static final Block TRANS_PRISMARINE_SLAB = slab("trans_prismarine_slab", Blocks.PRISMARINE_SLAB);
+	public static final Block TRANS_PRISMARINE_WALL = wall("trans_prismarine_wall", Blocks.PRISMARINE_WALL);
+	public static final Block TRANS_PRISMARINE_BRICKS = copy("trans_prismarine_bricks", Blocks.PRISMARINE_BRICKS);
+	public static final Block TRANS_PRISMARINE_BRICK_STAIRS = stairs("trans_prismarine_brick_stairs", TRANS_PRISMARINE_BRICKS,
+			Blocks.PRISMARINE_BRICK_STAIRS);
+	public static final Block TRANS_PRISMARINE_BRICK_SLAB = slab("trans_prismarine_brick_slab", Blocks.PRISMARINE_BRICK_SLAB);
+	public static final Block DARK_TRANS_PRISMARINE = copy("dark_trans_prismarine", Blocks.DARK_PRISMARINE);
+	public static final Block DARK_TRANS_PRISMARINE_STAIRS = stairs("dark_trans_prismarine_stairs", DARK_TRANS_PRISMARINE,
+			Blocks.DARK_PRISMARINE_STAIRS);
+	public static final Block DARK_TRANS_PRISMARINE_SLAB = slab("dark_trans_prismarine_slab", Blocks.DARK_PRISMARINE_SLAB);
+	/** A sea lantern glowing pink, white and blue. */
+	public static final Block TRANS_SEA_LANTERN = copy("trans_sea_lantern", Blocks.SEA_LANTERN);
+
 	// ---------------------------------------------------------------- pastel lush caves
 	/** Pink and blue moss; bone meal spreads it (and flowers) around, like vanilla moss. */
 	public static final Block TRANS_MOSS_BLOCK = register("trans_moss_block",
@@ -431,6 +450,11 @@ public final class ModBlocks {
 			BlockBehaviour.Properties.ofFullCopy(Blocks.MOSS_BLOCK));
 	public static final Block TRANS_MOSS_CARPET = register("trans_moss_carpet", CarpetBlock::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.MOSS_CARPET));
+	/** Lilac cave vines with glowing pink and blue berries (Trans Glow Berries, in ModItems, plant them). */
+	public static final Block TRANS_CAVE_VINES = registerWithoutItem("trans_cave_vines", TransCaveVinesBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.CAVE_VINES));
+	public static final Block TRANS_CAVE_VINES_PLANT = registerWithoutItem("trans_cave_vines_plant", TransCaveVinesPlantBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.CAVE_VINES_PLANT));
 
 	// ---------------------------------------------------------------- pastel gel (the slimes' glade)
 	/** Bouncy, see-through jelly in the pastel slimes' colours; soft mounds of it dot the Gumdrop Glade. */
@@ -521,18 +545,23 @@ public final class ModBlocks {
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(3.5F).requiresCorrectToolForDrops()
 					.sound(SoundType.STONE).lightLevel(state -> 8));
 
-	// ---------------------------------------------------------------- the Fairy Realm
-	/** The twelve frames of a Fairy Portal, found in the Fairy Sanctums; they take Trans Crystal Pearls. Unbreakable. */
-	public static final Block FAIRY_PORTAL_FRAME = register("fairy_portal_frame", FairyPortalFrameBlock::new,
-			BlockBehaviour.Properties.ofFullCopy(Blocks.END_PORTAL_FRAME).mapColor(MapColor.COLOR_PINK).sound(SoundType.AMETHYST)
-					.lightLevel(state -> state.getValue(FairyPortalFrameBlock.PEARL) ? 7 : 1));
-	/** The shimmering surface of an open Fairy Portal. */
+	// ---------------------------------------------------------------- pink lava, fire and obsidian
 	/** The Trans Realm's lava: pink, otherwise vanilla lava (see PinkLavaFluid). */
 	public static final Block PINK_LAVA = registerWithoutItem("pink_lava", properties -> new LiquidBlock(ModFluids.PINK_LAVA, properties) {
 	}, BlockBehaviour.Properties.ofFullCopy(Blocks.LAVA));
 	/** Fire in the Trans Realm and the Fairy Realm (BaseFireBlockMixin lights it there instead of vanilla fire). */
 	public static final Block PINK_FIRE = registerWithoutItem("pink_fire", PinkFireBlock::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.FIRE).mapColor(MapColor.COLOR_PINK));
+	/** Obsidian made where water meets a pink lava source (LiquidBlockMixin): as tough as obsidian, in deep pinks. */
+	public static final Block PINK_OBSIDIAN = register("pink_obsidian", Block::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.OBSIDIAN).mapColor(MapColor.COLOR_PINK));
+
+	// ---------------------------------------------------------------- the Fairy Realm
+	/** The twelve frames of a Fairy Portal, found in the Fairy Sanctums; they take Trans Crystal Pearls. Unbreakable. */
+	public static final Block FAIRY_PORTAL_FRAME = register("fairy_portal_frame", FairyPortalFrameBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.END_PORTAL_FRAME).mapColor(MapColor.COLOR_PINK).sound(SoundType.AMETHYST)
+					.lightLevel(state -> state.getValue(FairyPortalFrameBlock.PEARL) ? 7 : 1));
+	/** The shimmering surface of an open Fairy Portal. */
 	public static final Block FAIRY_PORTAL = registerWithoutItem("fairy_portal", FairyPortalBlock::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.END_PORTAL).mapColor(MapColor.COLOR_PINK));
 	/** The crystal altar in the middle of the fairy arena: offer it a crystal pearl for a rematch. Unbreakable. */

@@ -243,7 +243,7 @@ def generate_features():
     cf("trans_moss_patch", moss_patch("floor", 1, f"{NS}:trans_moss_vegetation", 0.8,
                                       {"type": "minecraft:uniform", "max_inclusive": 7, "min_inclusive": 4}))
     cf("trans_moss_patch_ceiling", moss_patch("ceiling", {"type": "minecraft:uniform", "max_inclusive": 2, "min_inclusive": 1},
-                                              "minecraft:cave_vine_in_moss", 0.08, {"type": "minecraft:uniform", "max_inclusive": 7, "min_inclusive": 4}))
+                                              f"{NS}:trans_cave_vine_in_moss", 0.08, {"type": "minecraft:uniform", "max_inclusive": 7, "min_inclusive": 4}))
     # What bone meal on trans moss does.
     cf("trans_moss_patch_bonemeal", moss_patch("floor", 1, f"{NS}:trans_moss_vegetation", 0.6,
                                                {"type": "minecraft:uniform", "max_inclusive": 2, "min_inclusive": 1}, edge=0.75))
@@ -273,7 +273,7 @@ def generate_features():
         {"data": state("star_bloom"), "weight": 2}, {"data": state("trans_fern"), "weight": 1}]}}})
     cf("deep_cave_moss", moss_patch("floor", 1, f"{NS}:deep_cave_vegetation", 0.55,
                                     {"type": "minecraft:uniform", "max_inclusive": 4, "min_inclusive": 2}))
-    cf("deep_cave_ceiling_moss", moss_patch("ceiling", 1, "minecraft:cave_vine_in_moss", 0.12,
+    cf("deep_cave_ceiling_moss", moss_patch("ceiling", 1, f"{NS}:trans_cave_vine_in_moss", 0.12,
                                             {"type": "minecraft:uniform", "max_inclusive": 4, "min_inclusive": 2}))
 
     def deep_scan(count, direction, y_spread):
@@ -650,8 +650,9 @@ def generate_features():
 
 # ============================================================================================ vanilla ores
 VANILLA_ORES = os.path.join(HERE, "vanilla_extra", "templates", "worldgen", "ores")
+VANILLA_CAVE_VINES = os.path.join(HERE, "vanilla_extra", "templates", "worldgen", "cave_vines")
 ORE_NAMES = ("coal", "iron", "copper", "gold", "redstone", "lapis", "diamond", "emerald")
-ORE_SWAPS = {
+VANILLA_SWAPS = {
     **{f"minecraft:{o}_ore": f"{NS}:trans_{o}_ore" for o in ORE_NAMES},
     **{f"minecraft:deepslate_{o}_ore": f"{NS}:trans_deepslate_{o}_ore" for o in ORE_NAMES},
     "minecraft:dirt": f"{NS}:trans_dirt", "minecraft:gravel": f"{NS}:trans_gravel", "minecraft:granite": f"{NS}:trans_granite",
@@ -660,6 +661,7 @@ ORE_SWAPS = {
     "minecraft:stone_ore_replaceables": f"{NS}:trans_stone_ore_replaceables",
     "minecraft:deepslate_ore_replaceables": f"{NS}:trans_deepslate_ore_replaceables",
     "minecraft:base_stone_overworld": f"{NS}:trans_base_stone",
+    "minecraft:cave_vines": f"{NS}:trans_cave_vines", "minecraft:cave_vines_plant": f"{NS}:trans_cave_vines_plant",
 }
 
 
@@ -669,15 +671,22 @@ def swap_ids(obj):
     if isinstance(obj, list):
         return [swap_ids(v) for v in obj]
     if isinstance(obj, str):
-        return ORE_SWAPS.get(obj, obj)
+        return VANILLA_SWAPS.get(obj, obj)
     return obj
 
 
 def generate_vanilla_ores():
-    """Vanilla 26.2's overworld ores and rock blobs (same sizes, counts and heights), placing trans ores in trans rock.
-    Each vanilla feature X becomes transdimension:trans_X."""
+    """Vanilla 26.2's overworld ores and rock blobs (same sizes, counts and heights), placing trans ores in trans rock,
+    and its cave vines, growing trans cave vines. Each vanilla feature X becomes transdimension:trans_X."""
+    copy_vanilla_features(VANILLA_ORES)
+    copy_vanilla_features(VANILLA_CAVE_VINES)
+
+
+def copy_vanilla_features(root):
+    """Copies vanilla features from tools/vanilla_extra/templates/worldgen/<root>/{configured,placed}, swapping in our
+    blocks (VANILLA_SWAPS)."""
     for kind in ("configured", "placed"):
-        folder = os.path.join(VANILLA_ORES, kind)
+        folder = os.path.join(root, kind)
         for f in sorted(os.listdir(folder)):
             with open(os.path.join(folder, f), encoding="utf-8") as fh:
                 d = swap_ids(json.load(fh))
@@ -947,7 +956,7 @@ def generate_biomes():
           sky="#9fb8ff", fog="#d9c8ff", music_sound="minecraft:music.overworld.lush_caves",
           particles=particles("minecraft:spore_blossom_air", 0.003),
           features={3: UNDERGROUND, 6: ORES + [f"{NS}:trans_ore_clay"], 7: CAVE_DECOR, 8: SPRINGS,
-                    9: [f"{NS}:tall_trans_grass", f"{NS}:trans_lush_caves_ceiling_vegetation", "minecraft:cave_vines",
+                    9: [f"{NS}:tall_trans_grass", f"{NS}:trans_lush_caves_ceiling_vegetation", f"{NS}:trans_cave_vines",
                         "minecraft:lush_caves_clay", f"{NS}:trans_lush_caves_vegetation", "minecraft:spore_blossom",
                         "minecraft:classic_vines_cave_feature"]},
           creatures=[], axolotls=[spawn("minecraft:axolotl", 10, 4, 6)],
@@ -985,7 +994,7 @@ FEATURE_RANK = [
     f"{NS}:heart_trees", f"{NS}:heart_trees_rare",
     f"{NS}:trees_pearlwood_forest", f"{NS}:trees_bluebell_woods", f"{NS}:trees_twilight_thicket", f"{NS}:trees_candy_floss_grove",
     f"{NS}:trees_moonlit_meadow", f"{NS}:hedge_bushes",
-    f"{NS}:tall_trans_grass", f"{NS}:trans_lush_caves_ceiling_vegetation", "minecraft:cave_vines", "minecraft:lush_caves_clay",
+    f"{NS}:tall_trans_grass", f"{NS}:trans_lush_caves_ceiling_vegetation", f"{NS}:trans_cave_vines", "minecraft:lush_caves_clay",
     f"{NS}:trans_lush_caves_vegetation", f"{NS}:blooming_cave_ceiling", f"{NS}:blooming_cave_floor", "minecraft:spore_blossom",
     "minecraft:classic_vines_cave_feature",
     f"{NS}:trans_coral_reefs", f"{NS}:trans_coral_reefs_dense", f"{NS}:trans_coral_reefs_rare", f"{NS}:trans_seagrass_warm", f"{NS}:trans_seagrass_deep", f"{NS}:trans_seagrass_river",

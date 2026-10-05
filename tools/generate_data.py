@@ -1020,6 +1020,21 @@ def double_plant(block, english, vanilla, tinted=False):
 
 
 def generate_vegetation():
+    # ---- trans cave vines (TransCaveVinesBlock): vanilla's cave vines in lilac, with pink and blue berries; Trans Glow
+    # Berries are their item, as glow berries are vanilla's
+    for part in ("cave_vines", "cave_vines_plant"):
+        block = f"trans_{part}"
+        blockstate(block, from_template(part, part, block))
+        for lit in ("", "_lit"):
+            model(f"{block}{lit}", {"parent": "minecraft:block/cross", "textures": {"cross": block_tex(f"{block}{lit}")}})
+        loot_like_vanilla(block, part, {"minecraft:glow_berries": "trans_glow_berries"})
+        for t in ("cave_vines", "climbable", "bee_growables"):
+            tag("block", t, block)
+    name("trans_cave_vines", "Trans Cave Vines")
+    name("trans_cave_vines_plant", "Trans Cave Vines Plant")
+    simple_item("trans_glow_berries", "Trans Glow Berries")
+    tag("item", "fox_food", "trans_glow_berries")
+
     # ---- grass, ferns, bushes
     blockstate("trans_short_grass", {"variants": {"": {"model": f"{NS}:block/trans_short_grass"}}})
     cross_model("trans_short_grass", tinted=True)
@@ -1258,6 +1273,24 @@ def generate_woods_and_flowers():
         loot(block, loot_self(block))
         tag("block", "hedges", block, ns=NS)
         tag("item", "hedges", block, ns=NS)
+
+
+def generate_trans_prismarine():
+    """Trans prismarine and sea lanterns for the mermaid ruins: vanilla's prismarine family in the flag's colours. Eight
+    vanilla blocks around a prism shard make eight trans ones."""
+    stone_family("trans_prismarine", "Trans Prismarine", "trans_prismarine", "Trans Prismarine")
+    stone_family("trans_prismarine_bricks", "Trans Prismarine Bricks", "trans_prismarine_brick", "Trans Prismarine Brick",
+                 wall_too=False)
+    stone_family("dark_trans_prismarine", "Dark Trans Prismarine", "dark_trans_prismarine", "Dark Trans Prismarine",
+                 wall_too=False)
+    cube("trans_sea_lantern", "Trans Sea Lantern", tool=None, drop=None)
+    loot_like_vanilla("trans_sea_lantern", "sea_lantern")
+    for ours, vanilla in (("trans_prismarine", "prismarine"), ("trans_prismarine_bricks", "prismarine_bricks"),
+                          ("dark_trans_prismarine", "dark_prismarine"), ("trans_sea_lantern", "sea_lantern")):
+        recipe(ours, shaped(ours, ["###", "#S#", "###"], {"#": f"minecraft:{vanilla}", "S": "prism_shard"}, 8))
+    stone_recipes("trans_prismarine", "trans_prismarine")
+    stone_recipes("trans_prismarine_brick", "trans_prismarine_bricks", wall=False)
+    stone_recipes("dark_trans_prismarine", "dark_trans_prismarine", wall=False)
 
 
 def generate_woods_and_flowers_recipes():
@@ -1564,6 +1597,11 @@ def generate_creatures():
     for t in ("fire", "replaceable", "happy_ghast_avoids"):
         tag("block", t, "pink_fire")
 
+    # Pink obsidian: what water makes of a pink lava source (LiquidBlockMixin). Tagged like obsidian.
+    cube("pink_obsidian", "Pink Obsidian")
+    for t in ("needs_diamond_tool", "dragon_immune"):
+        tag("block", t, "pink_obsidian")
+
     # Trans dungeons (TransDungeonFeature): vanilla's dungeon loot with the realm's treasures mixed in.
     def entry(item, weight, lo=1, hi=1, enchant=False):
         e = {"type": "minecraft:item", "name": rid(item), "weight": weight}
@@ -1580,7 +1618,7 @@ def generate_creatures():
             entry("minecraft:saddle", 20), entry("minecraft:golden_apple", 15), entry("minecraft:enchanted_golden_apple", 2),
             entry("minecraft:name_tag", 20), entry("minecraft:music_disc_cat", 10), entry("minecraft:iron_horse_armor", 12),
             entry("minecraft:golden_horse_armor", 8), entry("minecraft:diamond_horse_armor", 4), entry("minecraft:book", 10, enchant=True),
-            entry("trans_crystal", 6), entry("trans_pearl", 10, 1, 2), entry("bottled_fairy", 2)]},
+            entry("trans_crystal", 6), entry("trans_pearl", 10, 1, 2)]},
         {"rolls": {"type": "minecraft:uniform", "min": 1.0, "max": 4.0}, "entries": [
             entry("minecraft:iron_ingot", 10, 1, 4), entry("minecraft:gold_ingot", 5, 1, 4), entry("minecraft:bread", 20),
             entry("gumdrop", 15, 2, 5), entry("prism_shard", 15, 2, 6), entry("minecraft:redstone", 15, 1, 4),
@@ -2053,7 +2091,7 @@ def generate_advancements():
       {"defeated": {"trigger": "minecraft:player_killed_entity", "conditions": {"entity": [{
           "condition": "minecraft:entity_properties", "entity": "this", "predicate": {"minecraft:entity_type": rid("trans_fairy")}}]}}},
       frame="challenge")
-    A("bottled_magic", "fairy_tale_ending", "fairy_jar", "Bottled Magic", "Take home a Fairy Jar", {"jar": has("fairy_jar")})
+    A("fairy_in_a_jar", "fairy_tale_ending", "fairy_jar", "Fairy in a Jar", "Take home a Fairy Jar", {"jar": has("fairy_jar")})
 
 
 def generate_sounds():
@@ -2172,6 +2210,7 @@ def main():
     generate_woods_and_flowers()
     generate_recipes()
     generate_woods_and_flowers_recipes()
+    generate_trans_prismarine()
     generate_creatures()
     generate_fairy_realm_data()
     generate_furniture()

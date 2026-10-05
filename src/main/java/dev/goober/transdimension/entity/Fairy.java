@@ -202,7 +202,10 @@ public class Fairy extends PathfinderMob {
 		return InteractionResult.SUCCESS;
 	}
 
-	/** A fairy's thank-you: usually crystals, pearls or sweets, sometimes something special. */
+	/**
+	 * A fairy's thank-you: usually crystals, pearls or sweets, sometimes something special. Never a Bottled Fairy: those
+	 * only come from catching a fairy in a bottle.
+	 */
 	private ItemStack rollGift() {
 		int roll = this.random.nextInt(100);
 		if (roll < 35) {
@@ -214,7 +217,7 @@ public class Fairy extends PathfinderMob {
 		} else if (roll < 85) {
 			return new ItemStack(Items.GOLDEN_APPLE);
 		} else if (roll < 95) {
-			return new ItemStack(ModItems.BOTTLED_FAIRY);
+			return new ItemStack(Items.EXPERIENCE_BOTTLE, 2 + this.random.nextInt(3));
 		}
 		return new ItemStack(ModItems.TRANS_CRYSTAL_PEARL);
 	}

@@ -1,12 +1,12 @@
 {
-  "parent": "transdimension:fairy_tale_ending",
+  "parent": "transdimension:goober",
   "criteria": {
-    "jar": {
+    "bottle": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
-            "items": "transdimension:fairy_jar"
+            "items": "transdimension:bottled_fairy"
           }
         ]
       }
@@ -14,7 +14,7 @@
   },
   "display": {
     "icon": {
-      "id": "transdimension:fairy_jar"
+      "id": "transdimension:bottled_fairy"
     },
     "title": {
       "translate": "advancements.transdimension.bottled_magic.title"
@@ -25,7 +25,7 @@
   },
   "requirements": [
     [
-      "jar"
+      "bottle"
     ]
   ]
 }

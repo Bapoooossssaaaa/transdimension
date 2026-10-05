@@ -20,6 +20,7 @@ public final class ModNetworking {
 	public static void initialize() {
 		PayloadTypeRegistry.clientboundPlay().register(OpenMaddieDialoguePayload.TYPE, OpenMaddieDialoguePayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(WingFlapPayload.TYPE, WingFlapPayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(FairyRescuePayload.TYPE, FairyRescuePayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(MaddieChoicePayload.TYPE, MaddieChoicePayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(WingActionPayload.TYPE, WingActionPayload.CODEC);
 

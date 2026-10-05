@@ -21,6 +21,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BoatItem;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -36,7 +37,6 @@ import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.Consumables;
-import net.minecraft.world.item.component.DeathProtection;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
@@ -140,6 +140,12 @@ public final class ModItems {
 			.food(food(4, 0.4F, true),
 					withEffect(Consumables.defaultDrink(), new MobEffectInstance(MobEffects.DOLPHINS_GRACE, 20 * 60, 0))));
 
+	// ---------------------------------------------------------------- the realm's caves
+	/** Pink and blue glow berries from trans cave vines: a snack like glow berries, and they plant new vines on a ceiling. */
+	public static final Item TRANS_GLOW_BERRIES = register("trans_glow_berries",
+			properties -> new BlockItem(ModBlocks.TRANS_CAVE_VINES, properties),
+			new Item.Properties().food(food(2, 0.1F, false), Consumables.defaultFood().build()));
+
 	// ---------------------------------------------------------------- mobs
 	public static final Item SILLY_CAT_SPAWN_EGG = register("silly_cat_spawn_egg", SpawnEggItem::new,
 			new Item.Properties().spawnEgg(ModEntities.SILLY_CAT));
@@ -188,9 +194,12 @@ public final class ModItems {
 			new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1));
 
 	// ---------------------------------------------------------------- wild fairies
-	/** A fairy caught in a glass bottle: hold it and it saves you from death once, like a totem. */
+	/**
+	 * A fairy caught in a glass bottle (only by bottling one: fairies and chests never give them). Hold it and it saves you
+	 * from death once; {@link dev.goober.transdimension.item.BottledFairy} does the rescue, in the flag's colours instead of
+	 * the totem's, so the item has no death protection component.
+	 */
 	public static final Item BOTTLED_FAIRY = register("bottled_fairy", Item::new, new Item.Properties().stacksTo(1).rarity(Rarity.RARE)
-			.component(DataComponents.DEATH_PROTECTION, DeathProtection.TOTEM_OF_UNDYING)
 			.component(DataComponents.LORE, lore("item.transdimension.bottled_fairy.lore", "item.transdimension.bottled_fairy.lore2")));
 	public static final Item FAIRY_SPAWN_EGG = register("fairy_spawn_egg", SpawnEggItem::new,
 			new Item.Properties().spawnEgg(ModEntities.FAIRY));

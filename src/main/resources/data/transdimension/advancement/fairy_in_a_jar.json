@@ -1,0 +1,31 @@
+{
+  "parent": "transdimension:fairy_tale_ending",
+  "criteria": {
+    "jar": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:fairy_jar"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:fairy_jar"
+    },
+    "title": {
+      "translate": "advancements.transdimension.fairy_in_a_jar.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.fairy_in_a_jar.description"
+    }
+  },
+  "requirements": [
+    [
+      "jar"
+    ]
+  ]
+}

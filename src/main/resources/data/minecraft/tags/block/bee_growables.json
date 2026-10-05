@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:trans_cave_vines",
+    "transdimension:trans_cave_vines_plant"
+  ]
+}

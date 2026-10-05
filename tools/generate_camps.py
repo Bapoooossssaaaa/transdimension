@@ -266,7 +266,8 @@ def loot_tables():
                          item("minecraft:iron_ingot"), item("trans_pearl", 1, 2)]),
         (uniform(0, 1), [item("minecraft:iron_axe"), item("minecraft:iron_boots"), item("minecraft:iron_leggings"),
                          item("minecraft:iron_spear")]),
-        (1, [item("trans_crystal", 1, 2, weight=4), item("minecraft:golden_apple", weight=3), item("bottled_fairy", weight=1)]),
+        # (No Bottled Fairy: those only come from catching a fairy in a bottle.)
+        (1, [item("trans_crystal", 1, 2, weight=4), item("minecraft:golden_apple", weight=3)]),
     ])
     # 26.3's barrel: cushions instead of its cushions, hay instead of its straw beds.
     chest_table("trans_camp_barrel", [

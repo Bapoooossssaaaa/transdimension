@@ -84,7 +84,7 @@
     [
       "transdimension:tall_trans_grass",
       "transdimension:trans_lush_caves_ceiling_vegetation",
-      "minecraft:cave_vines",
+      "transdimension:trans_cave_vines",
       "minecraft:lush_caves_clay",
       "transdimension:trans_lush_caves_vegetation",
       "minecraft:spore_blossom",

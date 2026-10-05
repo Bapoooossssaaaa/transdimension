@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_trans_prismarine_bricks": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_prismarine_bricks"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:trans_prismarine_brick_stairs"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_trans_prismarine_bricks"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:trans_prismarine_brick_stairs"
+    ]
+  }
+}

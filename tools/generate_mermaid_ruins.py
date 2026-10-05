@@ -8,8 +8,10 @@ Three ruins, picked at random for each spot:
     north side, a vanity with a mirror, a candle and a pearl to the east, and a clam-shell bed to the west;
   * the Mermaid Arch: a collapsing gateway over a flag-striped path, with a little mermaid statue at its end and a chest
     half-buried by the path;
-  * the Mermaid Cottage: a small prismarine dome (its roof caved in on one side) over a coral flag rug, with a clam-shell
-    bed, a vanity, a chest and a sea-lantern chandelier, in a coral garden.
+  * the Mermaid Cottage: a small trans prismarine dome (its roof caved in on one side) over a coral flag rug, with a
+    clam-shell bed, a vanity, a chest and a trans sea lantern chandelier, in a coral garden.
+Their prismarine and sea lanterns are the trans versions (pink, lilac, blue and pearl prismarine, light blue bricks, dark
+plum prismarine, and sea lanterns glowing blue, pink and white).
 Kelp, seagrass, coral and sea pickles grow over all of them, and a processor list weathers them a little differently
 every time (cracked bricks, worn diorite and prismarine, the odd missing block).
 
@@ -52,9 +54,9 @@ BRICK = T + "trans_stone_bricks"
 CHISELED = T + "chiseled_trans_stone_bricks"
 FOUNDATION = T + "trans_sandstone"
 SAND = T + "trans_sand"
-PRISMARINE = "minecraft:prismarine_bricks"
-DARK = "minecraft:dark_prismarine"
-LANTERN = "minecraft:sea_lantern"
+PRISMARINE = T + "trans_prismarine_bricks"
+DARK = T + "dark_trans_prismarine"
+LANTERN = T + "trans_sea_lantern"
 CORALS = ("blush", "sky", "pearl")
 
 
@@ -141,7 +143,7 @@ class Template:
         mirror_x, and decor (block name, props) set on the table."""
         y = FLOOR + 1
         for z in range(z0, z1 + 1):
-            self.put((x, y, z), "minecraft:prismarine_brick_slab", {"type": "top", "waterlogged": False})
+            self.put((x, y, z), T + "trans_prismarine_brick_slab", {"type": "top", "waterlogged": False})
             for dy in (1, 2):
                 # The panes join each other and the frame's walls at both ends.
                 self.put((mirror_x, y + dy, z), "minecraft:light_blue_stained_glass_pane", {
@@ -209,7 +211,7 @@ def court():
 
     # The fountain: a pearl of light on a pedestal, sea pickles round its foot.
     t.put((c, FLOOR + 1, c), DARK)
-    t.put((c, FLOOR + 2, c), "minecraft:prismarine_wall", {"up": True, "north": "none", "south": "none", "east": "none", "west": "none",
+    t.put((c, FLOOR + 2, c), T + "trans_prismarine_wall", {"up": True, "north": "none", "south": "none", "east": "none", "west": "none",
                                                           "waterlogged": False})
     t.put((c, FLOOR + 3, c), LANTERN)
     for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
@@ -235,10 +237,10 @@ def court():
                 t.wall_fan(pos, facing)
 
     # The throne on the north side, facing the fountain: a stair seat, prismarine arms, a tall back crowned with coral.
-    t.put((c, FLOOR + 1, 3), "minecraft:prismarine_brick_stairs", {"facing": "north", "half": "bottom", "shape": "straight",
+    t.put((c, FLOOR + 1, 3), T + "trans_prismarine_brick_stairs", {"facing": "north", "half": "bottom", "shape": "straight",
                                                                   "waterlogged": False})
     for x in (c - 1, c + 1):
-        t.put((x, FLOOR + 1, 3), "minecraft:prismarine_wall", {"up": True, "north": "none", "south": "none", "east": "none",
+        t.put((x, FLOOR + 1, 3), T + "trans_prismarine_wall", {"up": True, "north": "none", "south": "none", "east": "none",
                                                               "west": "none", "waterlogged": False})
     for y in range(FLOOR + 1, FLOOR + 4):
         t.put((c, y, 2), DARK)
@@ -359,13 +361,13 @@ def cottage():
                     elif not (caved(x, z) and y == FLOOR + 3):
                         t.put((x, y, z), PRISMARINE)
             if 3.6 <= r < 4.6 and not caved(x, z):
-                t.put((x, FLOOR + 4, z), "minecraft:prismarine")
+                t.put((x, FLOOR + 4, z), T + "trans_prismarine")
             if 2.5 <= r < 3.6 and not caved(x, z):
                 t.put((x, FLOOR + 5, z), DARK)
             if r < 2.5 and not caved(x, z):
                 t.put((x, FLOOR + 6, z), LANTERN if (x, z) == (c, c) else PRISMARINE)
     # The fallen roof lies outside, in the garden.
-    for pos, block in (((11, FLOOR + 1, 2), "minecraft:prismarine"), ((10, FLOOR + 1, 1), DARK), ((12, FLOOR + 1, 4), PRISMARINE)):
+    for pos, block in (((11, FLOOR + 1, 2), T + "trans_prismarine"), ((10, FLOOR + 1, 1), DARK), ((12, FLOOR + 1, 4), PRISMARINE)):
         t.put(pos, block)
 
     # Keep the inside open even where the sea floor rises: water in every empty cell of the room.
@@ -435,7 +437,7 @@ def ruin_data():
 
     write(os.path.join(wg, "processor_list", "mermaid_weathering.json"), {"processors": [{"processor_type": "minecraft:rule", "rules": [
         worn(BRICK, T + "cracked_trans_stone_bricks", 0.3),
-        worn(PRISMARINE, "minecraft:prismarine", 0.25),
+        worn(PRISMARINE, T + "trans_prismarine", 0.25),
         worn(PEARL, WORN_PEARL, 0.2),
         worn(BRICK, "minecraft:water", 0.04),
         worn(PRISMARINE, "minecraft:water", 0.04),

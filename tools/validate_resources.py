@@ -331,6 +331,7 @@ EXTRA_PROPS = {"trans_bed": {"heart": ["none", "left", "right"]}, "fairy_portal_
 TWINS["fairy_portal_frame"] = "smoker"
 TWINS["trans_sea_pickle"] = "sea_pickle"
 TWINS["pink_fire"] = "fire"
+TWINS.update({"trans_cave_vines": "cave_vines", "trans_cave_vines_plant": "cave_vines_plant"})
 for b in BLOCKS:
     if b.endswith("_plush"):
         TWINS[b] = "smoker"

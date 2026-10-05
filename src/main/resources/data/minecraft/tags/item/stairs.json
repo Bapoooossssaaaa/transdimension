@@ -3,6 +3,7 @@
   "values": [
     "transdimension:blush_stairs",
     "transdimension:cobbled_trans_deepslate_stairs",
+    "transdimension:dark_trans_prismarine_stairs",
     "transdimension:light_blue_wool_stairs",
     "transdimension:pearl_stairs",
     "transdimension:pink_wool_stairs",
@@ -17,6 +18,8 @@
     "transdimension:trans_deepslate_tile_stairs",
     "transdimension:trans_diorite_stairs",
     "transdimension:trans_granite_stairs",
+    "transdimension:trans_prismarine_brick_stairs",
+    "transdimension:trans_prismarine_stairs",
     "transdimension:trans_sandstone_stairs",
     "transdimension:trans_stairs",
     "transdimension:trans_stone_brick_stairs",

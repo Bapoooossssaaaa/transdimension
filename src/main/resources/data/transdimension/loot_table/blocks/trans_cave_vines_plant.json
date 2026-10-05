@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "conditions": [
+        {
+          "block": "transdimension:trans_cave_vines_plant",
+          "condition": "minecraft:block_state_property",
+          "properties": {
+            "berries": "true"
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "transdimension:trans_glow_berries"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "transdimension:blocks/trans_cave_vines_plant"
+}

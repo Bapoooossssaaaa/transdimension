@@ -461,9 +461,10 @@ def trans_gravel():
     pebble = lambda p, px: norm(px) > 0.42
     labels, count = components(img, pebble)
     rng = random.Random(31)
-    # Most pebbles are pink, blue or white (it used to be mostly grey, which didn't look trans).
-    ramps = [mix_ramp(R_STONE, light_ramp(PINK, 0.5), 0.6), mix_ramp(R_STONE, light_ramp(BLUE, 0.5), 0.55),
-             mix_ramp(R_STONE, R_PEARL, 0.7), R_STONE, mix_ramp(R_STONE, light_ramp(PINK, 0.5), 0.4)]
+    # Most pebbles are pink, blue or white (it used to be mostly grey, which didn't look trans), but soft: the colours
+    # are mixed well into grey and kept a little dark, as brighter pebbles looked garish.
+    ramps = [mix_ramp(R_STONE, light_ramp(PINK, 0.5), 0.38), mix_ramp(R_STONE, light_ramp(BLUE, 0.5), 0.35),
+             mix_ramp(R_STONE, R_PEARL, 0.35), R_STONE, mix_ramp(R_STONE, light_ramp(PINK, 0.5), 0.25)]
     # Vanilla's pebbles touch, so each one is split into 3x3 chunks, each its own colour.
     choice = {}
     out = img.copy()
@@ -474,9 +475,9 @@ def trans_gravel():
             key = (labels[p], p[0] // 3, p[1] // 3)
             if key not in choice:
                 choice[key] = ramps[rng.randrange(len(ramps))]
-            c = sample(choice[key], 0.1 + 0.9 * t)
+            c = sample(choice[key], 0.04 + 0.66 * t)
         else:
-            c = sample(R_MORTAR, t * 1.3)
+            c = sample(R_MORTAR, t * 1.2)
         out.putpixel(p, (*c, px[3]))
     return out
 
@@ -870,6 +871,107 @@ def trans_clay():
 
 def trans_sea_pickle(item=False):
     return gradient_map(vitem("sea_pickle") if item else vblock("sea_pickle"), R_PICKLE)
+
+
+# ============================================================================================ trans cave vines and glow berries
+# Lilac leaves (like trans kelp) on plum stems, under the realm's pink moss; the berries glow pink or blue.
+R_VINE_STEM = [hexc(c) for c in ("3E1D36", "5E3053", "804A72", "9C6590")]
+R_BERRIES = ([hexc(c) for c in ("A83E68", "E2729A", "F7B2C7", "FFEAF1")],
+             [hexc(c) for c in ("2A6FB0", "4FB3EA", "9EDDFB", "EFFAFF")])
+
+
+def vine_parts(img, plain=None):
+    """Splits a vanilla cave vine texture into stems, leaves and berries. A berry is any pixel that differs from the
+    plain (berry-less) texture; without one (the glow berries item) the bright orange and yellow pixels are berries."""
+    stems, leaves, berries = set(), set(), set()
+    for p in pixels(img):
+        px = img.getpixel(p)
+        if px[3] == 0:
+            continue
+        h = hsv(px)[0]
+        if (plain.getpixel(p) != px) if plain is not None else (h < 0.16 and max(px[:3]) >= 140):
+            berries.add(p)
+        elif h < 0.14:
+            stems.add(p)
+        else:
+            leaves.add(p)
+    return stems, leaves, berries
+
+
+def trans_vines(img, plain=None, first_berry=0, berry_colour=None):
+    """Recolours a cave vine texture: lilac leaves, plum stems, and each berry pink or blue in turn (or as
+    `berry_colour(pos)` says: 0 pink, 1 blue)."""
+    stems, leaves, berries = vine_parts(img, plain)
+    out = gradient_map(img, V_LILAC, mask=lambda p, px: p in leaves, curve=lambda t: 0.06 + 0.66 * t)
+    gradient_map(img, R_VINE_STEM, mask=lambda p, px: p in stems, out=out)
+    labels, count = components(img, lambda p, px: p in berries, wrap=False)
+    lo, hi = lum_range(img, lambda p, px: p in berries)
+    for p, label in labels.items():
+        px = img.getpixel(p)
+        colour = berry_colour(p) if berry_colour else (label + first_berry) % 2
+        out.putpixel(p, (*sample(R_BERRIES[colour], (lum(px) - lo) / (hi - lo)), px[3]))
+    return out
+
+
+def trans_cave_vines_textures():
+    """The four cave vine textures (plain and with berries, tip and body)."""
+    out = {}
+    for part in ("cave_vines", "cave_vines_plant"):
+        plain = vblock(part)
+        out[f"trans_{part}"] = trans_vines(plain)
+        out[f"trans_{part}_lit"] = trans_vines(vblock(f"{part}_lit"), plain, first_berry=1 if part == "cave_vines" else 0)
+    return out
+
+
+def trans_glow_berries():
+    """The item: the big berry pink, the small one blue. They touch, so each pixel goes to the nearer berry's middle
+    (scaled by the berry's size)."""
+    big, small = ((5.0, 9.5), 4.0), ((10.0, 12.0), 2.4)
+    nearer = lambda p, berry: math.hypot(p[0] - berry[0][0], p[1] - berry[0][1]) / berry[1]
+    return trans_vines(vitem("glow_berries"), berry_colour=lambda p: 1 if nearer(p, small) < nearer(p, big) else 0)
+
+
+# ============================================================================================ trans prismarine and sea lanterns
+# Vanilla's prismarine drifts between four tints (one per animation frame); ours drifts through pink, lilac, blue and
+# pearl, with vanilla's frame order and timing.
+R_PRISMARINE_FRAMES = (
+    [hexc(c) for c in ("5C2448", "8C3F6A", "C46A93", "E99BB7", "F8CBD9")],
+    [hexc(c) for c in ("3D3270", "5E529C", "8A7CC6", "B6AAE6", "DCD5F6")],
+    [hexc(c) for c in ("1D4472", "2E6CA3", "4FA2D6", "86CBEF", "C2E9FB")],
+    [hexc(c) for c in ("575473", "7E7B9C", "A9A7C4", "D2D1E4", "F2F1F8")],
+)
+R_PRISMARINE_BRICKS = [hexc(c) for c in ("2B5C8E", "4C8FC2", "79BFE6", "A9DDF6", "D8F1FC")]
+R_DARK_PRISMARINE = [hexc(c) for c in ("1A1636", "2D2752", "4A3A72", "7A4F8A", "B0679F")]
+R_SEA_LANTERN = [hexc(c) for c in ("4C9BD6", "8CCFF2", "F2B4C6", "FBE0E8", "FFFFFF")]
+R_PINK_OBSIDIAN = [hexc(c) for c in ("2A0B1E", "4A1535", "73214F", "A3326E", "D45A95", "F7A6C8")]
+
+
+def trans_prismarine():
+    """(image, mcmeta) from vanilla's four-frame prismarine, one flag colour per frame."""
+    with _zip(BLOCK_ZIP).open("base block textures/prismarine.png.mcmeta") as f:
+        meta = json.load(f)
+    img = vblock("prismarine")
+    lo, hi = lum_range(img)
+    out = img.copy()
+    for i, ramp in enumerate(R_PRISMARINE_FRAMES):
+        out.paste(gradient_map(img.crop((0, 16 * i, 16, 16 * i + 16)), ramp, lo=lo, hi=hi), (0, 16 * i))
+    return out, meta
+
+
+def trans_sea_lantern():
+    """(image, mcmeta): vanilla's shimmering sea lantern with blue edges, a pink glow and a white-hot heart."""
+    with _zip(BLOCK_ZIP).open("base block textures/sea_lantern.png.mcmeta") as f:
+        meta = json.load(f)
+    return animated(vblock("sea_lantern"), R_SEA_LANTERN), meta
+
+
+def trans_prismarine_textures():
+    return {"trans_prismarine_bricks": recolour(vblock("prismarine_bricks"), R_PRISMARINE_BRICKS),
+            "dark_trans_prismarine": recolour(vblock("dark_prismarine"), R_DARK_PRISMARINE)}
+
+
+def pink_obsidian():
+    return recolour(vblock("obsidian"), R_PINK_OBSIDIAN)
 
 
 def pastel_bush():
@@ -3948,6 +4050,7 @@ def main():
         "trans_cake_bottom": trans_cake_bottom(), "pride_oven_front": pride_oven_front(), "pride_oven_side": pride_oven_side(),
         "pride_oven_top": pride_oven_top(), "pride_oven_bottom": pride_oven_bottom(),
         "trans_clay": trans_clay(), "trans_sea_pickle": trans_sea_pickle(),
+        **trans_cave_vines_textures(), **trans_prismarine_textures(), "pink_obsidian": pink_obsidian(),
     }
     blocks.update({name: cat_plush(name) for name in PLUSHES})
     blocks.update(furniture_textures())
@@ -3988,6 +4091,9 @@ def main():
         img, meta = pink_lava(vanilla)
         save(img, f"block/{ours}.png")
         save_mcmeta(f"block/{ours}.png", meta)
+    for name, (img, meta) in (("trans_prismarine", trans_prismarine()), ("trans_sea_lantern", trans_sea_lantern())):
+        save(img, f"block/{name}.png")
+        save_mcmeta(f"block/{name}.png", meta)
     for frame in ("0", "1"):
         img, meta = pink_fire(f"fire_{frame}")
         save(img, f"block/pink_fire_{frame}.png")
@@ -3995,7 +4101,7 @@ def main():
 
     items = {
         "trans_crystal": trans_crystal_item(), "prism_shard": prism_shard_item(), "pink_lava_bucket": pink_lava_bucket(),
-        "trans_sea_pickle": trans_sea_pickle(item=True),
+        "trans_sea_pickle": trans_sea_pickle(item=True), "trans_glow_berries": trans_glow_berries(),
         "trans_sword": trans_tool("sword"), "trans_pickaxe": trans_tool("pickaxe"), "trans_axe": trans_tool("axe"),
         "trans_shovel": trans_tool("shovel"), "trans_hoe": trans_tool("hoe"),
         "trans_helmet": trans_armor_item("helmet"), "trans_chestplate": trans_armor_item("chestplate"),

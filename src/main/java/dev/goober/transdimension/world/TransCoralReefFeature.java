@@ -147,7 +147,7 @@ public class TransCoralReefFeature extends Feature<NoneFeatureConfiguration> {
 			Block plant = random.nextBoolean() ? growth.plant() : growth.fan();
 			level.setBlock(above, plant.defaultBlockState(), Block.UPDATE_CLIENTS);
 		} else if (random.nextFloat() < 0.05F) {
-			level.setBlock(above, Blocks.SEA_PICKLE.defaultBlockState().setValue(SeaPickleBlock.PICKLES, random.nextInt(4) + 1),
+			level.setBlock(above, ModBlocks.TRANS_SEA_PICKLE.defaultBlockState().setValue(SeaPickleBlock.PICKLES, random.nextInt(4) + 1),
 					Block.UPDATE_CLIENTS);
 		}
 		for (Direction direction : HORIZONTAL) {

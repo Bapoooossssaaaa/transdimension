@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_dark_trans_prismarine": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:dark_trans_prismarine"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:dark_trans_prismarine_slab_from_dark_trans_prismarine_stonecutting"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_dark_trans_prismarine"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:dark_trans_prismarine_slab_from_dark_trans_prismarine_stonecutting"
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "transdimension:block/dark_trans_prismarine_slab"
+    },
+    "type=double": {
+      "model": "transdimension:block/dark_trans_prismarine"
+    },
+    "type=top": {
+      "model": "transdimension:block/dark_trans_prismarine_slab_top"
+    }
+  }
+}
