@@ -21,7 +21,8 @@ Most assets and data are written by Python scripts. Change the script, rerun it,
 5. `tools/generate_egg_house.py`: Maddie's floating island
 6. `tools/generate_fairy_realm.py`: the Fairy Sanctum and the Fairy Realm's arena island (its `ARENA_*` numbers must match `FairyRealm.java`)
 7. `tools/generate_camps.py`: trans camps (26.3's abandoned camp, converted from `tools/vanilla_extra/structures/abandoned_camp/`)
-8. `tools/validate_resources.py <mcmeta>/registries/data.json`: must report 0 errors
+8. `tools/generate_mermaid_ruins.py`: the mermaid ruins under the realm's seas
+9. `tools/validate_resources.py <mcmeta>/registries/data.json`: must report 0 errors
 
 You only need to rerun the script you changed (plus the validator). The validator's vanilla id check needs misode/mcmeta's 26.2 summary branch; without it, run the script with no argument.
 
@@ -36,7 +37,7 @@ The cloud environment can't download Minecraft or Fabric, so **the owner builds 
 
 ## Status (latest first)
 
-- **Round 5 is written but not built yet**: wild fairies and the Bottled Fairy, trans dungeons, pink lava, deepslate strata, the crystal gear back, biome-tinted grass, clay, sea pickles and gravel, trans camps (26.3's abandoned camp), furniture you can sit on, wool stairs and slabs, and trans dirt paths. HANDOFF's "Unverified APIs (round 5)" table lists what to check when the build fails.
+- **Round 5 is written but not built yet**: wild fairies and the Bottled Fairy, trans dungeons, pink lava, deepslate strata, the crystal gear back, biome-tinted grass, clay, sea pickles and gravel, trans camps (26.3's abandoned camp), mermaid ruins, white cacti and trans sugar cane, furniture you can sit on, wool stairs and slabs, and trans dirt paths. HANDOFF's "Unverified APIs (round 5)" table lists what to check when the build fails.
 - **Round 4 builds**: `gradlew build` passes (the last errors were `displayClientMessage` and `entityCutoutNoCull`). Play-testing is next. Round 4 added: rebuilt wings, trans vegetation, four woods, new flowers and biomes, crystals as a rare gem, trans fish, trans endermen, pastel slime pets, and the Fairy Realm endgame (sanctums, portal, the Trans Fairy boss, the fairy jar). Mixin targets and reflection are only checked when the game starts.
 - Recent work: the BSL preset; the clouds now use the flag's exact blue `#5BCEFA` and pink `#F5A9B8`.
 - Round 3 (beds, boats, plushes, Maddie, wand, wings, Egg House, paintings, advancements) is written. It builds along with round 4. Nothing in round 3 has been play-tested.

@@ -1938,6 +1938,8 @@ def generate_advancements():
       {"blooming_caverns": in_biome("blooming_caverns")})
     A("pastel_reef", "goober", "blush_coral_fan", "Reef Dreams", "Swim through the Pastel Reef",
       {"reef": in_biome("pastel_reef")})
+    A("mermaid_ruin", "pastel_reef", "minecraft:heart_of_the_sea", "Mermaid Tales", "Find the ruins of a mermaid's home under the sea",
+      {"ruin": player_is(location={"structures": f"{NS}:mermaid_ruin"})})
     A("pastel_peaks", "goober", "trans_stone", "Head in the Clouds", "Climb above Y 160 in the Pastel Peaks",
       {"peak": player_is(location={"biomes": rid("pastel_peaks"), "position": {"y": {"min": 160.0}}})})
     A("pastel_passport", "pastel_peaks", "minecraft:filled_map", "Pastel Passport", "Visit every biome of the Trans Realm",

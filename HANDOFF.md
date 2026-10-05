@@ -57,6 +57,10 @@ State of the mod for whoever picks it up next (person or AI). The README covers 
 
 `generate_camps.py` reads 26.3's abandoned camp templates (the cherry grove version: 10 tents, 45 shared campsites and 4 cherry grove ones, fetched from misode/mcmeta's `26.3-data` branch into `tools/vanilla_extra/structures/abandoned_camp/`). 26.3 writes palettes as `id`/`properties` instead of `Name`/`Properties`; the script rewrites them in 26.2's format with data version 4903. Three things don't exist in 26.2: white wool stairs (our light blue, pink and white wool stairs, chosen by row so the tents are flag-striped), straw beds (trans beds) and cushion entities (our cushion blocks, one block above where the entity sat; their 16 colours fold into three). The loot tables are 26.3's with its camp and treasure maps swapped for trans items. A camp is a tent (the start pool) joined to one campsite; the tents' tree jigsaws grow `trans_cherry_tree_checked` or `trans_tree_bees_checked`. Jigsaw pieces are placed with a known shape, so fence and wall connections come from the templates and beds keep `heart=none`.
 
+### How the mermaid ruins work
+
+`generate_mermaid_ruins.py` builds three single-piece templates (court, arch, cottage) with the paving at template y 3 and foundation below it; the structure uses `project_start_to_heightmap: OCEAN_FLOOR_WG` with `start_height` -3, so the paving replaces the top block of the sea floor. Templates contain no air, so the sea stays in every gap, and all waterloggable blocks are saved un-waterlogged: jigsaw placement's default `liquid_settings` (`apply_waterlogging`) waterlogs them wherever the sea already was, so a ruin poking out of a shallow sea doesn't leak water. The cottage's room is filled with water blocks so a slope can't bury it. The processor list cracks bricks, wears diorite and prismarine and knocks the odd block out at random. Biomes: Trans Ocean, Deep Trans Ocean, Pastel Reef.
+
 ### How sitting works
 
 `FurnitureBlock` takes an optional seat height (pixels). Using a seat with an empty hand calls `entity/Seat.sit`: it spawns an invisible `Seat` entity on the seat's surface and the player rides it (one per block). The seat discards itself as soon as nobody rides it or the block under it stops being a seat. Players sit with their hips 0.6 above their feet (the player's vehicle attachment), so the seat entity goes exactly at the surface.
@@ -98,7 +102,8 @@ Run from the repository root (needs `pip install pillow nbtlib`), in this order:
 5. `python3 tools/generate_egg_house.py`: the island template, its pool, structure, structure set, biome tag, map tag, `chests/egg_house` and the map pools (Egg House and Fairy Sanctum maps) in `chests/trans_house`.
 6. `python3 tools/generate_fairy_realm.py`: the Fairy Sanctum and arena island templates, the sanctum's structure, pool, structure set, processor list, tags and `chests/fairy_sanctum`.
 7. `python3 tools/generate_camps.py`: the trans camp (see "How the camps work"): `structure/trans_camp`, `worldgen/template_pool/trans_camp`, the structure, structure set, biome tag and `chests/trans_camp_{common,secret,barrel}`.
-8. `python3 tools/validate_resources.py /path/to/mcmeta-summary/registries/data.json`: cross-checks all of the above.
+8. `python3 tools/generate_mermaid_ruins.py`: the three mermaid ruins (`structure/mermaid_ruin/`), their pool, the `mermaid_weathering` processor list, the structure, structure set, biome tag and `chests/mermaid_ruin`.
+9. `python3 tools/validate_resources.py /path/to/mcmeta-summary/registries/data.json`: cross-checks all of the above.
 
 Hand-made files the scripts don't touch: the crystal tools' and armor's item definitions, item models and recipes, `equipment/trans_crystal.json`, the cake models and blockstate, `chests/trans_bakery`, most of `chests/trans_house`, and the baker trades and trade sets.
 

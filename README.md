@@ -76,6 +76,10 @@ Built from Minecraft's own plains village pieces, rebuilt in trans blocks: strip
 
 **Every village hides one cat plush** in a corner of one of its houses. There are nine different cats: Silly, Trans, Midnight, Biscuit, Patches, Mochi, Pearl, Bubblegum and Bluebell. The world hands out the cats you haven't found yet first, so nine villages are enough to collect them all, which earns an advancement.
 
+### Mermaid ruins
+
+The sunken homes of the realm's mermaids lie on the floor of its oceans and reefs, overgrown with kelp, coral and glowing sea pickles. There are three kinds: a round **court** paved in rings of the flag's colours around a fountain holding a glowing pearl, with broken pillars, a coral-crowned throne, a vanity with a mirror and a clam-shell bed; a crumbling **arch** over a flag-striped path, with a little mermaid statue at its end; and a small domed **cottage**, its roof caved in, with a coral flag rug, a bed, a vanity and a chandelier, in a coral garden. Each has a chest of mermaid treasure: trans pearls, prismarine, nautilus shells, gold, and now and then a trans crystal, an enchanted book for swimming, or a heart of the sea.
+
 ### Trans camps
 
 Minecraft 26.3's **abandoned camps**, brought back to 26.2 and made trans: a tent with flag-striped canvas (light blue along the bottom, then pink, then white up to the ridge, so its cross-section reads like the flag) over a pair of trans beds, and a campsite joined to it: a cold campfire ringed with cushions, fallen trans logs and petals, a little farm, a stone mound or a pond. Chests and barrels hold camping gear, food, cushions and the odd treasure (a diamond, potions, trans crystals, maybe a Bottled Fairy). Camps turn up in the realm's woods, meadows and flower fields, worn into the ground by trans dirt paths.
@@ -115,7 +119,7 @@ Minecraft 26.3's **abandoned camps**, brought back to 26.2 and made trans: a ten
 
 ### Advancements
 
-The **Trans Dimension** tab has 47 advancements: exploring every biome, finding the Egg House, meeting Maddie and using her gifts (fly above Y 250!), petting Silly Cats, building beds that make a heart, finding crystals and wearing a full set of crystal armor, the bakery's treats, collecting every flower and all nine plushes, heart trees and Starblooms, catching trans fish, taming pastel slimes, bottling a fairy, and the whole road to the Fairy Realm and its fairy.
+The **Trans Dimension** tab has 48 advancements: exploring every biome, finding the Egg House, meeting Maddie and using her gifts (fly above Y 250!), petting Silly Cats, building beds that make a heart, finding crystals and wearing a full set of crystal armor, the bakery's treats, collecting every flower and all nine plushes, heart trees and Starblooms, catching trans fish, finding a mermaid ruin, taming pastel slimes, bottling a fairy, and the whole road to the Fairy Realm and its fairy.
 
 ## Playing
 
@@ -153,6 +157,7 @@ Most of the assets and data are written by scripts in `tools/` (Python 3, with `
 | `generate_villages.py` | The trans village: structure templates (converted from the vanilla plains village), template pools, processors, the structure and its structure set. |
 | `generate_egg_house.py` | The Egg House island, read out of `Egg House!.zip`, and its structure, pool, structure set, loot and treasure maps. |
 | `generate_fairy_realm.py` | The endgame's structures: the Fairy Sanctum (shrine, stairs and portal hall) and the Fairy Realm's arena island, plus the sanctum's worldgen files, tags and chest loot. |
+| `generate_mermaid_ruins.py` | The three mermaid ruins (built block by block), their pool, weathering processors, structure, structure set, biome tag and chest loot. |
 | `generate_camps.py` | The trans camp: 26.3's abandoned camp templates (cherry grove version, in `tools/vanilla_extra/structures/abandoned_camp/`) rewritten in 26.2's format with trans blocks, plus its pools, structure, structure set, biome tag and chest loot. |
 | `validate_resources.py` | Checks that everything above points at things that exist. Pass `mcmeta-summary/registries/data.json` from [misode/mcmeta](https://github.com/misode/mcmeta) (26.2 summary branch) to check vanilla ids too. |
 
