@@ -27,9 +27,12 @@ import dev.goober.transdimension.client.entity.FairyLightModel;
 
 /**
  * The Fairy Jar's dancing fairy: the same glowing winged light as a wild fairy ({@link FairyLightModel}), looping about
- * inside the jar, turning slowly, inside a soft halo. It glows pink, then white, then blue (in step with
- * {@link FairyJarBlock#COLOURS}); its wings stay swept back a little so they fit inside the glass. Each jar dances out
- * of step with its neighbours. Textures: tools/generate_textures.py {@code fairy_light()}.
+ * inside the jar, turning slowly. It glows pink, then white, then blue (in step with {@link FairyJarBlock#COLOURS});
+ * its wings stay swept back so they fit inside the glass. Each jar dances out of step with its neighbours. Textures:
+ * tools/generate_textures.py {@code fairy_light()}.
+ *
+ * <p>It's drawn cutout, not translucent: translucent things behind the jar's glass are hidden by the glass (that's
+ * why the fairy vanished from the jar in round 5). For the same reason there's no halo in the jar.
  */
 public class FairyJarRenderer implements BlockEntityRenderer<FairyJarBlockEntity, FairyJarRenderer.State> {
 	private static final Identifier[] TEXTURES = {TransDimension.id("textures/entity/fairy_light/pink.png"),
@@ -37,11 +40,9 @@ public class FairyJarRenderer implements BlockEntityRenderer<FairyJarBlockEntity
 	private static final int FULL_BRIGHT = 0xF000F0;
 
 	private final LightModel light;
-	private final LightModel halo;
 
 	public FairyJarRenderer(BlockEntityRendererProvider.Context context) {
 		this.light = new LightModel(context.bakeLayer(FairyLightModel.LAYER));
-		this.halo = new LightModel(context.bakeLayer(FairyLightModel.HALO_LAYER));
 	}
 
 	@Override
@@ -72,9 +73,7 @@ public class FairyJarRenderer implements BlockEntityRenderer<FairyJarBlockEntity
 		poseStack.scale(-size, -size, size);
 		poseStack.translate(0.0F, -FairyLightModel.LIGHT_Y, 0.0F);
 		Identifier texture = TEXTURES[state.colour];
-		nodeCollector.submitModel(this.light, state, poseStack, RenderTypes.entityTranslucent(texture), FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
-				0, null);
-		nodeCollector.submitModel(this.halo, state, poseStack, RenderTypes.entityTranslucent(texture), FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
+		nodeCollector.submitModel(this.light, state, poseStack, RenderTypes.entityCutout(texture), FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
 				0, null);
 		poseStack.popPose();
 	}
@@ -91,14 +90,14 @@ public class FairyJarRenderer implements BlockEntityRenderer<FairyJarBlockEntity
 		private final FairyLightModel.Parts parts;
 
 		LightModel(ModelPart root) {
-			super(root, RenderTypes::entityTranslucent);
+			super(root, RenderTypes::entityCutout);
 			this.parts = new FairyLightModel.Parts(root);
 		}
 
 		@Override
 		public void setupAnim(State state) {
 			super.setupAnim(state);
-			this.parts.flutter(state.time, 0.75F);
+			this.parts.flutter(state.time, 1.0F);
 		}
 	}
 }

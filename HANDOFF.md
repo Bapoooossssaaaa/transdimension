@@ -8,6 +8,7 @@ State of the mod for whoever picks it up next (person or AI). The README covers 
 - **Rounds 1 and 2 compiled and loaded.** The owner ran them on 26.2 next to Sodium, Iris and Xaero's maps. The first run hung on "Preparing for world creation" because the sky timeline repeated vanilla's time markers; commit 2e490ee fixed that.
 - **Round 3 compiles and runs**: the owner's screenshots show Maddie (in her new skin) and the wings in game.
 - **Round 4 builds: `gradlew build` passes; nothing has been play-tested yet.** The first round-4 builds reported six errors in `src/main` (`Player#displayClientMessage`, which 26.2 split into `sendOverlayMessage` and `sendSystemMessage`) and two in `src/client` (`RenderTypes.entityCutoutNoCull`, renamed `entityCutout` in 26.1), all fixed. javac checks every class's names before it stops, so that confirmed every other API in rounds 3 and 4. What it can't check is mixin targets and names looked up by reflection; the game checks those at startup. Round 4 rebuilt the wings and added the new plants, woods, flowers, biomes, the three creatures and the whole Fairy Realm endgame (see "Round 4 at a glance"). The cloud environment can't download Gradle, Fabric's maven, Mojang's game files or a JDK 25 (see "Building in the cloud"). Every API was checked by hand against Fabric API's 26.2 source, NeoForge's 26.2 source patches (which quote vanilla 26.2 code around each patch), the NeoForge 26.x porting primers and vanilla 26.2 data from misode/mcmeta. The names that couldn't be confirmed are listed under "Unverified APIs (round 4)" with what to try instead; round 3's table is kept below it.
+- **Round 5 builds and runs**; the owner is play-testing it. Their first notes became round 6: pink fire in both realms, random pastel slime colours from spawn eggs and `/summon`, the Fairy Jar's fairy drawn cutout again (drawn translucent, it vanished behind the jar's glass), fairies with one pair of side wings instead of four, and recipe-book unlocks. **Round 6 hasn't been compiled**; see "Unverified APIs (round 6)".
 - `python3 tools/validate_resources.py <mcmeta-summary>/registries/data.json` passes with 0 errors. That run covers resources and data, not Java.
 
 ## Round 3 at a glance
@@ -79,7 +80,7 @@ When the island is placed, the item frames may log "Hanging entity at invalid po
 
 - **Trans fish** extend vanilla's `Cod` (schooling, flopping, bucketing) with their own model and bucket item.
 - **Trans endermen** extend `EnderMan` without the block-carrying goals. `EnderManMixin` swaps the portal particles in `aiStep` for light blue dust (`require = 0`); `handleEntityEvent(46)` makes the teleport burst. Their glowing eyes are a second, slightly bigger head drawn full bright (`TransEndermanModel.createEyesLayer`).
-- **Pastel slimes** are `TamableAnimal`s that only move by hopping: `travel` is ignored on the ground except on the tick they jump, and `jumpFromGround` pushes them towards where they're going. `squish` drives the squash-and-stretch in the model; a second model draws the translucent jelly coat.
+- **Pastel slimes** are `TamableAnimal`s that only move by hopping: `travel` is ignored on the ground except on the tick they jump, and `jumpFromGround` pushes them towards where they're going. `squish` drives the squash-and-stretch in the model; a second model draws the translucent jelly coat. A slime keeps only a colour it was saved with: spawn eggs and `/summon` load it from data with no colour, so it rolls one on its first tick like a wild slime.
 
 ### How the wings work
 
@@ -124,7 +125,7 @@ The compiler has checked every round-4 API (see the status above). Only the mixi
 
 ## Unverified APIs (round 5)
 
-Written after round 4 compiled. The first round-5 build failed only on `EntityType.SKELETON`/`ZOMBIE`/`SPIDER` in `TransDungeonFeature` (26.2 moved vanilla's entity types to `EntityTypes`; fixed). javac checks every name in a source set before it stops, so that confirmed all the `src/main` rows below. The client rows (`TransFishRenderer`, `FairyRenderer`, the fluid model, `SeatRenderer`) and the mixin target are still unchecked. Mixins: `NoiseBasedChunkGeneratorMixin` joins `EnderManMixin` in `transdimension.mixins.json`.
+Written after round 4 compiled. The first round-5 build failed only on `EntityType.SKELETON`/`ZOMBIE`/`SPIDER` in `TransDungeonFeature` (26.2 moved vanilla's entity types to `EntityTypes`; fixed). Round 5 has since built and run, so every row below compiles. Whether `NoiseBasedChunkGeneratorMixin` applies only shows in game: the deep lava below y -54 should be pink. Mixins: `NoiseBasedChunkGeneratorMixin` joins `EnderManMixin` in `transdimension.mixins.json`.
 
 | Where | API | If it doesn't compile |
 | --- | --- | --- |
@@ -143,6 +144,17 @@ Written after round 4 compiled. The first round-5 build failed only on `EntityTy
 | `FurnitureBlock`, `TransLampBlock` | `useWithoutItem(BlockState, Level, BlockPos, Player, BlockHitResult)` (confirmed by NeoForge's NoteBlock patch), `Block.UPDATE_ALL`, `MapColor.SNOW` | |
 | `ModBlocks` desert plants | `new CactusBlock(p) {}`, `new SugarCaneBlock(p) {}`, `new DryVegetationBlock(p) {}` (anonymous subclasses, so a protected constructor is fine; `DryVegetationBlock` is 1.21.5's rename of `DeadBushBlock`). NeoForge's 26.2 patches show both `canSurvive`s check `is(this)` plus the `supports_cactus`/`supports_sugar_cane` tags, so our own cacti and canes stack. | Register them with `::new` if the anonymous classes cause trouble. |
 | `TransDirtPathBlock` | extends `DirtPathBlock` (protected constructor), overriding `getStateForPlacement` and `tick(BlockState, ServerLevel, BlockPos, RandomSource)`; `Block.pushEntitiesUp(old, new, level, pos)` | Extend `Block` and copy vanilla's `DirtPathBlock` (shape, `canSurvive`, `updateShape`). `FlattenableBlockRegistry.register(Block, BlockState)` is confirmed in Fabric's source. |
+
+## Unverified APIs (round 6)
+
+Written after round 5 ran. `BaseFireBlockMixin` and `FireBlockMixin` join the mixin list. Pink fire is fire by tag (`minecraft:fire`), so it hurts, gets punched out and keeps mobs away like fire; its blockstate and models copy vanilla fire's. Burning mobs and the first-person fire overlay still use vanilla's orange flames: `ScreenEffectRenderer` takes `this.sprites.get(ModelBakery.FIRE_1)` (NeoForge's 26.2 patch), so a client mixin could swap that in the realms later. The recipe-book unlocks (`advancement/recipes/`, one per recipe, written by `generate_data.py` from the recipe folder) copy the format of vanilla 26.2's own recipe advancements. A lesson from the jar: an entity model drawn translucent inside a translucent block (the jar's glass) is hidden by it, so draw it cutout.
+
+| Where | API | If it doesn't compile |
+| --- | --- | --- |
+| `PinkFireBlock` | extends `FireBlock` (public `(Properties)` constructor), overriding the public `getIgniteOdds`/`getBurnOdds(BlockState)` (all confirmed by NeoForge's FireBlock patch and Fabric's `FireBlockMixin`). Fabric gives every `FireBlock` its own flammable registry, empty for a new fire block, so ours asks vanilla fire's. | |
+| `BaseFireBlockMixin` | `@Inject` at RETURN of the static `BaseFireBlock.getState(BlockGetter, BlockPos)`; `Block#withPropertiesOf` | `require = 0`: if the target is wrong, fire just stays orange. |
+| `FireBlockMixin` | `@Inject` at RETURN of the private `FireBlock#getStateWithAge` (NeoForge's patch shows `this.getStateWithAge(level, pos, newAge)`), reading the age with MixinExtras' `@Local(argsOnly = true) int` (Fabric Loader ships MixinExtras and Fabric API uses `@Local` itself); `FireBlock.AGE` | Take the arguments instead: `(LevelReader level, BlockPos pos, int age, CallbackInfoReturnable<BlockState> cir)`. |
+| `PastelSlime` | `ValueInput#getInt(String)` returning an `Optional` (already used by `Fairy` and `Maddie`) | |
 
 ## Unverified APIs (round 3)
 

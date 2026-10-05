@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_forget_me_not": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:forget_me_not"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:light_blue_dye_from_forget_me_not"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_forget_me_not"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:light_blue_dye_from_forget_me_not"
+    ]
+  }
+}

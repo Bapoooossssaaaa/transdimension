@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_pearl_daisy": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:pearl_daisy"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:white_dye_from_pearl_daisy"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_pearl_daisy"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:white_dye_from_pearl_daisy"
+    ]
+  }
+}

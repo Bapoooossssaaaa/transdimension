@@ -1,0 +1,54 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_trans_slab": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_slab"
+          }
+        ]
+      }
+    },
+    "has_stripped_trans_log": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:stripped_trans_log"
+          }
+        ]
+      }
+    },
+    "has_trans_planks": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_planks"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:trans_table"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_trans_slab",
+      "has_stripped_trans_log",
+      "has_trans_planks"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:trans_table"
+    ]
+  }
+}

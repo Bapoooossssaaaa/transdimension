@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_trans_sugar_cane": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_sugar_cane"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:sugar_from_trans_sugar_cane"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_trans_sugar_cane"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:sugar_from_trans_sugar_cane"
+    ]
+  }
+}

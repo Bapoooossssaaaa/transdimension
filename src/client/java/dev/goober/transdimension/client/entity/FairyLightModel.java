@@ -15,13 +15,13 @@ import net.minecraft.util.Mth;
 import dev.goober.transdimension.TransDimension;
 
 /**
- * The little winged light shared by wild fairies and the Fairy Jar: a glowing 4-pixel cube with two pairs of
- * see-through fairy wings (big upper wings, small hind wings) that flutter like a butterfly's. {@link #createHaloLayer()}
- * is a soft glowing shell drawn over the cube.
+ * The little winged light shared by wild fairies and the Fairy Jar: a glowing 4-pixel cube with a pair of see-through
+ * fairy wings, one on each side, that flutter up and down. {@link #createHaloLayer()} is a soft glowing shell drawn
+ * over the cube.
  *
- * <p>Texture (32x32, tools/generate_textures.py {@code fairy_light()}): cube 0,0 · upper wing 0,8 · hind wing 0,14 ·
- * halo 0,20. Every part hangs off "light", which sits {@link #LIGHT_Y} pixels down the model (the ground is 24), so the
- * fairy floats inside its 0.4-block box.
+ * <p>Texture (32x32, tools/generate_textures.py {@code fairy_light()}): cube 0,0 · wing 0,8 · halo 0,20. Every part
+ * hangs off "light", which sits {@link #LIGHT_Y} pixels down the model (the ground is 24), so the fairy floats inside
+ * its 0.4-block box.
  */
 public class FairyLightModel extends EntityModel<FairyRenderState> {
 	public static final ModelLayerLocation LAYER = new ModelLayerLocation(TransDimension.id("fairy_light"), "main");
@@ -39,14 +39,11 @@ public class FairyLightModel extends EntityModel<FairyRenderState> {
 		MeshDefinition mesh = new MeshDefinition();
 		PartDefinition light = mesh.getRoot().addOrReplaceChild("light", CubeListBuilder.create()
 				.texOffs(0, 0).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 4.0F, 4.0F), PartPose.offset(0.0F, LIGHT_Y, 0.0F));
+		// One wing on each side, fixed at the middle of the light's side and reaching out sideways.
 		light.addOrReplaceChild("right_wing", CubeListBuilder.create()
-				.texOffs(0, 8).addBox(-5.0F, -4.0F, 0.0F, 5.0F, 5.0F, 0.0F), PartPose.offset(-1.0F, -1.0F, 2.2F));
+				.texOffs(0, 8).addBox(-5.0F, -3.0F, 0.0F, 5.0F, 5.0F, 0.0F), PartPose.offset(-2.0F, 0.0F, 0.5F));
 		light.addOrReplaceChild("left_wing", CubeListBuilder.create()
-				.texOffs(0, 8).mirror().addBox(0.0F, -4.0F, 0.0F, 5.0F, 5.0F, 0.0F), PartPose.offset(1.0F, -1.0F, 2.2F));
-		light.addOrReplaceChild("right_hind_wing", CubeListBuilder.create()
-				.texOffs(0, 14).addBox(-3.0F, 0.0F, 0.0F, 3.0F, 3.0F, 0.0F), PartPose.offset(-1.0F, 0.5F, 2.2F));
-		light.addOrReplaceChild("left_hind_wing", CubeListBuilder.create()
-				.texOffs(0, 14).mirror().addBox(0.0F, 0.0F, 0.0F, 3.0F, 3.0F, 0.0F), PartPose.offset(1.0F, 0.5F, 2.2F));
+				.texOffs(0, 8).mirror().addBox(0.0F, -3.0F, 0.0F, 5.0F, 5.0F, 0.0F), PartPose.offset(2.0F, 0.0F, 0.5F));
 		return LayerDefinition.create(mesh, 32, 32);
 	}
 
@@ -69,35 +66,26 @@ public class FairyLightModel extends EntityModel<FairyRenderState> {
 
 	/** The light's moving parts, shared with the Fairy Jar's model. */
 	public static final class Parts {
-		static final String[] WINGS = {"right_wing", "left_wing", "right_hind_wing", "left_hind_wing"};
+		static final String[] WINGS = {"right_wing", "left_wing"};
 		private final ModelPart rightWing;
 		private final ModelPart leftWing;
-		private final ModelPart rightHindWing;
-		private final ModelPart leftHindWing;
 
 		public Parts(ModelPart root) {
 			ModelPart light = root.getChild("light");
 			this.rightWing = light.getChild(WINGS[0]);
 			this.leftWing = light.getChild(WINGS[1]);
-			this.rightHindWing = light.getChild(WINGS[2]);
-			this.leftHindWing = light.getChild(WINGS[3]);
 		}
 
 		/**
-		 * Wings beat quickly, sweeping back and opening again; the hind wings follow a moment later. {@code open} is how
-		 * far the wings spread at the open end of a beat (0 = out to the sides, about 1 = swept right back).
+		 * The wings beat quickly up and down. {@code sweep} is how far back they're swept (0 = straight out to the
+		 * sides, about 1 = well back, which keeps them inside the Fairy Jar).
 		 */
-		public void flutter(float time, float open) {
-			float beat = 0.5F + 0.5F * Mth.sin(time * 1.9F);
-			float hind = 0.5F + 0.5F * Mth.sin(time * 1.9F - 0.6F);
-			this.rightWing.yRot = open + (1.2F - open) * beat;
-			this.leftWing.yRot = -this.rightWing.yRot;
-			this.rightWing.zRot = 0.3F;
-			this.leftWing.zRot = -0.3F;
-			this.rightHindWing.yRot = open * 0.8F + (0.9F - open * 0.8F) * hind;
-			this.leftHindWing.yRot = -this.rightHindWing.yRot;
-			this.rightHindWing.zRot = -0.25F;
-			this.leftHindWing.zRot = 0.25F;
+		public void flutter(float time, float sweep) {
+			float beat = Mth.sin(time * 1.9F);
+			this.rightWing.yRot = sweep;
+			this.leftWing.yRot = -sweep;
+			this.rightWing.zRot = 0.45F * beat;
+			this.leftWing.zRot = -0.45F * beat;
 		}
 	}
 }

@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_sky_bell": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:sky_bell"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:light_blue_dye_from_sky_bell"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_sky_bell"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:light_blue_dye_from_sky_bell"
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_prism_shard": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:prism_shard"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:trans_lantern"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_prism_shard"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:trans_lantern"
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_trans_redstone_ore": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_redstone_ore"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:redstone_from_blasting_trans_redstone_ore"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_trans_redstone_ore"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:redstone_from_blasting_trans_redstone_ore"
+    ]
+  }
+}

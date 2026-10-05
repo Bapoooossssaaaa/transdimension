@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_twilight_planks": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:twilight_planks"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:twilight_fence_gate"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_twilight_planks"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:twilight_fence_gate"
+    ]
+  }
+}

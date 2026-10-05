@@ -196,8 +196,9 @@ for i in ITEMS:
         err(f"item {i}: no name in en_us.json")
 
 # ------------------------------------------------------------------ data
-# These have no loot table (Java says so): the cake, the plush marker, the unbreakable Fairy Realm blocks and pink lava.
-for b in BLOCKS - {"trans_cake", "plush_spot", "fairy_portal_frame", "fairy_portal", "fairy_altar", "pink_lava"}:
+# These have no loot table (Java says so): the cake, the plush marker, the unbreakable Fairy Realm blocks, pink lava and
+# pink fire.
+for b in BLOCKS - {"trans_cake", "plush_spot", "fairy_portal_frame", "fairy_portal", "fairy_altar", "pink_lava", "pink_fire"}:
     if not os.path.exists(os.path.join(DATA, NS, "loot_table", "blocks", b + ".json")):
         err(f"block {b}: no loot table")
 
@@ -329,6 +330,7 @@ TWINS.update({"trans_lamp": "redstone_lamp", "trans_dirt_path": "dirt_path", "tr
 EXTRA_PROPS = {"trans_bed": {"heart": ["none", "left", "right"]}, "fairy_portal_frame": {"pearl": ["false", "true"]}}
 TWINS["fairy_portal_frame"] = "smoker"
 TWINS["trans_sea_pickle"] = "sea_pickle"
+TWINS["pink_fire"] = "fire"
 for b in BLOCKS:
     if b.endswith("_plush"):
         TWINS[b] = "smoker"

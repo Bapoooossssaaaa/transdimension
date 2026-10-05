@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_trans_cactus": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_cactus"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:white_dye_from_trans_cactus"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_trans_cactus"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:white_dye_from_trans_cactus"
+    ]
+  }
+}

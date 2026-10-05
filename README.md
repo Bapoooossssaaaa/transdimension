@@ -10,7 +10,7 @@ A Fabric mod for **Minecraft Java 26.2** that adds the **Trans Realm**, a whole 
 
 Overworld-style hills, caves, rivers and oceans with twenty-three biomes. The ground is trans grass and dirt over soft grey trans stone, with twilight-purple trans deepslate further down (layered with faint pink and blue strata), and rose granite, pearl diorite, sky andesite and trans gravel (pink, blue and white pebbles) mixed in. Riverbeds and lake floors have patches of trans gravel, trans sand and lilac **trans clay** (it breaks into clay balls and smelts into pink terracotta). All the vanilla ores are there too (coal, iron, copper, gold, redstone, lapis, diamond and emerald, in stone and deepslate versions, set into the realm's own rock), so you can live in the realm.
 
-The realm's **lava is pink**: pink lava burns, sets fires and makes stone and obsidian just like lava, and you can carry it in a bucket. Its caves have glow lichen, and deep down, mossy patches with glowing Starblooms and glow berry vines. Its **dungeons** are built of trans cobblestone and stone bricks over mossy floors, with a monster spawner, unlit pink and blue candles, and chests of dungeon loot with the realm's treasures mixed in.
+The realm's **lava is pink**: pink lava burns, sets fires and makes stone and obsidian just like lava, and you can carry it in a bucket. Its **fire is pink** too: anything lit in the Trans Realm or the Fairy Realm (by flint and steel, a fire charge, lava or lightning) burns with pink flames that spread and burn out like any fire. Soul fire stays blue. Its caves have glow lichen, and deep down, mossy patches with glowing Starblooms and glow berry vines. Its **dungeons** are built of trans cobblestone and stone bricks over mossy floors, with a monster spawner, unlit pink and blue candles, and chests of dungeon loot with the realm's treasures mixed in.
 
 | Biome | What it's like |
 | --- | --- |
@@ -63,8 +63,8 @@ Somewhere high in the realm's sky floats a little island with a house on it: the
 
 - **Trans fish** swim in schools in the realm's seas, rivers and reef: cod in trans colours (blue-, pink- and white-backed, so a school comes out mixed). Catch them in a bucket, or cook them.
 - **Trans endermen** replace the endermen in the realm: snow white with soft pink and blue blended in, glowing pink eyes, and light blue sparkles instead of purple ones. They behave like endermen (don't stare!) but leave blocks alone, and drop **Trans Pearls**, which you can throw like ender pearls.
-- **Pastel slimes** live in the Gumdrop Glade: pink, blue, white and lavender cubes (and, rarely, one striped like the flag) with a sleepy little face and a clear jelly coat that squash and stretch as they bounce about. They're friendly. Feed them **Gumdrops** (pastel gel and sugar) or plain **sugar** to tame them: a tamed slime wears a bow, follows you around, sits when you use it with an empty hand, and two of them make a baby. They drop **pastel gel**, which also makes bouncy pink and blue **gel blocks**.
-- **Wild fairies** are rare: little glowing cubes with see-through wings, like the one in the Fairy Jar, each glowing blue, pink or white. They drift about a few blocks above the ground (most often in the Pride Flower Fields, the Moonlit Meadow, the Blooming Caverns and the Fairy Realm), hover round you out of curiosity, and dart off if you sprint at them. Use one with anything and it leaves you a gift (crystals, pearls, sweets, a golden apple, sometimes something special) and vanishes; use an empty **glass bottle** on one to catch it as a **Bottled Fairy**, which saves you from death once (like a totem) while you hold it.
+- **Pastel slimes** live in the Gumdrop Glade (and on the Fairy Realm's island): pink, blue, white and lavender cubes (and, rarely, one striped like the flag) with a sleepy little face and a clear jelly coat that squash and stretch as they bounce about. Slimes from spawn eggs and `/summon` get a random colour too. They're friendly. Feed them **Gumdrops** (pastel gel and sugar) or plain **sugar** to tame them: a tamed slime wears a bow, follows you around, sits when you use it with an empty hand, and two of them make a baby. They drop **pastel gel**, which also makes bouncy pink and blue **gel blocks**.
+- **Wild fairies** are rare: little glowing cubes with a pair of see-through wings at their sides, like the one in the Fairy Jar, each glowing blue, pink or white. They drift about a few blocks above the ground (most often in the Pride Flower Fields, the Moonlit Meadow, the Blooming Caverns and the Fairy Realm), hover round you out of curiosity, and dart off if you sprint at them. Use one with anything and it leaves you a gift (crystals, pearls, sweets, a golden apple, sometimes something special) and vanishes; use an empty **glass bottle** on one to catch it as a **Bottled Fairy**, which saves you from death once (like a totem) while you hold it.
 
 ### The Silly Cat
 
@@ -117,6 +117,10 @@ Minecraft 26.3's **abandoned camps**, brought back to 26.2 and made trans: a ten
 4. **The Trans Fairy.** She waits above her altar: a fairy queen with long pink hair, a crystal tiara, a gown in the flag's stripes, a star wand and four glittering wings. She flies circles around the arena and fights back: volleys of sparkling hearts from her wand, swooping dives straight through you, ice crystals bursting out of the ground under your feet (watch for the swirling frost), and once she's hurt she calls trans endermen to help and rains hearts from the sky. Each third of her health makes her faster.
 5. **The prize.** Beat her and a portal home opens on the arena's north side. She drops the **Fairy Jar**: a trans glass jar with a lid, and inside it a fairy (a little cube of light with see-through wings) that dances about, glowing pink, white and blue in turn. Put it anywhere in your builds. Offer a crystal pearl to the **Fairy Altar** in the arena to call her back for another round.
 
+### Recipes
+
+Every recipe shows up in the **recipe book** as soon as you pick up one of its ingredients.
+
 ### Advancements
 
 The **Trans Dimension** tab has 48 advancements: exploring every biome, finding the Egg House, meeting Maddie and using her gifts (fly above Y 250!), petting Silly Cats, building beds that make a heart, finding crystals and wearing a full set of crystal armor, the bakery's treats, collecting every flower and all nine plushes, heart trees and Starblooms, catching trans fish, finding a mermaid ruin, taming pastel slimes, bottling a fairy, and the whole road to the Fairy Realm and its fairy.
@@ -165,7 +169,7 @@ To restyle the mod, edit the palettes at the top of `generate_textures.py`, the 
 
 ## Notes and troubleshooting
 
-This was written against the real 26.2 APIs and checked against Fabric API 0.161.0's source, the Fabric docs reference mod, the 26.x porting primers and vanilla 26.2 data. Earlier versions compiled and loaded on 26.2, and the round 3 features (beds, boats, plushes, Maddie, the wand, the wings) have been seen working in game. The newest code (round 4: the rebuilt wings, the new plants, woods and biomes, the creatures and the whole Fairy Realm) hasn't been compiled yet, because the cloud environment it was written in can't download Minecraft. `HANDOFF.md` lists the names that were least certain and what to try if one doesn't compile.
+This was written against the real 26.2 APIs and checked against Fabric API 0.161.0's source, the Fabric docs reference mod, the 26.x porting primers and vanilla 26.2 data. Rounds 1 to 5 compile and run on 26.2 and are being play-tested. The newest fixes (pink fire, the fairies' wings, recipe-book unlocks) haven't been compiled yet, because the cloud environment they were written in can't download Minecraft. `HANDOFF.md` lists the names that were least certain and what to try if one doesn't compile.
 
 Three features hook into game internals and are built to fail safely:
 

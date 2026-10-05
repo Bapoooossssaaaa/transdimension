@@ -1,0 +1,43 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_pearl_leaves": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:pearl_leaves"
+          }
+        ]
+      }
+    },
+    "has_pearl_snowdrop": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:pearl_snowdrop"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:pearl_hedge"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_pearl_leaves",
+      "has_pearl_snowdrop"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:pearl_hedge"
+    ]
+  }
+}

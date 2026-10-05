@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_heart_bloom": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:heart_bloom"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:pink_dye_from_heart_bloom"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_heart_bloom"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:pink_dye_from_heart_bloom"
+    ]
+  }
+}

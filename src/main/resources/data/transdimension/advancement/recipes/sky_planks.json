@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_sky_logs": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#transdimension:sky_logs"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:sky_planks"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_sky_logs"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:sky_planks"
+    ]
+  }
+}

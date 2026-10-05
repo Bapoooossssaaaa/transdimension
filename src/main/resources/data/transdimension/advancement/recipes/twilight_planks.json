@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_twilight_logs": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#transdimension:twilight_logs"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:twilight_planks"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_twilight_logs"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:twilight_planks"
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_pearl_lupine": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:pearl_lupine"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:white_dye_from_pearl_lupine"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_pearl_lupine"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:white_dye_from_pearl_lupine"
+    ]
+  }
+}

@@ -305,6 +305,8 @@ public class PastelSlime extends TamableAnimal {
 	@Override
 	public void readAdditionalSaveData(ValueInput valueInput) {
 		super.readAdditionalSaveData(valueInput);
-		this.setVariant(valueInput.getIntOr("variant", PINK));
+		// Only a saved colour counts: spawn eggs and /summon load the slime from data that has none, and then it should
+		// roll a colour on its first tick like a wild slime (not come out pink every time).
+		valueInput.getInt("variant").ifPresent(this::setVariant);
 	}
 }

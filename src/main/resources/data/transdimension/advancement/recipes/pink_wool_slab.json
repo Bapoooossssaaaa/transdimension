@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_pink_wool": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:pink_wool"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:pink_wool_slab"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_pink_wool"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:pink_wool_slab"
+    ]
+  }
+}

@@ -840,6 +840,17 @@ def pink_lava(name):
     return animated(vblock(name), R_PINK_LAVA, 0.0, 1.0), meta
 
 
+# The realms' fire: vanilla's two fire animations re-coloured from deep pink to a white-hot, faintly blue core.
+R_PINK_FIRE = [hexc(c) for c in ("6E1440", "B0245F", "E8518E", "F58DB8", "FBD0E3", "E9F6FF")]
+
+
+def pink_fire(name):
+    """(image, mcmeta) for pink_fire_0 / pink_fire_1, from vanilla's fire_0 / fire_1 (same frames, same timing)."""
+    with _zip(BLOCK_ZIP).open(f"base block textures/{name}.png.mcmeta") as f:
+        meta = json.load(f)
+    return gradient_map(vblock(name), R_PINK_FIRE), meta
+
+
 def pink_lava_bucket():
     """The lava bucket with pink lava in it."""
     img = vitem("lava_bucket")
@@ -3686,9 +3697,9 @@ def fairy_jar_lid():
 
 
 def fairy_light(colour):
-    """32x32 for the fairy light (FairyLightModel: wild fairies and the Fairy Jar): the glowing cube (0,0), the upper
-    wings (0,8; 5x5, both faces), the hind wings (0,14; 3x3) and the halo shell (0,20; mostly see-through). Wings are
-    see-through with a bright rim, like a fairy's."""
+    """32x32 for the fairy light (FairyLightModel: wild fairies and the Fairy Jar): the glowing cube (0,0), the side
+    wings (0,8; 5x5, both faces; shaped the same at root and tip, so either way round looks right) and the halo shell
+    (0,20; mostly see-through). Wings are see-through with a bright rim, like a fairy's."""
     img = new(32, 32)
     core = hexc(colour)
     rim = mix(core, WHITE, 0.25)
@@ -3716,8 +3727,7 @@ def fairy_light(colour):
                 edge = any((x + dx, y + dy) not in cells for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
                 c = (255, 255, 255, 235) if edge else (*mix(core, WHITE, 0.45 + 0.1 * ((x + y) % 2)), 150)
                 img.putpixel((face_u + x, v + y), c)
-    wing(0, 8, [".XXX.", "XXXXX", "XXXXX", ".XXXX", "..XX."])
-    wing(0, 14, ["XX.", "XXX", ".XX"])
+    wing(0, 8, [".XXX.", "XXXXX", "XXXXX", ".XXX.", "..X.."])
 
     def halo(x, y):
         edge = x in (0, 3) or y in (0, 3)
@@ -3978,6 +3988,10 @@ def main():
         img, meta = pink_lava(vanilla)
         save(img, f"block/{ours}.png")
         save_mcmeta(f"block/{ours}.png", meta)
+    for frame in ("0", "1"):
+        img, meta = pink_fire(f"fire_{frame}")
+        save(img, f"block/pink_fire_{frame}.png")
+        save_mcmeta(f"block/pink_fire_{frame}.png", meta)
 
     items = {
         "trans_crystal": trans_crystal_item(), "prism_shard": prism_shard_item(), "pink_lava_bucket": pink_lava_bucket(),

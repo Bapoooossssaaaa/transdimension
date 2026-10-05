@@ -1,0 +1,43 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_blush_leaves": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:blush_leaves"
+          }
+        ]
+      }
+    },
+    "has_trans_rose": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_rose"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:blossom_hedge"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_blush_leaves",
+      "has_trans_rose"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:blossom_hedge"
+    ]
+  }
+}

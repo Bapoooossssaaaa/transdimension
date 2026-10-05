@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_trans_deepslate_tiles": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_deepslate_tiles"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:cracked_trans_deepslate_tiles"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_trans_deepslate_tiles"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:cracked_trans_deepslate_tiles"
+    ]
+  }
+}

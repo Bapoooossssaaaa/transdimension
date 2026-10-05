@@ -1553,6 +1553,17 @@ def generate_creatures():
     simple_item("pink_lava_bucket", "Pink Lava Bucket")
     tag("fluid", "lava", "pink_lava", "flowing_pink_lava")
 
+    # Pink fire: the fire that burns in both realms (BaseFireBlockMixin). Vanilla fire's blockstate and model shapes,
+    # with our two animated flame textures; it is fire by tag, so it burns, spreads and gets put out like fire.
+    blockstate("pink_fire", from_template("fire", "fire", "pink_fire"))
+    for shape in ("floor", "side", "side_alt", "up", "up_alt"):
+        for frame in (0, 1):
+            model(f"pink_fire_{shape}{frame}", {"parent": f"minecraft:block/template_fire_{shape}",
+                                                 "textures": {"fire": block_tex(f"pink_fire_{frame}")}})
+    name("pink_fire", "Pink Fire")
+    for t in ("fire", "replaceable", "happy_ghast_avoids"):
+        tag("block", t, "pink_fire")
+
     # Trans dungeons (TransDungeonFeature): vanilla's dungeon loot with the realm's treasures mixed in.
     def entry(item, weight, lo=1, hi=1, enchant=False):
         e = {"type": "minecraft:item", "name": rid(item), "weight": weight}
@@ -1917,7 +1928,8 @@ def generate_advancements():
     flowers, and collecting all nine cat plushes."""
     if os.path.isdir(ADV_DIR):
         for f in os.listdir(ADV_DIR):
-            os.remove(os.path.join(ADV_DIR, f))
+            if f.endswith(".json"):
+                os.remove(os.path.join(ADV_DIR, f))
     A = advancement
     A("goober", None, "trans_crystal", "Trans Dimension", "Say \"Goober\" and step into the Trans Realm",
       {"entered_trans_realm": {"trigger": "minecraft:changed_dimension", "conditions": {"to": f"{NS}:trans_realm"}}},
@@ -2070,6 +2082,44 @@ def generate_sounds():
     write(os.path.join(ASSETS, "sounds.json"), sounds)
 
 
+def generate_recipe_unlocks():
+    """Unlocks for the recipe book, one hidden advancement per recipe as vanilla does it (advancement/recipes/). A recipe
+    shows up in the book once the player picks up one of its ingredients; without these the book never shows the mod's
+    recipes, though they still craft. The realm's own ingredients do the unlocking when a recipe has any (as vanilla's
+    fences unlock with planks, not sticks). This runs after every recipe is written, so it covers all of them."""
+    out = os.path.join(ADV_DIR, "recipes")
+    if os.path.isdir(out):
+        for f in os.listdir(out):
+            os.remove(os.path.join(out, f))
+    recipe_dir = os.path.join(DATA, NS, "recipe")
+    for f in sorted(os.listdir(recipe_dir)):
+        if not f.endswith(".json"):
+            continue
+        with open(os.path.join(recipe_dir, f), encoding="utf-8") as fh:
+            r = json.load(fh)
+        if "key" in r:
+            ingredients = [r["key"][c] for row in r["pattern"] for c in row if c != " "]
+        else:
+            ingredients = r.get("ingredients") or [r["ingredient"]]
+        unique = []
+        for i in ingredients:
+            if i not in unique:
+                unique.append(i)
+        ours = [i for i in unique if (i if isinstance(i, str) else i[0]).lstrip("#").startswith(f"{NS}:")]
+        criteria = {}
+        for i in ours or unique:
+            path = (i if isinstance(i, str) else i[0]).lstrip("#").split(":")[-1].replace("/", "_")
+            key, n = f"has_{path}", 2
+            while key in criteria:
+                key, n = f"has_{path}_{n}", n + 1
+            criteria[key] = {"trigger": "minecraft:inventory_changed", "conditions": {"items": [{"items": i}]}}
+        recipe_id = f"{NS}:{f[:-5]}"
+        criteria["has_the_recipe"] = {"trigger": "minecraft:recipe_unlocked", "conditions": {"recipe": recipe_id}}
+        write(os.path.join(out, f), {"parent": "minecraft:recipes/root", "criteria": criteria,
+                                     "requirements": [["has_the_recipe", *[k for k in criteria if k != "has_the_recipe"]]],
+                                     "rewards": {"recipes": [recipe_id]}})
+
+
 def write_tags():
     for (kind, ns, path), values in sorted(TAGS.items()):
         write(os.path.join(DATA, ns, "tags", kind, f"{path}.json"), {"replace": False, "values": sorted(values)})
@@ -2128,6 +2178,7 @@ def main():
     generate_misc()
     generate_sounds()
     generate_advancements()
+    generate_recipe_unlocks()
     write_tags()
     write_lang()
     print(f"Wrote {len(TAGS)} tags and {len(NAMES)} names.")

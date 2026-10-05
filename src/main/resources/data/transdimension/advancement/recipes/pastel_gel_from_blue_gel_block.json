@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_blue_gel_block": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:blue_gel_block"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:pastel_gel_from_blue_gel_block"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_blue_gel_block"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:pastel_gel_from_blue_gel_block"
+    ]
+  }
+}

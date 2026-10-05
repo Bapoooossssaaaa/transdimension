@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_trans_deepslate_lapis_ore": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:trans_deepslate_lapis_ore"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:lapis_lazuli_from_blasting_trans_deepslate_lapis_ore"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_trans_deepslate_lapis_ore"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:lapis_lazuli_from_blasting_trans_deepslate_lapis_ore"
+    ]
+  }
+}

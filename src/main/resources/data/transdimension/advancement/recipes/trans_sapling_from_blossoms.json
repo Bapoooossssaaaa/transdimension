@@ -1,0 +1,43 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_pride_blossom": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:pride_blossom"
+          }
+        ]
+      }
+    },
+    "has_prism_shard": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:prism_shard"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:trans_sapling_from_blossoms"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_pride_blossom",
+      "has_prism_shard"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:trans_sapling_from_blossoms"
+    ]
+  }
+}

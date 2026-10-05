@@ -90,6 +90,7 @@ import dev.goober.transdimension.block.FairyJarBlock;
 import dev.goober.transdimension.block.FairyPortalBlock;
 import dev.goober.transdimension.block.FairyPortalFrameBlock;
 import dev.goober.transdimension.block.FurnitureBlock;
+import dev.goober.transdimension.block.PinkFireBlock;
 import dev.goober.transdimension.block.PlushSpotBlock;
 import dev.goober.transdimension.block.PrideOvenBlock;
 import dev.goober.transdimension.block.TransBedBlock;
@@ -529,6 +530,9 @@ public final class ModBlocks {
 	/** The Trans Realm's lava: pink, otherwise vanilla lava (see PinkLavaFluid). */
 	public static final Block PINK_LAVA = registerWithoutItem("pink_lava", properties -> new LiquidBlock(ModFluids.PINK_LAVA, properties) {
 	}, BlockBehaviour.Properties.ofFullCopy(Blocks.LAVA));
+	/** Fire in the Trans Realm and the Fairy Realm (BaseFireBlockMixin lights it there instead of vanilla fire). */
+	public static final Block PINK_FIRE = registerWithoutItem("pink_fire", PinkFireBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.FIRE).mapColor(MapColor.COLOR_PINK));
 	public static final Block FAIRY_PORTAL = registerWithoutItem("fairy_portal", FairyPortalBlock::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.END_PORTAL).mapColor(MapColor.COLOR_PINK));
 	/** The crystal altar in the middle of the fairy arena: offer it a crystal pearl for a rematch. Unbreakable. */

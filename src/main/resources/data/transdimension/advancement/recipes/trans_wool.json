@@ -1,0 +1,54 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_light_blue_wool": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:light_blue_wool"
+          }
+        ]
+      }
+    },
+    "has_pink_wool": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:pink_wool"
+          }
+        ]
+      }
+    },
+    "has_white_wool": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:white_wool"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:trans_wool"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_light_blue_wool",
+      "has_pink_wool",
+      "has_white_wool"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:trans_wool"
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_flag_lily": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:flag_lily"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:white_dye_from_flag_lily"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_flag_lily"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:white_dye_from_flag_lily"
+    ]
+  }
+}
