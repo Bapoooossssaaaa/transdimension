@@ -56,6 +56,9 @@ SWAP = {
     "minecraft:blue_carpet": "minecraft:magenta_carpet",
     "minecraft:cyan_wool": "minecraft:pink_wool",
     "minecraft:cyan_carpet": "minecraft:pink_carpet",
+    # mended: vanilla builds cracks into the templates; the processors still crack 6% of bricks for a little age
+    "minecraft:cracked_deepslate_bricks": "minecraft:deepslate_bricks",
+    "minecraft:cracked_deepslate_tiles": "minecraft:deepslate_tiles",
 }
 LOOT = {"minecraft:chests/ancient_city": T + "chests/" + CITY, "minecraft:chests/ancient_city_ice_box": T + "chests/" + CITY + "_ice_box"}
 
