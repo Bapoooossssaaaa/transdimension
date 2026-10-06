@@ -1,0 +1,41 @@
+{
+  "parent": "transdimension:sky_portal",
+  "criteria": {
+    "holy": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "transdimension:holy_golden_sword",
+              "transdimension:holy_golden_pickaxe",
+              "transdimension:holy_golden_axe",
+              "transdimension:holy_golden_shovel",
+              "transdimension:holy_golden_hoe",
+              "transdimension:holy_golden_helmet",
+              "transdimension:holy_golden_chestplate",
+              "transdimension:holy_golden_leggings",
+              "transdimension:holy_golden_boots"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:holy_golden_sword"
+    },
+    "title": {
+      "translate": "advancements.transdimension.holy_loot.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.holy_loot.description"
+    }
+  },
+  "requirements": [
+    [
+      "holy"
+    ]
+  ]
+}

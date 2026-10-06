@@ -2,6 +2,9 @@ package dev.goober.transdimension.client;
 
 import java.util.Arrays;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -13,7 +16,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
  * Glowing coloured boxes (beams, cubes, sheets of light), gathered for one frame and handed to the level renderer in one
  * go, relative to the camera. They're drawn unlit and see-through ({@code RenderTypes.debugFilledBox()}, the way Fabric's
  * own level render event tests draw in 26.2), so they shine just as bright in the dark. Used by the candle ritual
- * (RitualEffects) and the Fairy Realm cutscene (FairyCutsceneCamera).
+ * (RitualEffects), the Fairy Realm cutscene (FairyCutsceneCamera) and the cloud boat's line (CloudBoatRenderer).
  */
 public final class GlowGeometry {
 	private final Vec3 camera;
@@ -94,12 +97,20 @@ public final class GlowGeometry {
 	}
 
 	public void submit(LevelRenderContext context) {
+		this.submit(context.submitNodeCollector(), context.poseStack());
+	}
+
+	/**
+	 * Hands the boxes to {@code nodeCollector}, drawn from wherever {@code poseStack} stands: the camera for the level
+	 * render event, or an entity's position (with that position as this geometry's "camera") from an entity renderer.
+	 */
+	public void submit(SubmitNodeCollector nodeCollector, PoseStack poseStack) {
 		if (this.vertices == 0) {
 			return;
 		}
 		float[] xyz = Arrays.copyOf(this.positions, this.vertices * 3);
 		int[] argb = Arrays.copyOf(this.colours, this.vertices);
-		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.debugFilledBox(), (pose, buffer) -> {
+		nodeCollector.submitCustomGeometry(poseStack, RenderTypes.debugFilledBox(), (pose, buffer) -> {
 			for (int i = 0; i < argb.length; i++) {
 				buffer.addVertex(pose, xyz[i * 3], xyz[i * 3 + 1], xyz[i * 3 + 2]).setColor(argb[i]);
 			}

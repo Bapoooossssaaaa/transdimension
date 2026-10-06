@@ -12,7 +12,6 @@ import org.jspecify.annotations.Nullable;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,6 +31,7 @@ import dev.goober.transdimension.block.RitualPedestalBlock;
 import dev.goober.transdimension.block.SkyPortalBlock;
 import dev.goober.transdimension.network.RitualPayload;
 import dev.goober.transdimension.registry.ModBlocks;
+import dev.goober.transdimension.registry.ModParticles;
 
 /**
  * The candle ritual that opens a pink ancient city's gate into a Sky Portal.
@@ -338,7 +338,7 @@ public final class SculkRitual {
 					// Each candle flares with a chime, a note higher than the last.
 					Vec3 tip = this.candles.get(i);
 					this.level.playSound(null, tip.x, tip.y, tip.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.8F, 0.8F + i * 0.1F);
-					this.level.sendParticles(ParticleTypes.END_ROD, tip.x, tip.y, tip.z, 6, 0.05, 0.05, 0.05, 0.03);
+					this.level.sendParticles(ModParticles.PRISM_SPARK, tip.x, tip.y, tip.z, 6, 0.05, 0.05, 0.05, 0.03);
 				}
 			}
 			if (t == AWAKEN - 16) {
@@ -348,7 +348,7 @@ public final class SculkRitual {
 				BlockState state = this.level.getBlockState(this.crystal);
 				this.level.setBlock(this.crystal, state.setValue(RitualCrystalBlock.AWAKE, true), Block.UPDATE_ALL);
 				this.level.playSound(null, this.crystal, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 2.5F, 0.9F);
-				this.level.sendParticles(ParticleTypes.END_ROD, this.origin.x, this.origin.y, this.origin.z, 40, 0.1, 0.1, 0.1, 0.12);
+				this.level.sendParticles(ModParticles.PRISM_SPARK, this.origin.x, this.origin.y, this.origin.z, 40, 0.1, 0.1, 0.1, 0.12);
 			}
 			if (t == FIRE) {
 				this.level.playSound(null, this.origin.x, this.origin.y, this.origin.z, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 2.5F, 1.6F);
@@ -370,7 +370,7 @@ public final class SculkRitual {
 					if (this.level.getBlockState(pos).isAir()) {
 						this.level.setBlock(pos, sheet, Block.UPDATE_CLIENTS);
 						if (this.level.getRandom().nextInt(3) == 0) {
-							this.level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 2, 0.3, 0.3, 0.3, 0.02);
+							this.level.sendParticles(ModParticles.PRISM_SPARK, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 2, 0.3, 0.3, 0.3, 0.02);
 						}
 					}
 				}

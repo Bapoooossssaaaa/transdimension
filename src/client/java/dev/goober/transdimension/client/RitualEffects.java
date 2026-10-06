@@ -28,7 +28,8 @@ import dev.goober.transdimension.world.SculkRitual;
  * server sends when the circle is complete, on the timeline in SculkRitual's constants:
  * <ul>
  * <li>one after another round the circle, a beam of pink, blue or white light rises from each candle into the crystal,
- * <li>the crystal wakes in a flash and a great white and pink beam shoots from it into the middle of the gate,
+ * <li>the crystal, glowing every colour in turn like a prism, wakes in a flash and a great white and pink beam shoots
+ * from it into the middle of the gate,
  * <li>a sheet of light spreads out from the middle of the gate until it fills the frame, just ahead of the portal blocks
  * the server places ring by ring, then fades as the portal takes over.
  * </ul>
@@ -145,10 +146,11 @@ public final class RitualEffects {
 			}
 		}
 
-		// 2. The crystal: it gathers the light (a glow that swells as the candles feed it), then wakes in a flash.
+		// 2. The crystal: it gathers the light (a prismatic glow that swells as the candles feed it), then wakes in a flash.
 		double fed = Mth.clamp(age / SculkRitual.AWAKEN, 0.0, 1.0);
 		double pulse = 0.5 + 0.5 * Math.sin(now * 0.4);
-		g.cube(origin, 0.3 + 0.25 * fed + 0.04 * pulse, argb((0.15 + 0.25 * fed) * fade, PINK));
+		g.cube(origin, 0.3 + 0.25 * fed + 0.04 * pulse, argb((0.15 + 0.25 * fed) * fade, prism(now * 0.015)));
+		g.cube(origin, 0.22 + 0.18 * fed, argb((0.12 + 0.2 * fed) * fade, prism(now * 0.015 + 0.5)));
 		double sinceWake = age - SculkRitual.AWAKEN;
 		if (sinceWake >= 0.0 && sinceWake < 16.0) {
 			double k = sinceWake / 16.0;
@@ -198,7 +200,14 @@ public final class RitualEffects {
 		double spin = now * 0.08;
 		g.beam(origin, target, 0.035 + 0.01 * pulse, spin, argb(0.6 + 0.25 * pulse, WHITE));
 		g.beam(origin, target, 0.12 + 0.03 * pulse, -spin, argb(0.22 + 0.1 * pulse, DEEP_PINK));
-		g.cube(origin, 0.42 + 0.05 * pulse, argb(0.18 + 0.1 * pulse, PINK));
+		// the crystal's prismatic glow, its colours turning
+		g.cube(origin, 0.42 + 0.05 * pulse, argb(0.18 + 0.1 * pulse, prism(now * 0.01 + crystal.hashCode() * 0.1)));
+		g.cube(origin, 0.3 + 0.03 * pulse, argb(0.14 + 0.08 * pulse, prism(now * 0.01 + crystal.hashCode() * 0.1 + 0.5)));
+	}
+
+	/** A soft rainbow colour, {@code phase} of the way round the colour wheel (it wraps every 1). */
+	private static int prism(double phase) {
+		return Mth.hsvToRgb((float) (phase - Math.floor(phase)), 0.45F, 1.0F);
 	}
 
 	private static int argb(double alpha, int rgb) {

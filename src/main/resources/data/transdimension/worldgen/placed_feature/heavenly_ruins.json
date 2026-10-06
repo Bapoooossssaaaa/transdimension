@@ -1,0 +1,12 @@
+{
+  "feature": "transdimension:heavenly_ruin",
+  "placement": [
+    {
+      "type": "minecraft:rarity_filter",
+      "chance": 9
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

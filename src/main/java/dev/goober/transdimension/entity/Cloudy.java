@@ -172,6 +172,12 @@ public class Cloudy extends PathfinderMob {
 
 	// ------------------------------------------------------------------------------------------------ odds and ends
 
+	/** A Cloudy carrying the cloud turtle on a rescue (CloudRescue) is borrowed: it isn't saved with the world. */
+	@Override
+	public boolean shouldBeSaved() {
+		return !(this.getFirstPassenger() instanceof CloudTurtle) && super.shouldBeSaved();
+	}
+
 	@Override
 	protected SoundEvent getAmbientSound() {
 		return SoundEvents.WOOL_PLACE;

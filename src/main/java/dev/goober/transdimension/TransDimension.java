@@ -24,6 +24,7 @@ import dev.goober.transdimension.registry.ModSounds;
 import dev.goober.transdimension.registry.ModVillagers;
 import dev.goober.transdimension.teleport.GooberTeleporter;
 import dev.goober.transdimension.world.CloudRealm;
+import dev.goober.transdimension.world.CloudRescue;
 import dev.goober.transdimension.world.FairyRealm;
 import dev.goober.transdimension.world.PinkDeepDark;
 import dev.goober.transdimension.world.SculkRitual;
@@ -66,6 +67,7 @@ public class TransDimension implements ModInitializer {
 		PinkDeepDark.initialize();
 		SculkRitual.initialize();
 		CloudRealm.initialize();
+		CloudRescue.initialize();
 
 		LOGGER.info("Trans Dimension loaded. Say \"Goober\" in chat to visit the Trans Realm. You are valid!");
 	}

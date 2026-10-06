@@ -4144,14 +4144,6 @@ def ritual_candle_item():
     return out
 
 
-R_RITUAL_CRYSTAL = [hexc(c) for c in ("8C1D5A", "C2307E", "F0589F", "FF8FC0", "FFC9E1", "FFFFFF")]
-
-
-def ritual_crystal(awake=False):
-    """A big faceted pink crystal (from vanilla's amethyst block); brighter once the ritual has woken it."""
-    return gradient_map(vblock("amethyst_block"), R_RITUAL_CRYSTAL, curve=(lambda t: 0.35 + 0.65 * t) if awake else (lambda t: 0.1 + 0.8 * t))
-
-
 SKY_LIGHT = [hexc(c) for c in ("FFFFFF", "FFE3EE", "FFC2DC", "FF9CC8", "FFD6E8", "FFFFFF", "F2F7FF")]
 
 
@@ -4267,11 +4259,13 @@ CLOUD_BODY = [hexc(c) for c in ("C9D3E0", "DDE5EE", "EEF3F8", "FFFFFF")]
 
 
 def cloudy_texture():
-    """The Cloudy (128x64, CloudyModel's layout): soft white puffs, a little bluer underneath, and a happy face (round
-    dark eyes with a white glint, a wide smile and pink cheeks) on the front of the body."""
+    """The Cloudy (128x64, CloudyModel's layout, the three lumps underneath included): soft white puffs, a little bluer
+    underneath, and a happy face (round dark eyes with a white glint, a wide smile and pink cheeks) on the front of the
+    body."""
     img = new(128, 64)
     rng = random.Random(7)
-    boxes = [(0, 0, 22, 9, 16), (0, 25, 10, 4, 10), (40, 25, 8, 3, 9), (0, 40, 3, 6, 10), (28, 40, 3, 6, 11)]
+    boxes = [(0, 0, 22, 9, 16), (0, 25, 10, 4, 10), (40, 25, 8, 3, 9), (0, 40, 3, 6, 10), (28, 40, 3, 6, 11),
+             (80, 0, 9, 3, 10), (80, 16, 8, 2, 9), (80, 30, 8, 2, 7)]
     for (u, v, w, h, d) in boxes:
         # top (u+d, v) w x d, bottom (u+d+w, v) w x d, sides row (v+d) of height h across 2*(w+d)
         for y in range(d):
@@ -4364,8 +4358,6 @@ def round9_textures():
     yield "block/ritual_pedestal_top.png", ritual_pedestal_top(), None
     yield "block/ritual_candle.png", ritual_candle_block(), None
     yield "item/ritual_candle.png", ritual_candle_item(), None
-    yield "block/ritual_crystal.png", ritual_crystal(), None
-    yield "block/ritual_crystal_awake.png", ritual_crystal(awake=True), None
     yield "block/sky_portal.png", sky_portal_frames(), {"animation": {"frametime": 2, "interpolate": True}}
     yield "block/cloud_soil.png", cloud_soil(), None
     yield "block/cloud_grass_block_top.png", cloud_grass_block_top(), None
@@ -4382,6 +4374,410 @@ def round9_textures():
     yield "item/sculk_person_spawn_egg.png", sculk_person_spawn_egg(), None
     yield "item/cloudy_spawn_egg.png", cloudy_spawn_egg(), None
     yield from pink_particles()
+
+
+# ============================================================================================ the Cloud Realm, round 11
+# Cloudcite (the realm's own stone, in place of calcite), cloud leaves, the realm's four flowers, holy gold and gilded
+# cloudcite, holy water, the prismatic ritual crystal, cloud candy, holy gold gear, the angels, the cloud turtle (the
+# owner's skin for him: tools/art/cloud_turtle_skin.png), the white rescue boat, and the mod's own particles.
+R_CLOUDCITE = [hexc(c) for c in ("8E98AE", "B0B9CB", "CDD4E1", "E4E9F1", "F4F6FA", "FFFFFF")]
+# Holy gold: far brighter than vanilla's gold, nearly white where the light catches it.
+R_HOLY_GOLD = [hexc(c) for c in ("B07F16", "DDAA26", "F7CF3F", "FFE36E", "FFF2AE", "FFFDF0")]
+# For item sprites: the same, with a darker start so the outlines stay crisp.
+R_HOLY_GOLD_ITEM = [hexc(c) for c in ("5E3F08", "B07F16", "E8B52A", "FFD84A", "FFEB86", "FFF8D2", "FFFFFF")]
+R_HOLY_WATER = [hexc(c) for c in ("D9A635", "EDC453", "F8DD7E", "FDEDB0", "FFF9E2")]
+R_CLOUD_LEAVES = [hexc(c) for c in ("A3B1C6", "C3CEDD", "DEE5EE", "F1F4F8", "FFFFFF")]
+R_CLOUD_BOAT = [hexc(c) for c in ("9EA4B8", "BFC4D3", "DADDE7", "EEF0F5", "FFFFFF")]
+PEARL_GLINTS = [hexc("FCE1EA"), hexc("DDF2FD"), hexc("FFF6D8")]
+# Vanilla's tool handle (a stick): kept as it is on the holy gold tools.
+STICK_COLOURS = {hexc(c) for c in ("281E0B", "493615", "684E1E", "896727")}
+
+
+def cloudcite(name="calcite"):
+    """Cloudcite: vanilla's calcite (or another stone's pattern) in soft, cloudy white with a few pearly glints of pink,
+    blue and gold."""
+    img = gradient_map(vblock(name), R_CLOUDCITE, curve=lambda t: 0.25 + 0.75 * t)
+    rng = random.Random(len(name) * 7 + 3)
+    for p in pixels(img):
+        if img.getpixel(p)[3] and lum(img.getpixel(p)) > 0.85 and rng.random() < 0.035:
+            img.putpixel(p, (*rng.choice(PEARL_GLINTS), 255))
+    return img
+
+
+def gilded_cloudcite():
+    """Cloudcite bricks with seams of glowing holy gold (the darkest pixels of vanilla's stone bricks: the mortar)."""
+    src = vblock("stone_bricks")
+    out = cloudcite("stone_bricks")
+    lo, hi = lum_range(src)
+    for p in pixels(src):
+        px = src.getpixel(p)
+        t = (lum(px) - lo) / (hi - lo)
+        if px[3] and t < 0.16:
+            out.putpixel(p, (*sample(R_HOLY_GOLD, 0.45 + 0.4 * (1.0 - t / 0.16)), 255))
+    return out
+
+
+def holy_gold_block():
+    return gradient_map(vblock("gold_block"), R_HOLY_GOLD, curve=lambda t: 0.2 + 0.8 * t)
+
+
+def cloud_leaves():
+    """Round puffs of cloud on the cloud trees (vanilla's azalea leaves, white and faintly blue, with a golden speck or two)."""
+    return leaves_from("azalea_leaves", R_CLOUD_LEAVES, sparkle=hexc("FFF1C8"), lo_t=0.15)
+
+
+def cloud_puff():
+    """A puffball on a mint stem (vanilla's allium): white and soft blue, like a little cloud."""
+    return flower(vblock("allium"), lambda p, i: mix_ramp(R_CLOUD_LEAVES, R_PETAL_BLUE, 0.18))
+
+
+def halo_lily():
+    """Lily of the valley's bells in holy gold and white, every other one gold."""
+    return flower(vblock("lily_of_the_valley"), lambda p, i: R_HOLY_GOLD if i % 2 == 0 else R_PETAL_WHITE)
+
+
+def breezebell():
+    """A pale sky-blue cornflower, white at the tips."""
+    return flower(vblock("cornflower"), lambda p, i: mix_ramp(R_PETAL_BLUE, R_PETAL_WHITE, 0.45))
+
+
+def stardust_daisy():
+    """A lavender daisy (vanilla's oxeye) with a golden heart and white glitter on its petals."""
+    img = vblock("oxeye_daisy")
+    centre = lambda p, px: 0.03 < hsv(px)[0] < 0.2 and hsv(px)[1] > 0.4
+    out = flower(img, lambda p, i: R_HOLY_GOLD if centre(p, img.getpixel(p)) else mix_ramp(R_PETAL_LAVENDER, R_PETAL_WHITE, 0.4))
+    rng = random.Random(61)
+    for p in pixels(img):
+        px = img.getpixel(p)
+        if px[3] and not is_green(px) and not centre(p, px) and rng.random() < 0.12:
+            out.putpixel(p, (255, 255, 255, 255))
+    return out
+
+
+CLOUD_FLOWERS = ("cloud_puff", "halo_lily", "breezebell", "stardust_daisy")
+
+
+def holy_water(name):
+    """(image, mcmeta) for holy_water_still / holy_water_flow: vanilla's water animation in shimmering gold. Water's
+    see-through alpha is kept, so it's drawn see-through like water."""
+    with _zip(BLOCK_ZIP).open(f"base block textures/{name}.png.mcmeta") as f:
+        meta = json.load(f)
+    return animated(vblock(name), R_HOLY_WATER, 0.1, 1.0), meta
+
+
+def holy_water_bucket():
+    img = vitem("water_bucket")
+    water = lambda p, px: px[3] > 0 and 0.5 < hsv(px)[0] < 0.75 and hsv(px)[1] > 0.3
+    return gradient_map(img, R_HOLY_WATER, mask=water, curve=lambda t: 0.25 + 0.75 * t)
+
+
+def prismatic_crystal(awake=False, n=16):
+    """The ritual crystal: vanilla's amethyst block shining every colour in turn like a prism. Each frame turns the
+    facets' hues a little further round the colour wheel (bright facets paler, so they shine white); once the ritual
+    has woken it, it's brighter and more vivid."""
+    base = vblock("amethyst_block")
+    lo, hi = lum_range(base)
+    strip = new(16, 16 * n)
+    for k in range(n):
+        for (x, y) in pixels(base):
+            px = base.getpixel((x, y))
+            if not px[3]:
+                continue
+            t = min(1.0, max(0.0, (lum(px) - lo) / (hi - lo)))
+            # a rainbow sheen sweeping diagonally across the facets, pale where they catch the light
+            hue = (k / n + (x + y) / 40.0 + 0.2 * t) % 1.0
+            sat = (0.42 if awake else 0.34) * (1.0 - 0.6 * t)
+            val = (0.78 + 0.22 * t) if awake else (0.6 + 0.32 * t)
+            r, g, b = colorsys.hsv_to_rgb(hue, sat, val)
+            strip.putpixel((x, 16 * k + y), (round(r * 255), round(g * 255), round(b * 255), px[3]))
+    return strip
+
+
+def cloud_candy():
+    """Cloud candy: a fluffy swirl of cotton candy, pink, white and blue, on a white paper stick."""
+    img = new()
+    rng = random.Random(19)
+    cx, cy = 8.6, 6.2
+    for y in range(16):
+        for x in range(16):
+            dx, dy = x + 0.5 - cx, (y + 0.5 - cy) * 1.12
+            r = math.hypot(dx, dy)
+            edge = 5.4 + 0.7 * math.sin(math.atan2(dy, dx) * 5.0 + 0.6) + rng.random() * 0.5
+            if r > edge:
+                continue
+            # swirl bands of pink, white and blue, winding in to the middle
+            band = int((math.atan2(dy, dx) / math.tau * 3.0 + r * 0.32) % 3)
+            ramp = (R_PETAL_PINK, R_PETAL_WHITE, R_PETAL_BLUE)[band]
+            light = 0.75 - 0.08 * dx - 0.1 * dy + 0.15 * rng.random()
+            if r > edge - 1.0:
+                light -= 0.3
+            img.putpixel((x, y), (*sample(ramp, light), 255))
+    # the stick, leaning away down to the left
+    for i, (x, y) in enumerate(((7, 11), (6, 12), (5, 13), (4, 14), (3, 15))):
+        img.putpixel((x, y), (*hexc("F6F1E8"), 255))
+        img.putpixel((x + 1, y), (*(hexc("F5A9B8") if i % 2 else hexc("D9D2C6")), 255))
+    return img
+
+
+def holy_gear_item(name):
+    """A golden tool or piece of armor in holy gold (the stick of a tool kept as it is)."""
+    img = vitem(f"golden_{name}")
+    return gradient_map(img, R_HOLY_GOLD_ITEM, mask=lambda p, px: px[:3] not in STICK_COLOURS, curve=lambda t: 0.05 + 0.95 * t)
+
+
+def holy_armor_layer(rel):
+    """Worn holy gold armor: vanilla's gold armor layer, brighter."""
+    with _zip(ENTITY_ZIP).open(f"base entity textures/{rel}") as f:
+        img = Image.open(f).convert("RGBA")
+    return gradient_map(img, R_HOLY_GOLD_ITEM, curve=lambda t: 0.12 + 0.88 * t)
+
+
+HOLY_GEAR = ("sword", "pickaxe", "axe", "shovel", "hoe", "helmet", "chestplate", "leggings", "boots")
+
+
+def angel_spawn_egg():
+    return gradient_map(vitem("allay_spawn_egg"), [hexc(c) for c in ("B8912E", "E2C25E", "F6E6A8", "FBF6E4", "FFFFFF")])
+
+
+def blessed_icon():
+    """18x18 effect icon: a golden heart with a halo over it."""
+    rows = [
+        "..................",
+        ".....oooooooo.....",
+        "....o........o....",
+        ".....oooooooo.....",
+        "..................",
+        "...hhhh....hhhh...",
+        "..hHHHHh..hHHHHh..",
+        ".hHWWHHHhhHHHHHHh.",
+        ".hHWHHHHHHHHHHHGh.",
+        ".hHHHHHHHHHHHHHGh.",
+        "..hHHHHHHHHHHHGh..",
+        "...hHHHHHHHHHGh...",
+        "....hHHHHHHHGh....",
+        ".....hHHHHHGh.....",
+        "......hHHHGh......",
+        ".......hHGh.......",
+        "........hh........",
+        "..................",
+    ]
+    palette = {"o": hexc("F7CF3F"), "h": hexc("A87410"), "H": hexc("FFE36E"), "G": hexc("E8B52A"), "W": WHITE}
+    return from_ascii(rows, palette)
+
+
+def cloud_boat():
+    """The cloud turtle's white boat: vanilla's pale oak boat in clean white, grain and all."""
+    with _zip(ENTITY_ZIP).open("base entity textures/boat/pale_oak.png") as f:
+        img = Image.open(f).convert("RGBA")
+    return gradient_map(img, R_CLOUD_BOAT, curve=lambda t: 0.1 + 0.9 * t)
+
+
+def cloud_turtle_skin():
+    """The cloud turtle wears the skin the owner made for him, as it is."""
+    return Image.open(os.path.join(HERE, "art", "cloud_turtle_skin.png")).convert("RGBA")
+
+
+# ---- angels (128x128, AngelModel: the Trans Fairy's layout, see trans_fairy(), plus a halo and feathered wings)
+ANGEL_HAIR = [hexc(c) for c in ("B8913E", "D6B25C", "EBD08A", "F7E7B8", "FFF9E6")]
+ANGEL_ROBE = [hexc(c) for c in ("BDBBD0", "DAD9E6", "EEEEF5", "FAFAFD", "FFFFFF")]
+ANGEL_EYE = hexc("D9A12A")
+ANGEL_EYE_DARK = hexc("8A5A12")
+ANGEL_LASH = hexc("8C6A3A")
+FEATHER = [hexc(c) for c in ("A9AFC6", "C9CEDD", "E2E5EF", "F3F5FA", "FFFFFF")]
+
+
+def angel_wing(img, u, v, w, h, top, bottom, feather_w, rng, coverts=False):
+    """One feathered wing plane (a 0-deep box at u, v, w x h). It's drawn on both faces: the north face at u has the
+    hinge at its left edge, the south face at u + w at its right. In column s (counted out from the hinge) the wing
+    covers rows top(s) to bottom(s). Flight feathers feather_w wide hang down with rounded tips and shaded edges under a
+    band of small scalloped coverts along the gold-touched leading edge; the coverts plane is all scallops."""
+    cells = {}
+    for s in range(w):
+        t0, t1 = top(s), bottom(s)
+        k, within = divmod(s, feather_w)
+        # rounded feather tips: the outer columns of each feather stop a row short
+        if within in (0, feather_w - 1) and t1 - t0 > 3:
+            t1 -= 1
+        for t in range(max(0, t0), min(h - 1, t1) + 1):
+            depth = t - t0
+            if depth == 0:
+                c = sample(R_HOLY_GOLD, 0.8 + 0.15 * rng.random())          # the leading edge, touched with gold
+            elif coverts or depth <= 3:
+                # rows of small scalloped feathers
+                row = depth // 3
+                edge = depth % 3 == 2 and (s + row) % 3 != 1
+                c = sample(FEATHER, 0.55 if edge else 0.85 + 0.15 * rng.random())
+            else:
+                # a flight feather: a bright shaft down the middle, darker edges where it overlaps its neighbour
+                c = sample(FEATHER, 0.5 if within == 0 else (1.0 if within == feather_w // 2 else 0.82 + 0.1 * rng.random()))
+                if t >= t1 - 1:
+                    c = sample(FEATHER, 0.7)                                # the tip's soft shadow
+            cells[(s, t)] = c
+    for (s, t), c in cells.items():
+        img.putpixel((u + s, v + t), (*c, 255))
+        img.putpixel((u + w + (w - 1 - s), v + t), (*c, 255))
+
+
+def angel_texture():
+    """128x128 for AngelModel: the Trans Fairy's layout (head 0,0 · hair shell 32,0 · back hair 64,0 · side locks 88,0 ·
+    arms 40,16 · sleeves 48,16 · bodice 0,32 · collar 20,32 · skirt tiers 0,44 / 0,53 / 0,64 · legs 0,76 · sandals
+    8,76) in white and holy gold, with golden hair, plus the halo (96,0 · 96,4 · 112,0), the flight feathers (22x26
+    plane at 64,32) and the coverts (16x12 plane at 64,60)."""
+    rng = random.Random(41)
+    img = new(128, 128)
+    fill_box(img, 0, 0, 8, 8, 8, lambda f, x, y, w, h: sample(FAIRY_SKIN, 0.62 + 0.15 * (f == "front") - 0.1 * (f in ("left", "right")) + 0.05 * rng.random()))
+    face = {
+        (1, 3): ANGEL_LASH, (2, 3): ANGEL_LASH, (5, 3): ANGEL_LASH, (6, 3): ANGEL_LASH,
+        (1, 4): WHITE, (2, 4): ANGEL_EYE, (5, 4): ANGEL_EYE, (6, 4): WHITE,
+        (1, 5): ANGEL_EYE_DARK, (2, 5): ANGEL_EYE_DARK, (5, 5): ANGEL_EYE_DARK, (6, 5): ANGEL_EYE_DARK,
+        (0, 6): hexc("F7C2CC"), (7, 6): hexc("F7C2CC"),
+        (3, 6): hexc("E59AAE"), (4, 6): hexc("E59AAE"),
+    }
+    for (x, y), c in face.items():
+        img.putpixel((8 + x, 8 + y), (*c, 255))
+
+    def hair_px(f, x, y, w, h):
+        c = sample(ANGEL_HAIR, 0.45 + 0.4 * rng.random())
+        if f == "front":
+            fringe = [3, 2, 2, 1, 1, 2, 2, 3]
+            if y >= fringe[x]:
+                return None if not (x in (0, 7) and y < 7) else c
+        return c
+    fill_box(img, 32, 0, 8, 8, 8, hair_px)
+    fill_box(img, 64, 0, 9, 13, 2, lambda f, x, y, w, h: sample(ANGEL_HAIR, 0.75 + 0.2 * rng.random()) if y >= h - 4 and f != "top"
+             else sample(ANGEL_HAIR, 0.35 + 0.45 * rng.random() - 0.2 * (x % 3 == 0)))
+    fill_box(img, 88, 0, 2, 9, 2, lambda f, x, y, w, h: sample(ANGEL_HAIR, 0.45 + 0.4 * rng.random()))
+    # the halo: bright holy gold, shining white here and there
+    gold = lambda f, x, y, w, h: sample(R_HOLY_GOLD, 0.95) if (x + y) % 3 == 0 else sample(R_HOLY_GOLD, 0.6 + 0.2 * rng.random())
+    fill_box(img, 96, 0, 6, 1, 1, gold)
+    fill_box(img, 96, 4, 1, 1, 6, gold)
+    fill_box(img, 112, 0, 1, 1, 1, gold)
+
+    # bodice: white with a golden lacing down the front and a golden sash at the waist
+    def bodice(f, x, y, w, h):
+        if y == h - 1:
+            return sample(R_HOLY_GOLD, 0.55 + 0.2 * (x % 2))
+        if f == "front" and x in (2, 3) and y % 2 == 1:
+            return sample(R_HOLY_GOLD, 0.7)
+        return sample(ANGEL_ROBE, 0.6 + 0.25 * rng.random() - 0.1 * (f in ("left", "right")))
+    fill_box(img, 0, 32, 6, 8, 4, bodice)
+    fill_box(img, 20, 32, 7, 3, 5, lambda f, x, y, w, h: sample(R_HOLY_GOLD, 0.6 + 0.3 * ((x + y) % 2)))
+
+    def tier(f, x, y, w, h):
+        if f in ("top", "bottom"):
+            return sample(ANGEL_ROBE, 0.5)
+        if y == h - 1:
+            return sample(R_HOLY_GOLD, 0.55 + 0.25 * (x % 2))          # a golden hem on every tier
+        c = sample(ANGEL_ROBE, 0.55 + 0.35 * rng.random() - 0.15 * (x % 4 == 0))
+        if rng.random() < 0.05:
+            c = sample(R_HOLY_GOLD, 0.95)                               # glints of gold thread
+        return c
+    fill_box(img, 0, 44, 9, 3, 6, tier)
+    fill_box(img, 0, 53, 11, 3, 8, tier)
+    fill_box(img, 0, 64, 13, 3, 10, tier)
+    # arms: skin with golden bracelets; sleeves white with a golden rim
+    fill_box(img, 40, 16, 2, 10, 2, lambda f, x, y, w, h: sample(R_HOLY_GOLD, 0.7) if y == h - 3 else sample(FAIRY_SKIN, 0.6 + 0.1 * rng.random()))
+    fill_box(img, 48, 16, 3, 3, 3, lambda f, x, y, w, h: sample(R_HOLY_GOLD, 0.65) if y == h - 1 else sample(ANGEL_ROBE, 0.7 + 0.2 * rng.random()))
+    # bare legs and golden sandals
+    fill_box(img, 0, 76, 2, 9, 2, lambda f, x, y, w, h: sample(FAIRY_SKIN, 0.58 + 0.08 * rng.random()))
+    fill_box(img, 8, 76, 2, 1, 3, lambda f, x, y, w, h: sample(R_HOLY_GOLD, 0.5 + 0.3 * ((x + y) % 2)))
+
+    # the flight feathers: rising from the hinge to the wrist, then out to the tip; longest towards the tip
+    def flight_top(s):
+        return round(8 - 8 * (s / 12) ** 0.8) if s <= 12 else round((s - 12) * 0.55)
+
+    def flight_bottom(s):
+        return min(25, round(19 + 6 * s / 15)) if s <= 15 else round(25 - (s - 15) * 1.3)
+    angel_wing(img, 64, 32, 22, 26, flight_top, flight_bottom, 3, rng)
+    # the coverts (one row lower than the flight feathers' plane): a cape of small feathers over their upper half
+    angel_wing(img, 64, 60, 16, 12, lambda s: max(0, flight_top(s) - 1),
+               lambda s: (10 if s < 12 else 10 - (s - 11)) - (s // 2) % 2, 2, rng, coverts=True)
+    return img
+
+
+# ---- the mod's own particles: they glow and play their frames over their lives (client: SoulParticle.EmissiveProvider)
+PINK_FLAME_FRAMES = [
+    ["..w..", "..W..", ".PWP.", ".PXP.", "pWXWp", "pPXPp", ".pPp.", "..p.."],
+    [".....", "..w..", ".PWP.", ".PXP.", "pWXWp", "pPWPp", ".pPp.", "..p.."],
+    [".....", ".....", "..W..", ".PXP.", ".PXP.", "pPWPp", ".pPp.", "..p.."],
+    [".....", ".....", ".....", "..W..", ".PXP.", ".PWP.", ".pPp.", "....."],
+    [".....", ".....", ".....", ".....", "..W..", ".PWP.", "..p..", "....."],
+]
+PRISM_SPARK_BIG = ["...X...", "...C...", "..CXC..", "XCXXXCX", "..CXC..", "...C...", "...X..."]
+PRISM_SPARK_SMALL = [".......", ".......", "...C...", "..CXC..", "...C...", ".......", "......."]
+HOLY_SPARK_FRAMES = [
+    ["...g...", "...G...", "..GWG..", "gGWWWGg", "..GWG..", "...G...", "...g..."],
+    [".......", "...g...", "..GWG..", ".gWWWg.", "..GWG..", "...g...", "......."],
+    [".......", "...g...", "...G...", ".gGWGg.", "...G...", "...g...", "......."],
+    [".......", ".......", "...g...", "..gWg..", "...g...", ".......", "......."],
+    [".......", ".......", ".......", "...G...", ".......", ".......", "......."],
+    [".......", ".......", ".......", "...g...", ".......", ".......", "......."],
+]
+
+
+def pink_flame_frames():
+    """The ritual candles' flames: small (5x8 in the middle of a 16x16 sprite, about as big as a candle's flame), hot
+    pink outside, white in the heart, burning down over five frames."""
+    palette = {"p": hexc("E8518E"), "P": hexc("F58DB8"), "W": hexc("FBD0E3"), "w": hexc("FFE9F2"), "X": WHITE}
+    for rows in PINK_FLAME_FRAMES:
+        img = new(16, 16)
+        img.paste(from_ascii(rows, palette), (6, 4))
+        yield img
+
+
+def prism_spark_frames(n=8):
+    """A four-pointed star with a white heart, its colour turning round the rainbow frame by frame, shrinking at the end."""
+    for k in range(n):
+        r, g, b = colorsys.hsv_to_rgb(k / n, 0.5, 1.0)
+        palette = {"X": WHITE, "C": (round(r * 255), round(g * 255), round(b * 255))}
+        img = new(8, 8)
+        img.paste(from_ascii(PRISM_SPARK_BIG if k < n - 2 else PRISM_SPARK_SMALL, palette), (0, 0))
+        yield img
+
+
+def holy_spark_frames():
+    """A golden mote: a little white-hot star in holy gold, fading to a point."""
+    palette = {"g": hexc("E8B52A"), "G": hexc("FFE36E"), "W": hexc("FFFBE6")}
+    for rows in HOLY_SPARK_FRAMES:
+        img = new(8, 8)
+        img.paste(from_ascii(rows, palette), (0, 0))
+        yield img
+
+
+def round11_textures():
+    """Yields (path under textures/, image, mcmeta or None) for the Cloud Realm's round 11 blocks, items and mobs."""
+    yield "block/cloudcite.png", cloudcite(), None
+    yield "block/polished_cloudcite.png", cloudcite("polished_diorite"), None
+    yield "block/cloudcite_bricks.png", cloudcite("stone_bricks"), None
+    yield "block/chiseled_cloudcite.png", cloudcite("chiseled_stone_bricks"), None
+    yield "block/gilded_cloudcite.png", gilded_cloudcite(), None
+    yield "block/holy_gold_block.png", holy_gold_block(), None
+    yield "block/cloud_leaves.png", cloud_leaves(), LEAVES_META
+    for name in CLOUD_FLOWERS:
+        yield f"block/{name}.png", globals()[name](), CUTOUT
+    for vanilla, ours in (("water_still", "holy_water_still"), ("water_flow", "holy_water_flow")):
+        img, meta = holy_water(vanilla)
+        yield f"block/{ours}.png", img, meta
+    crystal_meta = {"animation": {"frametime": 3, "interpolate": True}}
+    yield "block/ritual_crystal.png", prismatic_crystal(), crystal_meta
+    yield "block/ritual_crystal_awake.png", prismatic_crystal(awake=True), crystal_meta
+    yield "item/cloud_candy.png", cloud_candy(), None
+    yield "item/holy_water_bucket.png", holy_water_bucket(), None
+    for name in HOLY_GEAR:
+        yield f"item/holy_golden_{name}.png", holy_gear_item(name), None
+    yield "item/angel_spawn_egg.png", angel_spawn_egg(), None
+    yield "entity/equipment/humanoid/holy_gold.png", holy_armor_layer("equipment/humanoid/gold.png"), None
+    yield "entity/equipment/humanoid_leggings/holy_gold.png", holy_armor_layer("equipment/humanoid_leggings/gold.png"), None
+    yield "entity/angel/angel.png", angel_texture(), None
+    yield "entity/cloud_turtle/cloud_turtle.png", cloud_turtle_skin(), None
+    yield "entity/boat/cloud.png", cloud_boat(), None
+    yield "mob_effect/blessed.png", blessed_icon(), None
+    for i, img in enumerate(pink_flame_frames()):
+        yield f"particle/pink_flame_{i}.png", img, None
+    for i, img in enumerate(prism_spark_frames()):
+        yield f"particle/prism_spark_{i}.png", img, None
+    for i, img in enumerate(holy_spark_frames()):
+        yield f"particle/holy_spark_{i}.png", img, None
 
 
 # ============================================================================================ chests
@@ -4583,6 +4979,10 @@ def main():
         save(img, f"entity/trans/{rel}")
 
     for rel, img, meta in round9_textures():
+        save(img, rel)
+        if meta:
+            save_mcmeta(rel, meta)
+    for rel, img, meta in round11_textures():
         save(img, rel)
         if meta:
             save_mcmeta(rel, meta)

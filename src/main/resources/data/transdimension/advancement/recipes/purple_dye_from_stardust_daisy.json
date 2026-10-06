@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_stardust_daisy": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:stardust_daisy"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:purple_dye_from_stardust_daisy"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_stardust_daisy"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:purple_dye_from_stardust_daisy"
+    ]
+  }
+}

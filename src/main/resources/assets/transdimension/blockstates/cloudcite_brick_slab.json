@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "transdimension:block/cloudcite_brick_slab"
+    },
+    "type=double": {
+      "model": "transdimension:block/cloudcite_bricks"
+    },
+    "type=top": {
+      "model": "transdimension:block/cloudcite_brick_slab_top"
+    }
+  }
+}

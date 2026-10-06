@@ -6,8 +6,10 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.world.BeanstalkFeature;
 import dev.goober.transdimension.world.FairyIslandFeature;
 import dev.goober.transdimension.world.HeartTreeFeature;
+import dev.goober.transdimension.world.HeavenlyRuinFeature;
 import dev.goober.transdimension.world.PinkSculkPatchFeature;
 import dev.goober.transdimension.world.TransCoralReefFeature;
 import dev.goober.transdimension.world.TransDungeonFeature;
@@ -31,6 +33,12 @@ public final class ModFeatures {
 	/** The Cloud Realm's clouds of white wool. */
 	public static final Feature<NoneFeatureConfiguration> WOOL_CLOUD = Registry.register(BuiltInRegistries.FEATURE,
 			TransDimension.id("wool_cloud"), new WoolCloudFeature(NoneFeatureConfiguration.CODEC));
+	/** The Cloud Realm's heavenly ruins: spiral towers and shrines of cloudcite and holy gold, with holy water. */
+	public static final Feature<NoneFeatureConfiguration> HEAVENLY_RUIN = Registry.register(BuiltInRegistries.FEATURE,
+			TransDimension.id("heavenly_ruin"), new HeavenlyRuinFeature(NoneFeatureConfiguration.CODEC));
+	/** A very rare giant beanstalk of green concrete, climbing from an island up to a cloud. */
+	public static final Feature<NoneFeatureConfiguration> BEANSTALK = Registry.register(BuiltInRegistries.FEATURE,
+			TransDimension.id("beanstalk"), new BeanstalkFeature(NoneFeatureConfiguration.CODEC));
 
 	private ModFeatures() {
 	}

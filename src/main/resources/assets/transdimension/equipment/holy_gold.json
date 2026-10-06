@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "transdimension:holy_gold"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "transdimension:holy_gold"
+      }
+    ]
+  }
+}

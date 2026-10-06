@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_cloudcite_brick_slab": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:cloudcite_brick_slab"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:chiseled_cloudcite"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_cloudcite_brick_slab"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:chiseled_cloudcite"
+    ]
+  }
+}

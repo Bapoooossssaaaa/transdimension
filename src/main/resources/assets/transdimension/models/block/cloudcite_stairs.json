@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "bottom": "transdimension:block/cloudcite",
+    "top": "transdimension:block/cloudcite",
+    "side": "transdimension:block/cloudcite"
+  }
+}

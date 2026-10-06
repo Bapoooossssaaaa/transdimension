@@ -1,0 +1,12 @@
+{
+  "feature": "transdimension:beanstalk",
+  "placement": [
+    {
+      "type": "minecraft:rarity_filter",
+      "chance": 400
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

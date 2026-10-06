@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "transdimension:holy_gold_block",
     "transdimension:sculk_gem_ore",
     "transdimension:trans_crystal_block",
     "transdimension:trans_crystal_ore",

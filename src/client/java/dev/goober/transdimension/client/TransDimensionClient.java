@@ -6,6 +6,7 @@ import java.util.Objects;
 import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.object.boat.BoatModel;
+import net.minecraft.client.particle.SoulParticle;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.FluidModel;
@@ -26,6 +27,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderingRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockColorRegistry;
@@ -39,11 +41,16 @@ import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.fabric.api.resource.v1.reloader.ResourceReloaderKeys;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.client.entity.AngelModel;
+import dev.goober.transdimension.client.entity.AngelRenderer;
+import dev.goober.transdimension.client.entity.CloudBoatRenderer;
+import dev.goober.transdimension.client.entity.CloudTurtleRenderer;
 import dev.goober.transdimension.client.entity.CloudyModel;
 import dev.goober.transdimension.client.entity.CloudyRenderer;
 import dev.goober.transdimension.client.entity.FairyLightModel;
 import dev.goober.transdimension.client.entity.FairyRenderer;
 import dev.goober.transdimension.client.entity.FairyCrystalSpikeRenderer;
+import dev.goober.transdimension.client.entity.JarFairyRenderer;
 import dev.goober.transdimension.client.entity.MaddieRenderer;
 import dev.goober.transdimension.client.entity.PastelSlimeModel;
 import dev.goober.transdimension.client.entity.PastelSlimeRenderer;
@@ -70,6 +77,7 @@ import dev.goober.transdimension.registry.ModBlocks;
 import dev.goober.transdimension.registry.ModEntities;
 import dev.goober.transdimension.registry.ModFluids;
 import dev.goober.transdimension.registry.ModItems;
+import dev.goober.transdimension.registry.ModParticles;
 
 public class TransDimensionClient implements ClientModInitializer {
 	/** Trans pink, used for trans grass outside of a world (and as the fallback colour). */
@@ -127,6 +135,7 @@ public class TransDimensionClient implements ClientModInitializer {
 		ModelLayerRegistry.registerModelLayer(FairyLightModel.LAYER, FairyLightModel::createLayer);
 		ModelLayerRegistry.registerModelLayer(FairyLightModel.HALO_LAYER, FairyLightModel::createHaloLayer);
 		EntityRenderers.register(ModEntities.FAIRY, FairyRenderer::new);
+		EntityRenderers.register(ModEntities.JAR_FAIRY, JarFairyRenderer::new);
 
 		// The invisible seat you ride while sitting on furniture.
 		EntityRenderers.register(ModEntities.SEAT, SeatRenderer::new);
@@ -137,9 +146,23 @@ public class TransDimensionClient implements ClientModInitializer {
 		ModelLayerRegistry.registerModelLayer(SculkPersonRenderer.LAYER, SculkPersonRenderer::createLayer);
 		EntityRenderers.register(ModEntities.SCULK_PERSON, SculkPersonRenderer::new);
 		PinkSculkParticles.register();
-		// The Cloud Realm's Cloudies.
+		// The Cloud Realm's Cloudies and angels, and the cloud turtle with his white boat (CloudRescue).
 		ModelLayerRegistry.registerModelLayer(CloudyRenderer.LAYER, CloudyModel::createLayer);
 		EntityRenderers.register(ModEntities.CLOUDY, CloudyRenderer::new);
+		ModelLayerRegistry.registerModelLayer(AngelRenderer.LAYER, AngelModel::createLayer);
+		EntityRenderers.register(ModEntities.ANGEL, AngelRenderer::new);
+		EntityRenderers.register(ModEntities.CLOUD_TURTLE, CloudTurtleRenderer::new);
+		ModelLayerRegistry.registerModelLayer(CloudBoatRenderer.LAYER, BoatModel::createBoatModel);
+		EntityRenderers.register(ModEntities.CLOUD_BOAT, CloudBoatRenderer::new);
+		// Holy water: golden and see-through (its textures' alpha), untinted.
+		FluidRenderingRegistry.register(ModFluids.HOLY_WATER, ModFluids.FLOWING_HOLY_WATER, new FluidModel.Unbaked(
+				new Material(TransDimension.id("block/holy_water_still")), new Material(TransDimension.id("block/holy_water_flow")), null, null));
+		// The mod's own sparkles: the ritual's pink candle flames and prismatic stars, and the angels' golden motes. They
+		// glow, and play their frames over their lives, the way soul fire's souls do.
+		ParticleProviderRegistry particles = ParticleProviderRegistry.getInstance();
+		particles.register(ModParticles.PINK_FLAME, SoulParticle.EmissiveProvider::new);
+		particles.register(ModParticles.PRISM_SPARK, SoulParticle.EmissiveProvider::new);
+		particles.register(ModParticles.HOLY_SPARK, SoulParticle.EmissiveProvider::new);
 
 		// Trans boats use vanilla's boat models with our textures.
 		ModelLayerRegistry.registerModelLayer(TRANS_BOAT_LAYER, BoatModel::createBoatModel);

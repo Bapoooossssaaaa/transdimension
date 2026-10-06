@@ -22,10 +22,14 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityType;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.entity.Angel;
+import dev.goober.transdimension.entity.CloudBoat;
+import dev.goober.transdimension.entity.CloudTurtle;
 import dev.goober.transdimension.entity.Cloudy;
 import dev.goober.transdimension.entity.CrystalEye;
 import dev.goober.transdimension.entity.Fairy;
 import dev.goober.transdimension.entity.FairyCrystalSpike;
+import dev.goober.transdimension.entity.JarFairy;
 import dev.goober.transdimension.entity.Maddie;
 import dev.goober.transdimension.entity.PastelSlime;
 import dev.goober.transdimension.entity.PinkWarden;
@@ -200,6 +204,47 @@ public final class ModEntities {
 					.sized(1.5F, 1.0F)
 					.clientTrackingRange(10)
 					.build(CLOUDY_KEY));
+
+	public static final ResourceKey<EntityType<?>> ANGEL_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("angel"));
+	public static final ResourceKey<EntityType<?>> CLOUD_TURTLE_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("cloud_turtle"));
+	public static final ResourceKey<EntityType<?>> CLOUD_BOAT_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("cloud_boat"));
+	public static final ResourceKey<EntityType<?>> JAR_FAIRY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("jar_fairy"));
+
+	/** Gentle angels that float in the Cloud Realm's shadows (ambient, so they come and go). */
+	public static final EntityType<Angel> ANGEL = Registry.register(BuiltInRegistries.ENTITY_TYPE, ANGEL_KEY,
+			FabricEntityType.Builder.createMob(Angel::new, MobCategory.AMBIENT, mob -> mob
+							.spawnPlacement(SpawnPlacementTypes.NO_RESTRICTIONS, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Angel::checkAngelSpawnRules)
+							.defaultAttributes(Angel::createAttributes))
+					.sized(0.6F, 1.9F)
+					.eyeHeight(1.6F)
+					.clientTrackingRange(10)
+					.build(ANGEL_KEY));
+	/** The cloud turtle who fishes falling players out of the Cloud Realm's sky (CloudRescue); he only exists while he works. */
+	public static final EntityType<CloudTurtle> CLOUD_TURTLE = Registry.register(BuiltInRegistries.ENTITY_TYPE, CLOUD_TURTLE_KEY,
+			FabricEntityType.Builder.createMob(CloudTurtle::new, MobCategory.MISC, mob -> mob.defaultAttributes(CloudTurtle::createAttributes))
+					.noSave()
+					.noLootTable()
+					.sized(0.6F, 1.8F)
+					.clientTrackingRange(16)
+					.build(CLOUD_TURTLE_KEY));
+	/** The white boat he carries you home in (moved by the server, so nobody steers it). */
+	public static final EntityType<CloudBoat> CLOUD_BOAT = Registry.register(BuiltInRegistries.ENTITY_TYPE, CLOUD_BOAT_KEY,
+			EntityType.Builder.<CloudBoat>of(CloudBoat::new, MobCategory.MISC)
+					.noSave()
+					.noLootTable()
+					.sized(1.375F, 0.5625F)
+					.passengerAttachments(0.1875F)
+					.clientTrackingRange(16)
+					.updateInterval(1)
+					.build(CLOUD_BOAT_KEY));
+	/** The little fairy flitting about inside a Fairy Jar (the jar keeps it there). */
+	public static final EntityType<JarFairy> JAR_FAIRY = Registry.register(BuiltInRegistries.ENTITY_TYPE, JAR_FAIRY_KEY,
+			FabricEntityType.Builder.createMob(JarFairy::new, MobCategory.MISC, mob -> mob.defaultAttributes(Fairy::createAttributes))
+					.noLootTable()
+					.sized(0.15F, 0.15F)
+					.eyeHeight(0.08F)
+					.clientTrackingRange(8)
+					.build(JAR_FAIRY_KEY));
 
 	private ModEntities() {
 	}

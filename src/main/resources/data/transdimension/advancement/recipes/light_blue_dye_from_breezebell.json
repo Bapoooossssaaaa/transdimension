@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_breezebell": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:breezebell"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:light_blue_dye_from_breezebell"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_breezebell"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:light_blue_dye_from_breezebell"
+    ]
+  }
+}

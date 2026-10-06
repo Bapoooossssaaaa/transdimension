@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_halo_lily": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:halo_lily"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:yellow_dye_from_halo_lily"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_halo_lily"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:yellow_dye_from_halo_lily"
+    ]
+  }
+}

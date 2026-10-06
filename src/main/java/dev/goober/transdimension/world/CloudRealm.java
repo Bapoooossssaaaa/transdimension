@@ -157,9 +157,12 @@ public final class CloudRealm {
 		for (int dx = -CLOUD_RADIUS - 1; dx <= CLOUD_RADIUS + 1; dx++) {
 			for (int dz = -CLOUD_RADIUS - 1; dz <= CLOUD_RADIUS + 1; dz++) {
 				double d = Math.sqrt(dx * dx + dz * dz);
-				// a puffy disc, three layers deep in the middle, with clear sky above it
-				for (int layer = 0; layer < 3; layer++) {
-					if (d <= CLOUD_RADIUS - layer * 2 + 0.5) {
+				// a puffy cloud, level on top to stand on and round underneath (five deep in the middle), with clear sky
+				// above it
+				double edge = CLOUD_RADIUS + 0.5;
+				if (d <= edge) {
+					int depth = (int) Math.round(Math.sqrt(1.0 - d * d / (edge * edge)) * 4.0);
+					for (int layer = 0; layer <= depth; layer++) {
 						level.setBlock(new BlockPos(dx, top - layer, dz), wool, Block.UPDATE_ALL);
 					}
 				}
@@ -170,8 +173,8 @@ public final class CloudRealm {
 				}
 			}
 		}
-		// The portal home: a quartz frame round a 3 x 4 sheet of light, with glowing froglights at its feet.
-		BlockState frame = Blocks.QUARTZ_BLOCK.defaultBlockState();
+		// The portal home: a frame of chiseled cloudcite round a 3 x 4 sheet of light, with glowing froglights at its feet.
+		BlockState frame = ModBlocks.CHISELED_CLOUDCITE.defaultBlockState();
 		BlockState sheet = ModBlocks.SKY_PORTAL.defaultBlockState().setValue(SkyPortalBlock.AXIS, Direction.Axis.X);
 		int z = RETURN_PORTAL.getZ();
 		int bottom = RETURN_PORTAL.getY();

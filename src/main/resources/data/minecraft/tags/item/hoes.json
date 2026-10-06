@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "transdimension:holy_golden_hoe",
     "transdimension:trans_hoe"
   ]
 }

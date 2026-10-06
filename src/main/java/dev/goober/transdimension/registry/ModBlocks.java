@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -19,13 +20,18 @@ import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.InsideBlockEffectApplier;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.PlaceOnWaterBlockItem;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.StandingAndWallBlockItem;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.BaseCoralFanBlock;
 import net.minecraft.world.level.block.BaseCoralPlantBlock;
@@ -83,6 +89,7 @@ import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.MapColor;
@@ -581,7 +588,7 @@ public final class ModBlocks {
 	/** The trophy for beating the Trans Fairy: a jar with a little winged light dancing inside. */
 	public static final Block FAIRY_JAR = register("fairy_jar", FairyJarBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
-					.lightLevel(state -> 12),
+					.lightLevel(state -> 12).randomTicks(),
 			new Item.Properties().rarity(Rarity.EPIC).stacksTo(16));
 
 	// ---------------------------------------------------------------- the pink deep dark
@@ -626,6 +633,51 @@ public final class ModBlocks {
 	/** The pale soil under the Cloud Realm's grass. */
 	public static final Block CLOUD_SOIL = register("cloud_soil", Block::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.DIRT).mapColor(MapColor.SNOW));
+	/** The Cloud Realm's own stone, in place of calcite: soft white with a pearly sheen, like a cloud turned to stone. */
+	public static final Block CLOUDCITE = register("cloudcite", Block::new, BlockBehaviour.Properties.ofFullCopy(Blocks.CALCITE).mapColor(MapColor.SNOW));
+	public static final Block CLOUDCITE_STAIRS = stairs("cloudcite_stairs", CLOUDCITE, Blocks.DIORITE_STAIRS);
+	public static final Block CLOUDCITE_SLAB = slab("cloudcite_slab", Blocks.DIORITE_SLAB);
+	public static final Block CLOUDCITE_WALL = wall("cloudcite_wall", Blocks.DIORITE_WALL);
+	public static final Block POLISHED_CLOUDCITE = copy("polished_cloudcite", Blocks.POLISHED_DIORITE);
+	public static final Block POLISHED_CLOUDCITE_STAIRS = stairs("polished_cloudcite_stairs", POLISHED_CLOUDCITE, Blocks.POLISHED_DIORITE_STAIRS);
+	public static final Block POLISHED_CLOUDCITE_SLAB = slab("polished_cloudcite_slab", Blocks.POLISHED_DIORITE_SLAB);
+	public static final Block CLOUDCITE_BRICKS = copy("cloudcite_bricks", Blocks.STONE_BRICKS);
+	public static final Block CLOUDCITE_BRICK_STAIRS = stairs("cloudcite_brick_stairs", CLOUDCITE_BRICKS, Blocks.STONE_BRICK_STAIRS);
+	public static final Block CLOUDCITE_BRICK_SLAB = slab("cloudcite_brick_slab", Blocks.STONE_BRICK_SLAB);
+	public static final Block CLOUDCITE_BRICK_WALL = wall("cloudcite_brick_wall", Blocks.STONE_BRICK_WALL);
+	public static final Block CHISELED_CLOUDCITE = copy("chiseled_cloudcite", Blocks.CHISELED_STONE_BRICKS);
+	/** Cloudcite bricks veined with holy gold, glowing softly: the heavenly ruins' trim. */
+	public static final Block GILDED_CLOUDCITE = register("gilded_cloudcite", Block::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BRICKS).mapColor(MapColor.GOLD).lightLevel(state -> 5));
+	/** Holy gold: far brighter than vanilla's, and it glows. The heavenly ruins are trimmed with it. */
+	public static final Block HOLY_GOLD_BLOCK = register("holy_gold_block", Block::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.GOLD_BLOCK).lightLevel(state -> 8));
+	/** The cloud trees' leaves: soft white puffs that shed wisps of cloud. */
+	public static final Block CLOUD_LEAVES = register("cloud_leaves", properties -> new UntintedParticleLeavesBlock(0.02F, ParticleTypes.WHITE_ASH, properties),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.CHERRY_LEAVES).mapColor(MapColor.SNOW));
+	// The Cloud Realm's flowers: cloud puffs, halo lilies, breezebells and stardust daisies.
+	public static final Block CLOUD_PUFF = flower("cloud_puff", MobEffects.SLOW_FALLING, 8.0F);
+	public static final Block POTTED_CLOUD_PUFF = potted("potted_cloud_puff", CLOUD_PUFF);
+	public static final Block HALO_LILY = flower("halo_lily", MobEffects.REGENERATION, 6.0F);
+	public static final Block POTTED_HALO_LILY = potted("potted_halo_lily", HALO_LILY);
+	public static final Block BREEZEBELL = flower("breezebell", MobEffects.SPEED, 8.0F);
+	public static final Block POTTED_BREEZEBELL = potted("potted_breezebell", BREEZEBELL);
+	public static final Block STARDUST_DAISY = flower("stardust_daisy", MobEffects.NIGHT_VISION, 8.0F);
+	public static final Block POTTED_STARDUST_DAISY = potted("potted_stardust_daisy", STARDUST_DAISY);
+	/**
+	 * Holy water: golden, glowing water from the heavenly ruins' fountains (see HolyWaterFluid). Anything bathing in it is
+	 * Blessed: it heals and gains absorption hearts.
+	 */
+	public static final Block HOLY_WATER = registerWithoutItem("holy_water", properties -> new LiquidBlock(ModFluids.HOLY_WATER, properties) {
+		@Override
+		protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier,
+				boolean isPrecise) {
+			super.entityInside(state, level, pos, entity, effectApplier, isPrecise);
+			if (!level.isClientSide() && entity instanceof LivingEntity living && (level.getGameTime() + entity.getId()) % 10 == 0) {
+				living.addEffect(new MobEffectInstance(ModEffects.BLESSED, 20 * 12, 0));
+			}
+		}
+	}, BlockBehaviour.Properties.ofFullCopy(Blocks.WATER).mapColor(MapColor.GOLD).lightLevel(state -> 6));
 
 	private ModBlocks() {
 	}

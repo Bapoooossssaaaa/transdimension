@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_cloud_puff": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "transdimension:cloud_puff"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "transdimension:white_dye_from_cloud_puff"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_cloud_puff"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "transdimension:white_dye_from_cloud_puff"
+    ]
+  }
+}

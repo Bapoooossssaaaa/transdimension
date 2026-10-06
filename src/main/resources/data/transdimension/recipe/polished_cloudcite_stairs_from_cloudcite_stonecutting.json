@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "transdimension:cloudcite",
+  "result": {
+    "count": 1,
+    "id": "transdimension:polished_cloudcite_stairs"
+  }
+}

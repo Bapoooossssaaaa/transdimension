@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "transdimension:holy_golden_chestplate",
     "transdimension:trans_chestplate"
   ]
 }

@@ -2,7 +2,6 @@ package dev.goober.transdimension.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -23,6 +22,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import dev.goober.transdimension.registry.ModItems;
+import dev.goober.transdimension.registry.ModParticles;
 import dev.goober.transdimension.world.SculkRitual;
 
 /**
@@ -57,7 +57,7 @@ public class RitualPedestalBlock extends Block {
 			stack.consume(1, player);
 			serverLevel.playSound(null, pos, SoundEvents.CANDLE_PLACE, SoundSource.BLOCKS, 1.0F, 1.0F);
 			serverLevel.playSound(null, pos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, 1.2F);
-			serverLevel.sendParticles(ParticleTypes.FLAME, pos.getX() + 0.5, pos.getY() + 1.15, pos.getZ() + 0.5, 6, 0.05, 0.05, 0.05, 0.01);
+			serverLevel.sendParticles(ModParticles.PINK_FLAME, pos.getX() + 0.5, pos.getY() + 1.15, pos.getZ() + 0.5, 6, 0.05, 0.05, 0.05, 0.01);
 			SculkRitual.candleLit(serverLevel, pos, player);
 		}
 		return InteractionResult.SUCCESS;
@@ -79,7 +79,7 @@ public class RitualPedestalBlock extends Block {
 		double x = pos.getX() + 0.5;
 		double y = pos.getY() + 1.12;
 		double z = pos.getZ() + 0.5;
-		level.addParticle(ParticleTypes.SMALL_FLAME, x, y, z, 0.0, 0.0, 0.0);
+		level.addParticle(ModParticles.PINK_FLAME, x, y, z, 0.0, 0.0, 0.0);
 		if (random.nextInt(4) == 0) {
 			level.addParticle(new DustParticleOptions(random.nextBoolean() ? 0xFF5FA2 : 0xFFFFFF, 0.5F), x + random.nextGaussian() * 0.1, y + 0.1,
 					z + random.nextGaussian() * 0.1, 0.0, 0.03, 0.0);

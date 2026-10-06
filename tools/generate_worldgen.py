@@ -738,7 +738,7 @@ CAVE_DECOR = [f"{NS}:trans_glow_lichen", f"{NS}:deep_cave_moss", f"{NS}:deep_cav
 def biome(name, *, temperature, downfall, grass, foliage, water, water_fog, sky, fog, music_sound,
           features, creatures=(), monsters=MONSTERS, water_creatures=(), water_ambient=(), underground_water=(),
           particles=None, precipitation=True, frozen=False, extra_attributes=None, underwater_music=False, axolotls=(), fairies=4,
-          carvers=True):
+          carvers=True, ambient=()):
     attributes = {
         "minecraft:audio/background_music": music(music_sound, underwater_music),
         "minecraft:visual/fog_color": fog,
@@ -762,7 +762,8 @@ def biome(name, *, temperature, downfall, grass, foliage, water, water_fog, sky,
         "spawn_costs": {},
         "spawners": {
             # Wild fairies are rare however heavy their weight: one in fifteen spawn tries works, and never near another.
-            "ambient": BATS + ([spawn("fairy", fairies, 1, 1)] if fairies else []), "axolotls": list(axolotls), "creature": list(creatures), "misc": [], "monster": list(monsters),
+            "ambient": BATS + ([spawn("fairy", fairies, 1, 1)] if fairies else []) + list(ambient), "axolotls": list(axolotls),
+            "creature": list(creatures), "misc": [], "monster": list(monsters),
             "underground_water_creature": list(underground_water), "water_ambient": list(water_ambient),
             "water_creature": list(water_creatures)},
         "temperature": temperature,
@@ -980,14 +981,16 @@ def generate_biomes():
                     8: SPRINGS},
           creatures=[spawn("sculk_person", 6, 1, 2)], monsters=MONSTERS + [spawn("pink_warden", 4, 1, 1)])
 
-    # ---- the Cloud Realm: white islands in a white sky; no monsters at all
+    # ---- the Cloud Realm: white islands in a white sky; no monsters at all. Heavenly ruins and (very rarely) a giant
+    # beanstalk stand on the islands, round clouds float high above them, and angels keep to the dark underneath.
     biome("cloud_isles", fairies=0, temperature=0.6, downfall=0.3, grass="#eef5f2", foliage="#f4f8f6", water="#cfe9ff", water_fog="#a8d4f5",
           sky="#d9ecff", fog="#f6f9ff", music_sound="minecraft:music.overworld.meadow", precipitation=False, carvers=False,
           particles=particles("minecraft:end_rod", 0.0006),
-          features={9: [f"{NS}:wool_clouds", f"{NS}:cloud_trees", f"{NS}:cloud_flowers", f"{NS}:cloud_grass"]},
-          creatures=[spawn("cloudy", 10, 1, 2), spawn("minecraft:sheep", 10, 2, 4), spawn("minecraft:pig", 8, 2, 4),
+          features={4: [f"{NS}:heavenly_ruins", f"{NS}:beanstalk"],
+                    9: [f"{NS}:wool_clouds", f"{NS}:cloud_trees", f"{NS}:cloud_flowers", f"{NS}:cloud_grass"]},
+          creatures=[spawn("cloudy", 24, 2, 4), spawn("minecraft:sheep", 10, 2, 4), spawn("minecraft:pig", 8, 2, 4),
                      spawn("minecraft:cow", 8, 2, 4), spawn("minecraft:chicken", 8, 2, 4), spawn("minecraft:rabbit", 6, 2, 3)],
-          monsters=())
+          ambient=[spawn("angel", 12, 1, 1)], monsters=())
 
 
 # ============================================================================================ feature order
@@ -995,7 +998,7 @@ def generate_biomes():
 # ("feature order cycle" crash otherwise), so every biome's lists are sorted by this one ranking.
 FEATURE_RANK = [
     # structures & local modifications
-    "minecraft:fossil_upper", f"{NS}:trans_crystal_geode_common", f"{NS}:trans_crystal_geode",
+    "minecraft:fossil_upper", f"{NS}:trans_crystal_geode_common", f"{NS}:trans_crystal_geode", f"{NS}:heavenly_ruins", f"{NS}:beanstalk",
     f"{NS}:trans_dungeon", f"{NS}:trans_dungeon_deep",
     # ores
     *TRANS_ORES, f"{NS}:trans_ore_copper_large", f"{NS}:trans_ore_emerald", f"{NS}:trans_ore_clay",
@@ -1385,7 +1388,7 @@ def remove_stale():
 # ============================================================================================ round 9
 def generate_round9_features():
     """The pink deep dark's sculk patches (PinkSculkPatchFeature), veins and sculk gem ore, and the Cloud Realm's wool
-    clouds (WoolCloudFeature), cloud trees (pale oak with wool crowns), white flowers and grass."""
+    clouds (WoolCloudFeature), heavenly ruins, beanstalk, cloud trees (pale oak with cloud leaves), flowers and grass."""
     deep = lambda: {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "max_inclusive": {"absolute": 16},
                                                                  "min_inclusive": {"above_bottom": 0}}}
     cf("pink_sculk_patch", {"type": f"{NS}:pink_sculk_patch", "config": {}})
@@ -1408,19 +1411,24 @@ def generate_round9_features():
                                                  {"type": "minecraft:biome"}])
 
     # ---- the Cloud Realm
+    # Round clouds high in the sky (WoolCloudFeature picks the height itself: well above whatever island is under it).
     cf("wool_cloud", {"type": f"{NS}:wool_cloud", "config": {}})
-    pf("wool_clouds", f"{NS}:wool_cloud", [{"type": "minecraft:rarity_filter", "chance": 2}, {"type": "minecraft:in_square"},
-                                            {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform",
-                                                                                          "max_inclusive": {"absolute": 230},
-                                                                                          "min_inclusive": {"absolute": 30}}},
+    pf("wool_clouds", f"{NS}:wool_cloud", [{"type": "minecraft:rarity_filter", "chance": 3}, {"type": "minecraft:in_square"},
                                             {"type": "minecraft:biome"}])
+    # Heavenly ruins (HeavenlyRuinFeature, templates by generate_heavenly_ruins.py: only where an island is level enough)
+    # and, very rarely, a giant concrete beanstalk up to a cloud of its own (BeanstalkFeature). Both centre themselves on
+    # their chunk.
+    cf("heavenly_ruin", {"type": f"{NS}:heavenly_ruin", "config": {}})
+    pf("heavenly_ruins", f"{NS}:heavenly_ruin", [{"type": "minecraft:rarity_filter", "chance": 9}, {"type": "minecraft:biome"}])
+    cf("beanstalk", {"type": f"{NS}:beanstalk", "config": {}})
+    pf("beanstalk", f"{NS}:beanstalk", [{"type": "minecraft:rarity_filter", "chance": 400}, {"type": "minecraft:biome"}])
     cf("cloud_tree", {"type": "minecraft:tree", "config": {
         "below_trunk_provider": {"type": "minecraft:rule_based_state_provider", "rules": [{
             "if_true": {"type": "minecraft:not", "predicate": {"type": "minecraft:matching_block_tag", "tag": "minecraft:cannot_replace_below_tree_trunk"}},
             "then": simple(state("cloud_soil"))}]},
         "decorators": [],
         "foliage_placer": {"type": "minecraft:blob_foliage_placer", "height": 3, "offset": 0, "radius": 3},
-        "foliage_provider": simple(state("minecraft:white_wool")),
+        "foliage_provider": simple(state("cloud_leaves", distance=7, persistent=False, waterlogged=False)),
         "ignore_vines": True,
         "minimum_size": {"type": "minecraft:two_layers_feature_size", "limit": 1, "lower_size": 0, "upper_size": 1},
         "trunk_placer": straight(4, 2, 1),
@@ -1430,22 +1438,24 @@ def generate_round9_features():
     pf("cloud_trees", f"{NS}:cloud_tree", [{"type": "minecraft:count", "count": weighted_count([(0, 6), (1, 3), (2, 1)])},
                                             {"type": "minecraft:in_square"}, {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"},
                                             oak_check, {"type": "minecraft:biome"}])
+    # The realm's own flowers, in patches on the islands' grass (never on the clouds: each must be able to grow where it goes).
     cf("cloud_flowers", {"type": "minecraft:simple_block", "config": {"to_place": {"type": "minecraft:weighted_state_provider", "entries": [
-        {"data": state("minecraft:lily_of_the_valley"), "weight": 3}, {"data": state("minecraft:oxeye_daisy"), "weight": 3},
-        {"data": state("minecraft:white_tulip"), "weight": 2}, {"data": state("minecraft:azure_bluet"), "weight": 2},
-        {"data": state("pearl_daisy"), "weight": 2}]}}})
+        {"data": state("cloud_puff"), "weight": 3}, {"data": state("halo_lily"), "weight": 3},
+        {"data": state("breezebell"), "weight": 3}, {"data": state("stardust_daisy"), "weight": 3},
+        {"data": state("pearl_daisy"), "weight": 1}]}}})
     on_top = [{"type": "minecraft:in_square"}, {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"}, {"type": "minecraft:biome"}]
-    pf("cloud_flowers", f"{NS}:cloud_flowers", [{"type": "minecraft:count", "count": 3}] + on_top + patch(32))
+    grows_here = {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:would_survive", "state": state("cloud_puff")}}
+    pf("cloud_flowers", f"{NS}:cloud_flowers", [{"type": "minecraft:count", "count": 4}] + on_top + patch(32) + [grows_here])
     # Vanilla's short grass, white in the Cloud Isles' grass colour.
     pf("cloud_grass", "minecraft:grass", [{"type": "minecraft:count", "count": 6}] + on_top + patch(32, 7, 3))
 
 
 def generate_cloud_realm():
-    """The Cloud Realm: vanilla's floating-islands terrain in calcite under cloud grass and soil, one biome (Cloud Isles),
+    """The Cloud Realm: vanilla's floating-islands terrain in cloudcite under cloud grass and soil, one biome (Cloud Isles),
     and a bright, still, white sky (fixed time, so no nights)."""
     with open(os.path.join(HERE, "vanilla_extra", "templates", "worldgen", "noise_settings_floating_islands.json"), encoding="utf-8") as f:
         settings = json.load(f)
-    settings["default_block"] = state("minecraft:calcite")
+    settings["default_block"] = state("cloudcite")
     settings["surface_rule"] = seq(cond(floor(), block("cloud_grass_block")), cond(floor(add_surface_depth=True), block("cloud_soil")))
     write(os.path.join(WG, "noise_settings", "cloud_realm.json"), settings)
     write(os.path.join(DATA, NS, "dimension", "cloud_realm.json"), {"type": f"{NS}:cloud_realm", "generator": {

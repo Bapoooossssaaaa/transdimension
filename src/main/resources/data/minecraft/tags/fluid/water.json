@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:flowing_holy_water",
+    "transdimension:holy_water"
+  ]
+}

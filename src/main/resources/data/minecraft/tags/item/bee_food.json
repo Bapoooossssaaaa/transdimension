@@ -3,9 +3,12 @@
   "values": [
     "transdimension:blush_carnation",
     "transdimension:blush_foxglove",
+    "transdimension:breezebell",
+    "transdimension:cloud_puff",
     "transdimension:fairy_bell",
     "transdimension:flag_lily",
     "transdimension:forget_me_not",
+    "transdimension:halo_lily",
     "transdimension:heart_bloom",
     "transdimension:lavender_puff",
     "transdimension:pearl_daisy",
@@ -15,6 +18,7 @@
     "transdimension:sky_bell",
     "transdimension:sky_delphinium",
     "transdimension:star_bloom",
+    "transdimension:stardust_daisy",
     "transdimension:trans_orchid",
     "transdimension:trans_rose",
     "transdimension:trans_tulip"

@@ -19,8 +19,18 @@ public class FairyRenderer extends MobRenderer<Fairy, FairyRenderState, FairyLig
 			TransDimension.id("textures/entity/fairy_light/white.png")};
 
 	public FairyRenderer(EntityRendererProvider.Context context) {
-		super(context, new FairyLightModel(context.bakeLayer(FairyLightModel.LAYER)), 0.15F);
-		this.addLayer(new FairyHaloLayer(this, context));
+		this(context, false);
+	}
+
+	/**
+	 * {@code inJar}: the Fairy Jar's little fairy (JarFairyRenderer), drawn cutout (a see-through model behind the jar's
+	 * see-through glass vanishes) with no glowing halo and no shadow.
+	 */
+	protected FairyRenderer(EntityRendererProvider.Context context, boolean inJar) {
+		super(context, new FairyLightModel(context.bakeLayer(FairyLightModel.LAYER), inJar), inJar ? 0.0F : 0.15F);
+		if (!inJar) {
+			this.addLayer(new FairyHaloLayer(this, context));
+		}
 	}
 
 	static Identifier texture(int colour) {

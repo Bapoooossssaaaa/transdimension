@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Unit;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -229,6 +230,62 @@ public final class ModItems {
 	// ---------------------------------------------------------------- the Cloud Realm
 	public static final Item CLOUDY_SPAWN_EGG = register("cloudy_spawn_egg", SpawnEggItem::new,
 			new Item.Properties().spawnEgg(ModEntities.CLOUDY));
+	public static final Item ANGEL_SPAWN_EGG = register("angel_spawn_egg", SpawnEggItem::new,
+			new Item.Properties().spawnEgg(ModEntities.ANGEL));
+
+	// ---------------------------------------------------------------- the Cloud Realm (round 11)
+	/** Cotton candy spun from a cloud: eat it and you float up into the air, then drift gently back down. */
+	public static final Item CLOUD_CANDY = register("cloud_candy", Item::new, new Item.Properties().food(food(3, 0.3F, true),
+			Consumables.defaultFood()
+					.onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(MobEffects.LEVITATION, 20 * 3, 1), 1.0F))
+					.onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 20 * 15, 0), 1.0F))
+					.build()).component(DataComponents.LORE, lore("item.transdimension.cloud_candy.lore")));
+	/** A bucket of the heavenly ruins' holy water. */
+	public static final Item HOLY_WATER_BUCKET = register("holy_water_bucket", properties -> new BucketItem(ModFluids.HOLY_WATER, properties),
+			new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1));
+
+	// ---------------------------------------------------------------- holy gold gear: the heavenly ruins' loot, never crafted
+	public static final TagKey<Item> REPAIRS_HOLY_GEAR = TagKey.create(Registries.ITEM, TransDimension.id("repairs_holy_gear"));
+	/** Holy gold mines like diamond, as quickly as gold, and takes enchantments like gold; and it never breaks. */
+	public static final ToolMaterial HOLY_TOOL_MATERIAL = new ToolMaterial(BlockTags.INCORRECT_FOR_DIAMOND_TOOL, 1561, 12.0F, 3.0F, 22,
+			REPAIRS_HOLY_GEAR);
+	public static final ResourceKey<EquipmentAsset> HOLY_EQUIPMENT_ASSET = ResourceKey.create(EquipmentAssets.ROOT_ID, TransDimension.id("holy_gold"));
+	public static final ArmorMaterial HOLY_ARMOR_MATERIAL = new ArmorMaterial(
+			ARMOR_BASE_DURABILITY,
+			Map.of(
+					ArmorType.HELMET, 3,
+					ArmorType.CHESTPLATE, 8,
+					ArmorType.LEGGINGS, 6,
+					ArmorType.BOOTS, 3
+			),
+			25,
+			SoundEvents.ARMOR_EQUIP_GOLD,
+			2.0F,
+			0.0F,
+			REPAIRS_HOLY_GEAR,
+			HOLY_EQUIPMENT_ASSET
+	);
+
+	public static final Item HOLY_GOLDEN_SWORD = register("holy_golden_sword", Item::new, holy().sword(HOLY_TOOL_MATERIAL, 3.0F, -2.4F));
+	public static final Item HOLY_GOLDEN_PICKAXE = register("holy_golden_pickaxe", Item::new, holy().pickaxe(HOLY_TOOL_MATERIAL, 1.0F, -2.8F));
+	public static final Item HOLY_GOLDEN_AXE = register("holy_golden_axe",
+			properties -> new AxeItem(HOLY_TOOL_MATERIAL, 5.0F, -3.0F, properties), holy());
+	public static final Item HOLY_GOLDEN_SHOVEL = register("holy_golden_shovel",
+			properties -> new ShovelItem(HOLY_TOOL_MATERIAL, 1.5F, -3.0F, properties), holy());
+	public static final Item HOLY_GOLDEN_HOE = register("holy_golden_hoe",
+			properties -> new HoeItem(HOLY_TOOL_MATERIAL, -3.0F, 0.0F, properties), holy());
+	public static final Item HOLY_GOLDEN_HELMET = register("holy_golden_helmet", Item::new, holy()
+			.humanoidArmor(HOLY_ARMOR_MATERIAL, ArmorType.HELMET)
+			.durability(ArmorType.HELMET.getDurability(ARMOR_BASE_DURABILITY)));
+	public static final Item HOLY_GOLDEN_CHESTPLATE = register("holy_golden_chestplate", Item::new, holy()
+			.humanoidArmor(HOLY_ARMOR_MATERIAL, ArmorType.CHESTPLATE)
+			.durability(ArmorType.CHESTPLATE.getDurability(ARMOR_BASE_DURABILITY)));
+	public static final Item HOLY_GOLDEN_LEGGINGS = register("holy_golden_leggings", Item::new, holy()
+			.humanoidArmor(HOLY_ARMOR_MATERIAL, ArmorType.LEGGINGS)
+			.durability(ArmorType.LEGGINGS.getDurability(ARMOR_BASE_DURABILITY)));
+	public static final Item HOLY_GOLDEN_BOOTS = register("holy_golden_boots", Item::new, holy()
+			.humanoidArmor(HOLY_ARMOR_MATERIAL, ArmorType.BOOTS)
+			.durability(ArmorType.BOOTS.getDurability(ARMOR_BASE_DURABILITY)));
 
 	// ---------------------------------------------------------------- boats
 	public static final Item TRANS_BOAT = register("trans_boat",
@@ -297,6 +354,17 @@ public final class ModItems {
 			builder.alwaysEdible();
 		}
 		return builder.build();
+	}
+
+	/**
+	 * Holy gear's shared properties: epic, always shimmering with the enchantment glint, and unbreakable ("holy loot never
+	 * breaks"), whatever it's made into.
+	 */
+	private static Item.Properties holy() {
+		return new Item.Properties().rarity(Rarity.EPIC)
+				.component(DataComponents.UNBREAKABLE, Unit.INSTANCE)
+				.component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
+				.component(DataComponents.LORE, lore("item.transdimension.holy_gear.lore"));
 	}
 
 	private static Consumable withEffect(Consumable.Builder builder, MobEffectInstance effect) {

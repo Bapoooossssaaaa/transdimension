@@ -20,6 +20,12 @@ public final class ModParticles {
 	public static final SimpleParticleType PINK_SHRIEK = register("pink_shriek");
 	public static final SimpleParticleType PINK_VIBRATION = register("pink_vibration");
 	public static final SimpleParticleType PINK_SONIC_BOOM = register("pink_sonic_boom");
+	/** The ritual candles' pink flames. */
+	public static final SimpleParticleType PINK_FLAME = register("pink_flame");
+	/** A twinkling prismatic star: the ritual's and the Sky Portal's own sparkle. */
+	public static final SimpleParticleType PRISM_SPARK = register("prism_spark");
+	/** A golden mote of holy light (angels and holy water). */
+	public static final SimpleParticleType HOLY_SPARK = register("holy_spark");
 
 	private ModParticles() {
 	}

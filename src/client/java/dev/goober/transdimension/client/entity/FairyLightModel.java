@@ -30,7 +30,12 @@ public class FairyLightModel extends EntityModel<FairyRenderState> {
 	private final Parts parts;
 
 	public FairyLightModel(ModelPart root) {
-		super(root, RenderTypes::entityTranslucent);
+		this(root, false);
+	}
+
+	/** {@code cutout}: drawn cutout instead of see-through (the Fairy Jar's fairy, which is seen through the jar's glass). */
+	public FairyLightModel(ModelPart root, boolean cutout) {
+		super(root, cutout ? RenderTypes::entityCutout : RenderTypes::entityTranslucent);
 		this.parts = new Parts(root);
 	}
 

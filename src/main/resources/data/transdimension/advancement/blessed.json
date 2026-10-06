@@ -1,0 +1,29 @@
+{
+  "parent": "transdimension:sky_portal",
+  "criteria": {
+    "blessed": {
+      "trigger": "minecraft:effects_changed",
+      "conditions": {
+        "effects": {
+          "transdimension:blessed": {}
+        }
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:holy_water_bucket"
+    },
+    "title": {
+      "translate": "advancements.transdimension.blessed.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.blessed.description"
+    }
+  },
+  "requirements": [
+    [
+      "blessed"
+    ]
+  ]
+}

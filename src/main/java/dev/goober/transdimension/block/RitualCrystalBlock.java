@@ -7,7 +7,6 @@ import java.util.function.Consumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
@@ -28,6 +27,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import dev.goober.transdimension.registry.ModParticles;
 import dev.goober.transdimension.world.SculkRitual;
 
 /**
@@ -99,7 +99,7 @@ public class RitualCrystalBlock extends Block {
 					gem.y - 0.3 + random.nextDouble() * 0.8, gem.z + Math.sin(angle) * radius, 0.0, 0.02, 0.0);
 		}
 		if (random.nextInt(awake ? 2 : 6) == 0) {
-			level.addParticle(ParticleTypes.END_ROD, gem.x + random.nextGaussian() * 0.3, gem.y + random.nextGaussian() * 0.3,
+			level.addParticle(ModParticles.PRISM_SPARK, gem.x + random.nextGaussian() * 0.3, gem.y + random.nextGaussian() * 0.3,
 					gem.z + random.nextGaussian() * 0.3, 0.0, 0.0, 0.0);
 		}
 	}

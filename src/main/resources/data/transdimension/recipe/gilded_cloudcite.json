@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "transdimension:cloudcite_bricks",
+    "G": "minecraft:gold_ingot"
+  },
+  "pattern": [
+    "###",
+    "#G#",
+    "###"
+  ],
+  "result": {
+    "count": 8,
+    "id": "transdimension:gilded_cloudcite"
+  }
+}

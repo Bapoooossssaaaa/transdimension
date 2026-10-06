@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "transdimension:item/holy_golden_hoe"
+  }
+}

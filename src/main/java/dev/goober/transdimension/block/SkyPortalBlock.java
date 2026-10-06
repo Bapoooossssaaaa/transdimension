@@ -5,7 +5,6 @@ import org.jspecify.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
@@ -23,6 +22,7 @@ import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import dev.goober.transdimension.registry.ModParticles;
 import dev.goober.transdimension.world.CloudRealm;
 import dev.goober.transdimension.world.SculkRitual;
 
@@ -72,7 +72,7 @@ public class SkyPortalBlock extends Block implements Portal {
 					0.0, 0.03, 0.0);
 		}
 		if (random.nextInt(8) == 0) {
-			level.addParticle(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + random.nextDouble(), pos.getZ() + 0.5,
+			level.addParticle(ModParticles.PRISM_SPARK, pos.getX() + 0.5, pos.getY() + random.nextDouble(), pos.getZ() + 0.5,
 					(random.nextDouble() - 0.5) * 0.05, 0.02, (random.nextDouble() - 0.5) * 0.05);
 		}
 	}

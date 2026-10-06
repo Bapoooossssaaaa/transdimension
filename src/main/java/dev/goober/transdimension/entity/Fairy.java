@@ -117,11 +117,16 @@ public class Fairy extends PathfinderMob {
 		if (!level.isClientSide() && !this.colourRolled) {
 			this.setColour(this.random.nextInt(COLOURS.length));
 		}
-		if (level.isClientSide() && this.random.nextInt(3) == 0) {
+		if (level.isClientSide() && this.leavesTrail() && this.random.nextInt(3) == 0) {
 			// A trail of glitter in its colour.
 			level.addParticle(new DustParticleOptions(COLOURS[this.getColour()], 0.55F), this.getRandomX(0.5), this.getY() + 0.1,
 					this.getRandomZ(0.5), 0.0, -0.02, 0.0);
 		}
+	}
+
+	/** Wild fairies trail glitter; the little one in a Fairy Jar doesn't (JarFairy). */
+	protected boolean leavesTrail() {
+		return true;
 	}
 
 	@Override

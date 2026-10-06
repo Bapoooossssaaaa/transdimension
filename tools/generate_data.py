@@ -1749,9 +1749,9 @@ def generate_fairy_realm_data():
     item_def("fairy_altar", f"{NS}:block/fairy_altar")
     name("fairy_altar", "Fairy Altar")
 
-    # ---- the Fairy Jar: a trans glass jar with a flag-striped cloth lid and a little winged light inside. The light is
-    # part of the jar's model (it glows, and its texture cycles pink, white and blue), so it shows wherever the jar is.
-    # (It used to be drawn by a block entity renderer, which never showed up in the owner's game.)
+    # ---- the Fairy Jar: a trans glass jar with a flag-striped cloth lid. In the world its fairy is a tiny entity that
+    # flies about inside it (JarFairy), so the block model is the empty jar; the item shows a little winged light in it
+    # instead (glowing, its texture cycling pink, white and blue).
     jar = [
         {"from": [3, 0, 3], "to": [13, 11, 13], "faces": _faces("#glass", (3, 5, 13, 16), (3, 3, 13, 13), cull=("down",))},
         {"from": [4, 11, 4], "to": [12, 12, 12], "faces": _faces("#glass", (4, 4, 12, 5), (4, 4, 12, 12), skip=("down",))},
@@ -1768,9 +1768,10 @@ def generate_fairy_realm_data():
     ]
     jar_tex = {"particle": block_tex("fairy_jar_glass"), "glass": block_tex("fairy_jar_glass"), "lid": block_tex("fairy_jar_lid"),
                "light": block_tex("fairy_jar_light")}
-    model("fairy_jar", {"parent": "minecraft:block/block", "textures": jar_tex, "elements": light + jar})
+    model("fairy_jar", {"parent": "minecraft:block/block", "textures": jar_tex, "elements": jar})
+    model("fairy_jar_item", {"parent": "minecraft:block/block", "textures": jar_tex, "elements": light + jar})
     blockstate("fairy_jar", {"variants": {"": {"model": f"{NS}:block/fairy_jar"}}})
-    item_def("fairy_jar", f"{NS}:block/fairy_jar")
+    item_def("fairy_jar", f"{NS}:block/fairy_jar_item")
     name("fairy_jar", "Fairy Jar")
     loot("fairy_jar", loot_self("fairy_jar"))
 
@@ -2384,6 +2385,120 @@ def generate_round9_advancements():
           "condition": "minecraft:entity_properties", "entity": "this", "predicate": {"minecraft:entity_type": rid("sculk_person")}}]}}})
 
 
+# ============================================================================================ the Cloud Realm, round 11
+CLOUD_FLOWERS = {"cloud_puff": ("Cloud Puff", "white_dye"), "halo_lily": ("Halo Lily", "yellow_dye"),
+                 "breezebell": ("Breezebell", "light_blue_dye"), "stardust_daisy": ("Stardust Daisy", "purple_dye")}
+HOLY_GEAR = {"sword": ("Sword", "swords"), "pickaxe": ("Pickaxe", "pickaxes"), "axe": ("Axe", "axes"), "shovel": ("Shovel", "shovels"),
+             "hoe": ("Hoe", "hoes"), "helmet": ("Helmet", "head_armor"), "chestplate": ("Chestplate", "chest_armor"),
+             "leggings": ("Leggings", "leg_armor"), "boots": ("Boots", "foot_armor")}
+ROUND11_PARTICLES = {"pink_flame": 5, "prism_spark": 8, "holy_spark": 6}
+
+
+def generate_round11():
+    # ---- cloudcite: the realm's own stone (in place of calcite) and what's made from it
+    stone_family("cloudcite", "Cloudcite", "cloudcite", "Cloudcite")
+    stone_family("polished_cloudcite", "Polished Cloudcite", "polished_cloudcite", "Polished Cloudcite", wall_too=False)
+    stone_family("cloudcite_bricks", "Cloudcite Bricks", "cloudcite_brick", "Cloudcite Brick")
+    cube("chiseled_cloudcite", "Chiseled Cloudcite")
+    cube("gilded_cloudcite", "Gilded Cloudcite")
+    R = recipe
+    stone_recipes("cloudcite", "cloudcite")
+    stone_recipes("polished_cloudcite", "polished_cloudcite", wall=False, cut_from=("cloudcite",))
+    stone_recipes("cloudcite_brick", "cloudcite_bricks", cut_from=("cloudcite", "polished_cloudcite"))
+    R("polished_cloudcite", shaped("polished_cloudcite", ["##", "##"], {"#": "cloudcite"}, 4))
+    R("cloudcite_bricks", shaped("cloudcite_bricks", ["##", "##"], {"#": "polished_cloudcite"}, 4))
+    R("chiseled_cloudcite", shaped("chiseled_cloudcite", ["#", "#"], {"#": "cloudcite_brick_slab"}))
+    R("gilded_cloudcite", shaped("gilded_cloudcite", ["###", "#G#", "###"], {"#": "cloudcite_bricks", "G": "minecraft:gold_ingot"}, 8))
+    for result, count in (("polished_cloudcite", 1), ("cloudcite_bricks", 1), ("chiseled_cloudcite", 1)):
+        R(f"{result}_from_cloudcite_stonecutting", stonecutting(result, "cloudcite", count))
+
+    # ---- holy gold: far brighter than gold, and it glows (the heavenly ruins' trim; never crafted)
+    cube("holy_gold_block", "Block of Holy Gold")
+    tag("block", "needs_iron_tool", "holy_gold_block")
+    tag("block", "beacon_base_blocks", "holy_gold_block")
+
+    # ---- cloud leaves: the cloud trees' puffs (no sapling: the trees only grow where the realm made them)
+    blockstate("cloud_leaves", {"variants": {"": {"model": f"{NS}:block/cloud_leaves"}}})
+    model("cloud_leaves", {"parent": "minecraft:block/leaves", "textures": {"all": block_tex("cloud_leaves")}})
+    item_def("cloud_leaves", f"{NS}:block/cloud_leaves")
+    name("cloud_leaves", "Cloud Leaves")
+    mine("cloud_leaves", "hoe")
+    loot("cloud_leaves", table("cloud_leaves", [
+        {"entries": [{"type": "minecraft:item", "conditions": [SHEARS_OR_SILK], "name": rid("cloud_leaves")}], "rolls": 1.0},
+        {"conditions": [{"condition": "minecraft:inverted", "term": SHEARS_OR_SILK}], "entries": [
+            {"type": "minecraft:item", "conditions": [{"chances": [0.02, 0.022222223, 0.025, 0.033333335, 0.1],
+                                                       "condition": "minecraft:table_bonus", "enchantment": "minecraft:fortune"}],
+             "functions": [{"count": {"type": "minecraft:uniform", "max": 2.0, "min": 1.0}, "function": "minecraft:set_count"},
+                           {"function": "minecraft:explosion_decay"}], "name": "minecraft:stick"}], "rolls": 1.0}]))
+    for kind in ("block", "item"):
+        tag(kind, "leaves", "cloud_leaves")
+
+    # ---- the realm's flowers (they grow on its islands' grass, not on the clouds)
+    for flower_id, (english, dye) in CLOUD_FLOWERS.items():
+        cross_plant(flower_id, english, f"potted_{flower_id}", f"Potted {english}")
+        for t in ("small_flowers", "bee_attractive"):
+            tag("block", t, flower_id)
+        tag("item", "small_flowers", flower_id)
+        tag("item", "bee_food", flower_id)
+        R(f"{dye}_from_{flower_id}", shapeless(f"minecraft:{dye}", [flower_id], 1, category="misc", group=dye))
+
+    # ---- holy water: golden water from the heavenly ruins' fountains (HolyWaterFluid); it counts as water by tag, so
+    # it's swum in, drowned in and put out like water. Bathing in it Blesses you.
+    blockstate("holy_water", {"variants": {"": {"model": f"{NS}:block/holy_water"}}})
+    model("holy_water", {"textures": {"particle": block_tex("holy_water_still")}})
+    name("holy_water", "Holy Water")
+    simple_item("holy_water_bucket", "Bucket of Holy Water")
+    tag("fluid", "water", "holy_water", "flowing_holy_water")
+    NAMES["effect.transdimension.blessed"] = "Blessed"
+
+    # ---- cloud candy: sugar spun round a stick with a tuft of cloud
+    simple_item("cloud_candy", "Cloud Candy")
+    NAMES["item.transdimension.cloud_candy.lore"] = "Float up on a sugar cloud, then drift gently down"
+    R("cloud_candy", shapeless("cloud_candy", ["minecraft:sugar", "minecraft:sugar", "minecraft:white_wool", "minecraft:stick"], 2,
+                               category="misc"))
+
+    # ---- holy gold gear: only ever found in the heavenly ruins (and up the beanstalk); it never breaks
+    for piece, (english, kind_tag) in HOLY_GEAR.items():
+        item = f"holy_golden_{piece}"
+        armor = kind_tag.endswith("_armor")
+        model(item, {"parent": "minecraft:item/generated" if armor else "minecraft:item/handheld",
+                     "textures": {"layer0": f"{NS}:item/{item}"}}, kind="item")
+        item_def(item, f"{NS}:item/{item}")
+        name(item, f"Holy Golden {english}", kind="item")
+        tag("item", kind_tag, item)
+        if armor:
+            tag("item", "trimmable_armor", item)
+    write(os.path.join(ASSETS, "equipment", "holy_gold.json"), {"layers": {
+        "humanoid": [{"texture": f"{NS}:holy_gold"}], "humanoid_leggings": [{"texture": f"{NS}:holy_gold"}]}})
+    tag("item", "repairs_holy_gear", "holy_gold_block", ns=NS)
+    NAMES["item.transdimension.holy_gear.lore"] = "Holy loot: it never breaks"
+
+    # ---- angels, the cloud turtle and his boat, and the Fairy Jar's little fairy
+    simple_item("angel_spawn_egg", "Angel Spawn Egg")
+    NAMES.update({"entity.transdimension.angel": "Angel", "entity.transdimension.cloud_turtle": "Cloud Turtle",
+                  "entity.transdimension.cloud_boat": "Cloud Boat", "entity.transdimension.jar_fairy": "Jar Fairy",
+                  "message.transdimension.rescue.caught": "☁ Hold on tight! The cloud turtle has you ☁",
+                  "message.transdimension.rescue.landed": "☁ Home safe! Sneak to hop out of the boat ☁"})
+    entity_loot("angel", [{"entries": [counted("minecraft:feather", 1, 3)], "rolls": 1.0},
+                          {"entries": [counted("minecraft:glowstone_dust", 0, 2)], "rolls": 1.0}])
+
+    # ---- the mod's own particles: the ritual candles' pink flames, prismatic stars and holy motes
+    for particle, frames in ROUND11_PARTICLES.items():
+        write(os.path.join(ASSETS, "particles", f"{particle}.json"), {"textures": [f"{NS}:{particle}_{i}" for i in range(frames)]})
+
+
+def generate_round11_advancements():
+    A = advancement
+    A("holy_loot", "sky_portal", "holy_golden_sword", "Holy Loot", "Find a piece of holy gold gear in a heavenly ruin",
+      {"holy": has_any([f"holy_golden_{piece}" for piece in HOLY_GEAR])})
+    A("blessed", "sky_portal", "holy_water_bucket", "Bless You!", "Be blessed by an angel, or by bathing in holy water",
+      {"blessed": {"trigger": "minecraft:effects_changed", "conditions": {"effects": {f"{NS}:blessed": {}}}}})
+    A("lucky_catch", "sky_portal", "cloud_candy", "Lucky Catch", "Fall off the Cloud Realm and get fished out by the cloud turtle",
+      {"caught": {"trigger": "minecraft:started_riding", "conditions": {"player": [{
+          "condition": "minecraft:entity_properties", "entity": "this",
+          "predicate": {"minecraft:vehicle": {"minecraft:entity_type": rid("cloud_boat")}}}]}}})
+
+
 def generate_sounds():
     def event(name, volume=1.0, pitch=1.0):
         return {"name": name, "type": "event", "volume": volume, "pitch": pitch}
@@ -2496,7 +2611,6 @@ def remove_stale():
         os.path.join(ASSETS, "items", "trans_water_bucket.json"),
         os.path.join(ASSETS, "models", "item", "trans_water_bucket.json"),
         os.path.join(ASSETS, "models", "item", "pride_blossom.json"),
-        os.path.join(DATA, "minecraft", "tags", "fluid", "water.json"),
         os.path.join(DATA, NS, "recipe", "glass_from_trans_sand.json"),
         os.path.join(ASSETS, "models", "item", "fairy_jar.json"),
     ]
@@ -2530,9 +2644,11 @@ def main():
     generate_furniture()
     generate_misc()
     generate_round9()
+    generate_round11()
     generate_sounds()
     generate_advancements()
     generate_round9_advancements()
+    generate_round11_advancements()
     generate_recipe_unlocks()
     write_tags()
     write_lang()

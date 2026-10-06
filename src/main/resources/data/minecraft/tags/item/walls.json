@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
+    "transdimension:cloudcite_brick_wall",
+    "transdimension:cloudcite_wall",
     "transdimension:cobbled_trans_deepslate_wall",
     "transdimension:polished_trans_deepslate_wall",
     "transdimension:trans_andesite_wall",

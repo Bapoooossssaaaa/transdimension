@@ -6,33 +6,33 @@
       "entries": [
         {
           "data": {
-            "Name": "minecraft:lily_of_the_valley"
+            "Name": "transdimension:cloud_puff"
           },
           "weight": 3
         },
         {
           "data": {
-            "Name": "minecraft:oxeye_daisy"
+            "Name": "transdimension:halo_lily"
           },
           "weight": 3
         },
         {
           "data": {
-            "Name": "minecraft:white_tulip"
+            "Name": "transdimension:breezebell"
           },
-          "weight": 2
+          "weight": 3
         },
         {
           "data": {
-            "Name": "minecraft:azure_bluet"
+            "Name": "transdimension:stardust_daisy"
           },
-          "weight": 2
+          "weight": 3
         },
         {
           "data": {
             "Name": "transdimension:pearl_daisy"
           },
-          "weight": 2
+          "weight": 1
         }
       ]
     }

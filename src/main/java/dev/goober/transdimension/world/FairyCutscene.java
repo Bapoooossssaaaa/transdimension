@@ -5,13 +5,13 @@ import java.util.List;
 import org.jspecify.annotations.Nullable;
 
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -32,6 +32,7 @@ import dev.goober.transdimension.network.FairyCutscenePayload;
 import dev.goober.transdimension.registry.ModAttachments;
 import dev.goober.transdimension.registry.ModEntities;
 import dev.goober.transdimension.registry.ModItems;
+import dev.goober.transdimension.registry.ModParticles;
 
 /**
  * The ritual at the Fairy Altar and the cutscene that starts the first fight.
@@ -59,23 +60,29 @@ public final class FairyCutscene {
 	private static final Identifier HOLD = TransDimension.id("cutscene_hold");
 
 	// The timeline, in ticks. The clients' camera follows it too (FairyCutsceneCamera).
+	/** A door of light in the flag's colours opens on the arena floor (drawn by the clients)... */
 	public static final int PORTAL_OPENS = 30;
-	public static final int MADDIE_ARRIVES = 55;
-	public static final int PORTAL_CLOSES = 70;
-	public static final int LINE_ONE = 70;
-	public static final int LINE_TWO = 130;
-	public static final int LINE_THREE = 195;
+	/** ...Maddie steps out of it... */
+	public static final int MADDIE_ARRIVES = 50;
+	/** ...walking this many ticks, {@link #WALK_DISTANCE} blocks, before she stops... */
+	public static final int WALK = 30;
+	public static final double WALK_DISTANCE = 3.0;
+	/** ...and it closes behind her. */
+	public static final int PORTAL_CLOSES = 88;
+	public static final int LINE_ONE = 86;
+	public static final int LINE_TWO = 140;
+	public static final int LINE_THREE = 200;
 	/** Light gathers over the altar... */
-	public static final int GATHER = 228;
+	public static final int GATHER = 233;
 	/** ...and the Trans Fairy appears in it. */
-	public static final int FAIRY_APPEARS = 250;
-	public static final int FAIRY_LINE_ONE = 266;
-	public static final int WAND_RAISED = 290;
-	public static final int SHOT = 300;
-	public static final int MADDIE_FALLS = 315;
-	public static final int FAIRY_LINE_TWO = 335;
-	public static final int FAIRY_LINE_THREE = 400;
-	public static final int FIGHT = 460;
+	public static final int FAIRY_APPEARS = 255;
+	public static final int FAIRY_LINE_ONE = 271;
+	public static final int WAND_RAISED = 295;
+	public static final int SHOT = 305;
+	public static final int MADDIE_FALLS = 320;
+	public static final int FAIRY_LINE_TWO = 340;
+	public static final int FAIRY_LINE_THREE = 405;
+	public static final int FIGHT = 465;
 
 	@Nullable
 	private static Scene scene;
@@ -161,18 +168,27 @@ public final class FairyCutscene {
 		}
 		int t = ++s.tick;
 		Vec3 portal = MADDIE_PORTAL;
-		if (t >= PORTAL_OPENS && t < PORTAL_CLOSES) {
-			swirl(level, portal, t);
+		if (t >= PORTAL_OPENS && t < PORTAL_CLOSES + 12 && t % 2 == 0) {
+			doorSparkles(level, portal);
 		}
 		// Each step is its own check, so two that fall on the same tick both happen.
 		if (t == PORTAL_OPENS) {
-			level.playSound(null, portal.x, portal.y, portal.z, SoundEvents.END_PORTAL_SPAWN, SoundSource.NEUTRAL, 0.6F, 1.6F);
+			level.playSound(null, portal.x, portal.y, portal.z, SoundEvents.BEACON_ACTIVATE, SoundSource.NEUTRAL, 1.2F, 1.8F);
+			level.playSound(null, portal.x, portal.y, portal.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.NEUTRAL, 1.5F, 1.2F);
 		}
 		if (t == MADDIE_ARRIVES) {
 			s.maddie = bringMaddie(level, portal);
 		}
+		if (s.maddie != null && t > MADDIE_ARRIVES && t <= MADDIE_ARRIVES + WALK) {
+			// She walks out through the door towards the altar (the client sees her walk from the steps she takes).
+			Maddie maddie = s.maddie;
+			maddie.setPos(maddie.getX(), maddie.getY(), maddie.getZ() + WALK_DISTANCE / WALK);
+			if (t == MADDIE_ARRIVES + WALK) {
+				faceWatcher(level, maddie);
+			}
+		}
 		if (t == PORTAL_CLOSES) {
-			FairyRealm.sparkle(level, portal.add(0.0, 1.2, 0.0), 40, 0.6);
+			level.playSound(null, portal.x, portal.y, portal.z, SoundEvents.BEACON_DEACTIVATE, SoundSource.NEUTRAL, 1.0F, 1.8F);
 		}
 		if (t == LINE_ONE) {
 			say(level, MADDIE, "message.transdimension.cutscene.maddie_1");
@@ -199,7 +215,7 @@ public final class FairyCutscene {
 			}
 			Vec3 at = FairyRealm.FAIRY_SPAWN;
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 2.5F, 1.4F);
-			level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 0.8, at.z, 60, 0.2, 0.2, 0.2, 0.25);
+			level.sendParticles(ModParticles.PRISM_SPARK, at.x, at.y + 0.8, at.z, 60, 0.2, 0.2, 0.2, 0.25);
 		}
 		if (t == FAIRY_LINE_ONE) {
 			say(level, FAIRY, "message.transdimension.cutscene.fairy_1");
@@ -250,36 +266,42 @@ public final class FairyCutscene {
 		}
 	}
 
-	/** Maddie steps out of her portal, facing whoever stands nearest the altar. */
+	/** Maddie steps into the doorway from behind it, facing the altar (she walks the rest of the way: see tick). */
 	@Nullable
-	private static Maddie bringMaddie(ServerLevel level, Vec3 at) {
+	private static Maddie bringMaddie(ServerLevel level, Vec3 door) {
 		Maddie maddie = ModEntities.MADDIE.create(level, EntitySpawnReason.EVENT);
 		if (maddie == null) {
 			return null;
 		}
-		float yaw = 0.0F;
-		ServerPlayer watcher = level.getNearestPlayer(at.x, at.y, at.z, AUDIENCE, false) instanceof ServerPlayer player ? player : null;
-		if (watcher != null) {
-			yaw = (float) (Mth.atan2(watcher.getZ() - at.z, watcher.getX() - at.x) * Mth.RAD_TO_DEG) - 90.0F;
-		}
-		maddie.snapTo(at.x, at.y, at.z, yaw, 0.0F);
-		maddie.setYHeadRot(yaw);
-		maddie.yBodyRot = yaw;
+		maddie.snapTo(door.x, door.y, door.z - 0.7, 0.0F, 0.0F);
+		maddie.setYHeadRot(0.0F);
+		maddie.yBodyRot = 0.0F;
 		maddie.actInCutscene();
 		level.addFreshEntity(maddie);
-		FairyRealm.sparkle(level, at.add(0.0, 1.0, 0.0), 60, 0.5);
-		level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.NEUTRAL, 1.5F, 1.2F);
+		level.playSound(null, door.x, door.y, door.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.NEUTRAL, 1.5F, 1.2F);
 		return maddie;
 	}
 
-	/** The portal: a ring of portal light and flag-coloured sparkles, standing upright. */
-	private static void swirl(ServerLevel level, Vec3 at, int t) {
-		for (int i = 0; i < 6; i++) {
-			float angle = (t * 0.35F + i * Mth.TWO_PI / 6.0F);
-			double x = at.x + Mth.cos(angle) * 0.9;
-			double y = at.y + 1.2 + Mth.sin(angle) * 1.4;
-			level.sendParticles(ParticleTypes.PORTAL, x, y, at.z, 2, 0.05, 0.05, 0.05, 0.3);
-			level.sendParticles(new DustParticleOptions(SPARKLES[i % SPARKLES.length], 1.2F), x, y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+	/** Turns Maddie to whoever stands nearest. */
+	private static void faceWatcher(ServerLevel level, Maddie maddie) {
+		ServerPlayer watcher = level.getNearestPlayer(maddie.getX(), maddie.getY(), maddie.getZ(), AUDIENCE, false) instanceof ServerPlayer player
+				? player : null;
+		if (watcher != null) {
+			float yaw = (float) (Mth.atan2(watcher.getZ() - maddie.getZ(), watcher.getX() - maddie.getX()) * Mth.RAD_TO_DEG) - 90.0F;
+			maddie.setYRot(yaw);
+			maddie.setYHeadRot(yaw);
+			maddie.yBodyRot = yaw;
+		}
+	}
+
+	/** Prismatic sparks drifting off the door's edges while it stands open (the door itself is drawn by each client). */
+	private static void doorSparkles(ServerLevel level, Vec3 door) {
+		RandomSource random = level.getRandom();
+		for (int i = 0; i < 2; i++) {
+			boolean side = random.nextBoolean();
+			double x = side ? door.x + (random.nextBoolean() ? -0.75 : 0.75) : door.x + (random.nextDouble() - 0.5) * 1.5;
+			double y = side ? door.y + random.nextDouble() * 2.8 : door.y + (random.nextBoolean() ? 0.0 : 2.8);
+			level.sendParticles(ModParticles.PRISM_SPARK, x, y, door.z, 1, 0.02, 0.02, 0.02, 0.01);
 		}
 	}
 
@@ -294,7 +316,7 @@ public final class FairyCutscene {
 			double z = at.z + Mth.sin(angle) * radius;
 			double y = at.y + Mth.sin(t * 0.3F + i) * 0.6;
 			level.sendParticles(new DustParticleOptions(SPARKLES[i % SPARKLES.length], 1.4F), x, y, z, 1, 0.0, 0.0, 0.0, 0.0);
-			level.sendParticles(ParticleTypes.END_ROD, x, y, z, 0, at.x - x, at.y - y, at.z - z, 0.08);
+			level.sendParticles(ModParticles.PRISM_SPARK, x, y, z, 0, at.x - x, at.y - y, at.z - z, 0.08);
 		}
 	}
 

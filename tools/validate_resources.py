@@ -196,9 +196,9 @@ for i in ITEMS:
         err(f"item {i}: no name in en_us.json")
 
 # ------------------------------------------------------------------ data
-# These have no loot table (Java says so): the cake, the plush marker, the unbreakable Fairy Realm blocks, pink lava and
-# pink fire, and the unbreakable candle ritual blocks and Sky Portal.
-for b in BLOCKS - {"trans_cake", "plush_spot", "fairy_portal_frame", "fairy_portal", "fairy_altar", "pink_lava", "pink_fire",
+# These have no loot table (Java says so): the cake, the plush marker, the unbreakable Fairy Realm blocks, pink lava, holy
+# water and pink fire, and the unbreakable candle ritual blocks and Sky Portal.
+for b in BLOCKS - {"trans_cake", "plush_spot", "fairy_portal_frame", "fairy_portal", "fairy_altar", "pink_lava", "holy_water", "pink_fire",
                    "ritual_pedestal", "ritual_crystal", "sky_portal"}:
     if not os.path.exists(os.path.join(DATA, NS, "loot_table", "blocks", b + ".json")):
         err(f"block {b}: no loot table")
@@ -338,6 +338,8 @@ TWINS.update({"pink_sculk_sensor": "sculk_sensor", "pink_sculk_shrieker": "sculk
               "pink_sculk_catalyst": "sculk_catalyst", "sky_portal": "nether_portal", "ritual_pedestal": "stone",
               "ritual_crystal": "smoker"})
 FACING_ONLY.add("ritual_crystal")
+# Round 11: holy water is a liquid like water (and pink lava like lava).
+TWINS.update({"holy_water": "water", "pink_lava": "lava"})
 EXTRA_PROPS.update({"ritual_pedestal": {"candle": ["false", "true"]}, "ritual_crystal": {"awake": ["false", "true"]}})
 for b in BLOCKS:
     if b.endswith("_plush"):

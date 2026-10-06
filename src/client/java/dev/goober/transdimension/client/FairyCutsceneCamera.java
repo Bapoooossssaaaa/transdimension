@@ -8,6 +8,7 @@ import org.jspecify.annotations.Nullable;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
@@ -20,7 +21,8 @@ import dev.goober.transdimension.world.FairyRealm;
 /**
  * The Fairy Realm cutscene's camera (the scene itself runs on the server: FairyCutscene). While it plays, the view leaves
  * the player and glides along a path of shots through the scene: up from the player's eyes into a crane shot of the
- * altar, round to Maddie's portal as she steps out, slowly round her as she speaks, over her shoulder as the light
+ * altar, round to the door of trans-striped light that opens for Maddie (drawn here, {@link #renderDoor}), in front of
+ * her as she walks out of it, slowly round her as she speaks, over her shoulder as the light
  * gathers over the altar, up at the Trans Fairy as she appears in a falling column of light and speaks, across to Maddie
  * as the bolt strikes her, back to the fairy, and at last back down to the player's own eyes, turned to face the fairy
  * as the fight begins.
@@ -35,6 +37,11 @@ public final class FairyCutsceneCamera {
 	private static final int PINK = 0xF5A9B8;
 	private static final int DEEP_PINK = 0xFF7EB3;
 	private static final int BLUE = 0x5BCEFA;
+	/** Maddie's door, standing on FairyCutscene.MADDIE_PORTAL and facing the altar (south). */
+	private static final double DOOR_WIDTH = 1.5;
+	private static final double DOOR_HEIGHT = 2.8;
+	/** Ticks the door takes to open, and to close. */
+	private static final int DOOR_OPENING = 12;
 
 	/** One key shot: where the camera is and what it looks at, {@code tick} ticks into the scene. */
 	private record Key(int tick, Vec3 position, Vec3 look) {
@@ -137,29 +144,34 @@ public final class FairyCutsceneCamera {
 	private static List<Key> plan(Vec3 eye, Vec3 gaze) {
 		Vec3 altar = Vec3.atBottomCenterOf(FairyRealm.ALTAR).add(0.0, 1.0, 0.0);
 		Vec3 portal = FairyCutscene.MADDIE_PORTAL;
-		Vec3 maddie = portal.add(0.0, 1.5, 0.0);
+		Vec3 door = portal.add(0.0, DOOR_HEIGHT / 2.0, 0.0);
+		// where Maddie stops, having walked out of the door towards the altar
+		Vec3 stand = portal.add(0.0, 0.0, FairyCutscene.WALK_DISTANCE - 0.7);
+		Vec3 maddie = stand.add(0.0, 1.5, 0.0);
 		Vec3 fairy = FairyRealm.FAIRY_SPAWN;
 		List<Key> keys = new ArrayList<>();
 		// the player's own view, rising into a crane shot of the glowing altar
 		keys.add(new Key(0, eye, gaze));
 		keys.add(new Key(26, altar.add(5.5, 4.5, 8.0), altar.add(0.0, 0.6, 0.0)));
-		// round to face the portal as it opens, and in as Maddie steps through
-		keys.add(new Key(FairyCutscene.PORTAL_OPENS + 18, altar.add(-4.0, 2.2, 1.5), maddie));
-		keys.add(new Key(FairyCutscene.MADDIE_ARRIVES + 14, portal.add(2.2, 1.7, 5.0), maddie.add(0.0, -0.2, 0.0)));
-		// slowly round her as she speaks, closer with every line
-		keys.add(new Key(FairyCutscene.LINE_TWO - 20, portal.add(1.8, 1.65, 3.6), maddie));
-		keys.add(new Key(FairyCutscene.LINE_THREE - 25, portal.add(-1.7, 1.6, 3.2), maddie));
-		keys.add(new Key(FairyCutscene.LINE_THREE + 8, portal.add(-0.7, 1.7, 2.3), maddie.add(0.0, 0.05, 0.0)));
+		// round to face the door as it opens, and in as Maddie steps through it
+		keys.add(new Key(FairyCutscene.PORTAL_OPENS + DOOR_OPENING, portal.add(2.4, 1.9, 7.0), door));
+		keys.add(new Key(FairyCutscene.MADDIE_ARRIVES + 6, portal.add(1.3, 1.6, 4.4), door.add(0.0, 0.1, 0.0)));
+		// backing away in front of her as she walks out, until she stops
+		keys.add(new Key(FairyCutscene.MADDIE_ARRIVES + FairyCutscene.WALK, stand.add(1.6, 1.7, 3.8), maddie.add(0.0, -0.1, 0.0)));
+		// slowly round her as she speaks, closer with every line, the door closing behind her
+		keys.add(new Key(FairyCutscene.LINE_TWO - 20, stand.add(1.8, 1.65, 3.4), maddie));
+		keys.add(new Key(FairyCutscene.LINE_THREE - 25, stand.add(-1.7, 1.6, 3.0), maddie));
+		keys.add(new Key(FairyCutscene.LINE_THREE + 8, stand.add(-0.7, 1.7, 2.2), maddie.add(0.0, 0.05, 0.0)));
 		// over her shoulder: the light gathers over the altar beyond her
-		keys.add(new Key(FairyCutscene.GATHER - 2, portal.add(0.9, 2.1, -1.6), fairy.add(0.0, -1.0, 0.0)));
+		keys.add(new Key(FairyCutscene.GATHER - 2, stand.add(0.9, 2.1, -1.6), fairy.add(0.0, -1.0, 0.0)));
 		// the fairy appears in a falling column of light
 		keys.add(new Key(FairyCutscene.FAIRY_APPEARS - 4, altar.add(2.8, 2.5, 7.5), fairy.add(0.0, -0.5, 0.0)));
 		keys.add(new Key(FairyCutscene.FAIRY_LINE_ONE - 4, altar.add(2.0, 3.6, 5.0), fairy));
 		// a low hero shot as she speaks and raises her wand
 		keys.add(new Key(FairyCutscene.SHOT - 8, altar.add(-2.6, 1.6, 3.4), fairy.add(0.0, 0.3, 0.0)));
 		// across to Maddie as the bolt strikes, and down as she falls
-		keys.add(new Key(FairyCutscene.SHOT + 6, altar.add(portal.subtract(altar).scale(0.5)).add(5.5, 3.0, 0.0), maddie.add(0.0, -0.3, 0.0)));
-		keys.add(new Key(FairyCutscene.MADDIE_FALLS + 14, portal.add(2.5, 1.6, 2.6), portal.add(0.0, 0.4, 0.0)));
+		keys.add(new Key(FairyCutscene.SHOT + 6, altar.add(stand.subtract(altar).scale(0.5)).add(5.5, 3.0, 0.0), maddie.add(0.0, -0.3, 0.0)));
+		keys.add(new Key(FairyCutscene.MADDIE_FALLS + 14, stand.add(2.5, 1.6, 2.6), stand.add(0.0, 0.4, 0.0)));
 		// back to the fairy, closer as she speaks
 		keys.add(new Key(FairyCutscene.FAIRY_LINE_TWO + 6, fairy.add(1.0, -1.5, 7.5), fairy));
 		keys.add(new Key(FairyCutscene.FAIRY_LINE_THREE, fairy.add(0.5, -1.0, 5.0), fairy));
@@ -189,13 +201,68 @@ public final class FairyCutsceneCamera {
 		return 0.5 * (2.0 * b + (c - a) * u + (2.0 * a - 5.0 * b + 4.0 * c - d) * u2 + (3.0 * b - a - 3.0 * c + d) * u3);
 	}
 
-	/** The column of light the Trans Fairy appears from: it falls from the sky onto the spot over the altar, then bursts. */
+	/** The scene's light: Maddie's door, and the column of light the Trans Fairy appears from. */
 	private static void renderLight(LevelRenderContext context) {
 		Minecraft minecraft = Minecraft.getInstance();
 		if (!active || minecraft.level == null) {
 			return;
 		}
 		double t = time(minecraft);
+		GlowGeometry g = new GlowGeometry(context.levelState().cameraRenderState.pos);
+		renderDoor(g, t);
+		renderColumn(g, t);
+		g.submit(context);
+	}
+
+	/**
+	 * Maddie's door: a tall doorway of light in the trans flag's stripes, the way the time doors open in a certain show.
+	 * A thread of light splits the air from the middle up and down, the doorway swings open sideways from it, and later
+	 * it narrows back to the thread and is gone. Its glowing frame is white at the core, then pink, then blue.
+	 */
+	private static void renderDoor(GlowGeometry g, double t) {
+		double opens = FairyCutscene.PORTAL_OPENS;
+		double closes = FairyCutscene.PORTAL_CLOSES;
+		if (t < opens || t > closes + DOOR_OPENING) {
+			return;
+		}
+		// 0 to 1 as it opens (the first third the thread growing, the rest the door widening), 1 to 0 as it closes
+		double k = t < closes ? (t - opens) / DOOR_OPENING : 1.0 - (t - closes) / DOOR_OPENING;
+		k = Mth.clamp(k, 0.0, 1.0);
+		double tall = Math.min(1.0, k * 3.0);
+		double wide = Mth.clamp((k - 0.33) / 0.67, 0.0, 1.0);
+		wide = wide * wide * (3.0 - 2.0 * wide);
+		Vec3 centre = FairyCutscene.MADDIE_PORTAL.add(0.0, DOOR_HEIGHT / 2.0, 0.0);
+		double up = DOOR_HEIGHT / 2.0 * tall;
+		double along = Math.max(0.02, DOOR_WIDTH / 2.0 * wide);
+		double shimmer = 0.5 + 0.5 * Math.sin(t * 0.5);
+		Direction facing = Direction.SOUTH;
+		// the doorway: the flag's five stripes, side by side, shimmering
+		int[] stripes = {BLUE, PINK, WHITE, PINK, BLUE};
+		double band = along * 2.0 / stripes.length;
+		for (int i = 0; i < stripes.length; i++) {
+			Vec3 at = centre.add(-along + band * (i + 0.5), 0.0, 0.0);
+			g.sheet(at, facing, band / 2.0, up, 0.02, GlowGeometry.argb((0.6 + 0.15 * shimmer) * wide, stripes[i]));
+		}
+		g.sheet(centre, facing, along, up, 0.04, GlowGeometry.argb(0.25 * wide, WHITE));
+		// the frame: a white core with a pink and a blue glow round it
+		double[][] glows = {{0.035, 0.95}, {0.09, 0.4}, {0.16, 0.18}};
+		int[] glowColours = {WHITE, DEEP_PINK, BLUE};
+		Vec3 left = centre.add(-along, 0.0, 0.0);
+		Vec3 right = centre.add(along, 0.0, 0.0);
+		for (int i = 0; i < glows.length; i++) {
+			double half = glows[i][0] * (1.0 + 0.2 * shimmer);
+			int colour = GlowGeometry.argb(glows[i][1], glowColours[i]);
+			g.beam(left.add(0.0, -up, 0.0), left.add(0.0, up, 0.0), half, 0.0, colour);
+			if (wide > 0.0) {
+				g.beam(right.add(0.0, -up, 0.0), right.add(0.0, up, 0.0), half, 0.0, colour);
+				g.beam(left.add(0.0, up, 0.0), right.add(0.0, up, 0.0), half, 0.0, colour);
+				g.beam(left.add(0.0, -up, 0.0), right.add(0.0, -up, 0.0), half, 0.0, colour);
+			}
+		}
+	}
+
+	/** The column of light the Trans Fairy appears from: it falls from the sky onto the spot over the altar, then bursts. */
+	private static void renderColumn(GlowGeometry g, double t) {
 		double from = FairyCutscene.GATHER;
 		double appear = FairyCutscene.FAIRY_APPEARS;
 		if (t < from || t > appear + 40.0) {
@@ -203,7 +270,6 @@ public final class FairyCutsceneCamera {
 		}
 		Vec3 fairy = FairyRealm.FAIRY_SPAWN.add(0.0, 0.8, 0.0);
 		Vec3 sky = fairy.add(0.0, 48.0, 0.0);
-		GlowGeometry g = new GlowGeometry(context.levelState().cameraRenderState.pos);
 		double spin = t * 0.15;
 		if (t < appear) {
 			// it falls, widening as it comes
@@ -227,6 +293,5 @@ public final class FairyCutsceneCamera {
 				g.cube(fairy, 0.4 + 2.0 * (1.0 - flash), GlowGeometry.argb(0.75 * flash, WHITE));
 			}
 		}
-		g.submit(context);
 	}
 }
