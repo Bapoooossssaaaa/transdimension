@@ -78,7 +78,9 @@
       "transdimension:trans_lily_pads",
       "transdimension:trans_sugar_cane"
     ],
-    []
+    [
+      "transdimension:pink_lava"
+    ]
   ],
   "has_precipitation": true,
   "spawn_costs": {},

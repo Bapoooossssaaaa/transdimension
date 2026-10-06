@@ -78,7 +78,9 @@
       "transdimension:sky_bell_carpets",
       "transdimension:trans_grass_forest"
     ],
-    []
+    [
+      "transdimension:pink_lava"
+    ]
   ],
   "has_precipitation": true,
   "spawn_costs": {},

@@ -2487,6 +2487,47 @@ def generate_round11():
         write(os.path.join(ASSETS, "particles", f"{particle}.json"), {"textures": [f"{NS}:{particle}_{i}" for i in range(frames)]})
 
 
+# ============================================================================================ round 12
+def generate_round12():
+    """The Cloud Realm's cloud chest: a chest-shaped barrel (CloudChestBlock) in white wood with golden trim and latch;
+    its lid lifts a little while it's open."""
+    def faces(texture, uv):
+        return {side: {"uv": uv, "texture": texture} for side in ("north", "south", "east", "west")}
+
+    def elements(lift):
+        return [
+            {"from": [1, 0, 1], "to": [15, 10, 15], "faces": {**faces("#body", [1, 6, 15, 16]),
+                                                              "down": {"uv": [1, 1, 15, 15], "texture": "#top", "cullface": "down"}}},
+            {"from": [1, 10 + lift, 1], "to": [15, 14 + lift, 15], "faces": {**faces("#lid", [1, 2, 15, 6]),
+                                                                            "up": {"uv": [1, 1, 15, 15], "texture": "#top"},
+                                                                            "down": {"uv": [1, 1, 15, 15], "texture": "#top"}}},
+            {"from": [7, 8 + lift, 0], "to": [9, 12 + lift, 1], "faces": {
+                side: {"uv": [7, 6, 9, 10], "texture": "#latch"} for side in ("north", "south", "east", "west", "up", "down")}},
+        ]
+    textures = {"particle": block_tex("cloud_chest_body"), "body": block_tex("cloud_chest_body"), "lid": block_tex("cloud_chest_lid"),
+                "top": block_tex("cloud_chest_top"), "latch": block_tex("holy_gold_block")}
+    model("cloud_chest", {"parent": "minecraft:block/block", "textures": textures, "elements": elements(0)})
+    model("cloud_chest_open", {"parent": "minecraft:block/block", "textures": textures, "elements": elements(2)})
+    rotation = {"north": 0, "east": 90, "south": 180, "west": 270, "up": 0, "down": 0}
+    variants = {}
+    for facing, y in rotation.items():
+        for open_ in ("false", "true"):
+            v = {"model": f"{NS}:block/cloud_chest" + ("_open" if open_ == "true" else "")}
+            if y:
+                v["y"] = y
+            variants[f"facing={facing},open={open_}"] = v
+    blockstate("cloud_chest", {"variants": variants})
+    item_def("cloud_chest", f"{NS}:block/cloud_chest")
+    name("cloud_chest", "Cloud Chest")
+    mine("cloud_chest", "axe")
+    loot("cloud_chest", loot_self("cloud_chest"))
+    recipe("cloud_chest", shaped("cloud_chest", ["PPP", "PGP", "PPP"], {"P": "minecraft:pale_oak_planks", "G": "minecraft:gold_ingot"},
+                                 category="misc"))
+
+    # The trans spark (ModParticles.TRANS_SPARK): the Fairy Realm's own sparkle, eight frames (trans_spark_frames()).
+    write(os.path.join(ASSETS, "particles", "trans_spark.json"), {"textures": [f"{NS}:trans_spark_{i}" for i in range(8)]})
+
+
 def generate_round11_advancements():
     A = advancement
     A("holy_loot", "sky_portal", "holy_golden_sword", "Holy Loot", "Find a piece of holy gold gear in a heavenly ruin",
@@ -2539,6 +2580,29 @@ def generate_sounds():
         "block.pink_sculk_catalyst.bloom": {"subtitle": "subtitles.transdimension.block.pink_sculk_catalyst.bloom", "sounds": [
             event("minecraft:block.amethyst_block.resonate", volume=0.8, pitch=1.6)]},
     }
+    # The pink warden's voice (PinkWarden#playSound, ModSounds.soften): chimes, sniffles and moss, nothing scary.
+    warden = {
+        "ambient": [event("minecraft:entity.allay.ambient_without_item", volume=0.6, pitch=0.7),
+                    event("minecraft:block.amethyst_block.resonate", volume=0.4, pitch=0.8)],
+        "hurt": [event("minecraft:entity.allay.hurt", pitch=0.7)],
+        "death": [event("minecraft:entity.allay.death", pitch=0.7)],
+        "step": [event("minecraft:block.moss.step", pitch=0.8)],
+        "roar": [event("minecraft:block.amethyst_block.resonate", pitch=0.7), event("minecraft:entity.allay.item_thrown", pitch=0.7)],
+        "sniff": [event("minecraft:entity.sniffer.sniffing", volume=0.6, pitch=1.3)],
+        "sonic_charge": [event("minecraft:block.beacon.power_select", volume=0.6, pitch=1.6)],
+        "sonic_boom": [event("minecraft:entity.firework_rocket.twinkle", pitch=1.2), event("minecraft:block.amethyst_block.break", pitch=0.9)],
+        "attack": [event("minecraft:entity.slime.attack", pitch=1.3)],
+        "dig": [event("minecraft:block.moss.break", pitch=0.8)],
+        "emerge": [event("minecraft:block.moss.place", pitch=0.8), event("minecraft:block.amethyst_block.chime", pitch=0.9)],
+        "listening": [event("minecraft:block.amethyst_block.chime", volume=0.6, pitch=1.2)],
+    }
+    for what, entries in warden.items():
+        sounds[f"entity.pink_warden.{what}"] = {"subtitle": f"subtitles.transdimension.entity.pink_warden.{what}", "sounds": entries}
+        NAMES[f"subtitles.transdimension.entity.pink_warden.{what}"] = {
+            "ambient": "Pink warden hums", "hurt": "Pink warden hurts", "death": "Pink warden fades", "step": "Pink warden pads",
+            "roar": "Pink warden sings out", "sniff": "Pink warden sniffles", "sonic_charge": "Pink warden glows",
+            "sonic_boom": "Pink warden sparkles", "attack": "Pink warden bonks", "dig": "Pink warden burrows",
+            "emerge": "Pink warden pops up", "listening": "Pink warden listens"}[what]
     write(os.path.join(ASSETS, "sounds.json"), sounds)
 
 
@@ -2650,6 +2714,7 @@ def main():
     generate_misc()
     generate_round9()
     generate_round11()
+    generate_round12()
     generate_sounds()
     generate_advancements()
     generate_round9_advancements()

@@ -7,8 +7,6 @@ import org.jspecify.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -37,6 +35,7 @@ import dev.goober.transdimension.entity.TransFairy;
 import dev.goober.transdimension.registry.ModAttachments;
 import dev.goober.transdimension.registry.ModBlocks;
 import dev.goober.transdimension.registry.ModEntities;
+import dev.goober.transdimension.registry.ModParticles;
 
 /**
  * The Fairy Realm and the way there.
@@ -60,8 +59,6 @@ public final class FairyRealm {
 	public static final BlockPos RETURN_PORTAL = new BlockPos(0, 121, -25);
 	/** Where the Trans Fairy appears, high over the altar. */
 	public static final Vec3 FAIRY_SPAWN = new Vec3(0.5, 127.0, 0.5);
-
-	private static final int[] SPARKLES = {0xF5A9B8, 0x5BCEFA, 0xFFFFFF};
 
 	private FairyRealm() {
 	}
@@ -295,11 +292,9 @@ public final class FairyRealm {
 		}
 	}
 
-	/** A burst of pink, blue and white sparkles. */
+	/** A burst of trans sparks (our own particle, turning blue, pink and white), a few of them flung out fast. */
 	public static void sparkle(ServerLevel level, Vec3 at, int count, double spread) {
-		for (int colour : SPARKLES) {
-			level.sendParticles(new DustParticleOptions(colour, 1.4F), at.x, at.y, at.z, count / 3, spread, spread * 0.6, spread, 0.02);
-		}
-		level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, count / 4, spread * 0.5, spread * 0.5, spread * 0.5, 0.06);
+		level.sendParticles(ModParticles.TRANS_SPARK, at.x, at.y, at.z, count, spread, spread * 0.6, spread, 0.02);
+		level.sendParticles(ModParticles.TRANS_SPARK, at.x, at.y, at.z, count / 4, spread * 0.5, spread * 0.5, spread * 0.5, 0.1);
 	}
 }

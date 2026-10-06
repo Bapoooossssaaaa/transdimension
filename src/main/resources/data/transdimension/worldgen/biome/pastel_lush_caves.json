@@ -90,7 +90,9 @@
       "minecraft:spore_blossom",
       "minecraft:classic_vines_cave_feature"
     ],
-    []
+    [
+      "transdimension:pink_lava"
+    ]
   ],
   "has_precipitation": true,
   "spawn_costs": {},

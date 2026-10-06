@@ -26,6 +26,11 @@ public final class ModParticles {
 	public static final SimpleParticleType PRISM_SPARK = register("prism_spark");
 	/** A golden mote of holy light (angels and holy water). */
 	public static final SimpleParticleType HOLY_SPARK = register("holy_spark");
+	/**
+	 * A star in the flag's colours that turns blue, pink and white as it lives: the Fairy Realm's own sparkle (its portal,
+	 * frames, altar, cutscene and boss), in place of vanilla's dust and end rods.
+	 */
+	public static final SimpleParticleType TRANS_SPARK = register("trans_spark");
 
 	private ModParticles() {
 	}

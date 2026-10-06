@@ -89,7 +89,9 @@
       "transdimension:dry_sugar_bushes",
       "transdimension:sugar_grass"
     ],
-    []
+    [
+      "transdimension:pink_lava"
+    ]
   ],
   "has_precipitation": false,
   "spawn_costs": {},

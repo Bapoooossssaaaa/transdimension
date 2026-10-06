@@ -90,7 +90,9 @@
       "transdimension:pastel_bushes",
       "minecraft:brown_mushroom_normal"
     ],
-    []
+    [
+      "transdimension:pink_lava"
+    ]
   ],
   "has_precipitation": true,
   "spawn_costs": {},

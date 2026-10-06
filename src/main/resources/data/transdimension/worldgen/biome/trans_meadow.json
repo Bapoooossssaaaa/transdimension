@@ -93,7 +93,9 @@
       "transdimension:pastel_bushes",
       "transdimension:trans_boulders"
     ],
-    []
+    [
+      "transdimension:pink_lava"
+    ]
   ],
   "has_precipitation": true,
   "spawn_costs": {},

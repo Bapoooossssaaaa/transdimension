@@ -8,10 +8,12 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.RandomizableContainer;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -20,11 +22,12 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 import net.minecraft.world.level.storage.loot.LootTable;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.registry.ModBlocks;
 
 /**
  * Very rarely, a giant beanstalk climbs out of a Cloud Realm island up to a cloud of its own. It's made of concrete
  * (because why not): two strands of lime and green concrete twisting round a green core, with big flat lime leaves
- * every few blocks to climb by, and on the cloud at the top, a chest of heavenly loot.
+ * every few blocks to climb by, and on the cloud at the top, a cloud chest of heavenly loot.
  */
 public class BeanstalkFeature extends Feature<NoneFeatureConfiguration> {
 	public static final ResourceKey<LootTable> LOOT = ResourceKey.create(Registries.LOOT_TABLE, TransDimension.id("chests/heavenly_ruin"));
@@ -91,7 +94,12 @@ public class BeanstalkFeature extends Feature<NoneFeatureConfiguration> {
 				break;
 			}
 		}
-		level.setBlock(chest, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.SOUTH), Block.UPDATE_CLIENTS);
+		// A cloud chest, named like one a player places (from its item), with the heavenly ruins' holy loot.
+		level.setBlock(chest, ModBlocks.CLOUD_CHEST.defaultBlockState().setValue(BarrelBlock.FACING, Direction.SOUTH), Block.UPDATE_CLIENTS);
+		BlockEntity entity = level.getBlockEntity(chest);
+		if (entity != null) {
+			entity.applyComponentsFromItemStack(new ItemStack(ModBlocks.CLOUD_CHEST));
+		}
 		RandomizableContainer.setBlockEntityLootTable(level, random, chest, LOOT);
 		return true;
 	}

@@ -16,10 +16,15 @@ import net.minecraft.world.level.storage.ValueOutput;
 /**
  * The white boat the cloud turtle fishes falling players up in (CloudRescue). It's drawn with vanilla's boat model, but
  * it isn't a vanilla boat: nobody can steer it, because the server carries it along on the end of the turtle's line
- * (its {@link #getPuller() puller}, whom the client draws the line to). Like the turtle, it only exists while he works.
+ * (its {@link #getPuller() puller}, whom the client draws the line to). Like the turtle, it only exists while he works:
+ * the rescue {@link #claim() claims} it every tick, and a boat nobody has claimed for two seconds (one loaded with a
+ * world or a player after a restart) lets its passenger out and vanishes.
  */
 public class CloudBoat extends Entity {
 	private static final EntityDataAccessor<Integer> PULLER = SynchedEntityData.defineId(CloudBoat.class, EntityDataSerializers.INT);
+	private static final int UNCLAIMED_TICKS = 40;
+
+	private int unclaimed;
 
 	public CloudBoat(EntityType<? extends CloudBoat> entityType, Level level) {
 		super(entityType, level);
@@ -41,6 +46,20 @@ public class CloudBoat extends Entity {
 
 	public void setPuller(@Nullable Entity puller) {
 		this.entityData.set(PULLER, puller != null ? puller.getId() : -1);
+	}
+
+	/** A rescue still holds this boat (CloudRescue calls this every tick). */
+	public void claim() {
+		this.unclaimed = 0;
+	}
+
+	@Override
+	public void tick() {
+		super.tick();
+		if (!this.level().isClientSide() && ++this.unclaimed > UNCLAIMED_TICKS) {
+			this.ejectPassengers();
+			this.discard();
+		}
 	}
 
 	@Override

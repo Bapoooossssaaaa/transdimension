@@ -43,7 +43,9 @@
     [
       "transdimension:fairy_islands"
     ],
-    []
+    [
+      "transdimension:pink_lava"
+    ]
   ],
   "has_precipitation": true,
   "spawn_costs": {},

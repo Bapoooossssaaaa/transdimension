@@ -1,5 +1,7 @@
 package dev.goober.transdimension.registry;
 
+import org.jspecify.annotations.Nullable;
+
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -41,12 +43,83 @@ public final class ModSounds {
 	public static final SoundType PINK_SCULK = new SoundType(1.0F, 1.0F, PINK_SCULK_BREAK, PINK_SCULK_STEP, PINK_SCULK_PLACE,
 			PINK_SCULK_HIT, PINK_SCULK_FALL);
 
+	// The pink warden's voice: gentle chimes and moss where a warden roars, sniffs, booms and stomps (PinkWarden#playSound).
+	public static final SoundEvent PINK_WARDEN_AMBIENT = register("entity.pink_warden.ambient");
+	public static final SoundEvent PINK_WARDEN_HURT = register("entity.pink_warden.hurt");
+	public static final SoundEvent PINK_WARDEN_DEATH = register("entity.pink_warden.death");
+	public static final SoundEvent PINK_WARDEN_STEP = register("entity.pink_warden.step");
+	public static final SoundEvent PINK_WARDEN_ROAR = register("entity.pink_warden.roar");
+	public static final SoundEvent PINK_WARDEN_SNIFF = register("entity.pink_warden.sniff");
+	public static final SoundEvent PINK_WARDEN_SONIC_CHARGE = register("entity.pink_warden.sonic_charge");
+	public static final SoundEvent PINK_WARDEN_SONIC_BOOM = register("entity.pink_warden.sonic_boom");
+	public static final SoundEvent PINK_WARDEN_ATTACK = register("entity.pink_warden.attack");
+	public static final SoundEvent PINK_WARDEN_DIG = register("entity.pink_warden.dig");
+	public static final SoundEvent PINK_WARDEN_EMERGE = register("entity.pink_warden.emerge");
+	public static final SoundEvent PINK_WARDEN_LISTENING = register("entity.pink_warden.listening");
+
 	private ModSounds() {
 	}
 
 	private static SoundEvent register(String name) {
 		Identifier id = TransDimension.id(name);
 		return Registry.register(BuiltInRegistries.SOUND_EVENT, id, SoundEvent.createVariableRangeEvent(id));
+	}
+
+	/**
+	 * The soft sound that stands in for one of vanilla's sculk or warden sounds, or null for any other sound. Used by the
+	 * pink warden for everything it says, and by the client for any sculk or warden sound heard in the Trans Realm
+	 * (ClientPacketListenerMixin), where every sculk block and warden is pink.
+	 */
+	public static @Nullable SoundEvent soften(SoundEvent sound) {
+		String path = sound.location().getPath();
+		if (path.startsWith("entity.warden.")) {
+			String what = path.substring("entity.warden.".length());
+			if (what.contains("roar")) {
+				return PINK_WARDEN_ROAR;
+			} else if (what.contains("sniff")) {
+				return PINK_WARDEN_SNIFF;
+			} else if (what.contains("sonic_charge")) {
+				return PINK_WARDEN_SONIC_CHARGE;
+			} else if (what.contains("sonic_boom")) {
+				return PINK_WARDEN_SONIC_BOOM;
+			} else if (what.contains("step")) {
+				return PINK_WARDEN_STEP;
+			} else if (what.contains("hurt")) {
+				return PINK_WARDEN_HURT;
+			} else if (what.contains("death")) {
+				return PINK_WARDEN_DEATH;
+			} else if (what.contains("attack")) {
+				return PINK_WARDEN_ATTACK;
+			} else if (what.contains("dig")) {
+				return PINK_WARDEN_DIG;
+			} else if (what.contains("emerge")) {
+				return PINK_WARDEN_EMERGE;
+			} else if (what.contains("listening")) {
+				return PINK_WARDEN_LISTENING;
+			}
+			return PINK_WARDEN_AMBIENT;
+		}
+		if (!path.startsWith("block.sculk") && !path.startsWith("block.calibrated_sculk_sensor")) {
+			return null;
+		}
+		if (path.endsWith("clicking_stop")) {
+			return PINK_SCULK_SENSOR_CLICKING_STOP;
+		} else if (path.endsWith("clicking")) {
+			return PINK_SCULK_SENSOR_CLICKING;
+		} else if (path.endsWith("shriek")) {
+			return PINK_SCULK_SHRIEKER_SHRIEK;
+		} else if (path.endsWith("bloom")) {
+			return PINK_SCULK_CATALYST_BLOOM;
+		} else if (path.endsWith("break")) {
+			return PINK_SCULK_BREAK;
+		} else if (path.endsWith("place")) {
+			return PINK_SCULK_PLACE;
+		} else if (path.endsWith("hit")) {
+			return PINK_SCULK_HIT;
+		} else if (path.endsWith("fall")) {
+			return PINK_SCULK_FALL;
+		}
+		return PINK_SCULK_STEP;
 	}
 
 	public static void initialize() {

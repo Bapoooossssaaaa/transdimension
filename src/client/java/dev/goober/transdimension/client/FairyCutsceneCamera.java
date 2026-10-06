@@ -10,11 +10,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 
+import dev.goober.transdimension.registry.ModParticles;
 import dev.goober.transdimension.world.FairyCutscene;
 import dev.goober.transdimension.world.FairyRealm;
 
@@ -62,6 +65,40 @@ public final class FairyCutsceneCamera {
 
 	public static void register() {
 		LevelRenderEvents.COLLECT_SUBMITS.register(FairyCutsceneCamera::renderLight);
+		ClientTickEvents.END_CLIENT_TICK.register(FairyCutsceneCamera::sparkle);
+	}
+
+	/**
+	 * Our own particles on the door while it stands open: prismatic sparks streaming off its edges, and light spilling out
+	 * of it towards the altar, thickest as Maddie steps through.
+	 */
+	private static void sparkle(Minecraft minecraft) {
+		if (!active || minecraft.level == null || minecraft.isPaused()) {
+			return;
+		}
+		double t = time(minecraft);
+		if (t < FairyCutscene.PORTAL_OPENS + DOOR_OPENING / 3.0 || t > FairyCutscene.PORTAL_CLOSES + DOOR_OPENING) {
+			return;
+		}
+		RandomSource random = minecraft.level.getRandom();
+		Vec3 door = FairyCutscene.MADDIE_PORTAL;
+		boolean stepping = t >= FairyCutscene.MADDIE_ARRIVES - 4 && t <= FairyCutscene.MADDIE_ARRIVES + 12;
+		for (int i = 0; i < (stepping ? 14 : 5); i++) {
+			double x;
+			double y;
+			if (random.nextInt(3) == 0) {
+				x = door.x + (random.nextDouble() - 0.5) * DOOR_WIDTH;
+				y = door.y + (random.nextBoolean() ? 0.0 : DOOR_HEIGHT);
+			} else {
+				x = door.x + (random.nextBoolean() ? -0.5 : 0.5) * DOOR_WIDTH;
+				y = door.y + random.nextDouble() * DOOR_HEIGHT;
+			}
+			minecraft.level.addParticle(ModParticles.PRISM_SPARK, x, y, door.z + 0.05, 0.0, 0.01, 0.02);
+		}
+		for (int i = 0; i < (stepping ? 8 : 2); i++) {
+			minecraft.level.addParticle(ModParticles.HOLY_SPARK, door.x + (random.nextDouble() - 0.5) * DOOR_WIDTH * 0.8,
+					door.y + random.nextDouble() * DOOR_HEIGHT * 0.9, door.z + 0.1, 0.0, 0.0, 0.06 + random.nextDouble() * 0.06);
+		}
 	}
 
 	public static boolean isActive() {

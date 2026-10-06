@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -55,7 +54,6 @@ public final class FairyCutscene {
 	private static final double AUDIENCE = 96.0;
 	private static final String MADDIE = "entity.transdimension.maddie";
 	private static final String FAIRY = "entity.transdimension.trans_fairy";
-	private static final int[] SPARKLES = {0xF5A9B8, 0x5BCEFA, 0xFFFFFF};
 	/** Holds the audience still while the scene plays (no walking, no jumping). */
 	private static final Identifier HOLD = TransDimension.id("cutscene_hold");
 
@@ -315,7 +313,7 @@ public final class FairyCutscene {
 			double x = at.x + Mth.cos(angle) * radius;
 			double z = at.z + Mth.sin(angle) * radius;
 			double y = at.y + Mth.sin(t * 0.3F + i) * 0.6;
-			level.sendParticles(new DustParticleOptions(SPARKLES[i % SPARKLES.length], 1.4F), x, y, z, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(ModParticles.TRANS_SPARK, x, y, z, 1, 0.0, 0.0, 0.0, 0.0);
 			level.sendParticles(ModParticles.PRISM_SPARK, x, y, z, 0, at.x - x, at.y - y, at.z - z, 0.08);
 		}
 	}

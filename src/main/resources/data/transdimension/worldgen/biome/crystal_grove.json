@@ -90,7 +90,9 @@
       "transdimension:trans_crystal_clusters_surface",
       "transdimension:trans_grass_plain"
     ],
-    []
+    [
+      "transdimension:pink_lava"
+    ]
   ],
   "has_precipitation": true,
   "spawn_costs": {},

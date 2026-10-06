@@ -3,8 +3,6 @@ package dev.goober.transdimension.block;
 import org.jspecify.annotations.Nullable;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
@@ -18,6 +16,7 @@ import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import dev.goober.transdimension.registry.ModParticles;
 import dev.goober.transdimension.world.FairyRealm;
 
 /**
@@ -27,7 +26,6 @@ import dev.goober.transdimension.world.FairyRealm;
  */
 public class FairyPortalBlock extends Block implements Portal {
 	private static final VoxelShape SHAPE = Block.box(0.0, 6.0, 0.0, 16.0, 12.0, 16.0);
-	private static final int[] SHIMMER = {0xF5A9B8, 0x5BCEFA, 0xC9B8F2, 0xFFFFFF};
 
 	public FairyPortalBlock(Properties properties) {
 		super(properties);
@@ -54,14 +52,13 @@ public class FairyPortalBlock extends Block implements Portal {
 
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
-		// Motes of light drift up out of the pool, and now and then a star twinkles over it.
+		// Trans sparks drift up out of the pool, and now and then a prismatic star twinkles over it.
 		for (int i = 0; i < 2; i++) {
-			int colour = SHIMMER[random.nextInt(SHIMMER.length)];
-			level.addParticle(new DustParticleOptions(colour, 0.6F + random.nextFloat() * 0.5F), pos.getX() + random.nextDouble(),
-					pos.getY() + 0.8, pos.getZ() + random.nextDouble(), 0.0, 0.04 + random.nextDouble() * 0.04, 0.0);
+			level.addParticle(ModParticles.TRANS_SPARK, pos.getX() + random.nextDouble(), pos.getY() + 0.8, pos.getZ() + random.nextDouble(),
+					0.0, 0.04 + random.nextDouble() * 0.04, 0.0);
 		}
 		if (random.nextInt(6) == 0) {
-			level.addParticle(ParticleTypes.END_ROD, pos.getX() + random.nextDouble(), pos.getY() + 0.9, pos.getZ() + random.nextDouble(),
+			level.addParticle(ModParticles.PRISM_SPARK, pos.getX() + random.nextDouble(), pos.getY() + 0.9, pos.getZ() + random.nextDouble(),
 					0.0, 0.02, 0.0);
 		}
 	}

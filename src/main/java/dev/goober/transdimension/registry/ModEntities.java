@@ -215,8 +215,8 @@ public final class ModEntities {
 			FabricEntityType.Builder.createMob(Angel::new, MobCategory.AMBIENT, mob -> mob
 							.spawnPlacement(SpawnPlacementTypes.NO_RESTRICTIONS, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Angel::checkAngelSpawnRules)
 							.defaultAttributes(Angel::createAttributes))
-					.sized(0.6F, 1.9F)
-					.eyeHeight(1.6F)
+					.sized(0.8F, 1.4F)
+					.eyeHeight(0.75F)
 					.clientTrackingRange(10)
 					.build(ANGEL_KEY));
 	/** The cloud turtle who fishes falling players out of the Cloud Realm's sky (CloudRescue); he only exists while he works. */
@@ -227,10 +227,12 @@ public final class ModEntities {
 					.sized(0.6F, 1.8F)
 					.clientTrackingRange(16)
 					.build(CLOUD_TURTLE_KEY));
-	/** The white boat he carries you home in (moved by the server, so nobody steers it). */
+	/**
+	 * The white boat he carries you home in (moved by the server, so nobody steers it). It can be saved, because vanilla
+	 * won't let anyone ride an entity that can't (Entity#startRiding); it removes itself once no rescue holds it.
+	 */
 	public static final EntityType<CloudBoat> CLOUD_BOAT = Registry.register(BuiltInRegistries.ENTITY_TYPE, CLOUD_BOAT_KEY,
 			EntityType.Builder.<CloudBoat>of(CloudBoat::new, MobCategory.MISC)
-					.noSave()
 					.noLootTable()
 					.sized(1.375F, 0.5625F)
 					.passengerAttachments(0.1875F)

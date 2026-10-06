@@ -12,6 +12,7 @@ import copy
 import itertools
 import json
 import os
+import shutil
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, ".."))
@@ -752,6 +753,8 @@ def biome(name, *, temperature, downfall, grass, foliage, water, water_fog, sky,
     steps = [[] for _ in range(11)]
     for step, items in features.items():
         steps[step] = list(items)
+    # Last of all, any vanilla lava the cave generator left turns pink (PinkLavaFeature).
+    steps[10].append(f"{NS}:pink_lava")
     b = {
         "attributes": attributes,
         "carvers": ["minecraft:cave", "minecraft:cave_extra_underground", "minecraft:canyon"] if carvers else [],
@@ -1037,7 +1040,7 @@ FEATURE_RANK = [
     f"{NS}:trans_firefly_bushes_near_water", f"{NS}:trans_firefly_bushes_swamp", "minecraft:vines", f"{NS}:trans_boulders",
     f"{NS}:pink_gel_mounds", f"{NS}:blue_gel_mounds", f"{NS}:fairy_islands",
     # top layer
-    "minecraft:freeze_top_layer",
+    "minecraft:freeze_top_layer", f"{NS}:pink_lava",
 ]
 
 
@@ -1153,14 +1156,49 @@ def surface_rule():
     )
 
 
+# Vanilla's overworld terrain (its noise settings, minus the surface rule, and every density function and noise its noise
+# router uses), from misode/mcmeta's 26.2 data. The Trans Realm is built from copies of them under our own ids.
+OVERWORLD_TERRAIN = os.path.join(HERE, "vanilla_extra", "templates", "worldgen", "overworld")
+
+
+def own_terrain(obj, written):
+    """Copies a density function tree, pointing every density function and noise it uses at our own copy of it
+    (transdimension:trans/<vanilla path>) and writing those copies. Noises are seeded by their ids, so with its own ids the
+    realm's continents, mountains, valleys, caves and climate no longer line up with the overworld's for the same seed."""
+    if isinstance(obj, dict):
+        return {k: (v if k == "type" else own_terrain(v, written)) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [own_terrain(v, written) for v in obj]
+    if isinstance(obj, str) and obj.startswith("minecraft:"):
+        path = obj.split(":", 1)[1]
+        for kind in ("density_function", "noise"):
+            source = os.path.join(OVERWORLD_TERRAIN, kind, path + ".json")
+            if os.path.exists(source):
+                if (kind, path) not in written:
+                    written.add((kind, path))
+                    with open(source, encoding="utf-8") as f:
+                        data = json.load(f)
+                    write(os.path.join(WG, kind, "trans", path + ".json"), own_terrain(data, written) if kind == "density_function" else data)
+                return f"{NS}:trans/{path}"
+    return obj
+
+
 def generate_noise_settings():
-    path = os.path.join(WG, "noise_settings", "trans_realm.json")
-    with open(path, encoding="utf-8") as f:
+    """The Trans Realm's terrain: vanilla's overworld noise settings with the realm's stone, water and surface, on its own
+    copies of the overworld's density functions and noises (own_terrain), so it's a different landscape from the
+    overworld's, not the same one in pink."""
+    with open(os.path.join(OVERWORLD_TERRAIN, "noise_settings.json"), encoding="utf-8") as f:
         settings = json.load(f)
+    for kind in ("density_function", "noise"):
+        folder = os.path.join(WG, kind, "trans")
+        if os.path.isdir(folder):
+            shutil.rmtree(folder)
+    settings["noise_router"] = own_terrain(settings["noise_router"], set())
     settings["default_block"] = state("trans_stone")
     settings["default_fluid"] = state("minecraft:water", level=0)
+    settings["ore_veins_enabled"] = False
     settings["surface_rule"] = surface_rule()
-    write(path, settings)
+    write(os.path.join(WG, "noise_settings", "trans_realm.json"), settings)
 
 
 # ============================================================================================ biome layout
@@ -1409,6 +1447,10 @@ def generate_round9_features():
         {"state": state("sculk_gem_ore"), "target": {"predicate_type": "minecraft:tag_match", "tag": f"{NS}:trans_deepslate_ore_replaceables"}}]}})
     pf("ore_sculk_gem", f"{NS}:ore_sculk_gem", [{"type": "minecraft:count", "count": 9}, {"type": "minecraft:in_square"}, deep(),
                                                  {"type": "minecraft:biome"}])
+
+    # Every realm biome's last step: vanilla lava turns pink (PinkLavaFeature), once per chunk.
+    cf("pink_lava", {"type": f"{NS}:pink_lava", "config": {}})
+    pf("pink_lava", f"{NS}:pink_lava", [])
 
     # ---- the Cloud Realm
     # Round clouds high in the sky (WoolCloudFeature picks the height itself: well above whatever island is under it).

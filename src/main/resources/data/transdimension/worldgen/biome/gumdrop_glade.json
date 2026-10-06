@@ -89,7 +89,9 @@
       "transdimension:pink_gel_mounds",
       "transdimension:blue_gel_mounds"
     ],
-    []
+    [
+      "transdimension:pink_lava"
+    ]
   ],
   "has_precipitation": true,
   "spawn_costs": {},

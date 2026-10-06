@@ -18,8 +18,11 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -32,19 +35,24 @@ import dev.goober.transdimension.entity.Cloudy;
 import dev.goober.transdimension.registry.ModEntities;
 
 /**
- * The Cloud Realm's safety net. Nobody takes damage from the void there, and a player who falls below the islands
- * (under y {@value #CATCH_Y}) is caught: a white boat ({@link CloudBoat}) appears under them and holds them, then the
+ * The Cloud Realm's safety net. Nobody takes damage from the void there. A long fall turns into a gentle drift (slow
+ * falling), and a player who falls off into empty sky (nothing under them all the way down) or below the islands (under
+ * y {@value #CATCH_Y}) is caught: a white boat ({@link CloudBoat}) appears under them and holds them, then the
  * cloud turtle ({@link CloudTurtle}) rides down out of the sky on a Cloudy, hooks the boat on his line, and flies it back
  * up the way they fell and over to the last ground they stood on (or the arrival cloud), where he sets it down. He waits
  * for them to hop out (sneak) before flying off with his boat.
  *
  * <p>The whole rescue is moved from here each tick (the boat, the Cloudy and the turtle have no minds of their own) and
- * lives in memory only: none of the three is saved, so a rescue cut short by a restart or a logout leaves nothing behind
- * (and the player, if still falling, is simply caught again).
+ * lives in memory only: the turtle and his Cloudy aren't saved, and the boat removes itself once no rescue holds it, so
+ * a rescue cut short by a restart or a logout leaves nothing behind (and the player, if still falling, is simply caught
+ * again).
  */
 public final class CloudRescue {
-	/** How far above the bottom of the world a falling player is caught. */
-	public static final int CATCH_Y = 12;
+	/** How far above the bottom of the world a falling player is caught (wherever they are). */
+	public static final int CATCH_Y = 24;
+	/** How far a player falls into empty sky before they're caught, or a long fall slows to a drift. */
+	private static final double FALL_BEFORE_CATCH = 10.0;
+	private static final double FALL_BEFORE_DRIFT = 6.0;
 	/** The length of the turtle's line, from the Cloudy down to the boat. */
 	private static final double LINE = 5.0;
 	/** How high above the landing spot the boat flies in. */
@@ -92,8 +100,14 @@ public final class CloudRescue {
 			if (player.onGround() && !player.isPassenger() && !player.isSpectator()) {
 				LAST_GROUND.put(id, player.position());
 			}
-			if (!RESCUES.containsKey(id) && !player.isSpectator() && !player.getAbilities().flying && !player.isPassenger()
-					&& player.getY() < level.getMinY() + CATCH_Y) {
+			boolean free = !player.isSpectator() && !player.getAbilities().flying && !player.isPassenger() && !player.isFallFlying()
+					&& !player.onGround();
+			if (free && player.getDeltaMovement().y < -0.3 && player.fallDistance > FALL_BEFORE_DRIFT) {
+				// A long fall becomes a gentle drift down.
+				player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 60, 0, false, false, true));
+			}
+			if (free && !RESCUES.containsKey(id) && (player.getY() < level.getMinY() + CATCH_Y
+					|| player.fallDistance > FALL_BEFORE_CATCH && nothingBelow(level, player))) {
 				RESCUES.put(id, new Rescue(level, player, landing(level, id)));
 			}
 		}
@@ -105,6 +119,25 @@ public final class CloudRescue {
 				iterator.remove();
 			}
 		}
+	}
+
+	/** True if there's no block at all under the player, all the way down: they've fallen off into empty sky. */
+	private static boolean nothingBelow(ServerLevel level, ServerPlayer player) {
+		BlockPos feet = player.blockPosition();
+		return level.getHeight(Heightmap.Types.MOTION_BLOCKING, feet.getX(), feet.getZ()) <= level.getMinY()
+				|| level.getHeight(Heightmap.Types.MOTION_BLOCKING, feet.getX(), feet.getZ()) > feet.getY() + 1
+				&& emptyUnder(level, feet);
+	}
+
+	/** No block under {@code feet} down to the bottom of the world (for when an island hangs overhead). */
+	private static boolean emptyUnder(ServerLevel level, BlockPos feet) {
+		BlockPos.MutableBlockPos cursor = feet.mutable();
+		for (int y = feet.getY() - 1; y >= level.getMinY(); y--) {
+			if (!level.getBlockState(cursor.setY(y)).isAir()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/** Where to set a rescued player down: the last ground they stood on, if it's still there, or the arrival cloud. */
@@ -173,6 +206,7 @@ public final class CloudRescue {
 		/** Runs one tick; true once the rescue is over. */
 		boolean advance() {
 			int t = this.age++;
+			this.boat.claim();
 			if (this.player.isRemoved() || !this.player.isAlive() || this.player.level() != this.level || this.boat.isRemoved()) {
 				return true;
 			}

@@ -83,7 +83,9 @@
       "transdimension:trans_seagrass_warm",
       "transdimension:trans_sea_pickles"
     ],
-    []
+    [
+      "transdimension:pink_lava"
+    ]
   ],
   "has_precipitation": true,
   "spawn_costs": {},

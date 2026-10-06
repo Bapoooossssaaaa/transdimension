@@ -339,7 +339,7 @@ TWINS.update({"pink_sculk_sensor": "sculk_sensor", "pink_sculk_shrieker": "sculk
               "ritual_crystal": "smoker"})
 FACING_ONLY.add("ritual_crystal")
 # Round 11: holy water is a liquid like water (and pink lava like lava).
-TWINS.update({"holy_water": "water", "pink_lava": "lava"})
+TWINS.update({"holy_water": "water", "pink_lava": "lava", "cloud_chest": "barrel"})
 EXTRA_PROPS.update({"ritual_pedestal": {"candle": ["false", "true"]}, "ritual_crystal": {"awake": ["false", "true"]}})
 for b in BLOCKS:
     if b.endswith("_plush"):
@@ -472,6 +472,36 @@ if dim:
         b = e["biome"]
         if not os.path.exists(os.path.join(WG, "biome", path_of(b) + ".json")):
             err(f"dimension: unknown biome {b}")
+
+
+# ------------------------------------------------------------------ terrain: noise routers, density functions, noises
+def terrain_ref_ok(ident):
+    ns, path = ident.split(":", 1)
+    if ns == NS:
+        return any(os.path.exists(os.path.join(WG, kind, path + ".json")) for kind in ("density_function", "noise"))
+    return vanilla_has("worldgen/density_function", ident) or vanilla_has("worldgen/noise", ident)
+
+
+def check_terrain_refs(obj, where):
+    """Every id in a noise router or density function (other than a "type") names a density function or a noise: ours
+    must be a file, vanilla's must be in the registry. A missing one stops world creation."""
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if k != "type":
+                check_terrain_refs(v, where)
+    elif isinstance(obj, list):
+        for v in obj:
+            check_terrain_refs(v, where)
+    elif isinstance(obj, str) and ":" in obj and not terrain_ref_ok(obj):
+        err(f"{where}: unknown density function or noise {obj}")
+
+
+for f in walk_json(os.path.join(WG, "noise_settings")):
+    d = load(f)
+    if d:
+        check_terrain_refs(d.get("noise_router", {}), os.path.relpath(f, ROOT))
+for f in walk_json(os.path.join(WG, "density_function")):
+    check_terrain_refs(load(f), os.path.relpath(f, ROOT))
 
 # ------------------------------------------------------------------ villages: structures, pools, templates
 def ours_or_vanilla(ident, folder, registry, ext=".json"):

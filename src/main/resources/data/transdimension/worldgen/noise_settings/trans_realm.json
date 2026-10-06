@@ -20,13 +20,13 @@
   "noise_router": {
     "barrier": {
       "type": "minecraft:noise",
-      "noise": "minecraft:aquifer_barrier",
+      "noise": "transdimension:trans/aquifer_barrier",
       "xz_scale": 1.0,
       "y_scale": 0.5
     },
-    "continents": "minecraft:overworld/continents",
-    "depth": "minecraft:overworld/depth",
-    "erosion": "minecraft:overworld/erosion",
+    "continents": "transdimension:trans/overworld/continents",
+    "depth": "transdimension:trans/overworld/depth",
+    "erosion": "transdimension:trans/overworld/erosion",
     "final_density": {
       "type": "minecraft:min",
       "argument1": {
@@ -72,7 +72,7 @@
                             "type": "minecraft:range_choice",
                             "input": {
                               "type": "minecraft:cache_once",
-                              "argument": "minecraft:overworld/sloped_cheese"
+                              "argument": "transdimension:trans/overworld/sloped_cheese"
                             },
                             "max_exclusive": 1.5625,
                             "min_inclusive": -1000000.0,
@@ -80,12 +80,12 @@
                               "type": "minecraft:min",
                               "argument1": {
                                 "type": "minecraft:cache_once",
-                                "argument": "minecraft:overworld/sloped_cheese"
+                                "argument": "transdimension:trans/overworld/sloped_cheese"
                               },
                               "argument2": {
                                 "type": "minecraft:mul",
                                 "argument1": 5.0,
-                                "argument2": "minecraft:overworld/caves/entrances"
+                                "argument2": "transdimension:trans/overworld/caves/entrances"
                               }
                             },
                             "when_out_of_range": {
@@ -103,7 +103,7 @@
                                         "type": "minecraft:square",
                                         "argument": {
                                           "type": "minecraft:noise",
-                                          "noise": "minecraft:cave_layer",
+                                          "noise": "transdimension:trans/cave_layer",
                                           "xz_scale": 1.0,
                                           "y_scale": 8.0
                                         }
@@ -118,7 +118,7 @@
                                           "argument1": 0.27,
                                           "argument2": {
                                             "type": "minecraft:noise",
-                                            "noise": "minecraft:cave_cheese",
+                                            "noise": "transdimension:trans/cave_cheese",
                                             "xz_scale": 1.0,
                                             "y_scale": 0.6666666666666666
                                           }
@@ -136,7 +136,7 @@
                                             "argument1": -0.64,
                                             "argument2": {
                                               "type": "minecraft:cache_once",
-                                              "argument": "minecraft:overworld/sloped_cheese"
+                                              "argument": "transdimension:trans/overworld/sloped_cheese"
                                             }
                                           }
                                         },
@@ -145,21 +145,21 @@
                                       }
                                     }
                                   },
-                                  "argument2": "minecraft:overworld/caves/entrances"
+                                  "argument2": "transdimension:trans/overworld/caves/entrances"
                                 },
                                 "argument2": {
                                   "type": "minecraft:add",
-                                  "argument1": "minecraft:overworld/caves/spaghetti_2d",
-                                  "argument2": "minecraft:overworld/caves/spaghetti_roughness_function"
+                                  "argument1": "transdimension:trans/overworld/caves/spaghetti_2d",
+                                  "argument2": "transdimension:trans/overworld/caves/spaghetti_roughness_function"
                                 }
                               },
                               "argument2": {
                                 "type": "minecraft:range_choice",
-                                "input": "minecraft:overworld/caves/pillars",
+                                "input": "transdimension:trans/overworld/caves/pillars",
                                 "max_exclusive": 0.03,
                                 "min_inclusive": -1000000.0,
                                 "when_in_range": -1000000.0,
-                                "when_out_of_range": "minecraft:overworld/caves/pillars"
+                                "when_out_of_range": "transdimension:trans/overworld/caves/pillars"
                               }
                             }
                           }
@@ -173,23 +173,23 @@
           }
         }
       },
-      "argument2": "minecraft:overworld/caves/noodle"
+      "argument2": "transdimension:trans/overworld/caves/noodle"
     },
     "fluid_level_floodedness": {
       "type": "minecraft:noise",
-      "noise": "minecraft:aquifer_fluid_level_floodedness",
+      "noise": "transdimension:trans/aquifer_fluid_level_floodedness",
       "xz_scale": 1.0,
       "y_scale": 0.67
     },
     "fluid_level_spread": {
       "type": "minecraft:noise",
-      "noise": "minecraft:aquifer_fluid_level_spread",
+      "noise": "transdimension:trans/aquifer_fluid_level_spread",
       "xz_scale": 1.0,
       "y_scale": 0.7142857142857143
     },
     "lava": {
       "type": "minecraft:noise",
-      "noise": "minecraft:aquifer_lava",
+      "noise": "transdimension:trans/aquifer_lava",
       "xz_scale": 1.0,
       "y_scale": 1.0
     },
@@ -252,12 +252,12 @@
                                 },
                                 "argument2": {
                                   "type": "minecraft:cache_2d",
-                                  "argument": "minecraft:overworld/offset"
+                                  "argument": "transdimension:trans/overworld/offset"
                                 }
                               },
                               "argument2": {
                                 "type": "minecraft:cache_2d",
-                                "argument": "minecraft:overworld/factor"
+                                "argument": "transdimension:trans/overworld/factor"
                               }
                             }
                           }
@@ -291,7 +291,7 @@
                   "type": "minecraft:invert",
                   "argument": {
                     "type": "minecraft:cache_2d",
-                    "argument": "minecraft:overworld/factor"
+                    "argument": "transdimension:trans/overworld/factor"
                   }
                 }
               },
@@ -300,7 +300,7 @@
                 "argument1": -1.0,
                 "argument2": {
                   "type": "minecraft:cache_2d",
-                  "argument": "minecraft:overworld/offset"
+                  "argument": "transdimension:trans/overworld/offset"
                 }
               }
             }
@@ -310,28 +310,28 @@
         "min": -40.0
       }
     },
-    "ridges": "minecraft:overworld/ridges",
+    "ridges": "transdimension:trans/overworld/ridges",
     "temperature": {
       "type": "minecraft:shifted_noise",
-      "noise": "minecraft:temperature",
-      "shift_x": "minecraft:shift_x",
+      "noise": "transdimension:trans/temperature",
+      "shift_x": "transdimension:trans/shift_x",
       "shift_y": 0.0,
-      "shift_z": "minecraft:shift_z",
+      "shift_z": "transdimension:trans/shift_z",
       "xz_scale": 0.25,
       "y_scale": 0.0
     },
     "vegetation": {
       "type": "minecraft:shifted_noise",
-      "noise": "minecraft:vegetation",
-      "shift_x": "minecraft:shift_x",
+      "noise": "transdimension:trans/vegetation",
+      "shift_x": "transdimension:trans/shift_x",
       "shift_y": 0.0,
-      "shift_z": "minecraft:shift_z",
+      "shift_z": "transdimension:trans/shift_z",
       "xz_scale": 0.25,
       "y_scale": 0.0
     },
     "vein_gap": {
       "type": "minecraft:noise",
-      "noise": "minecraft:ore_gap",
+      "noise": "transdimension:trans/ore_gap",
       "xz_scale": 1.0,
       "y_scale": 1.0
     },
@@ -346,12 +346,12 @@
             "type": "minecraft:interpolated",
             "argument": {
               "type": "minecraft:range_choice",
-              "input": "minecraft:y",
+              "input": "transdimension:trans/y",
               "max_exclusive": 51.0,
               "min_inclusive": -60.0,
               "when_in_range": {
                 "type": "minecraft:noise",
-                "noise": "minecraft:ore_vein_a",
+                "noise": "transdimension:trans/ore_vein_a",
                 "xz_scale": 4.0,
                 "y_scale": 4.0
               },
@@ -365,12 +365,12 @@
             "type": "minecraft:interpolated",
             "argument": {
               "type": "minecraft:range_choice",
-              "input": "minecraft:y",
+              "input": "transdimension:trans/y",
               "max_exclusive": 51.0,
               "min_inclusive": -60.0,
               "when_in_range": {
                 "type": "minecraft:noise",
-                "noise": "minecraft:ore_vein_b",
+                "noise": "transdimension:trans/ore_vein_b",
                 "xz_scale": 4.0,
                 "y_scale": 4.0
               },
@@ -384,12 +384,12 @@
       "type": "minecraft:interpolated",
       "argument": {
         "type": "minecraft:range_choice",
-        "input": "minecraft:y",
+        "input": "transdimension:trans/y",
         "max_exclusive": 51.0,
         "min_inclusive": -60.0,
         "when_in_range": {
           "type": "minecraft:noise",
-          "noise": "minecraft:ore_veininess",
+          "noise": "transdimension:trans/ore_veininess",
           "xz_scale": 1.5,
           "y_scale": 1.5
         },

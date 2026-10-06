@@ -5,6 +5,7 @@ import org.jspecify.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
 import net.minecraft.world.DifficultyInstance;
@@ -27,6 +28,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.AABB;
 
 import dev.goober.transdimension.registry.ModEntities;
+import dev.goober.transdimension.registry.ModSounds;
 import dev.goober.transdimension.world.PinkDeepDark;
 
 /**
@@ -54,6 +56,21 @@ public class PinkWarden extends Warden {
 
 	public PinkWarden(EntityType<? extends Monster> entityType, Level level) {
 		super(entityType, level);
+		// Silent, so the client never plays its thudding heartbeat or tendril clicks; everything it does say goes
+		// through playSound, softly.
+		this.setSilent(true);
+	}
+
+	/**
+	 * Every sound a warden makes (its roar, sniffs, sonic boom, steps, heartbeat-quick anger, hurt and death) comes out
+	 * as a gentle chime or a mossy footstep instead ({@link ModSounds#soften}), and never louder than a cat. It plays
+	 * even though the warden is silent.
+	 */
+	@Override
+	public void playSound(SoundEvent sound, float volume, float pitch) {
+		SoundEvent soft = ModSounds.soften(sound);
+		this.level().playSound(null, this.getX(), this.getY(), this.getZ(), soft != null ? soft : sound, this.getSoundSource(),
+				Math.min(volume, 1.0F) * 0.8F, pitch);
 	}
 
 	/**

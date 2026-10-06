@@ -89,7 +89,9 @@
       "transdimension:trans_firefly_bushes_near_water",
       "minecraft:vines"
     ],
-    []
+    [
+      "transdimension:pink_lava"
+    ]
   ],
   "has_precipitation": true,
   "spawn_costs": {},

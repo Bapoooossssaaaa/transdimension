@@ -358,10 +358,10 @@ public final class SculkRitual {
 				int ring = (t - OPEN) / RING_TICKS;
 				Vec3 centre = this.gate.centre;
 				if (ring == 0) {
-					this.level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.PORTAL_TRIGGER, SoundSource.BLOCKS, 1.5F, 1.4F);
+					this.level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 2.0F, 1.2F);
 				}
 				if (ring >= this.gate.rings.size()) {
-					this.level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.END_PORTAL_SPAWN, SoundSource.BLOCKS, 1.0F, 1.3F);
+					this.level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 2.0F, 1.5F);
 					tell(this.level, this.origin, "message.transdimension.ritual.opened");
 					return true;
 				}

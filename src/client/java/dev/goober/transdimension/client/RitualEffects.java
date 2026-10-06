@@ -11,9 +11,11 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
@@ -21,6 +23,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import dev.goober.transdimension.block.RitualCrystalBlock;
 import dev.goober.transdimension.network.RitualPayload;
 import dev.goober.transdimension.registry.ModBlocks;
+import dev.goober.transdimension.registry.ModParticles;
 import dev.goober.transdimension.world.SculkRitual;
 
 /**
@@ -36,7 +39,8 @@ import dev.goober.transdimension.world.SculkRitual;
  * Once the gate is open, every awake crystal near the player keeps a steady, gently pulsing beam on its gate (the crystal
  * block reports itself from its display ticks: {@link RitualCrystalBlock#onAwakeCrystalShown}).
  *
- * <p>Everything is drawn as glowing, unlit boxes ({@link GlowGeometry}), so the light shows up bright in the darkest city.
+ * <p>The light is drawn as glowing, full-bright boxes ({@link GlowGeometry}), so it shows up bright in the darkest city,
+ * and our own particles ({@link #sparkle}) follow it.
  */
 public final class RitualEffects {
 	private static final int PINK = 0xF5A9B8;
@@ -69,6 +73,78 @@ public final class RitualEffects {
 		});
 		RitualCrystalBlock.onAwakeCrystalShown = pos -> AWAKE.add(pos.immutable());
 		LevelRenderEvents.COLLECT_SUBMITS.register(RitualEffects::render);
+		ClientTickEvents.END_CLIENT_TICK.register(RitualEffects::sparkle);
+	}
+
+	/**
+	 * The light show's sparkles, our own particles following the light: streaming up each candle's beam into the crystal,
+	 * bursting from the crystal, pouring along the great beam, and dancing round the edge of the light as it spreads
+	 * across the gate.
+	 */
+	private static void sparkle(Minecraft minecraft) {
+		ClientLevel level = minecraft.level;
+		if (level == null || SHOWS.isEmpty() || minecraft.isPaused()) {
+			return;
+		}
+		RandomSource random = level.getRandom();
+		for (Show show : SHOWS) {
+			double age = level.getGameTime() - show.start;
+			RitualPayload ritual = show.ritual;
+			Vec3 origin = ritual.origin();
+			List<Vec3> candles = ritual.candles();
+			for (int i = 0; i < candles.size(); i++) {
+				double grow = (age - i * SculkRitual.CANDLE_INTERVAL) / SculkRitual.CANDLE_GROW;
+				if (grow <= 0.0 || age > SculkRitual.FIRE) {
+					continue;
+				}
+				Vec3 tip = candles.get(i);
+				Vec3 head = tip.lerp(origin, Math.min(1.0, grow));
+				Vec3 at = tip.lerp(head, random.nextDouble());
+				Vec3 flow = origin.subtract(tip).normalize().scale(0.08);
+				level.addParticle(ModParticles.PRISM_SPARK, at.x, at.y, at.z, flow.x, flow.y, flow.z);
+				if (grow < 1.0) {
+					level.addParticle(ModParticles.PINK_FLAME, head.x, head.y, head.z, 0.0, 0.0, 0.0);
+				}
+			}
+			double sinceWake = age - SculkRitual.AWAKEN;
+			if (sinceWake >= 0.0 && sinceWake < 4.0) {
+				for (int n = 0; n < 12; n++) {
+					level.addParticle(ModParticles.PRISM_SPARK, origin.x, origin.y, origin.z, random.nextGaussian() * 0.2, random.nextGaussian() * 0.2,
+							random.nextGaussian() * 0.2);
+				}
+			}
+			double fire = (age - SculkRitual.FIRE) / SculkRitual.FIRE_GROW;
+			if (fire > 0.0 && age < show.length() - SculkRitual.FADE) {
+				Vec3 end = origin.lerp(ritual.centre(), Math.min(1.0, fire));
+				Vec3 flow = ritual.centre().subtract(origin).normalize().scale(0.25);
+				for (int n = 0; n < 3; n++) {
+					Vec3 at = origin.lerp(end, random.nextDouble());
+					level.addParticle(ModParticles.PRISM_SPARK, at.x, at.y, at.z, flow.x, flow.y, flow.z);
+				}
+			}
+			double open = age - SculkRitual.OPEN;
+			double full = ritual.rings() * SculkRitual.RING_TICKS;
+			if (open > 0.0 && open < full + 10.0) {
+				// round the edge of the spreading light
+				double reach = 1.0 + open / SculkRitual.RING_TICKS;
+				double along = Math.min(reach, ritual.halfAlong());
+				double up = Math.min(reach, ritual.halfUp());
+				Direction across = ritual.facing().getClockWise();
+				for (int n = 0; n < 6; n++) {
+					double a;
+					double u;
+					if (random.nextBoolean()) {
+						a = (random.nextBoolean() ? 1.0 : -1.0) * along;
+						u = (random.nextDouble() * 2.0 - 1.0) * up;
+					} else {
+						a = (random.nextDouble() * 2.0 - 1.0) * along;
+						u = (random.nextBoolean() ? 1.0 : -1.0) * up;
+					}
+					Vec3 at = ritual.centre().add(across.getStepX() * a, u, across.getStepZ() * a);
+					level.addParticle(ModParticles.PRISM_SPARK, at.x, at.y, at.z, 0.0, 0.01, 0.0);
+				}
+			}
+		}
 	}
 
 	private static void render(LevelRenderContext context) {

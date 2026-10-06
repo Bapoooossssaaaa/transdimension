@@ -10,6 +10,7 @@ import dev.goober.transdimension.world.BeanstalkFeature;
 import dev.goober.transdimension.world.FairyIslandFeature;
 import dev.goober.transdimension.world.HeartTreeFeature;
 import dev.goober.transdimension.world.HeavenlyRuinFeature;
+import dev.goober.transdimension.world.PinkLavaFeature;
 import dev.goober.transdimension.world.PinkSculkPatchFeature;
 import dev.goober.transdimension.world.TransCoralReefFeature;
 import dev.goober.transdimension.world.TransDungeonFeature;
@@ -30,6 +31,9 @@ public final class ModFeatures {
 	/** Patches of pink sculk over the pink deep dark's cave walls, with sensors, shriekers and catalysts. */
 	public static final Feature<NoneFeatureConfiguration> PINK_SCULK_PATCH = Registry.register(BuiltInRegistries.FEATURE,
 			TransDimension.id("pink_sculk_patch"), new PinkSculkPatchFeature(NoneFeatureConfiguration.CODEC));
+	/** The last step of every realm chunk: any vanilla lava left by the cave generator turns pink. */
+	public static final Feature<NoneFeatureConfiguration> PINK_LAVA = Registry.register(BuiltInRegistries.FEATURE,
+			TransDimension.id("pink_lava"), new PinkLavaFeature(NoneFeatureConfiguration.CODEC));
 	/** The Cloud Realm's clouds of white wool. */
 	public static final Feature<NoneFeatureConfiguration> WOOL_CLOUD = Registry.register(BuiltInRegistries.FEATURE,
 			TransDimension.id("wool_cloud"), new WoolCloudFeature(NoneFeatureConfiguration.CODEC));

@@ -4,7 +4,6 @@ import org.jspecify.annotations.Nullable;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
@@ -35,7 +34,6 @@ public class SkyPortalBlock extends Block implements Portal {
 	public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.HORIZONTAL_AXIS;
 	private static final VoxelShape X_SHAPE = Block.box(0.0, 0.0, 6.0, 16.0, 16.0, 10.0);
 	private static final VoxelShape Z_SHAPE = Block.box(6.0, 0.0, 0.0, 10.0, 16.0, 16.0);
-	private static final int[] GLOW = {0xFFFFFF, 0xFFE3EE, 0xFFB3D1, 0xFF8EC0};
 
 	public SkyPortalBlock(Properties properties) {
 		super(properties);
@@ -67,7 +65,7 @@ public class SkyPortalBlock extends Block implements Portal {
 		for (int i = 0; i < 2; i++) {
 			double along = random.nextDouble();
 			double across = 0.5 + (random.nextDouble() - 0.5) * 0.6;
-			level.addParticle(new DustParticleOptions(GLOW[random.nextInt(GLOW.length)], 0.5F + random.nextFloat() * 0.5F),
+			level.addParticle(random.nextInt(3) == 0 ? ModParticles.HOLY_SPARK : ModParticles.PRISM_SPARK,
 					pos.getX() + (alongX ? along : across), pos.getY() + random.nextDouble(), pos.getZ() + (alongX ? across : along),
 					0.0, 0.03, 0.0);
 		}

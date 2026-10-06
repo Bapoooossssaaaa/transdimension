@@ -4577,13 +4577,31 @@ def cloud_turtle_skin():
     return Image.open(os.path.join(HERE, "art", "cloud_turtle_skin.png")).convert("RGBA")
 
 
-# ---- angels (128x128, AngelModel: the Trans Fairy's layout, see trans_fairy(), plus a halo and feathered wings)
-ANGEL_HAIR = [hexc(c) for c in ("B8913E", "D6B25C", "EBD08A", "F7E7B8", "FFF9E6")]
-ANGEL_ROBE = [hexc(c) for c in ("BDBBD0", "DAD9E6", "EEEEF5", "FAFAFD", "FFFFFF")]
-ANGEL_EYE = hexc("D9A12A")
-ANGEL_EYE_DARK = hexc("8A5A12")
-ANGEL_LASH = hexc("8C6A3A")
+# ---- the cloud chest (CloudChestBlock): white wood with golden trim; the block model uses rows 6 to 15 of the body
+# texture for the box and rows 2 to 5 of the lid texture for the lid's sides (columns 1 to 14 of both), and the top
+# texture's middle 14x14 for the top of the lid.
+R_CLOUD_WOOD = [hexc(c) for c in ("B4B1C6", "D3D1E0", "E9E8F1", "F6F5FA", "FFFFFF")]
+
+
+def cloud_chest_face(part):
+    img = gradient_map(vblock("pale_oak_planks"), R_CLOUD_WOOD, curve=lambda t: 0.3 + 0.7 * t)
+    rng = random.Random(len(part))
+    for y in range(16):
+        for x in range(16):
+            if part == "top":
+                trim = x in (1, 14) or y in (1, 14) or (x + y == 15 and 6 <= x <= 9) or (x == y and 6 <= x <= 9)
+            elif part == "lid":
+                trim = x in (1, 14) or y in (2, 5)
+            else:
+                trim = x in (1, 14) or y in (6, 15)
+            if trim:
+                img.putpixel((x, y), (*sample(R_HOLY_GOLD, 0.55 + 0.35 * rng.random()), 255))
+    return img
+
+
+# ---- angels (64x64, AngelModel: a glowing orb like the wild fairies', with a halo and feathered wings)
 FEATHER = [hexc(c) for c in ("A9AFC6", "C9CEDD", "E2E5EF", "F3F5FA", "FFFFFF")]
+R_ANGEL_ORB = [hexc(c) for c in ("F2C440", "FAD96A", "FFEBA4", "FFF7DC", "FFFFFF")]
 
 
 def angel_wing(img, u, v, w, h, top, bottom, feather_w, rng, coverts=False):
@@ -4594,7 +4612,7 @@ def angel_wing(img, u, v, w, h, top, bottom, feather_w, rng, coverts=False):
     cells = {}
     for s in range(w):
         t0, t1 = top(s), bottom(s)
-        k, within = divmod(s, feather_w)
+        within = s % feather_w
         # rounded feather tips: the outer columns of each feather stop a row short
         if within in (0, feather_w - 1) and t1 - t0 > 3:
             t1 -= 1
@@ -4602,7 +4620,7 @@ def angel_wing(img, u, v, w, h, top, bottom, feather_w, rng, coverts=False):
             depth = t - t0
             if depth == 0:
                 c = sample(R_HOLY_GOLD, 0.8 + 0.15 * rng.random())          # the leading edge, touched with gold
-            elif coverts or depth <= 3:
+            elif coverts or depth <= 2:
                 # rows of small scalloped feathers
                 row = depth // 3
                 edge = depth % 3 == 2 and (s + row) % 3 != 1
@@ -4619,79 +4637,35 @@ def angel_wing(img, u, v, w, h, top, bottom, feather_w, rng, coverts=False):
 
 
 def angel_texture():
-    """128x128 for AngelModel: the Trans Fairy's layout (head 0,0 · hair shell 32,0 · back hair 64,0 · side locks 88,0 ·
-    arms 40,16 · sleeves 48,16 · bodice 0,32 · collar 20,32 · skirt tiers 0,44 / 0,53 / 0,64 · legs 0,76 · sandals
-    8,76) in white and holy gold, with golden hair, plus the halo (96,0 · 96,4 · 112,0), the flight feathers (22x26
-    plane at 64,32) and the coverts (16x12 plane at 64,60)."""
+    """64x64 for AngelModel: the orb 8x8x8 at 0,0 (white at the heart of each face, gold at the edges) · its glow (the
+    same box, inflated) at 32,0, soft and half see-through · the halo's bars at 0,16 (8x1x1), 0,20 (1x1x8) and 20,16
+    (1x1x1) in bright holy gold · the flight feathers (a 14x16 plane) at 0,32 · the coverts (a 10x8 plane) at 32,32."""
     rng = random.Random(41)
-    img = new(128, 128)
-    fill_box(img, 0, 0, 8, 8, 8, lambda f, x, y, w, h: sample(FAIRY_SKIN, 0.62 + 0.15 * (f == "front") - 0.1 * (f in ("left", "right")) + 0.05 * rng.random()))
-    face = {
-        (1, 3): ANGEL_LASH, (2, 3): ANGEL_LASH, (5, 3): ANGEL_LASH, (6, 3): ANGEL_LASH,
-        (1, 4): WHITE, (2, 4): ANGEL_EYE, (5, 4): ANGEL_EYE, (6, 4): WHITE,
-        (1, 5): ANGEL_EYE_DARK, (2, 5): ANGEL_EYE_DARK, (5, 5): ANGEL_EYE_DARK, (6, 5): ANGEL_EYE_DARK,
-        (0, 6): hexc("F7C2CC"), (7, 6): hexc("F7C2CC"),
-        (3, 6): hexc("E59AAE"), (4, 6): hexc("E59AAE"),
-    }
-    for (x, y), c in face.items():
-        img.putpixel((8 + x, 8 + y), (*c, 255))
+    img = new(64, 64)
 
-    def hair_px(f, x, y, w, h):
-        c = sample(ANGEL_HAIR, 0.45 + 0.4 * rng.random())
-        if f == "front":
-            fringe = [3, 2, 2, 1, 1, 2, 2, 3]
-            if y >= fringe[x]:
-                return None if not (x in (0, 7) and y < 7) else c
-        return c
-    fill_box(img, 32, 0, 8, 8, 8, hair_px)
-    fill_box(img, 64, 0, 9, 13, 2, lambda f, x, y, w, h: sample(ANGEL_HAIR, 0.75 + 0.2 * rng.random()) if y >= h - 4 and f != "top"
-             else sample(ANGEL_HAIR, 0.35 + 0.45 * rng.random() - 0.2 * (x % 3 == 0)))
-    fill_box(img, 88, 0, 2, 9, 2, lambda f, x, y, w, h: sample(ANGEL_HAIR, 0.45 + 0.4 * rng.random()))
-    # the halo: bright holy gold, shining white here and there
+    def orb(f, x, y, w, h):
+        d = max(abs(x - (w - 1) / 2), abs(y - (h - 1) / 2)) / ((w - 1) / 2)
+        return sample(R_ANGEL_ORB, 1.0 - 0.75 * d + 0.05 * rng.random())
+    fill_box(img, 0, 0, 8, 8, 8, orb)
+
+    def glow(f, x, y, w, h):
+        d = max(abs(x - (w - 1) / 2), abs(y - (h - 1) / 2)) / ((w - 1) / 2)
+        return (*sample(R_ANGEL_ORB, 0.6 + 0.3 * rng.random()), round(40 + 50 * d))
+    fill_box(img, 32, 0, 8, 8, 8, glow)
     gold = lambda f, x, y, w, h: sample(R_HOLY_GOLD, 0.95) if (x + y) % 3 == 0 else sample(R_HOLY_GOLD, 0.6 + 0.2 * rng.random())
-    fill_box(img, 96, 0, 6, 1, 1, gold)
-    fill_box(img, 96, 4, 1, 1, 6, gold)
-    fill_box(img, 112, 0, 1, 1, 1, gold)
-
-    # bodice: white with a golden lacing down the front and a golden sash at the waist
-    def bodice(f, x, y, w, h):
-        if y == h - 1:
-            return sample(R_HOLY_GOLD, 0.55 + 0.2 * (x % 2))
-        if f == "front" and x in (2, 3) and y % 2 == 1:
-            return sample(R_HOLY_GOLD, 0.7)
-        return sample(ANGEL_ROBE, 0.6 + 0.25 * rng.random() - 0.1 * (f in ("left", "right")))
-    fill_box(img, 0, 32, 6, 8, 4, bodice)
-    fill_box(img, 20, 32, 7, 3, 5, lambda f, x, y, w, h: sample(R_HOLY_GOLD, 0.6 + 0.3 * ((x + y) % 2)))
-
-    def tier(f, x, y, w, h):
-        if f in ("top", "bottom"):
-            return sample(ANGEL_ROBE, 0.5)
-        if y == h - 1:
-            return sample(R_HOLY_GOLD, 0.55 + 0.25 * (x % 2))          # a golden hem on every tier
-        c = sample(ANGEL_ROBE, 0.55 + 0.35 * rng.random() - 0.15 * (x % 4 == 0))
-        if rng.random() < 0.05:
-            c = sample(R_HOLY_GOLD, 0.95)                               # glints of gold thread
-        return c
-    fill_box(img, 0, 44, 9, 3, 6, tier)
-    fill_box(img, 0, 53, 11, 3, 8, tier)
-    fill_box(img, 0, 64, 13, 3, 10, tier)
-    # arms: skin with golden bracelets; sleeves white with a golden rim
-    fill_box(img, 40, 16, 2, 10, 2, lambda f, x, y, w, h: sample(R_HOLY_GOLD, 0.7) if y == h - 3 else sample(FAIRY_SKIN, 0.6 + 0.1 * rng.random()))
-    fill_box(img, 48, 16, 3, 3, 3, lambda f, x, y, w, h: sample(R_HOLY_GOLD, 0.65) if y == h - 1 else sample(ANGEL_ROBE, 0.7 + 0.2 * rng.random()))
-    # bare legs and golden sandals
-    fill_box(img, 0, 76, 2, 9, 2, lambda f, x, y, w, h: sample(FAIRY_SKIN, 0.58 + 0.08 * rng.random()))
-    fill_box(img, 8, 76, 2, 1, 3, lambda f, x, y, w, h: sample(R_HOLY_GOLD, 0.5 + 0.3 * ((x + y) % 2)))
+    fill_box(img, 0, 16, 8, 1, 1, gold)
+    fill_box(img, 0, 20, 1, 1, 8, gold)
+    fill_box(img, 20, 16, 1, 1, 1, gold)
 
     # the flight feathers: rising from the hinge to the wrist, then out to the tip; longest towards the tip
     def flight_top(s):
-        return round(8 - 8 * (s / 12) ** 0.8) if s <= 12 else round((s - 12) * 0.55)
+        return round(6 - 6 * (s / 8) ** 0.8) if s <= 8 else round((s - 8) * 0.6)
 
     def flight_bottom(s):
-        return min(25, round(19 + 6 * s / 15)) if s <= 15 else round(25 - (s - 15) * 1.3)
-    angel_wing(img, 64, 32, 22, 26, flight_top, flight_bottom, 3, rng)
-    # the coverts (one row lower than the flight feathers' plane): a cape of small feathers over their upper half
-    angel_wing(img, 64, 60, 16, 12, lambda s: max(0, flight_top(s) - 1),
-               lambda s: (10 if s < 12 else 10 - (s - 11)) - (s // 2) % 2, 2, rng, coverts=True)
+        return min(15, round(11 + 4 * s / 10)) if s <= 10 else round(15 - (s - 10) * 1.2)
+    angel_wing(img, 0, 32, 14, 16, flight_top, flight_bottom, 3, rng)
+    # the coverts (a row lower than the flight feathers' plane): a cape of small feathers over their upper half
+    angel_wing(img, 32, 32, 10, 8, lambda s: max(0, flight_top(s) - 1), lambda s: 6 - (s // 2) % 2, 2, rng, coverts=True)
     return img
 
 
@@ -4732,6 +4706,16 @@ def prism_spark_frames(n=8):
         palette = {"X": WHITE, "C": (round(r * 255), round(g * 255), round(b * 255))}
         img = new(8, 8)
         img.paste(from_ascii(PRISM_SPARK_BIG if k < n - 2 else PRISM_SPARK_SMALL, palette), (0, 0))
+        yield img
+
+
+def trans_spark_frames():
+    """The trans spark: prism_spark's star in the flag's colours, turning blue, pink, white, pink and round again as it
+    lives, shrinking at the end (the Fairy Realm's portal, frames, altar, cutscene and boss)."""
+    colours = FLAG + FLAG[1:4]
+    for k, colour in enumerate(colours):
+        img = new(8, 8)
+        img.paste(from_ascii(PRISM_SPARK_BIG if k < len(colours) - 2 else PRISM_SPARK_SMALL, {"X": WHITE, "C": colour}), (0, 0))
         yield img
 
 
@@ -4778,6 +4762,12 @@ def round11_textures():
         yield f"particle/prism_spark_{i}.png", img, None
     for i, img in enumerate(holy_spark_frames()):
         yield f"particle/holy_spark_{i}.png", img, None
+    for part in ("body", "lid", "top"):
+        yield f"block/cloud_chest_{part}.png", cloud_chest_face(part), None
+    for i, img in enumerate(trans_spark_frames()):
+        yield f"particle/trans_spark_{i}.png", img, None
+    # Plain white, for the client's glowing light geometry (GlowGeometry): its colours come from the vertices.
+    yield "misc/glow.png", Image.new("RGBA", (16, 16), (255, 255, 255, 255)), None
 
 
 # ============================================================================================ chests

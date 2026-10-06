@@ -90,7 +90,9 @@
       "transdimension:trans_grass_meadow",
       "transdimension:pastel_bushes"
     ],
-    []
+    [
+      "transdimension:pink_lava"
+    ]
   ],
   "has_precipitation": true,
   "spawn_costs": {},

@@ -6,7 +6,6 @@ import java.util.function.Consumer;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
@@ -44,7 +43,6 @@ public class RitualCrystalBlock extends Block {
 	/** Set once the ritual has opened the gate: the crystal glows brighter for good. */
 	public static final BooleanProperty AWAKE = BooleanProperty.create("awake");
 	private static final Map<Direction, VoxelShape> SHAPES = new EnumMap<>(Direction.class);
-	private static final int[] GLOW = {0xFF5FA2, 0xFFB3D1, 0xFFFFFF};
 	/**
 	 * Called on the client for an awake crystal near the player, so its steady beam into the open gate gets drawn
 	 * (RitualEffects sets this; common code can't reach client classes).
@@ -95,8 +93,8 @@ public class RitualCrystalBlock extends Block {
 		for (int i = 0; i < motes; i++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			double radius = 0.5 + random.nextDouble() * 0.4;
-			level.addParticle(new DustParticleOptions(GLOW[random.nextInt(GLOW.length)], 0.7F), gem.x + Math.cos(angle) * radius,
-					gem.y - 0.3 + random.nextDouble() * 0.8, gem.z + Math.sin(angle) * radius, 0.0, 0.02, 0.0);
+			level.addParticle(ModParticles.PRISM_SPARK, gem.x + Math.cos(angle) * radius, gem.y - 0.3 + random.nextDouble() * 0.8,
+					gem.z + Math.sin(angle) * radius, 0.0, 0.02, 0.0);
 		}
 		if (random.nextInt(awake ? 2 : 6) == 0) {
 			level.addParticle(ModParticles.PRISM_SPARK, gem.x + random.nextGaussian() * 0.3, gem.y + random.nextGaussian() * 0.3,

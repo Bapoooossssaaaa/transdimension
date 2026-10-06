@@ -9,9 +9,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.references.BlockItemId;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -96,6 +98,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.block.CloudChestBlock;
 import dev.goober.transdimension.block.FairyAltarBlock;
 import dev.goober.transdimension.block.FairyJarBlock;
 import dev.goober.transdimension.block.FairyPortalBlock;
@@ -649,6 +652,14 @@ public final class ModBlocks {
 	/** Cloudcite bricks veined with holy gold, glowing softly: the heavenly ruins' trim. */
 	public static final Block GILDED_CLOUDCITE = register("gilded_cloudcite", Block::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BRICKS).mapColor(MapColor.GOLD).lightLevel(state -> 5));
+	/**
+	 * The Cloud Realm's white-and-gold chest (CloudChestBlock: a chest-shaped barrel). Its item is named, so the screen of a
+	 * placed one says "Cloud Chest" rather than "Barrel".
+	 */
+	public static final Block CLOUD_CHEST = register("cloud_chest", CloudChestBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.BARREL).mapColor(MapColor.SNOW).noOcclusion(),
+			new Item.Properties().component(DataComponents.CUSTOM_NAME,
+					Component.translatable("block.transdimension.cloud_chest").withStyle(style -> style.withItalic(false))));
 	/** Holy gold: far brighter than vanilla's, and it glows. The heavenly ruins are trimmed with it. */
 	public static final Block HOLY_GOLD_BLOCK = register("holy_gold_block", Block::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.GOLD_BLOCK).lightLevel(state -> 8));
@@ -863,5 +874,7 @@ public final class ModBlocks {
 		// Pink sensors and shriekers use vanilla's block entities, which only accept the blocks they were made for.
 		BlockEntityTypes.SCULK_SENSOR.addValidBlock(PINK_SCULK_SENSOR);
 		BlockEntityTypes.SCULK_SHRIEKER.addValidBlock(PINK_SCULK_SHRIEKER);
+		// The cloud chest is a barrel underneath.
+		BlockEntityTypes.BARREL.addValidBlock(CLOUD_CHEST);
 	}
 }

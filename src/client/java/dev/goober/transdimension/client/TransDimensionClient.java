@@ -157,12 +157,13 @@ public class TransDimensionClient implements ClientModInitializer {
 		// Holy water: golden and see-through (its textures' alpha), untinted.
 		FluidRenderingRegistry.register(ModFluids.HOLY_WATER, ModFluids.FLOWING_HOLY_WATER, new FluidModel.Unbaked(
 				new Material(TransDimension.id("block/holy_water_still")), new Material(TransDimension.id("block/holy_water_flow")), null, null));
-		// The mod's own sparkles: the ritual's pink candle flames and prismatic stars, and the angels' golden motes. They
-		// glow, and play their frames over their lives, the way soul fire's souls do.
+		// The mod's own sparkles: the ritual's pink candle flames and prismatic stars, the angels' golden motes and the
+		// Fairy Realm's trans sparks. They glow, and play their frames over their lives, the way soul fire's souls do.
 		ParticleProviderRegistry particles = ParticleProviderRegistry.getInstance();
 		particles.register(ModParticles.PINK_FLAME, SoulParticle.EmissiveProvider::new);
 		particles.register(ModParticles.PRISM_SPARK, SoulParticle.EmissiveProvider::new);
 		particles.register(ModParticles.HOLY_SPARK, SoulParticle.EmissiveProvider::new);
+		particles.register(ModParticles.TRANS_SPARK, SoulParticle.EmissiveProvider::new);
 
 		// Trans boats use vanilla's boat models with our textures.
 		ModelLayerRegistry.registerModelLayer(TRANS_BOAT_LAYER, BoatModel::createBoatModel);

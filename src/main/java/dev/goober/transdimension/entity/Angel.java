@@ -33,8 +33,8 @@ import dev.goober.transdimension.registry.ModParticles;
 import dev.goober.transdimension.world.CloudRealm;
 
 /**
- * An angel of the Cloud Realm: a glowing figure in white and gold with a golden halo over its head and great white
- * feathered wings. Angels gather where the realm's light can't reach (under the islands, in the ruins' towers), and they
+ * An angel of the Cloud Realm: a glowing orb of white and gold light, like a big wild fairy, with a golden halo over it
+ * and great white feathered wings. Angels gather where the realm's light can't reach (under the islands, in the ruins' towers), and they
  * float there quietly, drifting a little and shedding motes of golden light.
  *
  * <p>They are kind: an angel blesses any hurt player who comes near (the Blessed effect, as from holy water), and anyone
@@ -88,8 +88,8 @@ public class Angel extends PathfinderMob {
 		super.tick();
 		this.fallDistance = 0;
 		if (this.level().isClientSide() && this.random.nextInt(4) == 0) {
-			this.level().addParticle(ModParticles.HOLY_SPARK, this.getRandomX(0.8), this.getY() + 0.4 + this.random.nextDouble() * 1.4,
-					this.getRandomZ(0.8), 0.0, 0.01, 0.0);
+			this.level().addParticle(ModParticles.HOLY_SPARK, this.getRandomX(1.2), this.getY() + 0.3 + this.random.nextDouble() * 0.9,
+					this.getRandomZ(1.2), 0.0, 0.01, 0.0);
 		}
 	}
 
@@ -132,7 +132,7 @@ public class Angel extends PathfinderMob {
 		}
 		Player watcher = level.getNearestPlayer(this, 10.0);
 		if (watcher != null) {
-			// It turns its head to whoever comes near.
+			// It turns to whoever comes near.
 			this.getLookControl().setLookAt(watcher, 30.0F, 30.0F);
 		}
 	}

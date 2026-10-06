@@ -221,5 +221,161 @@
         "pitch": 1.6
       }
     ]
+  },
+  "entity.pink_warden.ambient": {
+    "subtitle": "subtitles.transdimension.entity.pink_warden.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.allay.ambient_without_item",
+        "type": "event",
+        "volume": 0.6,
+        "pitch": 0.7
+      },
+      {
+        "name": "minecraft:block.amethyst_block.resonate",
+        "type": "event",
+        "volume": 0.4,
+        "pitch": 0.8
+      }
+    ]
+  },
+  "entity.pink_warden.hurt": {
+    "subtitle": "subtitles.transdimension.entity.pink_warden.hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.allay.hurt",
+        "type": "event",
+        "volume": 1.0,
+        "pitch": 0.7
+      }
+    ]
+  },
+  "entity.pink_warden.death": {
+    "subtitle": "subtitles.transdimension.entity.pink_warden.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.allay.death",
+        "type": "event",
+        "volume": 1.0,
+        "pitch": 0.7
+      }
+    ]
+  },
+  "entity.pink_warden.step": {
+    "subtitle": "subtitles.transdimension.entity.pink_warden.step",
+    "sounds": [
+      {
+        "name": "minecraft:block.moss.step",
+        "type": "event",
+        "volume": 1.0,
+        "pitch": 0.8
+      }
+    ]
+  },
+  "entity.pink_warden.roar": {
+    "subtitle": "subtitles.transdimension.entity.pink_warden.roar",
+    "sounds": [
+      {
+        "name": "minecraft:block.amethyst_block.resonate",
+        "type": "event",
+        "volume": 1.0,
+        "pitch": 0.7
+      },
+      {
+        "name": "minecraft:entity.allay.item_thrown",
+        "type": "event",
+        "volume": 1.0,
+        "pitch": 0.7
+      }
+    ]
+  },
+  "entity.pink_warden.sniff": {
+    "subtitle": "subtitles.transdimension.entity.pink_warden.sniff",
+    "sounds": [
+      {
+        "name": "minecraft:entity.sniffer.sniffing",
+        "type": "event",
+        "volume": 0.6,
+        "pitch": 1.3
+      }
+    ]
+  },
+  "entity.pink_warden.sonic_charge": {
+    "subtitle": "subtitles.transdimension.entity.pink_warden.sonic_charge",
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.power_select",
+        "type": "event",
+        "volume": 0.6,
+        "pitch": 1.6
+      }
+    ]
+  },
+  "entity.pink_warden.sonic_boom": {
+    "subtitle": "subtitles.transdimension.entity.pink_warden.sonic_boom",
+    "sounds": [
+      {
+        "name": "minecraft:entity.firework_rocket.twinkle",
+        "type": "event",
+        "volume": 1.0,
+        "pitch": 1.2
+      },
+      {
+        "name": "minecraft:block.amethyst_block.break",
+        "type": "event",
+        "volume": 1.0,
+        "pitch": 0.9
+      }
+    ]
+  },
+  "entity.pink_warden.attack": {
+    "subtitle": "subtitles.transdimension.entity.pink_warden.attack",
+    "sounds": [
+      {
+        "name": "minecraft:entity.slime.attack",
+        "type": "event",
+        "volume": 1.0,
+        "pitch": 1.3
+      }
+    ]
+  },
+  "entity.pink_warden.dig": {
+    "subtitle": "subtitles.transdimension.entity.pink_warden.dig",
+    "sounds": [
+      {
+        "name": "minecraft:block.moss.break",
+        "type": "event",
+        "volume": 1.0,
+        "pitch": 0.8
+      }
+    ]
+  },
+  "entity.pink_warden.emerge": {
+    "subtitle": "subtitles.transdimension.entity.pink_warden.emerge",
+    "sounds": [
+      {
+        "name": "minecraft:block.moss.place",
+        "type": "event",
+        "volume": 1.0,
+        "pitch": 0.8
+      },
+      {
+        "name": "minecraft:block.amethyst_block.chime",
+        "type": "event",
+        "volume": 1.0,
+        "pitch": 0.9
+      }
+    ]
+  },
+  "entity.pink_warden.listening": {
+    "subtitle": "subtitles.transdimension.entity.pink_warden.listening",
+    "sounds": [
+      {
+        "name": "minecraft:block.amethyst_block.chime",
+        "type": "event",
+        "volume": 0.6,
+        "pitch": 1.2
+      }
+    ]
   }
 }

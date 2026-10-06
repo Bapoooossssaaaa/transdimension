@@ -89,7 +89,9 @@
       "minecraft:brown_mushroom_normal",
       "minecraft:red_mushroom_swamp"
     ],
-    []
+    [
+      "transdimension:pink_lava"
+    ]
   ],
   "has_precipitation": true,
   "spawn_costs": {},

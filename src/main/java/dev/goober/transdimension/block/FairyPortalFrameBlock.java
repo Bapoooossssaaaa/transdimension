@@ -2,7 +2,6 @@ package dev.goober.transdimension.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -29,6 +28,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import dev.goober.transdimension.registry.ModItems;
+import dev.goober.transdimension.registry.ModParticles;
 import dev.goober.transdimension.world.FairyRealm;
 
 /**
@@ -41,7 +41,6 @@ public class FairyPortalFrameBlock extends Block {
 	public static final BooleanProperty PEARL = BooleanProperty.create("pearl");
 	private static final VoxelShape BASE = Block.box(0.0, 0.0, 0.0, 16.0, 13.0, 16.0);
 	private static final VoxelShape WITH_PEARL = Shapes.or(BASE, Block.box(4.0, 13.0, 4.0, 12.0, 16.0, 12.0));
-	private static final int[] GLOW = {0xF5A9B8, 0x5BCEFA, 0xFFFFFF};
 
 	public FairyPortalFrameBlock(Properties properties) {
 		super(properties);
@@ -78,8 +77,7 @@ public class FairyPortalFrameBlock extends Block {
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
 		if (state.getValue(PEARL) && random.nextInt(3) == 0) {
-			int colour = GLOW[random.nextInt(GLOW.length)];
-			level.addParticle(new DustParticleOptions(colour, 0.7F), pos.getX() + 0.3 + random.nextDouble() * 0.4, pos.getY() + 1.05,
+			level.addParticle(ModParticles.TRANS_SPARK, pos.getX() + 0.3 + random.nextDouble() * 0.4, pos.getY() + 1.05,
 					pos.getZ() + 0.3 + random.nextDouble() * 0.4, 0.0, 0.03, 0.0);
 		}
 	}

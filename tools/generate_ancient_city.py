@@ -59,6 +59,10 @@ SWAP = {
     # the hidden room's little garden
     "minecraft:grass_block": T + "trans_grass_block",
     "minecraft:dirt": T + "trans_dirt",
+    # vanilla's dark oak beams, floors and fences, in the realm's own trans wood
+    "minecraft:dark_oak_log": T + "trans_log",
+    "minecraft:dark_oak_planks": T + "trans_planks",
+    "minecraft:dark_oak_fence": T + "trans_fence",
 }
 # Every wool and carpet in the city is pink (vanilla's floors are gray wool, its banners and beds blue).
 for colour in ("gray", "light_gray", "light_blue", "blue", "cyan", "magenta", "white", "black"):

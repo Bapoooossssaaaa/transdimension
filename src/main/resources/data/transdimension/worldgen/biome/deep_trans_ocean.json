@@ -82,7 +82,9 @@
       "transdimension:trans_seagrass_deep",
       "transdimension:trans_kelp_cold"
     ],
-    []
+    [
+      "transdimension:pink_lava"
+    ]
   ],
   "has_precipitation": true,
   "spawn_costs": {},

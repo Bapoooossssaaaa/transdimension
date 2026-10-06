@@ -88,7 +88,8 @@
       "transdimension:trans_boulders"
     ],
     [
-      "minecraft:freeze_top_layer"
+      "minecraft:freeze_top_layer",
+      "transdimension:pink_lava"
     ]
   ],
   "has_precipitation": true,

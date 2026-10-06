@@ -87,7 +87,8 @@
       "transdimension:trans_grass_taiga"
     ],
     [
-      "minecraft:freeze_top_layer"
+      "minecraft:freeze_top_layer",
+      "transdimension:pink_lava"
     ]
   ],
   "has_precipitation": true,

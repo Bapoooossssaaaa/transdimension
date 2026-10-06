@@ -1,7 +1,6 @@
 package dev.goober.transdimension.block;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -18,6 +17,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import dev.goober.transdimension.registry.ModItems;
+import dev.goober.transdimension.registry.ModParticles;
 import dev.goober.transdimension.world.FairyRealm;
 
 /**
@@ -28,7 +28,6 @@ import dev.goober.transdimension.world.FairyRealm;
 public class FairyAltarBlock extends Block {
 	private static final VoxelShape SHAPE = Shapes.or(Block.box(1.0, 0.0, 1.0, 15.0, 4.0, 15.0), Block.box(4.0, 4.0, 4.0, 12.0, 12.0, 12.0),
 			Block.box(2.0, 12.0, 2.0, 14.0, 15.0, 14.0));
-	private static final int[] GLOW = {0xF5A9B8, 0x5BCEFA, 0xFFFFFF};
 
 	public FairyAltarBlock(Properties properties) {
 		super(properties);
@@ -54,8 +53,7 @@ public class FairyAltarBlock extends Block {
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
 		if (random.nextInt(2) == 0) {
-			int colour = GLOW[random.nextInt(GLOW.length)];
-			level.addParticle(new DustParticleOptions(colour, 0.8F), pos.getX() + 0.2 + random.nextDouble() * 0.6, pos.getY() + 1.0,
+			level.addParticle(ModParticles.TRANS_SPARK, pos.getX() + 0.2 + random.nextDouble() * 0.6, pos.getY() + 1.0,
 					pos.getZ() + 0.2 + random.nextDouble() * 0.6, 0.0, 0.05, 0.0);
 		}
 	}

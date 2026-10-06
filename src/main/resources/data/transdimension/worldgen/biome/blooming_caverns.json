@@ -85,7 +85,9 @@
       "transdimension:blooming_cave_floor",
       "minecraft:spore_blossom"
     ],
-    []
+    [
+      "transdimension:pink_lava"
+    ]
   ],
   "has_precipitation": true,
   "spawn_costs": {},

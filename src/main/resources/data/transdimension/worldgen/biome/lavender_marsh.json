@@ -95,7 +95,9 @@
       "minecraft:red_mushroom_swamp",
       "transdimension:trans_firefly_bushes_swamp"
     ],
-    []
+    [
+      "transdimension:pink_lava"
+    ]
   ],
   "has_precipitation": true,
   "spawn_costs": {},

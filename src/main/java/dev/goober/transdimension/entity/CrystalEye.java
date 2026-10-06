@@ -2,7 +2,6 @@ package dev.goober.transdimension.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -20,6 +19,7 @@ import net.minecraft.world.phys.Vec3;
 
 import dev.goober.transdimension.registry.ModEntities;
 import dev.goober.transdimension.registry.ModItems;
+import dev.goober.transdimension.registry.ModParticles;
 
 /**
  * A thrown Trans Crystal Pearl, the Trans Realm's eye of ender. It rises and glides towards the nearest Fairy Sanctum
@@ -106,7 +106,7 @@ public class CrystalEye extends ThrowableItemProjectile {
 			level.addParticle(new DustParticleOptions(colour, 0.9F), this.getX() - motion.x * 0.25 + this.random.nextGaussian() * 0.08,
 					this.getY() - motion.y * 0.25 + 0.1, this.getZ() - motion.z * 0.25 + this.random.nextGaussian() * 0.08, 0.0, 0.0, 0.0);
 			if (this.tickCount % 4 == 0) {
-				level.addParticle(ParticleTypes.END_ROD, this.getX(), this.getY() + 0.1, this.getZ(), 0.0, 0.0, 0.0);
+				level.addParticle(ModParticles.TRANS_SPARK, this.getX(), this.getY() + 0.1, this.getZ(), 0.0, 0.0, 0.0);
 			}
 		}
 	}

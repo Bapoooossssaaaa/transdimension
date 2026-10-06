@@ -87,7 +87,9 @@
       "transdimension:spring_pink_lava"
     ],
     [],
-    []
+    [
+      "transdimension:pink_lava"
+    ]
   ],
   "has_precipitation": true,
   "spawn_costs": {},
