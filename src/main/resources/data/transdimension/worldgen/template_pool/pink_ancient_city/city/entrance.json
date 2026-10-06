@@ -1,0 +1,59 @@
+{
+  "elements": [
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "transdimension:pink_ancient_city/city/entrance/entrance_connector",
+        "processors": "transdimension:pink_ancient_city_generic_degradation",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "transdimension:pink_ancient_city/city/entrance/entrance_path_1",
+        "processors": "transdimension:pink_ancient_city_generic_degradation",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "transdimension:pink_ancient_city/city/entrance/entrance_path_2",
+        "processors": "transdimension:pink_ancient_city_generic_degradation",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "transdimension:pink_ancient_city/city/entrance/entrance_path_3",
+        "processors": "transdimension:pink_ancient_city_generic_degradation",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "transdimension:pink_ancient_city/city/entrance/entrance_path_4",
+        "processors": "transdimension:pink_ancient_city_generic_degradation",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "transdimension:pink_ancient_city/city/entrance/entrance_path_5",
+        "processors": "transdimension:pink_ancient_city_generic_degradation",
+        "projection": "rigid"
+      },
+      "weight": 1
+    }
+  ],
+  "fallback": "minecraft:empty"
+}

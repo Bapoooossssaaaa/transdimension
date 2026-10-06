@@ -29,6 +29,10 @@ public final class ModAttachments {
 	public static final AttachmentType<GlobalPos> FAIRY_RETURN = AttachmentRegistry.create(TransDimension.id("fairy_return"),
 			builder -> builder.persistent(GlobalPos.CODEC).copyOnDeath());
 
+	/** On a player: the Sky Portal they came through, so the Cloud Realm's portal takes them back to it. Survives death. */
+	public static final AttachmentType<GlobalPos> CLOUD_RETURN = AttachmentRegistry.create(TransDimension.id("cloud_return"),
+			builder -> builder.persistent(GlobalPos.CODEC).copyOnDeath());
+
 	private ModAttachments() {
 	}
 

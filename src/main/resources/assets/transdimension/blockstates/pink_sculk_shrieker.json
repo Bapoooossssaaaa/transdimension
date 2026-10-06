@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "can_summon=false": {
+      "model": "transdimension:block/pink_sculk_shrieker"
+    },
+    "can_summon=true": {
+      "model": "transdimension:block/pink_sculk_shrieker"
+    }
+  }
+}

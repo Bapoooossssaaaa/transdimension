@@ -737,7 +737,8 @@ CAVE_DECOR = [f"{NS}:trans_glow_lichen", f"{NS}:deep_cave_moss", f"{NS}:deep_cav
 
 def biome(name, *, temperature, downfall, grass, foliage, water, water_fog, sky, fog, music_sound,
           features, creatures=(), monsters=MONSTERS, water_creatures=(), water_ambient=(), underground_water=(),
-          particles=None, precipitation=True, frozen=False, extra_attributes=None, underwater_music=False, axolotls=(), fairies=4):
+          particles=None, precipitation=True, frozen=False, extra_attributes=None, underwater_music=False, axolotls=(), fairies=4,
+          carvers=True):
     attributes = {
         "minecraft:audio/background_music": music(music_sound, underwater_music),
         "minecraft:visual/fog_color": fog,
@@ -753,7 +754,7 @@ def biome(name, *, temperature, downfall, grass, foliage, water, water_fog, sky,
         steps[step] = list(items)
     b = {
         "attributes": attributes,
-        "carvers": ["minecraft:cave", "minecraft:cave_extra_underground", "minecraft:canyon"],
+        "carvers": ["minecraft:cave", "minecraft:cave_extra_underground", "minecraft:canyon"] if carvers else [],
         "downfall": downfall,
         "effects": {"foliage_color": foliage, "grass_color": grass, "water_color": water},
         "features": steps,
@@ -970,6 +971,24 @@ def generate_biomes():
                     7: CAVE_DECOR + [f"{NS}:trans_crystal_clusters_cave_floor", f"{NS}:trans_crystal_clusters_cave_ceiling"], 8: SPRINGS},
           creatures=[])
 
+    # ---- the pink deep dark: the realm's deep dark, deep under its mountains, all in pink. Monsters spawn as anywhere
+    # else (the pink wardens hunt them), fairies far more often (Fairy#checkFairySpawnRules), and sculk people trade.
+    biome("pink_deep_dark", fairies=40, temperature=0.8, downfall=0.4, grass="#f5a9b8", foliage="#f5a9b8", water="#d86aa8",
+          water_fog="#4a1240", sky="#ff9cc8", fog="#2a0a24", music_sound="minecraft:music.overworld.deep_dark", precipitation=False,
+          particles=particles(f"{NS}:pink_sculk_soul", 0.0008),
+          features={3: UNDERGROUND, 6: ORES + [f"{NS}:ore_sculk_gem"], 7: [f"{NS}:pink_sculk_vein", f"{NS}:pink_sculk_patch_deep_dark"],
+                    8: SPRINGS},
+          creatures=[spawn("sculk_person", 6, 1, 2)], monsters=MONSTERS + [spawn("pink_warden", 4, 1, 1)])
+
+    # ---- the Cloud Realm: white islands in a white sky; no monsters at all
+    biome("cloud_isles", fairies=0, temperature=0.6, downfall=0.3, grass="#eef5f2", foliage="#f4f8f6", water="#cfe9ff", water_fog="#a8d4f5",
+          sky="#d9ecff", fog="#f6f9ff", music_sound="minecraft:music.overworld.meadow", precipitation=False, carvers=False,
+          particles=particles("minecraft:end_rod", 0.0006),
+          features={9: [f"{NS}:wool_clouds", f"{NS}:cloud_trees", f"{NS}:cloud_flowers", f"{NS}:cloud_grass"]},
+          creatures=[spawn("cloudy", 10, 1, 2), spawn("minecraft:sheep", 10, 2, 4), spawn("minecraft:pig", 8, 2, 4),
+                     spawn("minecraft:cow", 8, 2, 4), spawn("minecraft:chicken", 8, 2, 4), spawn("minecraft:rabbit", 6, 2, 3)],
+          monsters=())
+
 
 # ============================================================================================ feature order
 # Minecraft requires features to appear in a consistent order across every biome of a dimension
@@ -981,10 +1000,12 @@ FEATURE_RANK = [
     # ores
     *TRANS_ORES, f"{NS}:trans_ore_copper_large", f"{NS}:trans_ore_emerald", f"{NS}:trans_ore_clay",
     f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_large", f"{NS}:ore_trans_crystal_extra",
+    f"{NS}:ore_sculk_gem",
     f"{NS}:trans_disk_clay", f"{NS}:trans_disk_gravel", f"{NS}:trans_disk_sand",
     # underground decoration
     f"{NS}:trans_glow_lichen", f"{NS}:deep_cave_moss", f"{NS}:deep_cave_ceiling_moss",
     f"{NS}:trans_crystal_clusters_cave_floor", f"{NS}:trans_crystal_clusters_cave_ceiling",
+    f"{NS}:pink_sculk_vein", f"{NS}:pink_sculk_patch_deep_dark",
     # springs
     f"{NS}:spring_trans_water", f"{NS}:spring_pink_lava",
     # vegetation: big things first, then flowers, grass and small decorations
@@ -993,7 +1014,8 @@ FEATURE_RANK = [
     f"{NS}:trees_frosted_fields", f"{NS}:trees_lavender_marsh", f"{NS}:trans_bushes",
     f"{NS}:heart_trees", f"{NS}:heart_trees_rare",
     f"{NS}:trees_pearlwood_forest", f"{NS}:trees_bluebell_woods", f"{NS}:trees_twilight_thicket", f"{NS}:trees_candy_floss_grove",
-    f"{NS}:trees_moonlit_meadow", f"{NS}:hedge_bushes",
+    f"{NS}:trees_moonlit_meadow", f"{NS}:hedge_bushes", f"{NS}:wool_clouds", f"{NS}:cloud_trees", f"{NS}:cloud_flowers",
+    f"{NS}:cloud_grass",
     f"{NS}:tall_trans_grass", f"{NS}:trans_lush_caves_ceiling_vegetation", f"{NS}:trans_cave_vines", "minecraft:lush_caves_clay",
     f"{NS}:trans_lush_caves_vegetation", f"{NS}:blooming_cave_ceiling", f"{NS}:blooming_cave_floor", "minecraft:spore_blossom",
     "minecraft:classic_vines_cave_feature",
@@ -1227,6 +1249,8 @@ def generate_dimension():
     entries.append(entry("pastel_lush_caves", full, (0.65, 1.0), (0.0, 1.0), full, full, depth=[0.2, 0.9]))
     # Blooming caverns under the drier middle of the realm.
     entries.append(entry("blooming_caverns", full, (-0.1, 0.3), (0.0, 1.0), full, full, depth=[0.2, 0.9]))
+    # The pink deep dark lies where vanilla's deep dark does: far down, under the mountains (low erosion).
+    entries.append(entry("pink_deep_dark", full, full, full, (-1.0, -0.375), full, depth=1.1))
     dimension = {"type": f"{NS}:trans_realm", "generator": {
         "type": "minecraft:noise", "settings": f"{NS}:trans_realm",
         "biome_source": {"type": "minecraft:multi_noise", "biomes": entries}}}
@@ -1246,6 +1270,7 @@ def generate_dimension_type():
     attrs["minecraft:visual/sky_color"] = "#5bcefa"
     attrs["minecraft:visual/water_fog_color"] = "#1f6fa8"
     dim["timelines"] = f"#{NS}:in_trans_realm"
+    dim["infiniburn"] = f"#{NS}:infiniburn_trans_realm"
     write(path, dim)
     # The Fairy Realm shares the realm's sky (same timelines), but its clouds drift far below the islands.
     fairy = json.loads(json.dumps(dim))
@@ -1357,15 +1382,119 @@ def remove_stale():
         os.remove(os.path.join(folder, f))
 
 
+# ============================================================================================ round 9
+def generate_round9_features():
+    """The pink deep dark's sculk patches (PinkSculkPatchFeature), veins and sculk gem ore, and the Cloud Realm's wool
+    clouds (WoolCloudFeature), cloud trees (pale oak with wool crowns), white flowers and grass."""
+    deep = lambda: {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "max_inclusive": {"absolute": 16},
+                                                                 "min_inclusive": {"above_bottom": 0}}}
+    cf("pink_sculk_patch", {"type": f"{NS}:pink_sculk_patch", "config": {}})
+    pf("pink_sculk_patch_deep_dark", f"{NS}:pink_sculk_patch", [{"type": "minecraft:count", "count": 128}, {"type": "minecraft:in_square"},
+                                                                deep(), {"type": "minecraft:biome"}])
+    # The pink ancient cities' own patches (their sculk pool, generate_ancient_city.py).
+    pf("pink_sculk_patch_city", f"{NS}:pink_sculk_patch", [])
+    rock = ["minecraft:stone", "minecraft:andesite", "minecraft:diorite", "minecraft:granite", "minecraft:dripstone_block", "minecraft:calcite",
+            "minecraft:tuff", "minecraft:deepslate"] + [f"{NS}:{b}" for b in ("trans_stone", "trans_deepslate", "trans_granite", "trans_diorite",
+                                                                              "trans_andesite", "trans_dirt", "trans_gravel")]
+    cf("pink_sculk_vein", {"type": "minecraft:multiface_growth", "config": {
+        "block": f"{NS}:pink_sculk_vein", "can_be_placed_on": rock, "can_place_on_ceiling": True, "can_place_on_floor": True,
+        "can_place_on_wall": True, "chance_of_spreading": 1.0, "search_range": 20}})
+    pf("pink_sculk_vein", f"{NS}:pink_sculk_vein", [
+        {"type": "minecraft:count", "count": {"type": "minecraft:uniform", "max_inclusive": 160, "min_inclusive": 120}},
+        {"type": "minecraft:in_square"}, deep(), {"type": "minecraft:biome"}])
+    cf("ore_sculk_gem", {"type": "minecraft:ore", "config": {"discard_chance_on_air_exposure": 0.0, "size": 5, "targets": [
+        {"state": state("sculk_gem_ore"), "target": {"predicate_type": "minecraft:tag_match", "tag": f"{NS}:trans_deepslate_ore_replaceables"}}]}})
+    pf("ore_sculk_gem", f"{NS}:ore_sculk_gem", [{"type": "minecraft:count", "count": 9}, {"type": "minecraft:in_square"}, deep(),
+                                                 {"type": "minecraft:biome"}])
+
+    # ---- the Cloud Realm
+    cf("wool_cloud", {"type": f"{NS}:wool_cloud", "config": {}})
+    pf("wool_clouds", f"{NS}:wool_cloud", [{"type": "minecraft:rarity_filter", "chance": 2}, {"type": "minecraft:in_square"},
+                                            {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform",
+                                                                                          "max_inclusive": {"absolute": 230},
+                                                                                          "min_inclusive": {"absolute": 30}}},
+                                            {"type": "minecraft:biome"}])
+    cf("cloud_tree", {"type": "minecraft:tree", "config": {
+        "below_trunk_provider": {"type": "minecraft:rule_based_state_provider", "rules": [{
+            "if_true": {"type": "minecraft:not", "predicate": {"type": "minecraft:matching_block_tag", "tag": "minecraft:cannot_replace_below_tree_trunk"}},
+            "then": simple(state("cloud_soil"))}]},
+        "decorators": [],
+        "foliage_placer": {"type": "minecraft:blob_foliage_placer", "height": 3, "offset": 0, "radius": 3},
+        "foliage_provider": simple(state("minecraft:white_wool")),
+        "ignore_vines": True,
+        "minimum_size": {"type": "minecraft:two_layers_feature_size", "limit": 1, "lower_size": 0, "upper_size": 1},
+        "trunk_placer": straight(4, 2, 1),
+        "trunk_provider": simple(state("minecraft:pale_oak_log", axis="y"))}})
+    oak_check = {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:would_survive",
+                                                                           "state": state("minecraft:oak_sapling", stage=0)}}
+    pf("cloud_trees", f"{NS}:cloud_tree", [{"type": "minecraft:count", "count": weighted_count([(0, 6), (1, 3), (2, 1)])},
+                                            {"type": "minecraft:in_square"}, {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"},
+                                            oak_check, {"type": "minecraft:biome"}])
+    cf("cloud_flowers", {"type": "minecraft:simple_block", "config": {"to_place": {"type": "minecraft:weighted_state_provider", "entries": [
+        {"data": state("minecraft:lily_of_the_valley"), "weight": 3}, {"data": state("minecraft:oxeye_daisy"), "weight": 3},
+        {"data": state("minecraft:white_tulip"), "weight": 2}, {"data": state("minecraft:azure_bluet"), "weight": 2},
+        {"data": state("pearl_daisy"), "weight": 2}]}}})
+    on_top = [{"type": "minecraft:in_square"}, {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"}, {"type": "minecraft:biome"}]
+    pf("cloud_flowers", f"{NS}:cloud_flowers", [{"type": "minecraft:count", "count": 3}] + on_top + patch(32))
+    # Vanilla's short grass, white in the Cloud Isles' grass colour.
+    pf("cloud_grass", "minecraft:grass", [{"type": "minecraft:count", "count": 6}] + on_top + patch(32, 7, 3))
+
+
+def generate_cloud_realm():
+    """The Cloud Realm: vanilla's floating-islands terrain in calcite under cloud grass and soil, one biome (Cloud Isles),
+    and a bright, still, white sky (fixed time, so no nights)."""
+    with open(os.path.join(HERE, "vanilla_extra", "templates", "worldgen", "noise_settings_floating_islands.json"), encoding="utf-8") as f:
+        settings = json.load(f)
+    settings["default_block"] = state("minecraft:calcite")
+    settings["surface_rule"] = seq(cond(floor(), block("cloud_grass_block")), cond(floor(add_surface_depth=True), block("cloud_soil")))
+    write(os.path.join(WG, "noise_settings", "cloud_realm.json"), settings)
+    write(os.path.join(DATA, NS, "dimension", "cloud_realm.json"), {"type": f"{NS}:cloud_realm", "generator": {
+        "type": "minecraft:noise", "settings": f"{NS}:cloud_realm",
+        "biome_source": {"type": "minecraft:fixed", "biome": f"{NS}:cloud_isles"}}})
+    write(os.path.join(DATA, NS, "dimension_type", "cloud_realm.json"), {
+        "ambient_light": 0.5,
+        "attributes": {
+            "minecraft:audio/background_music": {"default": {"max_delay": 12000, "min_delay": 6000, "sound": "minecraft:music.overworld.meadow"}},
+            "minecraft:gameplay/bed_rule": {"can_set_spawn": "always", "can_sleep": "never",
+                                            "error_message": {"translate": "block.minecraft.bed.no_sleep"}},
+            "minecraft:gameplay/nether_portal_spawns_piglin": False,
+            "minecraft:gameplay/respawn_anchor_works": False,
+            "minecraft:visual/ambient_light_color": "#c8d4e8",
+            "minecraft:visual/cloud_color": "#ffffffff",
+            "minecraft:visual/cloud_height": 24.0,
+            "minecraft:visual/fog_color": "#f6f9ff",
+            "minecraft:visual/sky_color": "#d9ecff",
+        },
+        "coordinate_scale": 1.0,
+        "default_clock": "minecraft:overworld",
+        "has_ceiling": False,
+        "has_ender_dragon_fight": False,
+        "has_fixed_time": True,
+        "has_skylight": True,
+        "height": 256,
+        "infiniburn": "#minecraft:infiniburn_overworld",
+        "logical_height": 256,
+        "min_y": 0,
+        "monster_spawn_block_light_limit": 0,
+        "monster_spawn_light_level": 0,
+        "timelines": "#minecraft:universal",
+    })
+    # White rabbits hop about the Cloud Isles (rabbit colours come from biome tags, not variants).
+    write(os.path.join(DATA, "minecraft", "tags", "worldgen", "biome", "spawns_white_rabbits.json"),
+          {"replace": False, "values": [f"{NS}:cloud_isles"]})
+
+
 def main():
     remove_stale()
     generate_features()
+    generate_round9_features()
     generate_biomes()
     sort_biome_features()
     generate_noise_settings()
     n = generate_dimension()
     generate_dimension_type()
     generate_fairy_dimension()
+    generate_cloud_realm()
     generate_timeline()
     print(f"World generation written ({n} biome-source entries).")
 

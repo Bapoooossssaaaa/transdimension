@@ -8,8 +8,10 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 import dev.goober.transdimension.TransDimension;
 import dev.goober.transdimension.world.FairyIslandFeature;
 import dev.goober.transdimension.world.HeartTreeFeature;
+import dev.goober.transdimension.world.PinkSculkPatchFeature;
 import dev.goober.transdimension.world.TransCoralReefFeature;
 import dev.goober.transdimension.world.TransDungeonFeature;
+import dev.goober.transdimension.world.WoolCloudFeature;
 
 /** The mod's own world generation feature types; their configured and placed features are JSON (generate_worldgen.py). */
 public final class ModFeatures {
@@ -23,6 +25,12 @@ public final class ModFeatures {
 	/** The realm's dungeons, in place of vanilla's cobblestone monster rooms. */
 	public static final Feature<NoneFeatureConfiguration> TRANS_DUNGEON = Registry.register(BuiltInRegistries.FEATURE,
 			TransDimension.id("trans_dungeon"), new TransDungeonFeature(NoneFeatureConfiguration.CODEC));
+	/** Patches of pink sculk over the pink deep dark's cave walls, with sensors, shriekers and catalysts. */
+	public static final Feature<NoneFeatureConfiguration> PINK_SCULK_PATCH = Registry.register(BuiltInRegistries.FEATURE,
+			TransDimension.id("pink_sculk_patch"), new PinkSculkPatchFeature(NoneFeatureConfiguration.CODEC));
+	/** The Cloud Realm's clouds of white wool. */
+	public static final Feature<NoneFeatureConfiguration> WOOL_CLOUD = Registry.register(BuiltInRegistries.FEATURE,
+			TransDimension.id("wool_cloud"), new WoolCloudFeature(NoneFeatureConfiguration.CODEC));
 
 	private ModFeatures() {
 	}

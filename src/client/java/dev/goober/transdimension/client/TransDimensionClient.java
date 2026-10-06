@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.block.FluidModel;
 import net.minecraft.client.renderer.entity.BoatRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
+import net.minecraft.client.renderer.entity.WardenRenderer;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.BlockPos;
@@ -37,12 +38,15 @@ import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.fabric.api.resource.v1.reloader.ResourceReloaderKeys;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.client.entity.CloudyModel;
+import dev.goober.transdimension.client.entity.CloudyRenderer;
 import dev.goober.transdimension.client.entity.FairyLightModel;
 import dev.goober.transdimension.client.entity.FairyRenderer;
 import dev.goober.transdimension.client.entity.FairyCrystalSpikeRenderer;
 import dev.goober.transdimension.client.entity.MaddieRenderer;
 import dev.goober.transdimension.client.entity.PastelSlimeModel;
 import dev.goober.transdimension.client.entity.PastelSlimeRenderer;
+import dev.goober.transdimension.client.entity.SculkPersonRenderer;
 import dev.goober.transdimension.client.entity.SeatRenderer;
 import dev.goober.transdimension.client.entity.SillyCatModel;
 import dev.goober.transdimension.client.entity.SillyCatRenderer;
@@ -126,6 +130,16 @@ public class TransDimensionClient implements ClientModInitializer {
 		// The invisible seat you ride while sitting on furniture.
 		EntityRenderers.register(ModEntities.SEAT, SeatRenderer::new);
 
+		// The pink deep dark: the friendly warden (vanilla's renderer; TransRecolor makes it pink in the realm), the sculk
+		// people, and vanilla's sculk effects drawn in pink in the realm.
+		EntityRenderers.register(ModEntities.PINK_WARDEN, WardenRenderer::new);
+		ModelLayerRegistry.registerModelLayer(SculkPersonRenderer.LAYER, SculkPersonRenderer::createLayer);
+		EntityRenderers.register(ModEntities.SCULK_PERSON, SculkPersonRenderer::new);
+		PinkSculkParticles.register();
+		// The Cloud Realm's Cloudies.
+		ModelLayerRegistry.registerModelLayer(CloudyRenderer.LAYER, CloudyModel::createLayer);
+		EntityRenderers.register(ModEntities.CLOUDY, CloudyRenderer::new);
+
 		// Trans boats use vanilla's boat models with our textures.
 		ModelLayerRegistry.registerModelLayer(TRANS_BOAT_LAYER, BoatModel::createBoatModel);
 		ModelLayerRegistry.registerModelLayer(TRANS_CHEST_BOAT_LAYER, BoatModel::createChestBoatModel);
@@ -174,8 +188,9 @@ public class TransDimensionClient implements ClientModInitializer {
 			boolean inRealm = TransDimension.TRANS_REALM.equals(dimension) || inFairyRealm;
 
 			if (!Objects.equals(dimension, lastDimension)) {
-				// The intro plays on arriving in the Trans Realm from outside, not on going to or coming back from the Fairy Realm.
-				boolean cameFromRealms = TransDimension.TRANS_REALM.equals(lastDimension) || TransDimension.FAIRY_REALM.equals(lastDimension);
+				// The intro plays on arriving in the Trans Realm from outside, not on coming back from the Fairy or Cloud Realm.
+				boolean cameFromRealms = TransDimension.TRANS_REALM.equals(lastDimension) || TransDimension.FAIRY_REALM.equals(lastDimension)
+						|| TransDimension.CLOUD_REALM.equals(lastDimension);
 				if (TransDimension.TRANS_REALM.equals(dimension) && !cameFromRealms) {
 					TransIntroOverlay.start();
 				}

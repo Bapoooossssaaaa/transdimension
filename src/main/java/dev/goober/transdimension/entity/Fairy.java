@@ -34,6 +34,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import dev.goober.transdimension.registry.ModItems;
+import dev.goober.transdimension.world.PinkDeepDark;
 
 /**
  * A wild fairy: a little glowing cube with fluttering wings, like the light in a Fairy Jar, that drifts about the Trans
@@ -53,6 +54,7 @@ public class Fairy extends PathfinderMob {
 	public static final int[] COLOURS = {0x5BCEFA, 0xF5A9B8, 0xFFFFFF};
 	/** Fairies keep at least this far apart, which keeps them rare. */
 	public static final int SPACING = 48;
+	public static final int PINK_DEEP_DARK_SPACING = 14;
 	private static final EntityDataAccessor<Integer> COLOUR = SynchedEntityData.defineId(Fairy.class, EntityDataSerializers.INT);
 
 	private boolean colourRolled;
@@ -72,11 +74,15 @@ public class Fairy extends PathfinderMob {
 				.add(Attributes.FLYING_SPEED, 0.3);
 	}
 
-	/** Natural spawns: one try in fifteen succeeds, and only with no other fairy nearby. */
+	/**
+	 * Natural spawns: one try in fifteen succeeds, and only with no other fairy nearby. Fairies love the pink deep dark:
+	 * down there one try in three succeeds and they only keep {@link #PINK_DEEP_DARK_SPACING} blocks apart.
+	 */
 	public static boolean checkFairySpawnRules(EntityType<? extends Mob> type, LevelAccessor level, EntitySpawnReason reason, BlockPos pos,
 			RandomSource random) {
-		return random.nextInt(15) == 0 && Mob.checkMobSpawnRules(type, level, reason, pos, random)
-				&& level.getEntitiesOfClass(Fairy.class, new AABB(pos).inflate(SPACING)).isEmpty();
+		boolean pinkDeepDark = PinkDeepDark.isPinkDeepDark(level, pos);
+		return random.nextInt(pinkDeepDark ? 3 : 15) == 0 && Mob.checkMobSpawnRules(type, level, reason, pos, random)
+				&& level.getEntitiesOfClass(Fairy.class, new AABB(pos).inflate(pinkDeepDark ? PINK_DEEP_DARK_SPACING : SPACING)).isEmpty();
 	}
 
 	@Override

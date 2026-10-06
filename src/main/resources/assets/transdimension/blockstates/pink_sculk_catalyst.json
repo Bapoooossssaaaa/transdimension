@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "bloom=false": {
+      "model": "transdimension:block/pink_sculk_catalyst"
+    },
+    "bloom=true": {
+      "model": "transdimension:block/pink_sculk_catalyst_bloom"
+    }
+  }
+}

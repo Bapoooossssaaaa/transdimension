@@ -214,6 +214,22 @@ public final class ModItems {
 	public static final Item FAIRY_SPAWN_EGG = register("fairy_spawn_egg", SpawnEggItem::new,
 			new Item.Properties().spawnEgg(ModEntities.FAIRY));
 
+	// ---------------------------------------------------------------- the pink deep dark
+	/** The pink deep dark's gem, mined from sculk gem ore: sculk people take it as money, like emeralds. */
+	public static final Item SCULK_GEM = register("sculk_gem", Item::new, new Item.Properties()
+			.component(DataComponents.LORE, lore("item.transdimension.sculk_gem.lore")));
+	/** Found in pink ancient city chests: set one on every stand of the ritual circle to open the city's gate. */
+	public static final Item RITUAL_CANDLE = register("ritual_candle", Item::new, new Item.Properties().rarity(Rarity.UNCOMMON)
+			.component(DataComponents.LORE, lore("item.transdimension.ritual_candle.lore", "item.transdimension.ritual_candle.lore2")));
+	public static final Item PINK_WARDEN_SPAWN_EGG = register("pink_warden_spawn_egg", SpawnEggItem::new,
+			new Item.Properties().spawnEgg(ModEntities.PINK_WARDEN));
+	public static final Item SCULK_PERSON_SPAWN_EGG = register("sculk_person_spawn_egg", SpawnEggItem::new,
+			new Item.Properties().spawnEgg(ModEntities.SCULK_PERSON));
+
+	// ---------------------------------------------------------------- the Cloud Realm
+	public static final Item CLOUDY_SPAWN_EGG = register("cloudy_spawn_egg", SpawnEggItem::new,
+			new Item.Properties().spawnEgg(ModEntities.CLOUDY));
+
 	// ---------------------------------------------------------------- boats
 	public static final Item TRANS_BOAT = register("trans_boat",
 			properties -> new BoatItem(ModEntities.TRANS_BOAT, properties), new Item.Properties().stacksTo(1));

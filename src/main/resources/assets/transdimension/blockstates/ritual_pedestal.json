@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "candle=false": {
+      "model": "transdimension:block/ritual_pedestal"
+    },
+    "candle=true": {
+      "model": "transdimension:block/ritual_pedestal_lit"
+    }
+  }
+}

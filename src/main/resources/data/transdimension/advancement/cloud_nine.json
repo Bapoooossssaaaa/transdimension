@@ -1,0 +1,37 @@
+{
+  "parent": "transdimension:sky_portal",
+  "criteria": {
+    "ride": {
+      "trigger": "minecraft:started_riding",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:vehicle": {
+                "minecraft:entity_type": "transdimension:cloudy"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:cloudy_spawn_egg"
+    },
+    "title": {
+      "translate": "advancements.transdimension.cloud_nine.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.cloud_nine.description"
+    }
+  },
+  "requirements": [
+    [
+      "ride"
+    ]
+  ]
+}

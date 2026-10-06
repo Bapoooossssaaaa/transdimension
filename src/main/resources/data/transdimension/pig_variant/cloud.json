@@ -1,0 +1,13 @@
+{
+  "asset_id": "transdimension:entity/pig/cloud_pig",
+  "baby_asset_id": "transdimension:entity/pig/cloud_pig_baby",
+  "spawn_conditions": [
+    {
+      "condition": {
+        "type": "minecraft:biome",
+        "biomes": "transdimension:cloud_isles"
+      },
+      "priority": 2
+    }
+  ]
+}

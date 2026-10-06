@@ -1,0 +1,28 @@
+{
+  "parent": "transdimension:pink_deep_dark",
+  "criteria": {
+    "entered": {
+      "trigger": "minecraft:changed_dimension",
+      "conditions": {
+        "to": "transdimension:cloud_realm"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:ritual_candle"
+    },
+    "title": {
+      "translate": "advancements.transdimension.sky_portal.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.sky_portal.description"
+    },
+    "frame": "goal"
+  },
+  "requirements": [
+    [
+      "entered"
+    ]
+  ]
+}

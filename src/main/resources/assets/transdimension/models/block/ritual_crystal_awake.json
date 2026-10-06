@@ -1,0 +1,243 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "transdimension:block/ritual_crystal_awake",
+    "crystal": "transdimension:block/ritual_crystal_awake"
+  },
+  "elements": [
+    {
+      "from": [
+        5,
+        2,
+        5
+      ],
+      "to": [
+        11,
+        14,
+        11
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            5,
+            5,
+            11,
+            11
+          ],
+          "texture": "#crystal"
+        },
+        "up": {
+          "uv": [
+            5,
+            5,
+            11,
+            11
+          ],
+          "texture": "#crystal"
+        },
+        "north": {
+          "uv": [
+            5,
+            2,
+            11,
+            14
+          ],
+          "texture": "#crystal"
+        },
+        "south": {
+          "uv": [
+            5,
+            2,
+            11,
+            14
+          ],
+          "texture": "#crystal"
+        },
+        "west": {
+          "uv": [
+            5,
+            2,
+            11,
+            14
+          ],
+          "texture": "#crystal"
+        },
+        "east": {
+          "uv": [
+            5,
+            2,
+            11,
+            14
+          ],
+          "texture": "#crystal"
+        }
+      },
+      "light_emission": 15,
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "y",
+        "angle": 45
+      }
+    },
+    {
+      "from": [
+        3,
+        0,
+        6
+      ],
+      "to": [
+        6,
+        7,
+        9
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            3,
+            6,
+            6,
+            9
+          ],
+          "texture": "#crystal"
+        },
+        "up": {
+          "uv": [
+            3,
+            6,
+            6,
+            9
+          ],
+          "texture": "#crystal"
+        },
+        "north": {
+          "uv": [
+            3,
+            9,
+            6,
+            16
+          ],
+          "texture": "#crystal"
+        },
+        "south": {
+          "uv": [
+            3,
+            9,
+            6,
+            16
+          ],
+          "texture": "#crystal"
+        },
+        "west": {
+          "uv": [
+            6,
+            9,
+            9,
+            16
+          ],
+          "texture": "#crystal"
+        },
+        "east": {
+          "uv": [
+            6,
+            9,
+            9,
+            16
+          ],
+          "texture": "#crystal"
+        }
+      },
+      "light_emission": 15,
+      "rotation": {
+        "origin": [
+          4.5,
+          0,
+          7.5
+        ],
+        "axis": "z",
+        "angle": 22.5
+      }
+    },
+    {
+      "from": [
+        10,
+        0,
+        7
+      ],
+      "to": [
+        13,
+        6,
+        10
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            10,
+            7,
+            13,
+            10
+          ],
+          "texture": "#crystal"
+        },
+        "up": {
+          "uv": [
+            10,
+            7,
+            13,
+            10
+          ],
+          "texture": "#crystal"
+        },
+        "north": {
+          "uv": [
+            10,
+            10,
+            13,
+            16
+          ],
+          "texture": "#crystal"
+        },
+        "south": {
+          "uv": [
+            10,
+            10,
+            13,
+            16
+          ],
+          "texture": "#crystal"
+        },
+        "west": {
+          "uv": [
+            7,
+            10,
+            10,
+            16
+          ],
+          "texture": "#crystal"
+        },
+        "east": {
+          "uv": [
+            7,
+            10,
+            10,
+            16
+          ],
+          "texture": "#crystal"
+        }
+      },
+      "light_emission": 15,
+      "rotation": {
+        "origin": [
+          11.5,
+          0,
+          8.5
+        ],
+        "axis": "z",
+        "angle": -22.5
+      }
+    }
+  ]
+}

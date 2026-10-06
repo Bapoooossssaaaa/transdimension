@@ -1,0 +1,12 @@
+{
+  "gives": {
+    "id": "minecraft:netherite_ingot"
+  },
+  "max_uses": 3.0,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "transdimension:sculk_gem",
+    "count": 24.0
+  },
+  "xp": 15.0
+}

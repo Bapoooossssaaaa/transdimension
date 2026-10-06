@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:sculk_person/2/sculk_gem_netherite_scrap",
+    "transdimension:sculk_person/2/sculk_gem_recovery_compass",
+    "transdimension:sculk_person/2/sculk_gem_golden_apple",
+    "transdimension:sculk_person/2/sculk_gem_ritual_candle"
+  ]
+}

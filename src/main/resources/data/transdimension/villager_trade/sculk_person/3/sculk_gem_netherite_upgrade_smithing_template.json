@@ -1,0 +1,12 @@
+{
+  "gives": {
+    "id": "minecraft:netherite_upgrade_smithing_template"
+  },
+  "max_uses": 3.0,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "transdimension:sculk_gem",
+    "count": 16.0
+  },
+  "xp": 10.0
+}

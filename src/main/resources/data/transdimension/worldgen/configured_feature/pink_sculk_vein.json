@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:multiface_growth",
+  "config": {
+    "block": "transdimension:pink_sculk_vein",
+    "can_be_placed_on": [
+      "minecraft:stone",
+      "minecraft:andesite",
+      "minecraft:diorite",
+      "minecraft:granite",
+      "minecraft:dripstone_block",
+      "minecraft:calcite",
+      "minecraft:tuff",
+      "minecraft:deepslate",
+      "transdimension:trans_stone",
+      "transdimension:trans_deepslate",
+      "transdimension:trans_granite",
+      "transdimension:trans_diorite",
+      "transdimension:trans_andesite",
+      "transdimension:trans_dirt",
+      "transdimension:trans_gravel"
+    ],
+    "can_place_on_ceiling": true,
+    "can_place_on_floor": true,
+    "can_place_on_wall": true,
+    "chance_of_spreading": 1.0,
+    "search_range": 20
+  }
+}

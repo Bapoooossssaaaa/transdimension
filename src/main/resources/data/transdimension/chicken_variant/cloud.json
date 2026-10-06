@@ -1,0 +1,13 @@
+{
+  "asset_id": "transdimension:entity/chicken/cloud_chicken",
+  "baby_asset_id": "transdimension:entity/chicken/cloud_chicken_baby",
+  "spawn_conditions": [
+    {
+      "condition": {
+        "type": "minecraft:biome",
+        "biomes": "transdimension:cloud_isles"
+      },
+      "priority": 2
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "transdimension:block/pink_sculk_sensor",
+  "textures": {
+    "tendrils": "transdimension:block/pink_sculk_sensor_tendril_active"
+  }
+}

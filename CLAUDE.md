@@ -6,8 +6,8 @@ Claude Code loads this file at the start of every session, so it stays short. Fo
 
 Fabric mod for **Minecraft Java 26.2**: a trans-flag dimension (the Trans Realm). Mod id `transdimension`, package `dev.goober.transdimension`. Fabric Loader 0.19.5, Fabric API 0.161.0+26.2, Loom 1.18, Java 25. Minecraft 26.x is unobfuscated, so it uses Mojang's names and has no mappings. `README.md` lists every feature.
 
-- `src/main`: common code. `registry/` (ModBlocks, ModItems, ModEntities, ModAttachments...), `block/` (incl. the fairy portal, altar and jar), `entity/` (Maddie, SillyCat, TransMagicBolt, TransFish, TransEnderman, PastelSlime, TransFairy, FairyCrystalSpike, Fairy, Seat, CrystalEye), `item/` (TransWings, TransWandItem, TransCrystalPearlItem, BottledFairy), `network/`, `event/RealmEvents`, `world/` (PlushLedger, FairyRealm, FairyRealmState, FairyCutscene, FairyIslandFeature, HeartTreeFeature, TransCoralReefFeature), `teleport/`, `mixin/EnderManMixin`.
-- `src/client`: `TransDimensionClient`, `HeartClouds`, `TransRecolor`, `TransIntroOverlay`, `wings/`, `FairyCutsceneOverlay`, `TransFairyBossBar`, `screen/MaddieDialogueScreen`, `entity/` models and renderers, `mixin/` (AvatarRendererMixin, TextureManagerMixin).
+- `src/main`: common code. `registry/` (ModBlocks, ModItems, ModEntities, ModAttachments...), `block/` (incl. the fairy portal, altar and jar), `entity/` (Maddie, SillyCat, TransMagicBolt, TransFish, TransEnderman, PastelSlime, TransFairy, FairyCrystalSpike, Fairy, Seat, CrystalEye, PinkWarden, SculkPerson, Cloudy), `item/` (TransWings, TransWandItem, TransCrystalPearlItem, BottledFairy), `network/`, `event/RealmEvents`, `world/` (PlushLedger, FairyRealm, FairyRealmState, FairyCutscene, FairyIslandFeature, HeartTreeFeature, TransCoralReefFeature, PinkDeepDark, PinkSculkPatchFeature, SculkRitual, CloudRealm, WoolCloudFeature), `teleport/`, `mixin/EnderManMixin`.
+- `src/client`: `TransDimensionClient`, `HeartClouds`, `TransRecolor`, `TransIntroOverlay`, `wings/`, `FairyCutsceneOverlay`, `TransFairyBossBar`, `PinkSculkParticles`, `screen/MaddieDialogueScreen`, `entity/` models and renderers, `mixin/` (AvatarRendererMixin, TextureManagerMixin).
 - `extras/BSL_Trans_Realm.txt`: a preset for BSL Shaders (not part of the jar).
 
 ## Generated files: edit the scripts, not the JSON
@@ -22,7 +22,8 @@ Most assets and data are written by Python scripts. Change the script, rerun it,
 6. `tools/generate_fairy_realm.py`: the Fairy Sanctum and the Fairy Realm's arena island (its `ARENA_*` numbers must match `FairyRealm.java`)
 7. `tools/generate_camps.py`: trans camps (26.3's abandoned camp, converted from `tools/vanilla_extra/structures/abandoned_camp/`)
 8. `tools/generate_mermaid_ruins.py`: the mermaid ruins under the realm's seas
-9. `tools/validate_resources.py <mcmeta>/registries/data.json`: must report 0 errors
+9. `tools/generate_ancient_city.py`: the pink ancient city (vanilla's, converted from `tools/vanilla_extra/`; its ritual positions must match `SculkRitual.java`)
+10. `tools/validate_resources.py <mcmeta>/registries/data.json`: must report 0 errors
 
 You only need to rerun the script you changed (plus the validator). The validator's vanilla id check needs misode/mcmeta's 26.2 summary branch; without it, run the script with no argument.
 
@@ -37,6 +38,7 @@ The cloud environment can't download Minecraft or Fabric, so **the owner builds 
 
 ## Status (latest first)
 
+- **Round 9 is written, not compiled yet**: better Fairy Portal frame textures, the pink deep dark (pink sculk, sculk gem ore, pink sculk particles in the realm, darkness becomes night vision), the friendly pink warden (`PinkWarden extends Warden`), sculk people (`SculkPerson extends Villager`, data trades), the pink ancient city with the candle ritual and the Sky Portal (`SculkRitual`), and the Cloud Realm (floating islands, wool clouds, Cloudies you can ride, baby happy ghasts, white farm animal variants). HANDOFF's "Unverified APIs (round 9)" lists what to check.
 - **Round 8 is written, not compiled yet**: the jar's fairy is now part of the jar's block model (its block entity renderer never showed), no Fairy Realm intro, the altar ritual and Maddie's death cutscene (`world/FairyCutscene`), the client's trans boss bar (`TransFairyBossBar`), thrown Crystal Pearls (`entity/CrystalEye`) instead of sanctum maps, diamonds instead of crystals in chests, Crystal Alloy and the Crystal Upgrade template (mermaid ruins, or crafted) for crystal gear, and pastel slime fixes. HANDOFF's "Unverified APIs (round 8)" lists what to check.
 - **Round 7 is written, not compiled yet**: trans sea pickles on the reefs, trans cave vines and Trans Glow Berries, softer trans gravel, the trans prismarine family and trans sea lanterns (in the mermaid ruins), pink obsidian (`LiquidBlockMixin`), and the Bottled Fairy's own trans-coloured rescue (`item/BottledFairy`, on Fabric's `ALLOW_DEATH`; only from bottling a fairy). HANDOFF's "Unverified APIs (round 7)" lists what to check.
 - **Round 6 fixes are written; the first build failed only on `PinkFireBlock` (private fire odds, now answered in `FireBlockMixin`), so the rest of `src/main` compiles. The client hasn't been compiled yet.** Round 6: pink fire in both realms (`PinkFireBlock`, `BaseFireBlockMixin`, `FireBlockMixin`), random slime colours from spawn eggs and `/summon`, the jar fairy drawn cutout again (translucent vanished behind the glass), fairies with one pair of side wings, and recipe-book unlocks (`generate_data.py` writes `advancement/recipes/`, one per recipe). HANDOFF's "Unverified APIs (round 6)" lists what to check.

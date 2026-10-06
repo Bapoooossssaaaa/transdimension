@@ -1,0 +1,35 @@
+{
+  "parent": "transdimension:pink_deep_dark",
+  "criteria": {
+    "trade": {
+      "trigger": "minecraft:villager_trade",
+      "conditions": {
+        "villager": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:entity_type": "transdimension:sculk_person"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "transdimension:sculk_gem"
+    },
+    "title": {
+      "translate": "advancements.transdimension.sculk_trader.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.sculk_trader.description"
+    }
+  },
+  "requirements": [
+    [
+      "trade"
+    ]
+  ]
+}

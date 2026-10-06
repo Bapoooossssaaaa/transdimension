@@ -1,0 +1,12 @@
+{
+  "gives": {
+    "id": "transdimension:ritual_candle"
+  },
+  "max_uses": 8.0,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "transdimension:sculk_gem",
+    "count": 5.0
+  },
+  "xp": 5.0
+}

@@ -1,0 +1,12 @@
+{
+  "gives": {
+    "id": "minecraft:nether_star"
+  },
+  "max_uses": 1.0,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "transdimension:sculk_gem",
+    "count": 48.0
+  },
+  "xp": 30.0
+}

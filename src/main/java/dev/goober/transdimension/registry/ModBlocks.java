@@ -61,6 +61,9 @@ import net.minecraft.world.level.block.LilyPadBlock;
 import net.minecraft.world.level.block.PressurePlateBlock;
 import net.minecraft.world.level.block.RedStoneOreBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.SculkSensorBlock;
+import net.minecraft.world.level.block.SculkShriekerBlock;
+import net.minecraft.world.level.block.SculkVeinBlock;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.ShortDryGrassBlock;
 import net.minecraft.world.level.block.SlabBlock;
@@ -77,6 +80,7 @@ import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.UntintedParticleLeavesBlock;
 import net.minecraft.world.level.block.WallBlock;
+import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
@@ -91,8 +95,12 @@ import dev.goober.transdimension.block.FairyPortalBlock;
 import dev.goober.transdimension.block.FairyPortalFrameBlock;
 import dev.goober.transdimension.block.FurnitureBlock;
 import dev.goober.transdimension.block.PinkFireBlock;
+import dev.goober.transdimension.block.PinkSculkCatalystBlock;
 import dev.goober.transdimension.block.PlushSpotBlock;
 import dev.goober.transdimension.block.PrideOvenBlock;
+import dev.goober.transdimension.block.RitualCrystalBlock;
+import dev.goober.transdimension.block.RitualPedestalBlock;
+import dev.goober.transdimension.block.SkyPortalBlock;
 import dev.goober.transdimension.block.TransBedBlock;
 import dev.goober.transdimension.block.TransCaveVinesBlock;
 import dev.goober.transdimension.block.TransCaveVinesPlantBlock;
@@ -574,6 +582,49 @@ public final class ModBlocks {
 					.lightLevel(state -> 12),
 			new Item.Properties().rarity(Rarity.EPIC).stacksTo(16));
 
+	// ---------------------------------------------------------------- the pink deep dark
+	/** The pink deep dark's living carpet. Drops a little experience, like vanilla sculk. */
+	public static final Block PINK_SCULK = register("pink_sculk", properties -> new DropExperienceBlock(ConstantInt.of(1), properties),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.SCULK).mapColor(MapColor.COLOR_PINK));
+	/** Pink veins creeping over the cave walls round the patches (vanilla's vein block, so it grows like glow lichen). */
+	public static final Block PINK_SCULK_VEIN = register("pink_sculk_vein", SculkVeinBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.SCULK_VEIN).mapColor(MapColor.COLOR_PINK));
+	/**
+	 * Blooms and spreads pink sculk when something dies nearby ({@code PinkDeepDark}). It has no block entity, because
+	 * vanilla's catalyst block entity would spread vanilla's blue sculk.
+	 */
+	public static final Block PINK_SCULK_CATALYST = register("pink_sculk_catalyst", PinkSculkCatalystBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.SCULK_CATALYST).mapColor(MapColor.COLOR_PINK));
+	/** Vanilla's sculk sensor (block and block entity) in pink: it hears vibrations and powers redstone the same way. */
+	public static final Block PINK_SCULK_SENSOR = register("pink_sculk_sensor", SculkSensorBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.SCULK_SENSOR).mapColor(MapColor.COLOR_PINK));
+	/** Vanilla's sculk shrieker in pink. The mod only places it with can_summon=false: it shrieks but never calls a warden. */
+	public static final Block PINK_SCULK_SHRIEKER = register("pink_sculk_shrieker", SculkShriekerBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.SCULK_SHRIEKER).mapColor(MapColor.COLOR_PINK));
+	/** The pink deep dark's gem ore, in trans deepslate. Sculk people trade their wares for its gems. */
+	public static final Block SCULK_GEM_ORE = ore("sculk_gem_ore", UniformInt.of(3, 7), Blocks.DEEPSLATE_EMERALD_ORE);
+
+	// ---------------------------------------------------------------- the candle ritual and the Sky Portal
+	/** A candle stand of the ritual circle in a pink ancient city ({@code SculkRitual}). Unbreakable, like the city's gate. */
+	public static final Block RITUAL_PEDESTAL = register("ritual_pedestal", RitualPedestalBlock::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.DEEPSLATE).strength(-1.0F, 3600000.0F).noLootTable().noOcclusion()
+					.sound(SoundType.DEEPSLATE_BRICKS).lightLevel(state -> state.getValue(RitualPedestalBlock.CANDLE) ? 12 : 0));
+	/** The crystal floating over the ritual circle; it beams the candles' light into the gate. Unbreakable. */
+	public static final Block RITUAL_CRYSTAL = register("ritual_crystal", RitualCrystalBlock::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(-1.0F, 3600000.0F).noLootTable().noOcclusion()
+					.sound(SoundType.AMETHYST).lightLevel(state -> state.getValue(RitualCrystalBlock.AWAKE) ? 15 : 10));
+	/** The white and pink light of an open Sky Portal (the way to the Cloud Realm). */
+	public static final Block SKY_PORTAL = registerWithoutItem("sky_portal", SkyPortalBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.END_PORTAL).mapColor(MapColor.SNOW));
+
+	// ---------------------------------------------------------------- the Cloud Realm
+	/** The Cloud Realm's grass: snow-white blades over pale cloud soil. */
+	public static final Block CLOUD_GRASS_BLOCK = register("cloud_grass_block", Block::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.GRASS_BLOCK).mapColor(MapColor.SNOW));
+	/** The pale soil under the Cloud Realm's grass. */
+	public static final Block CLOUD_SOIL = register("cloud_soil", Block::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.DIRT).mapColor(MapColor.SNOW));
+
 	private ModBlocks() {
 	}
 
@@ -755,6 +806,8 @@ public final class ModBlocks {
 	}
 
 	public static void initialize() {
-		// Static fields do the work; calling this forces class loading at the right time.
+		// Pink sensors and shriekers use vanilla's block entities, which only accept the blocks they were made for.
+		BlockEntityTypes.SCULK_SENSOR.addValidBlock(PINK_SCULK_SENSOR);
+		BlockEntityTypes.SCULK_SHRIEKER.addValidBlock(PINK_SCULK_SHRIEKER);
 	}
 }

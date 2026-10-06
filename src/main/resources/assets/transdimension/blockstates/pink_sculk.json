@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "transdimension:block/pink_sculk"
+      },
+      {
+        "model": "transdimension:block/pink_sculk_mirrored"
+      },
+      {
+        "model": "transdimension:block/pink_sculk",
+        "y": 180
+      },
+      {
+        "model": "transdimension:block/pink_sculk_mirrored",
+        "y": 180
+      }
+    ]
+  }
+}

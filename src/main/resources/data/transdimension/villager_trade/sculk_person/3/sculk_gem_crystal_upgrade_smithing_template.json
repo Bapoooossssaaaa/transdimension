@@ -1,0 +1,12 @@
+{
+  "gives": {
+    "id": "transdimension:crystal_upgrade_smithing_template"
+  },
+  "max_uses": 3.0,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "transdimension:sculk_gem",
+    "count": 12.0
+  },
+  "xp": 10.0
+}

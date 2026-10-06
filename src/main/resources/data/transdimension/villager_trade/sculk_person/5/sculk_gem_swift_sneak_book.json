@@ -1,0 +1,23 @@
+{
+  "additional_wants": {
+    "id": "minecraft:book"
+  },
+  "given_item_modifiers": [
+    {
+      "function": "minecraft:set_enchantments",
+      "enchantments": {
+        "minecraft:swift_sneak": 3.0
+      }
+    }
+  ],
+  "gives": {
+    "id": "minecraft:enchanted_book"
+  },
+  "max_uses": 3.0,
+  "reputation_discount": 0.05,
+  "wants": {
+    "count": 24.0,
+    "id": "transdimension:sculk_gem"
+  },
+  "xp": 30.0
+}

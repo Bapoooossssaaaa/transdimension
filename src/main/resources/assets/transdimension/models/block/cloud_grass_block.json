@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "transdimension:block/cloud_soil",
+    "side": "transdimension:block/cloud_grass_block_side",
+    "top": "transdimension:block/cloud_grass_block_top",
+    "particle": "transdimension:block/cloud_soil"
+  }
+}

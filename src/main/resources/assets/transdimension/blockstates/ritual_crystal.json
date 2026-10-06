@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "awake=false,facing=north": {
+      "model": "transdimension:block/ritual_crystal"
+    },
+    "awake=false,facing=east": {
+      "model": "transdimension:block/ritual_crystal",
+      "y": 90
+    },
+    "awake=false,facing=south": {
+      "model": "transdimension:block/ritual_crystal",
+      "y": 180
+    },
+    "awake=false,facing=west": {
+      "model": "transdimension:block/ritual_crystal",
+      "y": 270
+    },
+    "awake=true,facing=north": {
+      "model": "transdimension:block/ritual_crystal_awake"
+    },
+    "awake=true,facing=east": {
+      "model": "transdimension:block/ritual_crystal_awake",
+      "y": 90
+    },
+    "awake=true,facing=south": {
+      "model": "transdimension:block/ritual_crystal_awake",
+      "y": 180
+    },
+    "awake=true,facing=west": {
+      "model": "transdimension:block/ritual_crystal_awake",
+      "y": 270
+    }
+  }
+}

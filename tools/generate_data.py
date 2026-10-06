@@ -1927,7 +1927,7 @@ BIOMES = {
     "crystal_caves": "Crystal Caves", "pearlwood_forest": "Pearlwood Forest", "bluebell_woods": "Bluebell Woods",
     "twilight_thicket": "Twilight Thicket", "candy_floss_grove": "Candy Floss Grove", "pastel_lush_caves": "Pastel Lush Caves",
     "pride_flower_fields": "Pride Flower Fields", "moonlit_meadow": "Moonlit Meadow", "gumdrop_glade": "Gumdrop Glade",
-    "pastel_reef": "Pastel Reef", "blooming_caverns": "Blooming Caverns",
+    "pastel_reef": "Pastel Reef", "blooming_caverns": "Blooming Caverns", "pink_deep_dark": "Pink Deep Dark",
 }
 
 
@@ -2115,6 +2115,252 @@ def generate_advancements():
     A("fairy_in_a_jar", "fairy_tale_ending", "fairy_jar", "Fairy in a Jar", "Take home a Fairy Jar", {"jar": has("fairy_jar")})
 
 
+# ============================================================================================ round 9
+# The pink deep dark, the candle ritual and the Cloud Realm. (Textures: generate_textures.py round9_textures(); the
+# biome and the Cloud Realm: generate_worldgen.py; the pink ancient cities: generate_ancient_city.py.)
+SCULK_PERSON_TRADES = {
+    # level: [(wants, count, gives, count, max uses, xp)] — sculk gems buy the deep's treasures
+    1: [("sculk_gem", 4, "minecraft:echo_shard", 1, 12, 2), ("sculk_gem", 6, "minecraft:diamond", 2, 12, 2),
+        ("sculk_gem", 2, "minecraft:experience_bottle", 4, 16, 1), ("minecraft:echo_shard", 3, "sculk_gem", 1, 16, 2)],
+    2: [("sculk_gem", 8, "minecraft:netherite_scrap", 1, 8, 5), ("sculk_gem", 10, "minecraft:recovery_compass", 1, 4, 5),
+        ("sculk_gem", 6, "minecraft:golden_apple", 2, 8, 5), ("sculk_gem", 5, "ritual_candle", 1, 8, 5)],
+    3: [("sculk_gem", 14, "minecraft:shulker_shell", 2, 6, 10), ("sculk_gem", 18, "minecraft:totem_of_undying", 1, 3, 10),
+        ("sculk_gem", 16, "minecraft:netherite_upgrade_smithing_template", 1, 3, 10),
+        ("sculk_gem", 12, "crystal_upgrade_smithing_template", 1, 3, 10)],
+    4: [("sculk_gem", 24, "minecraft:netherite_ingot", 1, 3, 15), ("sculk_gem", 20, "minecraft:enchanted_golden_apple", 1, 3, 15),
+        ("sculk_gem", 16, "trans_crystal", 2, 4, 15), ("sculk_gem", 20, "minecraft:music_disc_5", 1, 2, 15)],
+    5: [("sculk_gem", 40, "minecraft:elytra", 1, 2, 30), ("sculk_gem", 32, "minecraft:heavy_core", 1, 2, 30),
+        ("sculk_gem", 48, "minecraft:nether_star", 1, 1, 30)],
+}
+
+
+def generate_sculk_trades():
+    """The sculk people's trades: villager_trade/sculk_person/<level>/*, their tags and one trade set per level."""
+    root = os.path.join(DATA, NS, "villager_trade", "sculk_person")
+    if os.path.isdir(root):
+        import shutil
+        shutil.rmtree(root)
+    for level, trades in SCULK_PERSON_TRADES.items():
+        ids = []
+        for wants, wcount, gives, gcount, uses, xp in trades:
+            trade_name = f"{wants.split(':')[-1]}_{gives.split(':')[-1]}"
+            trade = {"gives": {"id": rid(gives)}, "max_uses": float(uses), "reputation_discount": 0.05, "wants": {"id": rid(wants)},
+                     "xp": float(xp)}
+            if gcount > 1:
+                trade["gives"]["count"] = gcount
+            if wcount > 1:
+                trade["wants"]["count"] = float(wcount)
+            write(os.path.join(root, str(level), f"{trade_name}.json"), trade)
+            ids.append(f"{NS}:sculk_person/{level}/{trade_name}")
+        if level == 5:
+            write(os.path.join(root, "5", "sculk_gem_swift_sneak_book.json"), {
+                "additional_wants": {"id": "minecraft:book"},
+                "given_item_modifiers": [{"function": "minecraft:set_enchantments", "enchantments": {"minecraft:swift_sneak": 3.0}}],
+                "gives": {"id": "minecraft:enchanted_book"}, "max_uses": 3.0, "reputation_discount": 0.05,
+                "wants": {"count": 24.0, "id": rid("sculk_gem")}, "xp": 30.0})
+            ids.append(f"{NS}:sculk_person/5/sculk_gem_swift_sneak_book")
+        write(os.path.join(DATA, NS, "tags", "villager_trade", "sculk_person", f"level_{level}.json"), {"replace": False, "values": ids})
+        write(os.path.join(DATA, NS, "trade_set", "sculk_person", f"level_{level}.json"), {
+            "amount": 3.0 if level < 5 else 2.0, "random_sequence": f"{NS}:trade_set/sculk_person/level_{level}",
+            "trades": f"#{NS}:sculk_person/level_{level}"})
+
+
+def faced_box(frm, to, texture, top=None, light=None):
+    """A model element with every face from one texture (the up face from `top` if given), UVs following its size."""
+    x0, y0, z0 = frm
+    x1, y1, z1 = to
+    faces = {
+        "down": {"uv": [x0, z0, x1, z1], "texture": texture},
+        "up": {"uv": [x0, z0, x1, z1], "texture": top or texture},
+        "north": {"uv": [x0, 16 - y1, x1, 16 - y0], "texture": texture},
+        "south": {"uv": [x0, 16 - y1, x1, 16 - y0], "texture": texture},
+        "west": {"uv": [z0, 16 - y1, z1, 16 - y0], "texture": texture},
+        "east": {"uv": [z0, 16 - y1, z1, 16 - y0], "texture": texture},
+    }
+    e = {"from": list(frm), "to": list(to), "faces": faces}
+    if light:
+        e["light_emission"] = light
+    return e
+
+
+def generate_round9():
+    # ---- pink sculk
+    blockstate("pink_sculk", {"variants": {"": [
+        {"model": f"{NS}:block/pink_sculk"}, {"model": f"{NS}:block/pink_sculk_mirrored"},
+        {"model": f"{NS}:block/pink_sculk", "y": 180}, {"model": f"{NS}:block/pink_sculk_mirrored", "y": 180}]}})
+    model("pink_sculk", {"parent": "minecraft:block/cube_all", "textures": {"all": block_tex("pink_sculk")}})
+    model("pink_sculk_mirrored", {"parent": "minecraft:block/cube_mirrored_all", "textures": {"all": block_tex("pink_sculk")}})
+    item_def("pink_sculk", f"{NS}:block/pink_sculk")
+
+    blockstate("pink_sculk_vein", from_template("sculk_vein", "sculk_vein", "pink_sculk_vein"))
+    model("pink_sculk_vein", {"ambientocclusion": False, "textures": {"particle": block_tex("pink_sculk_vein"), "sculk_vein": block_tex("pink_sculk_vein")},
+                              "elements": [{"from": [0, 0, 0.1], "to": [16, 16, 0.1], "faces": {
+                                  "north": {"uv": [16, 0, 0, 16], "texture": "#sculk_vein"}, "south": {"uv": [0, 0, 16, 16], "texture": "#sculk_vein"}}}]})
+    model("pink_sculk_vein", {"parent": "minecraft:item/generated", "textures": {"layer0": block_tex("pink_sculk_vein")}}, kind="item")
+    item_def("pink_sculk_vein", f"{NS}:item/pink_sculk_vein")
+
+    for bloom in ("", "_bloom"):
+        model(f"pink_sculk_catalyst{bloom}", {"parent": "minecraft:block/cube_bottom_top", "textures": {
+            "bottom": block_tex("pink_sculk_catalyst_bottom"), "side": block_tex(f"pink_sculk_catalyst_side{bloom}"),
+            "top": block_tex(f"pink_sculk_catalyst_top{bloom}")}})
+    blockstate("pink_sculk_catalyst", {"variants": {"bloom=false": {"model": f"{NS}:block/pink_sculk_catalyst"},
+                                                    "bloom=true": {"model": f"{NS}:block/pink_sculk_catalyst_bloom"}}})
+    item_def("pink_sculk_catalyst", f"{NS}:block/pink_sculk_catalyst")
+
+    model("pink_sculk_sensor", {"parent": "minecraft:block/sculk_sensor", "textures": {
+        "bottom": block_tex("pink_sculk_sensor_bottom"), "side": block_tex("pink_sculk_sensor_side"),
+        "tendrils": block_tex("pink_sculk_sensor_tendril_inactive"), "top": block_tex("pink_sculk_sensor_top"),
+        "particle": block_tex("pink_sculk_sensor_bottom")}})
+    model("pink_sculk_sensor_active", {"parent": f"{NS}:block/pink_sculk_sensor", "textures": {
+        "tendrils": block_tex("pink_sculk_sensor_tendril_active")}})
+    blockstate("pink_sculk_sensor", {"variants": {
+        "sculk_sensor_phase=inactive": {"model": f"{NS}:block/pink_sculk_sensor"},
+        "sculk_sensor_phase=active": {"model": f"{NS}:block/pink_sculk_sensor_active"},
+        "sculk_sensor_phase=cooldown": {"model": f"{NS}:block/pink_sculk_sensor_active"}}})
+    item_def("pink_sculk_sensor", f"{NS}:block/pink_sculk_sensor")
+
+    model("pink_sculk_shrieker", {"parent": "minecraft:block/template_sculk_shrieker", "textures": {
+        "bottom": block_tex("pink_sculk_shrieker_bottom"), "side": block_tex("pink_sculk_shrieker_side"),
+        "top": block_tex("pink_sculk_shrieker_top"), "inner_top": block_tex("pink_sculk_shrieker_inner_top"),
+        "particle": block_tex("pink_sculk_shrieker_bottom")}})
+    blockstate("pink_sculk_shrieker", {"variants": {"can_summon=false": {"model": f"{NS}:block/pink_sculk_shrieker"},
+                                                    "can_summon=true": {"model": f"{NS}:block/pink_sculk_shrieker"}}})
+    item_def("pink_sculk_shrieker", f"{NS}:block/pink_sculk_shrieker")
+
+    for block, english, vanilla in (("pink_sculk", "Pink Sculk", "sculk"), ("pink_sculk_vein", "Pink Sculk Vein", "sculk_vein"),
+                                    ("pink_sculk_catalyst", "Pink Sculk Catalyst", "sculk_catalyst"),
+                                    ("pink_sculk_sensor", "Pink Sculk Sensor", "sculk_sensor"),
+                                    ("pink_sculk_shrieker", "Pink Sculk Shrieker", "sculk_shrieker")):
+        name(block, english)
+        mine(block, "hoe")
+        loot_like_vanilla(block, vanilla)
+
+    # ---- sculk gems
+    cube("sculk_gem_ore", "Sculk Gem Ore", drop=None)
+    loot("sculk_gem_ore", loot_ore("sculk_gem_ore", "sculk_gem"))
+    tag("block", "needs_iron_tool", "sculk_gem_ore")
+    simple_item("sculk_gem", "Sculk Gem")
+    NAMES["item.transdimension.sculk_gem.lore"] = "Sculk people trade for these"
+
+    # ---- the candle ritual
+    simple_item("ritual_candle", "Ritual Candle")
+    NAMES["item.transdimension.ritual_candle.lore"] = "Set one on each candle stand of a ritual circle"
+    NAMES["item.transdimension.ritual_candle.lore2"] = "Found in the chests of pink ancient cities"
+    stand = [faced_box((2, 0, 2), (14, 3, 14), "#side", "#top"), faced_box((4, 3, 4), (12, 9, 12), "#side"),
+             faced_box((3, 9, 3), (13, 11, 13), "#side", "#top")]
+    candle = {"from": [6.5, 11, 6.5], "to": [9.5, 16, 9.5], "faces": {
+        "up": {"uv": [0, 6, 3, 9], "texture": "#candle"},
+        **{side: {"uv": [0, 0, 3, 5], "texture": "#candle"} for side in ("north", "south", "west", "east")}}}
+    wick = {"from": [7.5, 16, 7.5], "to": [8.5, 17, 8.5], "faces": {
+        side: {"uv": [1, 7, 2, 8], "texture": "#candle"} for side in ("up", "north", "south", "west", "east")}}
+    stand_tex = {"particle": block_tex("ritual_pedestal_side"), "side": block_tex("ritual_pedestal_side"),
+                 "top": block_tex("ritual_pedestal_top"), "candle": block_tex("ritual_candle")}
+    model("ritual_pedestal", {"parent": "minecraft:block/block", "textures": stand_tex, "elements": stand})
+    model("ritual_pedestal_lit", {"parent": "minecraft:block/block", "textures": stand_tex, "elements": stand + [candle, wick]})
+    blockstate("ritual_pedestal", {"variants": {"candle=false": {"model": f"{NS}:block/ritual_pedestal"},
+                                                "candle=true": {"model": f"{NS}:block/ritual_pedestal_lit"}}})
+    item_def("ritual_pedestal", f"{NS}:block/ritual_pedestal")
+    name("ritual_pedestal", "Ritual Candle Stand")
+
+    def crystal_elements():
+        core = faced_box((5, 2, 5), (11, 14, 11), "#crystal", light=15)
+        core["rotation"] = {"origin": [8, 8, 8], "axis": "y", "angle": 45}
+        left = faced_box((3, 0, 6), (6, 7, 9), "#crystal", light=15)
+        left["rotation"] = {"origin": [4.5, 0, 7.5], "axis": "z", "angle": 22.5}
+        right = faced_box((10, 0, 7), (13, 6, 10), "#crystal", light=15)
+        right["rotation"] = {"origin": [11.5, 0, 8.5], "axis": "z", "angle": -22.5}
+        return [core, left, right]
+    for awake in ("", "_awake"):
+        model(f"ritual_crystal{awake}", {"parent": "minecraft:block/block", "textures": {
+            "particle": block_tex(f"ritual_crystal{awake}"), "crystal": block_tex(f"ritual_crystal{awake}")}, "elements": crystal_elements()})
+    rotation = {"north": 0, "east": 90, "south": 180, "west": 270}
+    variants = {}
+    for awake in ("false", "true"):
+        for facing, y in rotation.items():
+            v = {"model": f"{NS}:block/ritual_crystal" + ("_awake" if awake == "true" else "")}
+            if y:
+                v["y"] = y
+            variants[f"awake={awake},facing={facing}"] = v
+    blockstate("ritual_crystal", {"variants": variants})
+    item_def("ritual_crystal", f"{NS}:block/ritual_crystal")
+    name("ritual_crystal", "Ritual Crystal")
+
+    portal_tex = {"particle": block_tex("sky_portal"), "portal": translucent("sky_portal")}
+    model("sky_portal_ns", {"textures": portal_tex, "elements": [{"from": [0, 0, 6], "to": [16, 16, 10], "light_emission": 15, "faces": {
+        "north": {"uv": [0, 0, 16, 16], "texture": "#portal"}, "south": {"uv": [0, 0, 16, 16], "texture": "#portal"}}}]})
+    model("sky_portal_ew", {"textures": portal_tex, "elements": [{"from": [6, 0, 0], "to": [10, 16, 16], "light_emission": 15, "faces": {
+        "east": {"uv": [0, 0, 16, 16], "texture": "#portal"}, "west": {"uv": [0, 0, 16, 16], "texture": "#portal"}}}]})
+    blockstate("sky_portal", {"variants": {"axis=x": {"model": f"{NS}:block/sky_portal_ns"}, "axis=z": {"model": f"{NS}:block/sky_portal_ew"}}})
+    name("sky_portal", "Sky Portal")
+
+    NAMES.update({
+        "message.transdimension.ritual.candles": "✦ %s of %s candles burn round the circle ✦",
+        "message.transdimension.ritual.begin": "✦ The candles flare, and the crystal drinks in their light... ✦",
+        "message.transdimension.ritual.opened": "✦ The gate opens onto the sky ✦",
+        "message.transdimension.ritual.open": "✦ The gate already stands open ✦",
+        "message.transdimension.ritual.blocked": "✦ Something fills the middle of the gate ✦",
+        "message.transdimension.ritual.broken": "✦ The gate's frame is broken, and the light spills away ✦",
+    })
+
+    # ---- the Cloud Realm's ground
+    blockstate("cloud_grass_block", {"variants": {"": [{"model": f"{NS}:block/cloud_grass_block", **({"y": y} if y else {})} for y in (0, 90, 180, 270)]}})
+    model("cloud_grass_block", {"parent": "minecraft:block/cube_bottom_top", "textures": {
+        "bottom": block_tex("cloud_soil"), "side": block_tex("cloud_grass_block_side"), "top": block_tex("cloud_grass_block_top"),
+        "particle": block_tex("cloud_soil")}})
+    item_def("cloud_grass_block", f"{NS}:block/cloud_grass_block")
+    name("cloud_grass_block", "Cloud Grass Block")
+    mine("cloud_grass_block", "shovel")
+    loot("cloud_grass_block", loot_silk_or("cloud_grass_block", "cloud_soil"))
+    cube("cloud_soil", "Cloud Soil", tool="shovel")
+    for b in ("cloud_grass_block", "cloud_soil"):
+        tag("block", "dirt", b)
+        tag("item", "dirt", b)
+    for t in ("animals_spawnable_on", "rabbits_spawnable_on", "wolves_spawnable_on", "valid_spawn", "grass_blocks"):
+        tag("block", t, "cloud_grass_block")
+    tag("item", "grass_blocks", "cloud_grass_block")
+    tag("block", "sniffer_diggable_block", "cloud_soil", "cloud_grass_block")
+    # Pink fire on the pink ancient cities' soul sand burns forever, like soul fire (the realm's dimension type uses this).
+    tag("block", "infiniburn_trans_realm", "#minecraft:infiniburn_overworld", "minecraft:soul_sand", "minecraft:soul_soil", ns=NS)
+
+    # ---- creatures
+    for egg, english in (("pink_warden_spawn_egg", "Pink Warden Spawn Egg"), ("sculk_person_spawn_egg", "Sculk Person Spawn Egg"),
+                         ("cloudy_spawn_egg", "Cloudy Spawn Egg")):
+        simple_item(egg, english)
+    NAMES.update({"entity.transdimension.pink_warden": "Pink Warden", "entity.transdimension.sculk_person": "Sculk Person",
+                  "entity.transdimension.cloudy": "Cloudy", "entity.transdimension.villager.sculk_person": "Sculk Person",
+                  "biome.transdimension.cloud_isles": "Cloud Isles"})
+    entity_loot("pink_warden", [{"entries": [{"type": "minecraft:item", "name": rid("pink_sculk_catalyst")}], "rolls": 1.0}])
+    entity_loot("sculk_person", [])
+    entity_loot("cloudy", [{"entries": [counted("minecraft:white_wool", 1, 2)], "rolls": 1.0}])
+    generate_sculk_trades()
+    # The Cloud Realm's white farm animals: data-driven variants that spawn only in its biome.
+    for kind in ("pig", "cow", "chicken"):
+        write(os.path.join(DATA, NS, f"{kind}_variant", "cloud.json"), {
+            "asset_id": f"{NS}:entity/{kind}/cloud_{kind}", "baby_asset_id": f"{NS}:entity/{kind}/cloud_{kind}_baby",
+            "spawn_conditions": [{"condition": {"type": "minecraft:biome", "biomes": f"{NS}:cloud_isles"}, "priority": 2}]})
+
+    # ---- pink sculk particles (their sprites; see ModParticles)
+    for particle, frames in (("pink_sculk_soul", 11), ("pink_sonic_boom", 16), ("pink_shriek", 0), ("pink_vibration", 0)):
+        textures = [f"{NS}:{particle}_{i}" for i in range(frames)] if frames else [f"{NS}:{particle}"]
+        write(os.path.join(ASSETS, "particles", f"{particle}.json"), {"textures": textures})
+
+
+def generate_round9_advancements():
+    A = advancement
+    A("pink_deep_dark", "crystal_caves", "pink_sculk", "Pink Silence", "Find the Pink Deep Dark, under the realm's mountains",
+      {"pink_deep_dark": in_biome("pink_deep_dark")})
+    A("sky_portal", "pink_deep_dark", "ritual_candle", "Ritual of Light",
+      "Light the candle circle of a pink ancient city and step through its gate",
+      {"entered": {"trigger": "minecraft:changed_dimension", "conditions": {"to": f"{NS}:cloud_realm"}}}, frame="goal")
+    A("cloud_nine", "sky_portal", "cloudy_spawn_egg", "Cloud Nine", "Ride a Cloudy",
+      {"ride": {"trigger": "minecraft:started_riding", "conditions": {"player": [{
+          "condition": "minecraft:entity_properties", "entity": "this",
+          "predicate": {"minecraft:vehicle": {"minecraft:entity_type": rid("cloudy")}}}]}}})
+    A("sculk_trader", "pink_deep_dark", "sculk_gem", "Hushed Haggling", "Trade with a sculk person",
+      {"trade": {"trigger": "minecraft:villager_trade", "conditions": {"villager": [{
+          "condition": "minecraft:entity_properties", "entity": "this", "predicate": {"minecraft:entity_type": rid("sculk_person")}}]}}})
+
+
 def generate_sounds():
     def event(name, volume=1.0, pitch=1.0):
         return {"name": name, "type": "event", "volume": volume, "pitch": pitch}
@@ -2243,8 +2489,10 @@ def main():
     generate_fairy_realm_data()
     generate_furniture()
     generate_misc()
+    generate_round9()
     generate_sounds()
     generate_advancements()
+    generate_round9_advancements()
     generate_recipe_unlocks()
     write_tags()
     write_lang()

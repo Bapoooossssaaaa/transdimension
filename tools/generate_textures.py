@@ -3117,7 +3117,10 @@ def trans_mob_textures():
         with zf.open(entry) as f:
             img = Image.open(f).convert("RGBA")
         variant = filename[len("axolotl_"):-4].replace("_baby", "") if filename.startswith("axolotl_") else None
-        yield rel, (trans_axolotl(img, variant) if variant in AXOLOTL_COLOURS else trans_mob(img))
+        if folder == "warden":
+            yield rel, pink_warden_texture(img)   # every warden in the realm is the pink deep dark's pink warden
+        else:
+            yield rel, (trans_axolotl(img, variant) if variant in AXOLOTL_COLOURS else trans_mob(img))
 
 
 # ============================================================================================ the realm's creatures (round 4)
@@ -3709,54 +3712,44 @@ def trans_fairy_glow():
     return img
 
 
-PEARL_STONE = [hexc(c) for c in ("8E89A8", "B3AFC9", "D2CFE2", "E9E7F2", "F7F6FB")]
-SOCKET = [hexc(c) for c in ("120E2C", "1E1846", "2D2560", "3E3478")]
+# The Fairy Portal Frame keeps all of vanilla's end portal frame shading and only swaps its colours, region by region:
+# the teal frame becomes deep blue, the pale inlay round the socket pink, the end stone below it pearly lilac and the
+# socket near-black indigo. (Mapping each region over its own brightness range keeps the detail; one shared range
+# washed the old version out to flat white with noisy pink and blue rings.)
+FRAME_BODY = [hexc(c) for c in ("16284F", "1F3F78", "2D5FA3", "4A86C8")]
+FRAME_INLAY = [hexc(c) for c in ("B26585", "DA8EAD", "F5B9CB", "FFE8EF")]
+FRAME_STONE = [hexc(c) for c in ("8F8AA8", "ADA8C4", "C8C4DB", "E0DDEC", "F4F2F9")]
+FRAME_SOCKET = [hexc(c) for c in ("050A1A", "0C1530", "142046")]
+# The crystal pearl in a filled socket: vanilla's eye of ender, deep blue round a pink and white iris.
+FRAME_PEARL = [hexc(c) for c in ("0E1A45", "1F3F86", "3C78C4", "5BCEFA", "C9B8F2", "F5A9B8", "FFFFFF")]
+# The open Fairy Portal's opal pool.
 OPAL = [hexc(c) for c in ("F5A9B8", "C9B8F2", "8ED8FA", "5BCEFA", "B8F0F5", "FFFFFF", "F9C6E6")]
 
 
-def frame_recolour(img):
-    """End stone -> pearl stone, the green trim -> pink and blue, the dark socket -> deep indigo."""
+def frame_recolour(img, side):
     out = img.copy()
-    lo, hi = lum_range(img)
-    for (x, y) in pixels(img):
-        px = img.getpixel((x, y))
-        if not px[3]:
-            continue
-        h, s, v = hsv(px)
-        t = (lum(px) - lo) / (hi - lo)
-        if s > 0.25 and 0.12 < h < 0.2:          # end stone (yellow)
-            c = sample(PEARL_STONE, 0.25 + 0.75 * t)
-        elif lum(px) < 0.16:                       # the dark socket
-            c = sample(SOCKET, t * 3)
-        else:                                       # green trim: pink on the outer ring, blue inside
-            ring = min(x, y, 15 - x, 15 - y)
-            c = sample([hexc("D46F93"), hexc("F5A9B8"), hexc("FBD0DA")] if ring % 2 == 0 else [hexc("2F86C4"), hexc("5BCEFA"), hexc("A6E6FC")],
-                       0.2 + 0.8 * t)
-        out.putpixel((x, y), (*c, px[3]))
+    pale = lambda p, px: lum(px) >= 0.45
+    regions = ((lambda p, px: lum(px) < 0.12, FRAME_SOCKET),
+               (lambda p, px: 0.12 <= lum(px) < 0.45, FRAME_BODY),
+               # on the side, the pale rows above y 8 are the inlay's edge and the rest is end stone
+               ((lambda p, px: pale(p, px) and p[1] < 8) if side else pale, FRAME_INLAY),
+               ((lambda p, px: pale(p, px) and p[1] >= 8) if side else (lambda p, px: False), FRAME_STONE))
+    for mask, ramp in regions:
+        gradient_map(img, ramp, mask=mask, out=out)
     return out
 
 
 def fairy_frame_top():
-    return frame_recolour(vblock("end_portal_frame_top"))
+    return frame_recolour(vblock("end_portal_frame_top"), side=False)
 
 
 def fairy_frame_side():
-    return frame_recolour(vblock("end_portal_frame_side"))
+    return frame_recolour(vblock("end_portal_frame_side"), side=True)
 
 
 def fairy_frame_pearl():
-    """The socket with a crystal pearl in it (the frame model shows the middle 8x8 and a 3-pixel rim of it)."""
-    img = new(16, 16)
-    rng = random.Random(4)
-    for y in range(16):
-        for x in range(16):
-            d = math.hypot(x - 7.5, y - 7.5)
-            t = max(0.0, 1.0 - d / 5.5)
-            c = sample([hexc("2C6FB0"), hexc("5BCEFA"), hexc("C9B8F2"), hexc("F5A9B8"), hexc("FFFFFF")], 0.15 + 0.85 * t)
-            img.putpixel((x, y), (*c, 255))
-    for (x, y) in ((6, 5), (7, 5), (6, 6)):
-        img.putpixel((x, y), (255, 255, 255, 255))
-    return img
+    """Laid out like vanilla's end_portal_frame_eye: the frame model shows its middle 8x8 on top and rows 0-2 on the sides."""
+    return gradient_map(vblock("end_portal_frame_eye"), FRAME_PEARL)
 
 
 def fairy_portal_frames(n=32):
@@ -4019,6 +4012,348 @@ def icon():
 
 
 # ============================================================================================ main
+# ============================================================================================ round 9
+# The pink deep dark (pink sculk, its ore and gem, the pink warden, sculk people and pink sculk particles), the candle
+# ritual (stands, candles, crystal, the Sky Portal) and the Cloud Realm (cloud grass and soil, Cloudies, white farm
+# animals). Vanilla's sculk is recoloured with one fixed brightness range, so every sculk texture shares the same pinks.
+R_PINK_SCULK = [hexc(c) for c in ("2B0A24", "3F1036", "5C184C", "832262", "B02D79", "E04C96", "FF86BB", "FFC8DF")]
+R_PINK_BONE = [hexc(c) for c in ("6A5260", "9C8090", "C8AEBC", "E8D3DC", "FAEFF3")]
+R_PINK_GLOW = [hexc(c) for c in ("6E1A56", "B02D79", "E04C96", "FF86BB", "FFC8DF", "FFFFFF")]
+PINK_SCULK_TEXTURES = (
+    "sculk", "sculk_vein", "sculk_catalyst_top", "sculk_catalyst_side", "sculk_catalyst_bottom", "sculk_catalyst_top_bloom",
+    "sculk_catalyst_side_bloom", "sculk_sensor_top", "sculk_sensor_side", "sculk_sensor_bottom", "sculk_sensor_tendril_inactive",
+    "sculk_sensor_tendril_active", "sculk_shrieker_top", "sculk_shrieker_side", "sculk_shrieker_bottom", "sculk_shrieker_inner_top")
+
+
+def is_bone(px):
+    """The shriekers' and catalysts' bone: pale and grey, unlike sculk's dark teal and glowing cyan."""
+    return hsv(px)[1] < 0.4 and lum(px) > 0.28
+
+
+def pink_sculk(img):
+    """Vanilla sculk (any texture: blocks, the warden) in pink: dark teal to deep plum, glowing cyan to hot pink, and the
+    bone to a pinkish white. Fixed brightness ranges keep animation frames and different blocks consistent."""
+    out = img.copy()
+    gradient_map(img, R_PINK_SCULK, mask=lambda p, px: not is_bone(px), lo=0.06, hi=0.68, out=out)
+    gradient_map(img, R_PINK_BONE, mask=lambda p, px: is_bone(px), lo=0.3, hi=0.9, out=out)
+    return out
+
+
+def pink_sculk_textures():
+    """Yields (name, image, mcmeta or None) for the pink sculk blocks, named pink_<vanilla name>."""
+    for name in PINK_SCULK_TEXTURES:
+        meta = None
+        try:
+            with _zip(BLOCK_ZIP).open(f"base block textures/{name}.png.mcmeta") as f:
+                meta = json.load(f)
+        except KeyError:
+            pass
+        yield f"pink_{name}", pink_sculk(vblock(name)), meta
+
+
+R_SCULK_GEM = [hexc(c) for c in ("4A0E36", "8C1D5A", "D8418E", "FF7EB6", "FFC9E1", "FFFFFF")]
+
+
+def sculk_gem_ore():
+    """Trans deepslate with pink sculk gems in it (vanilla's deepslate emerald ore, its emeralds turned pink)."""
+    ore = vblock("deepslate_emerald_ore")
+    gem = lambda p, px: hsv(px)[1] > 0.25
+    out = ore_on(trans_deepslate(strata=True), vblock("deepslate"), ore, R_DEEPSLATE)
+    return gradient_map(ore, R_SCULK_GEM, mask=gem, out=out)
+
+
+def sculk_gem_item():
+    """A cut pink gem: the emerald's shape, the sculk's pinks."""
+    return gradient_map(vitem("emerald"), R_SCULK_GEM, curve=lambda t: 0.05 + 0.95 * t)
+
+
+# The ritual: deep plum-grey stone with pink inlay for the candle stands, white candles with pink bands, a glowing
+# pink crystal, and the Sky Portal's white and pink light.
+R_RITUAL_STONE = [hexc(c) for c in ("1E1620", "2E2331", "433446", "5C4860", "77607B")]
+
+
+def ritual_pedestal_side():
+    return gradient_map(vblock("polished_deepslate"), R_RITUAL_STONE)
+
+
+def ritual_pedestal_top():
+    """Chiseled deepslate's ring, inlaid with pink."""
+    img = vblock("chiseled_deepslate")
+    out = gradient_map(img, R_RITUAL_STONE)
+    lo, hi = lum_range(img)
+    for p in pixels(img):
+        if (lum(img.getpixel(p)) - lo) / (hi - lo) > 0.7:
+            out.putpixel(p, (*sample(R_PINK_GLOW, 0.45 + 0.4 * (lum(img.getpixel(p)) - lo) / (hi - lo)), 255))
+    return out
+
+
+def ritual_candle_block():
+    """The candle on a stand (3 x 5 pixels of side at 0,0, its 3 x 3 top at 0,6): white wax with two pink bands."""
+    img = new(16, 16)
+    for y in range(5):
+        for x in range(3):
+            band = y in (1, 3)
+            c = sample(R_PINK_GLOW, 0.55) if band else (255, 250, 252)
+            if x == 2:
+                c = mix(c, (190, 160, 175), 0.35)  # shade the right edge
+            img.putpixel((x, y), (*c, 255))
+    for y in range(6, 9):
+        for x in range(3):
+            img.putpixel((x, y), (*((60, 30, 40) if (x, y) == (1, 7) else (245, 236, 240)), 255))
+    return img
+
+
+def ritual_candle_item():
+    """The item: vanilla's white candle with pink bands round it."""
+    img = vitem("white_candle")
+    out = img.copy()
+    for (x, y) in pixels(img):
+        px = img.getpixel((x, y))
+        if px[3] and hsv(px)[1] < 0.2 and y % 4 == 1 and lum(px) > 0.5:
+            out.putpixel((x, y), (*sample(R_PINK_GLOW, 0.3 + 0.5 * lum(px)), px[3]))
+    return out
+
+
+R_RITUAL_CRYSTAL = [hexc(c) for c in ("8C1D5A", "C2307E", "F0589F", "FF8FC0", "FFC9E1", "FFFFFF")]
+
+
+def ritual_crystal(awake=False):
+    """A big faceted pink crystal (from vanilla's amethyst block); brighter once the ritual has woken it."""
+    return gradient_map(vblock("amethyst_block"), R_RITUAL_CRYSTAL, curve=(lambda t: 0.35 + 0.65 * t) if awake else (lambda t: 0.1 + 0.8 * t))
+
+
+SKY_LIGHT = [hexc(c) for c in ("FFFFFF", "FFE3EE", "FFC2DC", "FF9CC8", "FFD6E8", "FFFFFF", "F2F7FF")]
+
+
+def sky_portal_frames(n=32):
+    """The Sky Portal: soft bands of white and pink light drifting upwards through each other (tileable), slightly
+    see-through, with bright motes rising."""
+    frames = []
+    rng = random.Random(29)
+    tau = math.tau
+    motes = [(rng.randrange(16), rng.randrange(n), 2 + rng.randrange(3)) for _ in range(10)]
+    for k in range(n):
+        p = k / n * tau
+        img = new(16, 16)
+        for y in range(16):
+            for x in range(16):
+                u, v = x / 16 * tau, y / 16 * tau
+                f = math.sin(u + p) * 0.6 + math.sin(v + 2 * p) + math.sin(u - v + p) * 0.5 + math.cos(2 * u + v - p) * 0.3
+                t = (f / 4.8 + 0.5 + k / n) % 1.0
+                c = sample(SKY_LIGHT, t)
+                img.putpixel((x, y), (*c, 215))
+        for (mx, born, speed) in motes:
+            age = (k - born) % n
+            my = (15 - age * speed) % 16
+            img.putpixel((mx, my), (255, 255, 255, 255))
+        frames.append(img)
+    strip = new(16, 16 * n)
+    for i, f in enumerate(frames):
+        strip.paste(f, (0, 16 * i))
+    return strip
+
+
+# The Cloud Realm's ground: snow-white grass on pale, blue-grey soil.
+R_CLOUD_GRASS = [hexc(c) for c in ("B9C8D4", "D2DEE6", "E8F0F4", "FFFFFF")]
+R_CLOUD_SOIL = [hexc(c) for c in ("7F8B9C", "9DA8B7", "BCC5D0", "D9DFE6")]
+
+
+def cloud_soil():
+    return gradient_map(vblock("dirt"), R_CLOUD_SOIL)
+
+
+def cloud_grass_block_top():
+    return gradient_map(vblock("grass_block_top"), R_CLOUD_GRASS)
+
+
+def cloud_grass_block_side():
+    """Cloud soil with the white grass fringe (vanilla's side overlay) hanging over its top."""
+    out = cloud_soil()
+    overlay = vblock("grass_block_side_overlay")
+    lo, hi = lum_range(overlay)
+    for p in pixels(overlay):
+        px = overlay.getpixel(p)
+        if px[3]:
+            out.putpixel(p, (*sample(R_CLOUD_GRASS, (lum(px) - lo) / (hi - lo)), 255))
+    return out
+
+
+# ---- entities
+def pink_warden_texture(img):
+    """The pink warden (TransRecolor's pre-made warden textures, used for every warden in the Trans Realm)."""
+    return pink_sculk(img)
+
+
+def sculk_person_skin():
+    """A sculk person (player skin layout, classic arms): pink sculk skin with darker veins, a bone-white face plate with
+    glowing pink eyes, and sculk tendrils sprouting from the head (the hat layer)."""
+    sculk = pink_sculk(vblock("sculk")).crop((0, 0, 16, 16))
+    vein = pink_sculk(vblock("sculk_vein")).crop((0, 0, 16, 16))
+    img = new(64, 64)
+    # Inner layer: every face of every part in pink sculk (tiled from the block texture).
+    inner = [(0, 0, 32, 16), (16, 16, 24, 16), (40, 16, 16, 16), (0, 16, 16, 16), (32, 48, 16, 16), (16, 48, 16, 16)]
+    for (u, v, w, h) in inner:
+        for y in range(h):
+            for x in range(w):
+                if (u, v) == (0, 0) and ((x < 8 and y < 8) or (x >= 24 and y < 8)):
+                    continue  # the unused corners of the head's net
+                img.putpixel((u + x, v + y), sculk.getpixel(((u + x) % 16, (v + y) % 16)))
+    # The face (front of the head, 8,8 .. 16,16): a bone plate with two glowing eyes and a dark slit mouth.
+    bone = [hexc(c) for c in ("C8AEBC", "E8D3DC", "FAEFF3")]
+    for y in range(8):
+        for x in range(8):
+            if 1 <= y <= 6:
+                img.putpixel((8 + x, 8 + y), (*sample(bone, 0.3 + 0.7 * (1 - abs(x - 3.5) / 4)), 255))
+    for ex in (9, 10, 13, 14):
+        img.putpixel((ex, 11), (*sample(R_PINK_GLOW, 0.95), 255))
+        img.putpixel((ex, 12), (*sample(R_PINK_GLOW, 0.65), 255))
+    for mx in range(10, 14):
+        img.putpixel((mx, 14), (60, 20, 50, 255))
+    # Outer layer: veins over the body and sleeves, and tendrils on top of the head.
+    outer = [(16, 32, 24, 16), (40, 32, 16, 16), (0, 32, 16, 16), (48, 48, 16, 16), (0, 48, 16, 16)]
+    for (u, v, w, h) in outer:
+        for y in range(h):
+            for x in range(w):
+                px = vein.getpixel(((u + x) % 16, (v + y) % 16))
+                if px[3] and (x + y) % 3 != 0:
+                    img.putpixel((u + x, v + y), px)
+    tendril = pink_sculk(vblock("sculk_sensor_tendril_active")).crop((0, 0, 16, 16))
+    for y in range(8):
+        for x in range(8):
+            px = tendril.getpixel((4 + x, 8 + y))
+            if px[3]:
+                img.putpixel((40 + x, y), px)       # hat top
+                img.putpixel((40 + x, 8 + y), px)   # hat front, brow tendrils
+    return img
+
+
+def sculk_person_robe():
+    """The sculk person profession's villager overlay (only ever seen if a zombie converts one): the butcher's apron
+    in plum and pink."""
+    return gradient_map(vextra("entity/villager/profession/butcher.png"), R_PINK_SCULK[1:6])
+
+
+CLOUD_BODY = [hexc(c) for c in ("C9D3E0", "DDE5EE", "EEF3F8", "FFFFFF")]
+
+
+def cloudy_texture():
+    """The Cloudy (128x64, CloudyModel's layout): soft white puffs, a little bluer underneath, and a happy face (round
+    dark eyes with a white glint, a wide smile and pink cheeks) on the front of the body."""
+    img = new(128, 64)
+    rng = random.Random(7)
+    boxes = [(0, 0, 22, 9, 16), (0, 25, 10, 4, 10), (40, 25, 8, 3, 9), (0, 40, 3, 6, 10), (28, 40, 3, 6, 11)]
+    for (u, v, w, h, d) in boxes:
+        # top (u+d, v) w x d, bottom (u+d+w, v) w x d, sides row (v+d) of height h across 2*(w+d)
+        for y in range(d):
+            for x in range(w):
+                img.putpixel((u + d + x, v + y), (*sample(CLOUD_BODY, 0.75 + rng.random() * 0.25), 255))
+                img.putpixel((u + d + w + x, v + y), (*sample(CLOUD_BODY, 0.05 + rng.random() * 0.25), 255))
+        for y in range(h):
+            shade = 1.0 - y / max(1, h - 1) * 0.55
+            for x in range(2 * (w + d)):
+                img.putpixel((u + x, v + d + y), (*sample(CLOUD_BODY, shade * (0.85 + rng.random() * 0.15)), 255))
+    # The face on the body's front (north face: 16,16, 22 x 9).
+    fx, fy = 16, 16
+    dark = (46, 52, 74, 255)
+    for (ex, ey) in ((6, 2), (14, 2)):
+        for dx in range(2):
+            for dy in range(3):
+                img.putpixel((fx + ex + dx, fy + ey + dy), dark)
+        img.putpixel((fx + ex, fy + ey), (255, 255, 255, 255))
+    smile = [(8, 6), (9, 7), (10, 7), (11, 7), (12, 7), (13, 6)]
+    for (sx, sy) in smile:
+        img.putpixel((fx + sx, fy + sy), dark)
+    for (cx, cy) in ((4, 5), (5, 5), (16, 5), (17, 5)):
+        img.putpixel((fx + cx, fy + cy), (*hexc("F7B6CC"), 255))
+    return img
+
+
+def white_farm_animal(kind, baby=False):
+    """A cloud-white variant of a temperate farm animal (data/transdimension/<kind>_variant/cloud.json)."""
+    suffix = "_baby" if baby else ""
+    with _zip(ENTITY_ZIP).open(f"base entity textures/{kind}/{kind}_temperate{suffix}.png") as f:
+        img = Image.open(f).convert("RGBA")
+    # Keep the pink snout, eyes and beak and the like (strongly coloured, small) and whiten the rest.
+    out = img.copy()
+    body = lambda p, px: hsv(px)[1] < 0.55 or lum(px) < 0.2
+    lo, hi = lum_range(img, body)
+    for p in pixels(img):
+        px = img.getpixel(p)
+        if not px[3] or not body(p, px):
+            continue
+        t = (lum(px) - lo) / (hi - lo)
+        if lum(px) < 0.12:
+            continue  # eyes and nostrils stay dark
+        out.putpixel(p, (*sample(CLOUD_BODY, 0.15 + 0.85 * t), px[3]))
+    return out
+
+
+# ---- spawn eggs: vanilla eggs recoloured
+def pink_warden_spawn_egg():
+    return pink_sculk(vitem("warden_spawn_egg"))
+
+
+def sculk_person_spawn_egg():
+    return gradient_map(vitem("villager_spawn_egg"), R_PINK_SCULK[1:])
+
+
+def cloudy_spawn_egg():
+    return gradient_map(vitem("happy_ghast_spawn_egg"), [hexc(c) for c in ("8FA6C0", "C9D6E4", "EEF3F8", "FFFFFF")])
+
+
+# ---- particles: vanilla's sculk particles in pink (only used in the Trans Realm, see client/PinkSculkParticles)
+R_PINK_PARTICLE = [hexc(c) for c in ("D23A86", "F0589F", "FF8FC0", "FFC9E1", "FFFFFF")]
+
+
+def pink_particle(name):
+    """Particles glow, so they take only the brighter half of the pinks."""
+    img = Image.open(os.path.join(EXTRA, "particle", f"{name}.png")).convert("RGBA")
+    if name.startswith("vibration"):
+        return animated(img, R_PINK_PARTICLE)
+    return gradient_map(img, R_PINK_PARTICLE)
+
+
+def pink_particles():
+    """Yields (path under textures/, image, mcmeta or None)."""
+    for i in range(11):
+        yield f"particle/pink_sculk_soul_{i}.png", pink_particle(f"sculk_soul_{i}"), None
+    for i in range(16):
+        yield f"particle/pink_sonic_boom_{i}.png", pink_particle(f"sonic_boom_{i}"), None
+    yield "particle/pink_shriek.png", pink_particle("shriek"), None
+    with open(os.path.join(EXTRA, "particle", "vibration.png.mcmeta"), encoding="utf-8") as f:
+        yield "particle/pink_vibration.png", pink_particle("vibration"), json.load(f)
+
+
+def round9_textures():
+    """Yields (path under textures/, image, mcmeta or None) for everything above."""
+    for name, img, meta in pink_sculk_textures():
+        yield f"block/{name}.png", img, meta
+    yield "block/sculk_gem_ore.png", sculk_gem_ore(), None
+    yield "item/sculk_gem.png", sculk_gem_item(), None
+    yield "block/ritual_pedestal_side.png", ritual_pedestal_side(), None
+    yield "block/ritual_pedestal_top.png", ritual_pedestal_top(), None
+    yield "block/ritual_candle.png", ritual_candle_block(), None
+    yield "item/ritual_candle.png", ritual_candle_item(), None
+    yield "block/ritual_crystal.png", ritual_crystal(), None
+    yield "block/ritual_crystal_awake.png", ritual_crystal(awake=True), None
+    yield "block/sky_portal.png", sky_portal_frames(), {"animation": {"frametime": 2, "interpolate": True}}
+    yield "block/cloud_soil.png", cloud_soil(), None
+    yield "block/cloud_grass_block_top.png", cloud_grass_block_top(), None
+    yield "block/cloud_grass_block_side.png", cloud_grass_block_side(), None
+    yield "entity/sculk_person/sculk_person.png", sculk_person_skin(), None
+    robe = sculk_person_robe()
+    for kind in ("villager", "zombie_villager"):
+        yield f"entity/{kind}/profession/sculk_person.png", robe, {"villager": {"hat": "none"}}
+    yield "entity/cloudy/cloudy.png", cloudy_texture(), None
+    for kind in ("pig", "cow", "chicken"):
+        yield f"entity/{kind}/cloud_{kind}.png", white_farm_animal(kind), None
+        yield f"entity/{kind}/cloud_{kind}_baby.png", white_farm_animal(kind, baby=True), None
+    yield "item/pink_warden_spawn_egg.png", pink_warden_spawn_egg(), None
+    yield "item/sculk_person_spawn_egg.png", sculk_person_spawn_egg(), None
+    yield "item/cloudy_spawn_egg.png", cloudy_spawn_egg(), None
+    yield from pink_particles()
+
+
 def main():
     blocks = {
         # terrain
@@ -4174,6 +4509,11 @@ def main():
         shutil.rmtree(trans_mobs)
     for rel, img in trans_mob_textures():
         save(img, f"entity/trans/{rel}")
+
+    for rel, img, meta in round9_textures():
+        save(img, rel)
+        if meta:
+            save_mcmeta(rel, meta)
 
     save(slobbered_icon(), "mob_effect/slobbered.png")
     for i, frame in enumerate(saliva_frames()):

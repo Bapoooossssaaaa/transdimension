@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:sculk_person/5/sculk_gem_elytra",
+    "transdimension:sculk_person/5/sculk_gem_heavy_core",
+    "transdimension:sculk_person/5/sculk_gem_nether_star",
+    "transdimension:sculk_person/5/sculk_gem_swift_sneak_book"
+  ]
+}

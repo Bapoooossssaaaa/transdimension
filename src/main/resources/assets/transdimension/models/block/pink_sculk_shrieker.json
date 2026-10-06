@@ -1,0 +1,10 @@
+{
+  "parent": "minecraft:block/template_sculk_shrieker",
+  "textures": {
+    "bottom": "transdimension:block/pink_sculk_shrieker_bottom",
+    "side": "transdimension:block/pink_sculk_shrieker_side",
+    "top": "transdimension:block/pink_sculk_shrieker_top",
+    "inner_top": "transdimension:block/pink_sculk_shrieker_inner_top",
+    "particle": "transdimension:block/pink_sculk_shrieker_bottom"
+  }
+}

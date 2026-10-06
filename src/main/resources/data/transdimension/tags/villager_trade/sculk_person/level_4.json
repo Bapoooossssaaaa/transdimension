@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "transdimension:sculk_person/4/sculk_gem_netherite_ingot",
+    "transdimension:sculk_person/4/sculk_gem_enchanted_golden_apple",
+    "transdimension:sculk_person/4/sculk_gem_trans_crystal",
+    "transdimension:sculk_person/4/sculk_gem_music_disc_5"
+  ]
+}

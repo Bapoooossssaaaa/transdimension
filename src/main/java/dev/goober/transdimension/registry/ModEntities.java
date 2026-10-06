@@ -13,6 +13,8 @@ import net.minecraft.world.entity.animal.fish.AbstractFish;
 import net.minecraft.world.entity.animal.fish.WaterAnimal;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.warden.Warden;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.vehicle.boat.Boat;
 import net.minecraft.world.entity.vehicle.boat.ChestBoat;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -20,11 +22,14 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityType;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.entity.Cloudy;
 import dev.goober.transdimension.entity.CrystalEye;
 import dev.goober.transdimension.entity.Fairy;
 import dev.goober.transdimension.entity.FairyCrystalSpike;
 import dev.goober.transdimension.entity.Maddie;
 import dev.goober.transdimension.entity.PastelSlime;
+import dev.goober.transdimension.entity.PinkWarden;
+import dev.goober.transdimension.entity.SculkPerson;
 import dev.goober.transdimension.entity.Seat;
 import dev.goober.transdimension.entity.SillyCat;
 import dev.goober.transdimension.entity.TransEnderman;
@@ -164,6 +169,37 @@ public final class ModEntities {
 					.sized(0.001F, 0.001F)
 					.clientTrackingRange(10)
 					.build(SEAT_KEY));
+
+	public static final ResourceKey<EntityType<?>> PINK_WARDEN_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("pink_warden"));
+	public static final ResourceKey<EntityType<?>> SCULK_PERSON_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("sculk_person"));
+	public static final ResourceKey<EntityType<?>> CLOUDY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("cloudy"));
+
+	/** The pink deep dark's friendly warden, sized like vanilla's. One guards every pink ancient city; a few roam. */
+	public static final EntityType<PinkWarden> PINK_WARDEN = Registry.register(BuiltInRegistries.ENTITY_TYPE, PINK_WARDEN_KEY,
+			FabricEntityType.Builder.createMob(PinkWarden::new, MobCategory.MONSTER, mob -> mob
+							.spawnPlacement(SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, PinkWarden::checkPinkWardenSpawnRules)
+							.defaultAttributes(Warden::createAttributes))
+					.sized(0.9F, 2.9F)
+					.fireImmune()
+					.clientTrackingRange(16)
+					.build(PINK_WARDEN_KEY));
+	/** Humanoid traders of the pink deep dark (villagers underneath; see {@link SculkPerson}). */
+	public static final EntityType<SculkPerson> SCULK_PERSON = Registry.register(BuiltInRegistries.ENTITY_TYPE, SCULK_PERSON_KEY,
+			FabricEntityType.Builder.createMob(SculkPerson::new, MobCategory.CREATURE, mob -> mob
+							.spawnPlacement(SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, SculkPerson::checkSculkPersonSpawnRules)
+							.defaultAttributes(Villager::createAttributes))
+					.sized(0.6F, 1.95F)
+					.eyeHeight(1.62F)
+					.clientTrackingRange(10)
+					.build(SCULK_PERSON_KEY));
+	/** The Cloud Realm's rideable little clouds. */
+	public static final EntityType<Cloudy> CLOUDY = Registry.register(BuiltInRegistries.ENTITY_TYPE, CLOUDY_KEY,
+			FabricEntityType.Builder.createMob(Cloudy::new, MobCategory.CREATURE, mob -> mob
+							.spawnPlacement(SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Cloudy::checkCloudySpawnRules)
+							.defaultAttributes(Cloudy::createAttributes))
+					.sized(1.5F, 1.0F)
+					.clientTrackingRange(10)
+					.build(CLOUDY_KEY));
 
 	private ModEntities() {
 	}

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "transdimension:block/sky_portal_ns"
+    },
+    "axis=z": {
+      "model": "transdimension:block/sky_portal_ew"
+    }
+  }
+}

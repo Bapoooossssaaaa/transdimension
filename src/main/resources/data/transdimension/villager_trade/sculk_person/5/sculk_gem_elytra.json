@@ -1,0 +1,12 @@
+{
+  "gives": {
+    "id": "minecraft:elytra"
+  },
+  "max_uses": 2.0,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "transdimension:sculk_gem",
+    "count": 40.0
+  },
+  "xp": 30.0
+}

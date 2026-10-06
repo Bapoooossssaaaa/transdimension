@@ -1,0 +1,12 @@
+{
+  "gives": {
+    "id": "minecraft:totem_of_undying"
+  },
+  "max_uses": 3.0,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "transdimension:sculk_gem",
+    "count": 18.0
+  },
+  "xp": 10.0
+}

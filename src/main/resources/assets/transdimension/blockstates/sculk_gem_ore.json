@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "transdimension:block/sculk_gem_ore"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "transdimension:cloud_realm",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "transdimension:cloud_realm",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "transdimension:cloud_isles"
+    }
+  }
+}

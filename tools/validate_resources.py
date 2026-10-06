@@ -197,8 +197,9 @@ for i in ITEMS:
 
 # ------------------------------------------------------------------ data
 # These have no loot table (Java says so): the cake, the plush marker, the unbreakable Fairy Realm blocks, pink lava and
-# pink fire.
-for b in BLOCKS - {"trans_cake", "plush_spot", "fairy_portal_frame", "fairy_portal", "fairy_altar", "pink_lava", "pink_fire"}:
+# pink fire, and the unbreakable candle ritual blocks and Sky Portal.
+for b in BLOCKS - {"trans_cake", "plush_spot", "fairy_portal_frame", "fairy_portal", "fairy_altar", "pink_lava", "pink_fire",
+                   "ritual_pedestal", "ritual_crystal", "sky_portal"}:
     if not os.path.exists(os.path.join(DATA, NS, "loot_table", "blocks", b + ".json")):
         err(f"block {b}: no loot table")
 
@@ -332,6 +333,12 @@ TWINS["fairy_portal_frame"] = "smoker"
 TWINS["trans_sea_pickle"] = "sea_pickle"
 TWINS["pink_fire"] = "fire"
 TWINS.update({"trans_cave_vines": "cave_vines", "trans_cave_vines_plant": "cave_vines_plant"})
+# Round 9: pink sculk blocks are vanilla's sculk blocks; the ritual's blocks have their own properties.
+TWINS.update({"pink_sculk_sensor": "sculk_sensor", "pink_sculk_shrieker": "sculk_shrieker", "pink_sculk_vein": "sculk_vein",
+              "pink_sculk_catalyst": "sculk_catalyst", "sky_portal": "nether_portal", "ritual_pedestal": "stone",
+              "ritual_crystal": "smoker"})
+FACING_ONLY.add("ritual_crystal")
+EXTRA_PROPS.update({"ritual_pedestal": {"candle": ["false", "true"]}, "ritual_crystal": {"awake": ["false", "true"]}})
 for b in BLOCKS:
     if b.endswith("_plush"):
         TWINS[b] = "smoker"
@@ -449,7 +456,9 @@ for f in walk_json(os.path.join(WG, "biome")):
             if not entity_exists(t):
                 err(f"{rel}: unknown entity {t}")
     for part in d["attributes"].get("minecraft:visual/ambient_particles", []):
-        if not vanilla_has("particle_type", part["particle"]["type"]):
+        ptype = part["particle"]["type"]
+        ours_ok = ptype.startswith(NS + ":") and os.path.exists(os.path.join(ASSETS, "particles", ptype.split(":", 1)[1] + ".json"))
+        if not ours_ok and not vanilla_has("particle_type", ptype):
             err(f"{rel}: unknown particle {part['particle']['type']}")
     for m in d["attributes"].get("minecraft:audio/background_music", {}).values():
         if not vanilla_has("sound_event", m["sound"]):
@@ -487,9 +496,14 @@ for f in walk_json(os.path.join(WG, "template_pool")):
     rel = os.path.relpath(f, ROOT)
     if not pool_exists(d["fallback"]):
         err(f"{rel}: unknown fallback pool {d['fallback']}")
-    for e in d["elements"]:
-        el = e["element"]
+    elements = [e["element"] for e in d["elements"]]
+    for e in list(elements):
+        if e["element_type"] == "minecraft:list_pool_element":
+            elements += e["elements"]
+    for el in elements:
         kind = el["element_type"]
+        if kind == "minecraft:list_pool_element":
+            continue
         if kind in ("minecraft:single_pool_element", "minecraft:legacy_single_pool_element"):
             if not ours_or_vanilla(el["location"], "structure", "structure", ".nbt"):
                 err(f"{rel}: unknown structure template {el['location']}")
