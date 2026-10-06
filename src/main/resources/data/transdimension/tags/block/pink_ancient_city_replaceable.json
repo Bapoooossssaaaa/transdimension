@@ -1,0 +1,16 @@
+{
+  "values": [
+    "transdimension:trans_deepslate",
+    "transdimension:trans_deepslate_bricks",
+    "transdimension:trans_deepslate_tiles",
+    "transdimension:trans_deepslate_brick_slab",
+    "transdimension:trans_deepslate_tile_slab",
+    "transdimension:trans_deepslate_brick_stairs",
+    "transdimension:trans_deepslate_tile_wall",
+    "transdimension:trans_deepslate_brick_wall",
+    "transdimension:cobbled_trans_deepslate",
+    "transdimension:cracked_trans_deepslate_bricks",
+    "transdimension:cracked_trans_deepslate_tiles",
+    "minecraft:pink_wool"
+  ]
+}

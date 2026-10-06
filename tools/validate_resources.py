@@ -535,6 +535,34 @@ for f in walk_json(os.path.join(WG, "processor_list")):
     if d:
         check_rule_blocks(d, os.path.relpath(f, ROOT))
 
+# Every tag of ours that our data refers to must exist. Some are written by one generator and used by another (the pink
+# ancient city's processors use a block tag that generate_ancient_city.py writes), and a missing one stops the world
+# from loading ("Missing tag ... Unbound values in registry").
+OUR_TAGS = set()
+for f in walk_json(os.path.join(DATA, NS, "tags")):
+    parts = os.path.relpath(f, os.path.join(DATA, NS, "tags"))[:-len(".json")].split(os.sep)
+    for i in range(1, len(parts)):
+        OUR_TAGS.add("/".join(parts[i:]))
+
+
+def check_our_tag_refs(obj, where):
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if k == "tag" and isinstance(v, str) and v.startswith(NS + ":") and path_of(v) not in OUR_TAGS:
+                err(f"{where}: missing tag {v}")
+            check_our_tag_refs(v, where)
+    elif isinstance(obj, list):
+        for v in obj:
+            check_our_tag_refs(v, where)
+    elif isinstance(obj, str) and obj.startswith("#" + NS + ":") and path_of(obj[1:]) not in OUR_TAGS:
+        err(f"{where}: missing tag {obj}")
+
+
+for f in walk_json(os.path.join(DATA, NS)):
+    d = load(f)
+    if d is not None:
+        check_our_tag_refs(d, os.path.relpath(f, ROOT))
+
 for f in walk_json(os.path.join(WG, "structure")):
     d = load(f)
     if not d:

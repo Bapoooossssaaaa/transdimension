@@ -2603,6 +2603,11 @@ def write_lang():
     write(path, ordered)
 
 
+# Our block and item tags that other generators write (never wiped here): without the first, the pink ancient city's
+# processor lists fail to load and no world can be created.
+OTHER_GENERATORS_TAGS = {"block/pink_ancient_city_replaceable.json"}     # generate_ancient_city.py
+
+
 def remove_stale():
     stale = [
         os.path.join(ASSETS, "blockstates", "trans_water.json"),
@@ -2627,7 +2632,7 @@ def remove_stale():
         d = os.path.join(DATA, NS, "tags", sub)
         if os.path.isdir(d):
             for f in os.listdir(d):
-                if f.endswith(".json"):
+                if f.endswith(".json") and f"{sub}/{f}" not in OTHER_GENERATORS_TAGS:
                     os.remove(os.path.join(d, f))
 
 
