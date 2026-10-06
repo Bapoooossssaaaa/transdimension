@@ -128,7 +128,7 @@ Minecraft 26.3's **abandoned camps**, brought back to 26.2 and made trans: a ten
 - **The candle ritual.** In front of each city's great gate stands a dais with a circle of eight **candle stands** under a floating **Ritual Crystal**. Set a Ritual Candle on every stand (use the crystal or a stand to see how many are lit). When the last one lights, each candle shoots a beam of light up into the crystal, the crystal wakes and shoots one great beam into the middle of the gate, and a white and pink **Sky Portal** opens there and spreads out until it fills the whole frame.
 - **The Cloud Realm.** Step through the Sky Portal into a bright, white sky full of floating islands of white stone with snow-white grass and flowers, trees crowned with clouds of white wool, and big wool clouds drifting between the islands. It's always day, and no monsters spawn there. You arrive on a little wool cloud in the middle of the realm, where a Sky Portal leads back to the gate you came through.
 - **Cloudies** are little smiling clouds that drift about the islands. Use one to sit on it, and it carries you wherever you look: hold forward to fly (look up to climb, down to sink) and sneak to hop off. One always waits by the arrival cloud.
-- **Baby happy ghasts** float about the Cloud Realm, and they stay babies forever. The realm's pigs, cows and chickens are snow white, its sheep white and its rabbits white too.
+- **Baby happy ghasts** float about the Cloud Realm, and they stay babies forever. The realm's pigs, cows and chickens are snow white, its rabbits white, and its sheep (vanilla's) nearly always white.
 
 ### Recipes
 
