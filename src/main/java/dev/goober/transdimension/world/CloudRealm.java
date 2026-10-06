@@ -62,7 +62,7 @@ public final class CloudRealm {
 		});
 		ServerTickEvents.END_LEVEL_TICK.register(level -> {
 			if (isCloudRealm(level) && level.getGameTime() % 300 == 0) {
-				spawnGhastlings(level);
+				tendGhastlings(level);
 			}
 		});
 	}
@@ -193,15 +193,25 @@ public final class CloudRealm {
 
 	// ------------------------------------------------------------------------------------------------ baby happy ghasts
 
-	/** Now and then a baby happy ghast drifts in near each player, up to a few at a time; they never grow up. */
-	private static void spawnGhastlings(ServerLevel level) {
+	/**
+	 * Now and then a baby happy ghast drifts in near each player, up to a few at a time. They never grow up: every 15
+	 * seconds each baby near a player is made young again ({@code setBaby(true)} restarts its growing). Vanilla's own age
+	 * lock, {@code AgeableMob#setAgeLocked} (the golden dandelion's), is protected.
+	 */
+	private static void tendGhastlings(ServerLevel level) {
 		RandomSource random = level.getRandom();
 		for (ServerPlayer player : level.players()) {
-			if (player.isSpectator() || random.nextFloat() > 0.35F) {
+			if (player.isSpectator()) {
 				continue;
 			}
 			AABB around = player.getBoundingBox().inflate(80.0);
-			if (level.getEntities(EntityTypes.HAPPY_GHAST, around, ghast -> true).size() >= GHASTLINGS_NEAR_PLAYER) {
+			var nearby = level.getEntities(EntityTypes.HAPPY_GHAST, around, ghast -> true);
+			for (var ghast : nearby) {
+				if (ghast.isBaby()) {
+					ghast.setBaby(true);
+				}
+			}
+			if (nearby.size() >= GHASTLINGS_NEAR_PLAYER || random.nextFloat() > 0.35F) {
 				continue;
 			}
 			double angle = random.nextDouble() * Math.PI * 2.0;
@@ -218,7 +228,6 @@ public final class CloudRealm {
 				continue;
 			}
 			ghastling.setBaby(true);
-			ghastling.setAgeLocked(true);
 			ghastling.snapTo(x, y, z, random.nextFloat() * 360.0F, 0.0F);
 			level.addFreshEntity(ghastling);
 		}
