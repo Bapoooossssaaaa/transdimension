@@ -118,7 +118,7 @@ Minecraft 26.3's **abandoned camps**, brought back to 26.2 and made trans: a ten
 2. **Light the portal.** Craft **Trans Crystal Pearls** (a Trans Pearl from a trans enderman plus a Trans Crystal) and set one into each empty frame. When all twelve glow, the middle fills with a shimmering pool of pink, lilac, blue and white light, swirling like opal and twinkling with stars, in a burst of the realm's own **trans sparks**: little stars that turn blue, pink and white as they float (they also rise off the pool, the lit frames and the altar, and fly with the boss and the cutscene).
 3. **The Fairy Realm.** Drop into the pool and you arrive on a lush floating island high above a sea of heart clouds, with more islands drifting all around. A path leads to a round arena paved in the flag's colours, ringed by crystal-topped pillars, with trees, flowers and a waterfall around it. The arena is empty: throw a **Trans Crystal** onto the altar in the middle (or use one on it) to call the Trans Fairy. The first time, a cutscene plays, with the HUD hidden and the camera gliding through the scene: a tall door of light in the flag's stripes splits open on the arena floor and **Maddie** walks out of it, horrified that you've summoned the Trans Fairy, an ancient and horrible being. Before she can finish, light gathers over the altar and the fairy appears in a falling column of it, hushes Maddie and strikes her down with her wand, then turns to you: you woke her, so show her what your heart is worth. Maddie is gone from the realm after that.
 4. **The Trans Fairy.** A fairy queen with long pink hair, a crystal tiara, a gown in the flag's stripes, a star wand and four glittering wings. She flies circles around the arena and fights back: volleys of sparkling hearts from her wand, swooping dives straight through you, ice crystals bursting out of the ground under your feet (watch for the swirling frost), and once she's hurt she calls trans endermen to help and rains hearts from the sky. Each third of her health makes her faster. Her health shows in a sparkly trans-flag bar at the top of the screen.
-5. **The prize.** Beat her and a portal home opens on the arena's north side. She drops the **Fairy Jar**: a trans glass jar with a lid, and inside it a tiny fairy (a little glowing cube of light with see-through wings) that flits about the jar, glowing pink, white and blue in turn. Put it anywhere in your builds. Throw another Trans Crystal onto the **Fairy Altar** to call her back for another round.
+5. **The prize.** Beat her and a portal home opens on the arena's north side. She drops the **Fairy Jar**: a trans glass jar with a lid, and inside it a tiny fairy (a little glowing cube of light with see-through wings) that drifts slowly about the jar, stopping to hover now and then, glowing in its own colour (blue, pink or a pearly white) and now and then letting a mote of light slip out of the jar. Put it anywhere in your builds. Throw another Trans Crystal onto the **Fairy Altar** to call her back for another round.
 
 ### The pink deep dark and the Cloud Realm
 
@@ -158,7 +158,12 @@ Some tips:
 - Trans crystal ore is rare and deep: dig below y≈16, ideally near the bottom of the world, or explore the Crystal Caves.
 - `/locate structure transdimension:fairy_sanctum` finds the nearest Fairy Sanctum.
 - Everything is in the **Trans Dimension** creative tab, including spawn eggs for Maddie, the realm's creatures and the Trans Fairy.
-- Playing with **BSL Shaders**? `extras/BSL_Trans_Realm.txt` is a trans preset: heart clouds in flag colours, the realm's own sky and fog, biome-coloured water, pink sunsets and lamplight. The instructions are at the top of the file.
+- **Shaders (Iris).** The mod works with shader packs:
+  - Its plants and leaves wave, its lava, fire, lamps, crystals and portals glow, holy water gets the pack's water, and its glass is glass. Each block of ours borrows its vanilla twin's shader id (our leaves an oak leaf's, pink lava lava's), so this works with any pack that knows vanilla blocks.
+  - Under **BSL**, the heart clouds keep their flag colours.
+  - The ritual's beams and the time door shine as pure light.
+  - Fairies and angels don't blow out to white.
+- Playing with **BSL Shaders 10.1.8**? `extras/BSL_Trans_Realm.txt` is a trans preset: the heart clouds, the realm's own sky with its pink horizon and fog, biome-coloured water, a pink and blue aurora, pink sunsets and lamplight, and a soft pink colour grade. The instructions are at the top of the file. Every option in it is checked against BSL 10.1.8 (`tools/check_bsl_preset.py`); the old preset's clouds, aurora and colour grade had values BSL doesn't offer, so they did nothing.
 
 ## Building from source
 
@@ -193,7 +198,7 @@ To restyle the mod, edit the palettes at the top of `generate_textures.py`, the 
 
 ## Notes and troubleshooting
 
-This was written against the real 26.2 APIs and checked against Fabric API 0.161.0's source, the Fabric docs reference mod, the 26.x porting primers and vanilla 26.2 data. Rounds 1 to 9 compile on 26.2, and rounds 1 to 5 have been played. Rounds 10 and 11 build and start; round 12's fixes (the cloud turtle, orb angels, soft sounds, the light effects with shaders, pink lava, the realm's own terrain, the ruins and cloud chests) haven't been compiled yet, because the cloud environment they were written in can't download Minecraft. `HANDOFF.md` lists the names that were least certain and what to try if one doesn't compile.
+This was written against the real 26.2 APIs and checked against Fabric API 0.161.0's source, the Fabric docs reference mod, the 26.x porting primers and vanilla 26.2 data. Rounds 1 to 9 compile on 26.2, and rounds 1 to 5 have been played. Rounds 10 and 11 build and have been played. Round 12's fixes (the cloud turtle, orb angels, soft sounds, the light effects with shaders, pink lava, the realm's own terrain, the ruins and cloud chests) and round 13's (the calmer Fairy Jar fairy and the shader support, written against the Iris 1.11.4 and BSL 10.1.8 files the owner shared) haven't been compiled yet, because the cloud environment they were written in can't download Minecraft. `HANDOFF.md` lists the names that were least certain and what to try if one doesn't compile.
 
 Three features hook into game internals and are built to fail safely:
 

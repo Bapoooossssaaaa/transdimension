@@ -8,9 +8,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.client.compat.ShaderCompat;
 import dev.goober.transdimension.entity.Fairy;
 
-/** Wild fairies: the fairy light in one colour, full bright, a little bigger than the jar's so you can spot one. */
+/**
+ * Wild fairies: the fairy light in one colour, full bright (a little less under a shader pack, see
+ * {@link ShaderCompat#glowLight()}), a little bigger than the jar's so you can spot one.
+ */
 public class FairyRenderer extends MobRenderer<Fairy, FairyRenderState, FairyLightModel> {
 	/** By colour: blue, pink, white (the same textures as the Fairy Jar's light). */
 	private static final Identifier[] TEXTURES = {
@@ -60,6 +64,6 @@ public class FairyRenderer extends MobRenderer<Fairy, FairyRenderState, FairyLig
 
 	@Override
 	protected int getBlockLightLevel(Fairy fairy, BlockPos pos) {
-		return 15;
+		return ShaderCompat.glowLight();
 	}
 }

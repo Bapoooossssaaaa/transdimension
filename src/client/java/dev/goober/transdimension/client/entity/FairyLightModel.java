@@ -28,15 +28,21 @@ public class FairyLightModel extends EntityModel<FairyRenderState> {
 	public static final float LIGHT_Y = 20.0F;
 
 	private final Parts parts;
+	/** How fast the wings beat, against a wild fairy's. */
+	private final float wingBeat;
 
 	public FairyLightModel(ModelPart root) {
 		this(root, false);
 	}
 
-	/** {@code cutout}: drawn cutout instead of see-through (the Fairy Jar's fairy, which is seen through the jar's glass). */
-	public FairyLightModel(ModelPart root, boolean cutout) {
-		super(root, cutout ? RenderTypes::entityCutout : RenderTypes::entityTranslucent);
+	/**
+	 * {@code inJar}: the Fairy Jar's fairy, drawn cutout instead of see-through (it's seen through the jar's glass) and
+	 * beating its wings at under half a wild fairy's pace.
+	 */
+	public FairyLightModel(ModelPart root, boolean inJar) {
+		super(root, inJar ? RenderTypes::entityCutout : RenderTypes::entityTranslucent);
 		this.parts = new Parts(root);
+		this.wingBeat = inJar ? 0.4F : 1.0F;
 	}
 
 	public static LayerDefinition createLayer() {
@@ -65,7 +71,7 @@ public class FairyLightModel extends EntityModel<FairyRenderState> {
 	@Override
 	public void setupAnim(FairyRenderState state) {
 		super.setupAnim(state);
-		this.parts.flutter(state.ageInTicks, 0.25F);
+		this.parts.flutter(state.ageInTicks * this.wingBeat, 0.25F);
 	}
 
 	/** The light's moving parts. */

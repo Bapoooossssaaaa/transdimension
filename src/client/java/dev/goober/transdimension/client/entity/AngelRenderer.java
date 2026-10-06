@@ -8,9 +8,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.client.compat.ShaderCompat;
 import dev.goober.transdimension.entity.Angel;
 
-/** Draws an {@link Angel} with {@link AngelModel}, see-through and full bright: angels shine white and gold in the dark they keep to. */
+/**
+ * Draws an {@link Angel} with {@link AngelModel}, see-through and full bright (a little less under a shader pack, see
+ * {@link ShaderCompat#glowLight()}): angels shine white and gold in the dark they keep to.
+ */
 public class AngelRenderer extends MobRenderer<Angel, LivingEntityRenderState, AngelModel> {
 	public static final ModelLayerLocation LAYER = new ModelLayerLocation(TransDimension.id("angel"), "main");
 	private static final Identifier TEXTURE = TransDimension.id("textures/entity/angel/angel.png");
@@ -31,6 +35,6 @@ public class AngelRenderer extends MobRenderer<Angel, LivingEntityRenderState, A
 
 	@Override
 	protected int getBlockLightLevel(Angel angel, BlockPos pos) {
-		return 15;
+		return ShaderCompat.glowLight();
 	}
 }

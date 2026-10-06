@@ -1,29 +1,35 @@
-# Trans Realm preset for BSL Shaders (Iris or OptiFine)
+# Trans Realm preset for BSL Shaders 10.1.8 (Iris)
 #
 # How to use:
-#   1. Put this file in .minecraft/shaderpacks/, next to your BSL zip.
-#   2. Rename it to the zip's exact file name plus ".txt",
-#      e.g. BSL_v10.0.zip -> BSL_v10.0.zip.txt
-#   3. Pick BSL under Video Settings > Shader Packs.
+#   1. In Minecraft, pick another shader pack (or none) first, or close the game.
+#   2. Copy this file into .minecraft/shaderpacks/, next to BSL_v10.1.8.zip.
+#   3. Rename it to the zip's exact name plus ".txt", replacing the old one: BSL_v10.1.8.zip.txt
+#   4. Pick BSL under Video Settings > Shader Packs.
+#
+# Every option and value here is one BSL 10.1.8 offers (checked against its lib/settings.glsl). BSL ignores a value it
+# doesn't offer: the old preset's CLOUDS=false, AURORA=true and CG_TM=0.20 were all ignored, so BSL kept its own
+# clouds over the heart clouds and the pink colour grade never came on.
 #
 # What it does:
-#   - Clouds: BSL's own clouds are off, so the realm's heart clouds show, cycling through the flag
-#     (blue, pink, white, pink, blue). If you see no clouds at all, open BSL's settings, find Clouds
-#     under Atmosphere and pick the vanilla option.
-#   - Sky and fog follow the game's own sky colours, so the Trans Realm keeps its trans-blue sky, pink fog and
-#     pink-and-blue sunsets while the Overworld stays normal.
+#   - Clouds: BSL's "Vanilla" clouds, so the realm's heart clouds show. The mod tints them with the game's cloud colour,
+#     so they cycle through the flag (blue, pink, white, pink, blue) under BSL too. Minecraft's own Clouds video
+#     setting must be on (Fast or Fancy).
+#   - Sky and fog follow the game's: the Trans Realm keeps its trans-blue sky with a pink horizon and pink fog, and the
+#     Overworld stays normal.
 #   - Water takes each biome's colour: blue seas, pink rivers, lavender crystal pools.
+#   - A pink and blue aurora at night. It shows in every overworld-like dimension, the Overworld too: set AURORA to 1
+#     for snowy biomes only, or 0 to turn it off.
 #   - Pink sunrises and sunsets, pink-white daylight, lavender nights, lilac shadows, pink torchlight.
 #   - Brighter colours, a soft pink colour grade, extra bloom and glow.
 #
-# Lighting strengths stay at BSL's defaults. Options your BSL version doesn't have are skipped, and changing
-# anything in the shader menu rewrites this file.
+# Lighting strengths stay at BSL's defaults. Changing anything in the shader menu rewrites this file.
 
-# Clouds
-CLOUDS=false
+# Clouds: vanilla clouds (0 off, 1 skybox, 2 volumetric, 3 vanilla)
+CLOUDS=3
 
 # Sky, fog and water from the game (follows the realm's own colours)
 SKY_VANILLA=true
+USE_FOG_COLOR=true
 WATER_MODE=1
 
 # Sky colour used where the game's isn't
@@ -69,15 +75,21 @@ WATER_R=92
 WATER_G=204
 WATER_B=248
 
-# Atmosphere
+# Night sky: stars, and a trans aurora (pink low, blue high)
 STARS=true
-AURORA=true
+AURORA=2
+AURORA_LR=244
+AURORA_LG=168
+AURORA_LB=184
+AURORA_HR=92
+AURORA_HG=204
+AURORA_HB=248
+
+# Light shafts
 LIGHT_SHAFT=true
 LIGHT_SHAFT_STRENGTH=1.25
-ROUND_SUN_MOON=true
 
 # Camera
-BLOOM=true
 BLOOM_STRENGTH=1.50
 LENS_FLARE=true
 LENS_FLARE_STRENGTH=1.25
@@ -91,4 +103,4 @@ COLOR_GRADING=true
 CG_TR=255
 CG_TG=176
 CG_TB=216
-CG_TM=0.20
+CG_TM=0.2

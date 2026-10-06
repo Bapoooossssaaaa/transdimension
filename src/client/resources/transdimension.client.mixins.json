@@ -6,6 +6,8 @@
 		"AvatarRendererMixin",
 		"CameraMixin",
 		"ClientPacketListenerMixin",
+		"IrisIncludeGraphMixin",
+		"IrisWorldRenderingSettingsMixin",
 		"TextureManagerMixin"
 	],
 	"injectors": {

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
@@ -17,25 +18,34 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import dev.goober.transdimension.TransDimension;
 
 /**
- * Glowing coloured boxes (beams, cubes, sheets of light), gathered for one frame and handed to the renderer in one go,
- * relative to the camera (or to an entity, from an entity renderer). They're drawn see-through and full bright with the
- * same render type as see-through mobs ({@code RenderTypes.entityTranslucent}, on a plain white texture), so shader packs
- * draw them like any glowing mob part. (They used to use {@code debugFilledBox}, which shader packs such as BSL on Iris
- * don't draw.) Every face is wound to face outwards, so it shows whether or not the render type culls back faces. Used by
- * the candle ritual (RitualEffects), the Fairy Realm cutscene (FairyCutsceneCamera) and the cloud boat's line
- * (CloudBoatRenderer).
+ * Coloured boxes (beams, cubes, sheets of light), gathered for one frame and handed to the renderer in one go, relative
+ * to the camera (or to an entity, from an entity renderer), on a plain white texture. Glowing ones (the default) use the
+ * beacon beam's render type ({@code RenderTypes.beaconBeam}, see-through): unlit and unshaded without shaders, and under
+ * Iris drawn by the pack's beacon beam program, which shader packs treat as pure light (BSL boosts it four times, so it
+ * blooms) instead of lighting it like a mob. Plain ones ({@code glow} false: the cloud boat's line) use see-through mobs'
+ * render type ({@code RenderTypes.entityTranslucent}), full bright. (They first used {@code debugFilledBox}, which BSL on
+ * Iris doesn't draw at all.) Every face is wound to face outwards, so it shows whether or not the render type culls back
+ * faces. Used by the candle ritual (RitualEffects), the Fairy Realm cutscene (FairyCutsceneCamera) and the cloud boat's
+ * line (CloudBoatRenderer).
  */
 public final class GlowGeometry {
 	private static final Identifier WHITE = TransDimension.id("textures/misc/glow.png");
 	private static final int FULL_BRIGHT = 0xF000F0;
 
 	private final Vec3 camera;
+	private final boolean glow;
 	private float[] positions = new float[3 * 24 * 32];
 	private int[] colours = new int[24 * 32];
 	private int vertices;
 
 	public GlowGeometry(Vec3 camera) {
+		this(camera, true);
+	}
+
+	/** {@code glow}: drawn as light (the beacon beam's render type) rather than as a see-through solid. */
+	public GlowGeometry(Vec3 camera, boolean glow) {
 		this.camera = camera;
+		this.glow = glow;
 	}
 
 	/** A square beam from {@code from} to {@code to}, {@code half} wide either side, turned {@code spin} radians about itself. */
@@ -130,9 +140,11 @@ public final class GlowGeometry {
 		}
 		float[] xyz = Arrays.copyOf(this.positions, this.vertices * 3);
 		int[] argb = Arrays.copyOf(this.colours, this.vertices);
-		// Every vertex needs everything an entity's does: a spot on the (white) texture, no hurt overlay, full light, and
-		// a normal (straight up for all of them, so no face is shaded darker than another).
-		nodeCollector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucent(WHITE), (pose, buffer) -> {
+		// Every vertex gets everything an entity's needs (a beacon beam needs less, and skips the rest): a spot on the
+		// (white) texture, no hurt overlay, full light, and a normal (straight up for all of them, so no face is shaded
+		// darker than another).
+		RenderType type = this.glow ? RenderTypes.beaconBeam(WHITE, true) : RenderTypes.entityTranslucent(WHITE);
+		nodeCollector.submitCustomGeometry(poseStack, type, (pose, buffer) -> {
 			for (int i = 0; i < argb.length; i++) {
 				buffer.addVertex(pose, xyz[i * 3], xyz[i * 3 + 1], xyz[i * 3 + 2]).setColor(argb[i]).setUv(0.5F, 0.5F)
 						.setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(pose, 0.0F, 1.0F, 0.0F);

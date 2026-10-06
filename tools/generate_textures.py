@@ -3845,11 +3845,19 @@ def fairy_jar_lid():
 def fairy_light(colour):
     """32x32 for the fairy light (FairyLightModel: wild fairies and the Fairy Jar): the glowing cube (0,0), the side
     wings (0,8; 5x5, both faces; shaped the same at root and tip, so either way round looks right) and the halo shell
-    (0,20; mostly see-through). Wings are see-through with a bright rim, like a fairy's."""
+    (0,20; mostly see-through). Wings are see-through with a bright rim, like a fairy's.
+
+    White is a pearl, not plain white: mixing white towards white left a flat #FFFFFF box with no detail at all, and
+    shader packs (BSL lights a bright entity at nearly twice its block light) blew it out further. So the white fairy is
+    lilac-grey at its corners, soft white inside with a blush of pink and a breath of blue across its middle and one bright
+    highlight, with lilac-tinted wings and halo."""
     img = new(32, 32)
-    core = hexc(colour)
-    rim = mix(core, WHITE, 0.25)
-    glow = mix(core, WHITE, 0.75)
+    pearl = colour.upper() == "FFFFFF"
+    core = hexc("ECE6F6") if pearl else hexc(colour)
+    rim = hexc("E3DBF1") if pearl else mix(core, WHITE, 0.25)
+    glow = hexc("F5F1FB") if pearl else mix(core, WHITE, 0.75)
+    corner = hexc("CFC5E4")
+    blush = {(2, 1): hexc("F8D9E6"), (1, 2): hexc("D9ECFA")}
 
     def cube_faces(v, paint):
         for name, (u0, v0) in {"top": (4, v), "bottom": (8, v), "west": (0, v + 4), "north": (4, v + 4), "east": (8, v + 4),
@@ -3862,6 +3870,10 @@ def fairy_light(colour):
         inner = 1 <= x <= 2 and 1 <= y <= 2
         if (x, y) == (1, 1):
             return (255, 255, 255, 255)
+        if pearl and (x, y) in blush:
+            return (*blush[(x, y)], 255)
+        if pearl and x in (0, 3) and y in (0, 3):
+            return (*corner, 255)
         return (*(glow if inner else rim), 255)
     cube_faces(0, body)
 
@@ -3871,7 +3883,10 @@ def fairy_light(colour):
         for face_u in (u, u + w):
             for (x, y) in cells:
                 edge = any((x + dx, y + dy) not in cells for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
-                c = (255, 255, 255, 235) if edge else (*mix(core, WHITE, 0.45 + 0.1 * ((x + y) % 2)), 150)
+                if pearl:
+                    c = (*hexc("FBF9FE"), 235) if edge else (*(hexc("E4DCF2") if (x + y) % 2 else hexc("EEE9F7")), 150)
+                else:
+                    c = (255, 255, 255, 235) if edge else (*mix(core, WHITE, 0.45 + 0.1 * ((x + y) % 2)), 150)
                 img.putpixel((face_u + x, v + y), c)
     wing(0, 8, [".XXX.", "XXXXX", "XXXXX", ".XXX.", "..X.."])
 

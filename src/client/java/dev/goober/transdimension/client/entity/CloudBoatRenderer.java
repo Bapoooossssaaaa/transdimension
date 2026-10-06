@@ -81,7 +81,7 @@ public class CloudBoatRenderer extends EntityRenderer<CloudBoat, CloudBoatRender
 
 		if (state.hand != null) {
 			// The sling and the line, drawn from the boat's own position.
-			GlowGeometry lines = new GlowGeometry(Vec3.ZERO);
+			GlowGeometry lines = new GlowGeometry(Vec3.ZERO, false);
 			Vec3 hook = new Vec3(0.0, HOOK, 0.0);
 			double rad = state.yRot * Mth.DEG_TO_RAD;
 			Vec3 forward = new Vec3(-Math.sin(rad), 0.0, Math.cos(rad));

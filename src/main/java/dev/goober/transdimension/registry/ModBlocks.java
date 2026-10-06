@@ -591,7 +591,7 @@ public final class ModBlocks {
 	/** The trophy for beating the Trans Fairy: a jar with a little winged light dancing inside. */
 	public static final Block FAIRY_JAR = register("fairy_jar", FairyJarBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
-					.lightLevel(state -> 12).randomTicks(),
+					.lightLevel(state -> FairyJarBlock.LIGHT).randomTicks(),
 			new Item.Properties().rarity(Rarity.EPIC).stacksTo(16));
 
 	// ---------------------------------------------------------------- the pink deep dark
