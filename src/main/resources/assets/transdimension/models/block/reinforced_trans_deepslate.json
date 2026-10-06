@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "transdimension:block/reinforced_trans_deepslate_top",
+    "side": "transdimension:block/reinforced_trans_deepslate_side",
+    "bottom": "transdimension:block/reinforced_trans_deepslate_bottom"
+  }
+}

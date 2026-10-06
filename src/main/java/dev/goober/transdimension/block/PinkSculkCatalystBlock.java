@@ -3,7 +3,6 @@ package dev.goober.transdimension.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
@@ -14,6 +13,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 
 import dev.goober.transdimension.registry.ModParticles;
+import dev.goober.transdimension.registry.ModSounds;
 import dev.goober.transdimension.world.PinkDeepDark;
 
 /**
@@ -34,7 +34,7 @@ public class PinkSculkCatalystBlock extends Block {
 	public static void bloom(ServerLevel level, BlockPos pos, BlockState state) {
 		level.setBlock(pos, state.setValue(BLOOM, true), Block.UPDATE_ALL);
 		level.scheduleTick(pos, state.getBlock(), 8);
-		level.playSound(null, pos, SoundEvents.SCULK_CATALYST_BLOOM, SoundSource.BLOCKS, 2.0F, 0.6F + level.getRandom().nextFloat() * 0.4F);
+		level.playSound(null, pos, ModSounds.PINK_SCULK_CATALYST_BLOOM, SoundSource.BLOCKS, 1.5F, 0.9F + level.getRandom().nextFloat() * 0.2F);
 		level.sendParticles(ModParticles.PINK_SCULK_SOUL, pos.getX() + 0.5, pos.getY() + 1.15, pos.getZ() + 0.5, 3, 0.2, 0.0, 0.2, 0.0);
 	}
 

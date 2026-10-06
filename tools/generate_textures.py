@@ -427,6 +427,27 @@ def deepslate_bricks(name, seed):
     return bricks_from(vblock(name), seed=seed, base=R_DEEPSLATE, mortar=deep_mortar, tint=0.16)
 
 
+def reinforced_trans_deepslate(face):
+    """The pink ancient city's gate frame: vanilla's reinforced deepslate with a twilight slate body, its bone-white
+    corners pearly pink and its teal studs trans blue."""
+    src = vblock(f"reinforced_deepslate_{face}")
+    lo, hi = lum_range(src)
+    bone = [hexc(c) for c in ("6B3A55", "9A5878", "C9819F", "F5A9B8", "FBD3DD", "FFF1F5")]
+    out = src.copy()
+    for (x, y) in pixels(src):
+        px = src.getpixel((x, y))
+        h, sat, _ = colorsys.rgb_to_hsv(px[0] / 255, px[1] / 255, px[2] / 255)
+        t = (lum(px) - lo) / (hi - lo)
+        if sat > 0.18 and 0.4 < h < 0.6:
+            c = sample(R_BLUE, 0.35 + 0.6 * t)
+        elif sat > 0.12 and 0.1 < h < 0.4:
+            c = sample(bone, t)
+        else:
+            c = sample(R_DEEPSLATE, t)
+        out.putpixel((x, y), (*c, px[3]))
+    return out
+
+
 def chiseled_trans_deepslate():
     img = gradient_map(vblock("chiseled_deepslate"), R_DEEPSLATE)
     return paste_heart(img, 7, 7, shade(PINK, 0.8), outline=hexc("5C2A44"))
@@ -3720,8 +3741,6 @@ FRAME_BODY = [hexc(c) for c in ("16284F", "1F3F78", "2D5FA3", "4A86C8")]
 FRAME_INLAY = [hexc(c) for c in ("B26585", "DA8EAD", "F5B9CB", "FFE8EF")]
 FRAME_STONE = [hexc(c) for c in ("8F8AA8", "ADA8C4", "C8C4DB", "E0DDEC", "F4F2F9")]
 FRAME_SOCKET = [hexc(c) for c in ("050A1A", "0C1530", "142046")]
-# The crystal pearl in a filled socket: vanilla's eye of ender, deep blue round a pink and white iris.
-FRAME_PEARL = [hexc(c) for c in ("0E1A45", "1F3F86", "3C78C4", "5BCEFA", "C9B8F2", "F5A9B8", "FFFFFF")]
 # The open Fairy Portal's opal pool.
 OPAL = [hexc(c) for c in ("F5A9B8", "C9B8F2", "8ED8FA", "5BCEFA", "B8F0F5", "FFFFFF", "F9C6E6")]
 
@@ -3748,8 +3767,19 @@ def fairy_frame_side():
 
 
 def fairy_frame_pearl():
-    """Laid out like vanilla's end_portal_frame_eye: the frame model shows its middle 8x8 on top and rows 0-2 on the sides."""
-    return gradient_map(vblock("end_portal_frame_eye"), FRAME_PEARL)
+    """The socket with a crystal pearl in it: a glowing pink pearl with a white glint, ringed in trans blue (the frame
+    model shows the middle 8x8 and a 3-pixel rim of it). This is the frame's first pearl, which the owner prefers to the
+    recoloured vanilla eye that replaced it for a while."""
+    img = new(16, 16)
+    for y in range(16):
+        for x in range(16):
+            d = math.hypot(x - 7.5, y - 7.5)
+            t = max(0.0, 1.0 - d / 5.5)
+            c = sample([hexc("2C6FB0"), hexc("5BCEFA"), hexc("C9B8F2"), hexc("F5A9B8"), hexc("FFFFFF")], 0.15 + 0.85 * t)
+            img.putpixel((x, y), (*c, 255))
+    for (x, y) in ((6, 5), (7, 5), (6, 6)):
+        img.putpixel((x, y), (255, 255, 255, 255))
+    return img
 
 
 def fairy_portal_frames(n=32):
@@ -4354,6 +4384,47 @@ def round9_textures():
     yield from pink_particles()
 
 
+# ============================================================================================ chests
+# Every chest in the game is glowy pink: these replace vanilla's own chest textures (assets/minecraft/), and the chests
+# give off light (ChestLightMixin) so they glow in the dark.
+R_CHEST_WOOD = [hexc(c) for c in ("5C1B3E", "9A3568", "D45E95", "F290B5", "F9C2D4", "FFE9F1")]
+R_CHEST_LATCH = [hexc(c) for c in ("6F7FA8", "A9B8DA", "D8E3F6", "F2F7FF", "FFFFFF")]
+CHEST_TEXTURES = ("normal", "normal_left", "normal_right", "trapped", "trapped_left", "trapped_right")
+
+
+def glowy_chest(name):
+    """Vanilla's chest (tools/vanilla_extra/entity/chest/) in rosy pink wood with its grain kept, a pearly latch and, on
+    the trapped chest, a trans blue hook."""
+    src = vextra(f"entity/chest/{name}.png")
+
+    def latch(px):
+        _, sat, val = colorsys.rgb_to_hsv(px[0] / 255, px[1] / 255, px[2] / 255)
+        return sat < 0.15 and val > 0.3
+
+    def hook(px):
+        h, sat, _ = colorsys.rgb_to_hsv(px[0] / 255, px[1] / 255, px[2] / 255)
+        return sat > 0.5 and (h < 0.04 or h > 0.92)
+
+    wood_lo, wood_hi = lum_range(src, mask=lambda p, px: not latch(px) and not hook(px) and lum(px) > 0.08)
+    metal_lo, metal_hi = lum_range(src, mask=lambda p, px: latch(px))
+    out = src.copy()
+    for (x, y) in pixels(src):
+        px = src.getpixel((x, y))
+        if px[3] == 0:
+            continue
+        if latch(px):
+            c = sample(R_CHEST_LATCH, min(1.0, max(0.0, (lum(px) - metal_lo) / (metal_hi - metal_lo))))
+        elif hook(px):
+            c = sample(R_BLUE, 0.6)
+        elif lum(px) <= 0.08:
+            c = sample(R_CHEST_WOOD, 0.05)
+        else:
+            t = min(1.0, max(0.0, (lum(px) - wood_lo) / (wood_hi - wood_lo)))
+            c = sample(R_CHEST_WOOD, 0.18 + 0.7 * t)
+        out.putpixel((x, y), (*c, px[3]))
+    return out
+
+
 def main():
     blocks = {
         # terrain
@@ -4374,6 +4445,7 @@ def main():
         "trans_deepslate_tiles": deepslate_bricks("deepslate_tiles", 1),
         "cracked_trans_deepslate_tiles": deepslate_bricks("cracked_deepslate_tiles", 1),
         "chiseled_trans_deepslate": chiseled_trans_deepslate(),
+        **{f"reinforced_trans_deepslate_{face}": reinforced_trans_deepslate(face) for face in ("top", "side", "bottom")},
         # granite, diorite, andesite, gravel
         "trans_granite": trans_granite(), "polished_trans_granite": trans_granite("polished_granite"),
         "trans_diorite": trans_diorite(), "polished_trans_diorite": trans_diorite("polished_diorite"),
@@ -4525,6 +4597,11 @@ def main():
         img = make()
         assert img.size == (16 * pw, 16 * ph), name
         save(img, f"painting/{name}.png")
+
+    chests = os.path.join(ROOT, "src", "main", "resources", "assets", "minecraft", "textures", "entity", "chest")
+    os.makedirs(chests, exist_ok=True)
+    for name in CHEST_TEXTURES:
+        glowy_chest(name).save(os.path.join(chests, f"{name}.png"))
 
     icon_path = os.path.join(OUT, "icon.png")
     icon().save(icon_path)

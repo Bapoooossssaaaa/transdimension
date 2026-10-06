@@ -209,6 +209,8 @@ public final class ModBlocks {
 	public static final Block TRANS_DEEPSLATE_TILE_WALL = wall("trans_deepslate_tile_wall", Blocks.DEEPSLATE_TILE_WALL);
 	public static final Block CRACKED_TRANS_DEEPSLATE_TILES = copy("cracked_trans_deepslate_tiles", Blocks.CRACKED_DEEPSLATE_TILES);
 	public static final Block CHISELED_TRANS_DEEPSLATE = copy("chiseled_trans_deepslate", Blocks.CHISELED_DEEPSLATE);
+	/** The pink ancient city's gate frame: vanilla's reinforced deepslate in trans colours, just as hard to break. */
+	public static final Block REINFORCED_TRANS_DEEPSLATE = copy("reinforced_trans_deepslate", Blocks.REINFORCED_DEEPSLATE);
 
 	// ---------------------------------------------------------------- rose granite, pearl diorite, sky andesite, gravel
 	public static final Block TRANS_GRANITE = copy("trans_granite", Blocks.GRANITE);
@@ -585,22 +587,22 @@ public final class ModBlocks {
 	// ---------------------------------------------------------------- the pink deep dark
 	/** The pink deep dark's living carpet. Drops a little experience, like vanilla sculk. */
 	public static final Block PINK_SCULK = register("pink_sculk", properties -> new DropExperienceBlock(ConstantInt.of(1), properties),
-			BlockBehaviour.Properties.ofFullCopy(Blocks.SCULK).mapColor(MapColor.COLOR_PINK));
+			BlockBehaviour.Properties.ofFullCopy(Blocks.SCULK).mapColor(MapColor.COLOR_PINK).sound(ModSounds.PINK_SCULK));
 	/** Pink veins creeping over the cave walls round the patches (vanilla's vein block, so it grows like glow lichen). */
 	public static final Block PINK_SCULK_VEIN = register("pink_sculk_vein", SculkVeinBlock::new,
-			BlockBehaviour.Properties.ofFullCopy(Blocks.SCULK_VEIN).mapColor(MapColor.COLOR_PINK));
+			BlockBehaviour.Properties.ofFullCopy(Blocks.SCULK_VEIN).mapColor(MapColor.COLOR_PINK).sound(ModSounds.PINK_SCULK));
 	/**
 	 * Blooms and spreads pink sculk when something dies nearby ({@code PinkDeepDark}). It has no block entity, because
 	 * vanilla's catalyst block entity would spread vanilla's blue sculk.
 	 */
 	public static final Block PINK_SCULK_CATALYST = register("pink_sculk_catalyst", PinkSculkCatalystBlock::new,
-			BlockBehaviour.Properties.ofFullCopy(Blocks.SCULK_CATALYST).mapColor(MapColor.COLOR_PINK));
+			BlockBehaviour.Properties.ofFullCopy(Blocks.SCULK_CATALYST).mapColor(MapColor.COLOR_PINK).sound(ModSounds.PINK_SCULK));
 	/** Vanilla's sculk sensor (block and block entity) in pink: it hears vibrations and powers redstone the same way. */
 	public static final Block PINK_SCULK_SENSOR = register("pink_sculk_sensor", SculkSensorBlock::new,
-			BlockBehaviour.Properties.ofFullCopy(Blocks.SCULK_SENSOR).mapColor(MapColor.COLOR_PINK));
+			BlockBehaviour.Properties.ofFullCopy(Blocks.SCULK_SENSOR).mapColor(MapColor.COLOR_PINK).sound(ModSounds.PINK_SCULK));
 	/** Vanilla's sculk shrieker in pink. The mod only places it with can_summon=false: it shrieks but never calls a warden. */
 	public static final Block PINK_SCULK_SHRIEKER = register("pink_sculk_shrieker", SculkShriekerBlock::new,
-			BlockBehaviour.Properties.ofFullCopy(Blocks.SCULK_SHRIEKER).mapColor(MapColor.COLOR_PINK));
+			BlockBehaviour.Properties.ofFullCopy(Blocks.SCULK_SHRIEKER).mapColor(MapColor.COLOR_PINK).sound(ModSounds.PINK_SCULK));
 	/** The pink deep dark's gem ore, in trans deepslate. Sculk people trade their wares for its gems. */
 	public static final Block SCULK_GEM_ORE = ore("sculk_gem_ore", UniformInt.of(3, 7), Blocks.DEEPSLATE_EMERALD_ORE);
 

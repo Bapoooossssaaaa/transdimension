@@ -7,7 +7,10 @@
 		"FireBlockMixin",
 		"LiquidBlockMixin",
 		"EnderManMixin",
-		"NoiseBasedChunkGeneratorMixin"
+		"NoiseBasedChunkGeneratorMixin",
+		"SculkSensorBlockMixin",
+		"SculkShriekerBlockEntityMixin",
+		"ChestLightMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

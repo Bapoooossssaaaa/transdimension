@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "transdimension:block/reinforced_trans_deepslate"
+    }
+  }
+}

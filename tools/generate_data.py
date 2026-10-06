@@ -621,6 +621,16 @@ def generate_blocks():
     stone_family("trans_deepslate_tiles", "Trans Deepslate Tiles", "trans_deepslate_tile", "Trans Deepslate Tile")
     cube("cracked_trans_deepslate_tiles", "Cracked Trans Deepslate Tiles")
     cube("chiseled_trans_deepslate", "Chiseled Trans Deepslate")
+    # The pink ancient city's gate frame. Like vanilla's reinforced deepslate it takes an age to break and drops nothing.
+    blockstate("reinforced_trans_deepslate", {"variants": {"": {"model": f"{NS}:block/reinforced_trans_deepslate"}}})
+    model("reinforced_trans_deepslate", {"parent": "minecraft:block/cube_bottom_top", "textures": {
+        "top": block_tex("reinforced_trans_deepslate_top"), "side": block_tex("reinforced_trans_deepslate_side"),
+        "bottom": block_tex("reinforced_trans_deepslate_bottom")}})
+    item_def("reinforced_trans_deepslate", f"{NS}:block/reinforced_trans_deepslate")
+    name("reinforced_trans_deepslate", "Reinforced Trans Deepslate")
+    loot("reinforced_trans_deepslate", {"type": "minecraft:block", "random_sequence": f"{NS}:blocks/reinforced_trans_deepslate"})
+    for immune in ("dragon_immune", "wither_immune", "features_cannot_replace"):
+        tag("block", immune, "reinforced_trans_deepslate")
 
     # ---- rose granite, pearl diorite, sky andesite, gravel
     for stone, english in (("granite", "Rose Granite"), ("diorite", "Pearl Diorite"), ("andesite", "Sky Andesite")):
@@ -1781,9 +1791,12 @@ def generate_fairy_realm_data():
         "item.transdimension.trans_crystal_pearl.nothing": "The pearl can't sense any Fairy Sanctum nearby.",
         "entity.transdimension.crystal_eye": "Trans Crystal Pearl",
         "message.transdimension.fairy_altar_hint": "✦ The arena is quiet. Throw a Trans Crystal onto the altar to call the Trans Fairy. ✦",
-        "message.transdimension.cutscene.maddie_1": "What are you doing?!",
-        "message.transdimension.cutscene.maddie_2": "I've done something horrible...",
-        "message.transdimension.cutscene.maddie_3": "The Trans Fairy is a horrible being. Get away from her before she—",
+        "message.transdimension.cutscene.maddie_1": "Wait! What are you doing?!",
+        "message.transdimension.cutscene.maddie_2": "You summoned her... You've done something horrible!",
+        "message.transdimension.cutscene.maddie_3": "The Trans Fairy is an ancient, horrible being. Get away from her before she—",
+        "message.transdimension.cutscene.fairy_1": "Hush now, little Maddie.",
+        "message.transdimension.cutscene.fairy_2": "Ages I have slept beneath this altar... and you are the one who woke me.",
+        "message.transdimension.cutscene.fairy_3": "Very well, child of the flag. Show me what your heart is worth!",
         "message.transdimension.pastel_slime.stay": "Your slime will wait here",
         "message.transdimension.pastel_slime.follow": "Your slime follows you again",
         "message.transdimension.fairy_already_here": "The Trans Fairy is already here!",
@@ -1909,6 +1922,10 @@ def generate_misc():
         "entity.transdimension.villager.trans_baker": "Trans Baker",
         "effect.transdimension.slobbered": "Slobbered",
         "subtitles.transdimension.entity.silly_cat.ambient": "Silly Cat meows",
+        "subtitles.transdimension.block.pink_sculk_sensor.clicking": "Pink Sculk Sensor chimes",
+        "subtitles.transdimension.block.pink_sculk_sensor.clicking_stop": "Pink Sculk Sensor settles",
+        "subtitles.transdimension.block.pink_sculk_shrieker.shriek": "Pink Sculk Shrieker sings",
+        "subtitles.transdimension.block.pink_sculk_catalyst.bloom": "Pink Sculk Catalyst blooms",
         "subtitles.transdimension.entity.silly_cat.purr": "Silly Cat purrs",
         "subtitles.transdimension.entity.silly_cat.lick": "Silly Cat gives a big lick",
         "subtitles.transdimension.entity.silly_cat.hurt": "Silly Cat hurts",
@@ -2262,14 +2279,18 @@ def generate_round9():
     item_def("ritual_pedestal", f"{NS}:block/ritual_pedestal")
     name("ritual_pedestal", "Ritual Candle Stand")
 
-    def crystal_elements():
-        core = faced_box((5, 2, 5), (11, 14, 11), "#crystal", light=15)
-        core["rotation"] = {"origin": [8, 8, 8], "axis": "y", "angle": 45}
-        left = faced_box((3, 0, 6), (6, 7, 9), "#crystal", light=15)
-        left["rotation"] = {"origin": [4.5, 0, 7.5], "axis": "z", "angle": 22.5}
-        right = faced_box((10, 0, 7), (13, 6, 10), "#crystal", light=15)
-        right["rotation"] = {"origin": [11.5, 0, 8.5], "axis": "z", "angle": -22.5}
-        return [core, left, right]
+    def crystal_elements(shift=8):
+        # In the world the gem floats half a block up and half a block east (its facing's clockwise side) of its block's
+        # middle (SculkRitual.beamOrigin), so it can hang dead level with, and in line with, the middle of an even-sized
+        # gate. The item shows it unshifted.
+        def gem(frm, to, origin, axis, angle):
+            e = faced_box(frm, to, "#crystal", light=15)
+            e["from"] = [frm[0] + shift, frm[1] + shift, frm[2]]
+            e["to"] = [to[0] + shift, to[1] + shift, to[2]]
+            e["rotation"] = {"origin": [origin[0] + shift, origin[1] + shift, origin[2]], "axis": axis, "angle": angle}
+            return e
+        return [gem((5, 2, 5), (11, 14, 11), (8, 8, 8), "y", 45), gem((3, 0, 6), (6, 7, 9), (4.5, 0, 7.5), "z", 22.5),
+                gem((10, 0, 7), (13, 6, 10), (11.5, 0, 8.5), "z", -22.5)]
     for awake in ("", "_awake"):
         model(f"ritual_crystal{awake}", {"parent": "minecraft:block/block", "textures": {
             "particle": block_tex(f"ritual_crystal{awake}"), "crystal": block_tex(f"ritual_crystal{awake}")}, "elements": crystal_elements()})
@@ -2282,7 +2303,9 @@ def generate_round9():
                 v["y"] = y
             variants[f"awake={awake},facing={facing}"] = v
     blockstate("ritual_crystal", {"variants": variants})
-    item_def("ritual_crystal", f"{NS}:block/ritual_crystal")
+    model("ritual_crystal_item", {"parent": "minecraft:block/block", "textures": {
+        "particle": block_tex("ritual_crystal"), "crystal": block_tex("ritual_crystal")}, "elements": crystal_elements(shift=0)})
+    item_def("ritual_crystal", f"{NS}:block/ritual_crystal_item")
     name("ritual_crystal", "Ritual Crystal")
 
     portal_tex = {"particle": block_tex("sky_portal"), "portal": translucent("sky_portal")}
@@ -2383,6 +2406,23 @@ def generate_sounds():
         "ui.intro.bell": {"sounds": [{"name": "minecraft:note/bell"}]},
         "ui.intro.chime": {"sounds": [{"name": "minecraft:block/amethyst/shimmer", "volume": 0.9}]},
         "ui.intro.whoosh": {"sounds": [event("minecraft:entity.player.attack.sweep", volume=0.8, pitch=0.6)]},
+        # Pink sculk sounds soft and sparkly instead of creepy: moss underfoot, chimes where vanilla's sculk clicks and
+        # shrieks (ModSounds.PINK_SCULK and the sculk sensor and shrieker mixins).
+        "block.pink_sculk.break": {"subtitle": "subtitles.block.generic.break", "sounds": [
+            event("minecraft:block.moss.break", pitch=1.15), event("minecraft:block.moss.break", pitch=1.15),
+            event("minecraft:block.amethyst_cluster.break", volume=0.6, pitch=1.4)]},
+        "block.pink_sculk.step": {"subtitle": "subtitles.block.generic.footsteps", "sounds": [event("minecraft:block.moss.step", pitch=1.15)]},
+        "block.pink_sculk.place": {"subtitle": "subtitles.block.generic.place", "sounds": [event("minecraft:block.moss.place", pitch=1.15)]},
+        "block.pink_sculk.hit": {"subtitle": "subtitles.block.generic.hit", "sounds": [event("minecraft:block.moss.hit", pitch=1.15)]},
+        "block.pink_sculk.fall": {"subtitle": "subtitles.block.generic.fall", "sounds": [event("minecraft:block.moss.fall", pitch=1.15)]},
+        "block.pink_sculk_sensor.clicking": {"subtitle": "subtitles.transdimension.block.pink_sculk_sensor.clicking", "sounds": [
+            event("minecraft:block.amethyst_block.chime", volume=0.9, pitch=1.4)]},
+        "block.pink_sculk_sensor.clicking_stop": {"subtitle": "subtitles.transdimension.block.pink_sculk_sensor.clicking_stop", "sounds": [
+            event("minecraft:block.amethyst_cluster.step", volume=0.6, pitch=1.6)]},
+        "block.pink_sculk_shrieker.shriek": {"subtitle": "subtitles.transdimension.block.pink_sculk_shrieker.shriek", "sounds": [
+            event("minecraft:block.amethyst_block.resonate", pitch=1.3), event("minecraft:entity.allay.ambient_without_item", pitch=1.1)]},
+        "block.pink_sculk_catalyst.bloom": {"subtitle": "subtitles.transdimension.block.pink_sculk_catalyst.bloom", "sounds": [
+            event("minecraft:block.amethyst_block.resonate", volume=0.8, pitch=1.6)]},
     }
     write(os.path.join(ASSETS, "sounds.json"), sounds)
 

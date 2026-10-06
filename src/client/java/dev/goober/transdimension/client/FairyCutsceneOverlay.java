@@ -10,18 +10,22 @@ import net.minecraft.util.Mth;
 import dev.goober.transdimension.network.FairyCutscenePayload;
 
 /**
- * The Fairy Realm's cutscene as each watching player sees it (the server runs it: FairyCutscene). Black letterbox bars
- * slide in over the HUD, each of Maddie's lines types itself out as a subtitle in the lower bar under her name in pink,
- * and the bars slide away again as the fight begins.
+ * The Fairy Realm cutscene's subtitles as each watching player sees them (the server runs the scene: FairyCutscene; the
+ * camera moves with {@link FairyCutsceneCamera}). There are no bars: each line types itself out low on the screen under
+ * its speaker's name, Maddie's in pink and the Trans Fairy's in blue, and the last one fades away as the fight begins.
+ * The rest of the HUD is hidden while the scene plays (TransDimensionClient).
  */
 public final class FairyCutsceneOverlay {
-	private static final float BAR_SECONDS = 0.6F;
 	private static final float CHARS_PER_SECOND = 30.0F;
+	private static final float FADE_SECONDS = 0.6F;
+	private static final int MADDIE_PINK = 0xF5A9B8;
+	private static final int FAIRY_BLUE = 0x5BCEFA;
 
 	private static boolean active;
-	/** When the bars last started moving in or out; -1 when there's nothing to draw. */
-	private static long changedNanos = -1L;
+	/** When the scene ended (the last line fades from then), or -1. */
+	private static long endedNanos = -1L;
 	private static String speaker = "";
+	private static int speakerColour = MADDIE_PINK;
 	private static String line = "";
 	private static long lineNanos;
 
@@ -33,21 +37,22 @@ public final class FairyCutsceneOverlay {
 		switch (payload.kind()) {
 			case FairyCutscenePayload.START -> {
 				active = true;
-				changedNanos = now;
+				endedNanos = -1L;
 				line = "";
+				FairyCutsceneCamera.start();
 			}
 			case FairyCutscenePayload.LINE -> {
-				if (!active) {
-					active = true;
-					changedNanos = now;
-				}
+				active = true;
+				endedNanos = -1L;
 				speaker = Component.translatable(payload.speaker()).getString();
+				speakerColour = payload.speaker().contains("trans_fairy") ? FAIRY_BLUE : MADDIE_PINK;
 				line = Component.translatable(payload.line()).getString();
 				lineNanos = now;
 			}
 			default -> {
 				active = false;
-				changedNanos = now;
+				endedNanos = now;
+				FairyCutsceneCamera.stop();
 			}
 		}
 	}
@@ -55,34 +60,31 @@ public final class FairyCutsceneOverlay {
 	/** Clears the scene (leaving the Fairy Realm mid-scene). */
 	public static void reset() {
 		active = false;
-		changedNanos = -1L;
+		endedNanos = -1L;
 		line = "";
+		FairyCutsceneCamera.stop();
 	}
 
 	public static void extract(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
-		if (changedNanos < 0L) {
+		if (line.isEmpty() || (!active && endedNanos < 0L)) {
 			return;
 		}
 		long now = System.nanoTime();
-		float t = Mth.clamp((now - changedNanos) / 1.0e9F / BAR_SECONDS, 0.0F, 1.0F);
-		float eased = t * t * (3.0F - 2.0F * t);
-		float shown = active ? eased : 1.0F - eased;
-		if (shown <= 0.0F) {
-			changedNanos = -1L;
+		float alpha = active ? 1.0F : 1.0F - (now - endedNanos) / 1.0e9F / FADE_SECONDS;
+		if (alpha <= 0.05F) {
+			if (!active) {
+				line = "";
+				endedNanos = -1L;
+			}
 			return;
 		}
+		Font font = Minecraft.getInstance().font;
 		int width = graphics.guiWidth();
-		int height = graphics.guiHeight();
-		int bar = Math.round(height * 0.13F * shown);
-		graphics.fill(0, 0, width, bar, 0xFF000000);
-		graphics.fill(0, height - bar, width, height, 0xFF000000);
-		if (active && shown >= 1.0F && !line.isEmpty()) {
-			Font font = Minecraft.getInstance().font;
-			int typed = Mth.clamp((int) ((now - lineNanos) / 1.0e9F * CHARS_PER_SECOND), 0, line.length());
-			int y = height - bar + Math.max(2, (bar - 20) / 2);
-			graphics.text(font, speaker, (width - font.width(speaker)) / 2, y, 0xFFF5A9B8, true);
-			// Centred on the whole line, so the words don't shift as they type out.
-			graphics.text(font, line.substring(0, typed), (width - font.width(line)) / 2, y + 11, 0xFFFFFFFF, true);
-		}
+		int y = graphics.guiHeight() - 46;
+		int typed = Mth.clamp((int) ((now - lineNanos) / 1.0e9F * CHARS_PER_SECOND), 0, line.length());
+		int a = Mth.clamp(Math.round(alpha * 255.0F), 0, 255) << 24;
+		graphics.text(font, speaker, (width - font.width(speaker)) / 2, y, a | speakerColour, true);
+		// Centred on the whole line, so the words don't shift as they type out.
+		graphics.text(font, line.substring(0, typed), (width - font.width(line)) / 2, y + 12, a | 0xFFFFFF, true);
 	}
 }

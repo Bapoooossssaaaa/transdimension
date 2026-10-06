@@ -1,6 +1,8 @@
 package dev.goober.transdimension.world;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -10,53 +12,73 @@ import org.jspecify.annotations.Nullable;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 import dev.goober.transdimension.block.RitualCrystalBlock;
 import dev.goober.transdimension.block.RitualPedestalBlock;
 import dev.goober.transdimension.block.SkyPortalBlock;
+import dev.goober.transdimension.network.RitualPayload;
 import dev.goober.transdimension.registry.ModBlocks;
 
 /**
  * The candle ritual that opens a pink ancient city's gate into a Sky Portal.
  *
- * <p>In front of the great gate of every pink ancient city (tools/generate_ancient_city.py) stands a circle of eight
- * {@link RitualPedestalBlock candle stands} under a floating {@link RitualCrystalBlock}, which faces the gate. Ritual
- * Candles come from the city's chests. When the last stand gets its candle:
+ * <p>In front of the great gate of every pink ancient city (tools/generate_ancient_city.py) a circle of eight
+ * {@link RitualPedestalBlock candle stands} rings the foot of a floating {@link RitualCrystalBlock}, which hangs level
+ * with the middle of the gate and faces it. Ritual Candles come from the city's chests. When the last stand gets its
+ * candle:
  * <ol>
- * <li>each candle shoots a beam of light up into the crystal ({@link #CANDLE_BEAMS} ticks),
- * <li>the crystal wakes and shoots one great beam into the middle of the gate ({@link #CRYSTAL_BEAM} ticks),
- * <li>a Sky Portal opens at the middle of the gate and spreads out ring by ring until it touches the frame all round.
+ * <li>one after another round the circle, each candle shoots a beam of light up into the crystal,
+ * <li>the crystal wakes with a flash and fires one great beam straight into the middle of the gate,
+ * <li>a Sky Portal opens there behind a sheet of light and spreads out ring by ring until it touches the frame all round.
  * </ol>
- * The opening is found by flood-filling the air in the gate's plane from its middle ({@link #GATE_DISTANCE} blocks the
- * way the crystal faces and {@link #GATE_RISE} up). A frame with a hole in it (more than {@link #MAX_PORTAL} blocks of
- * light) can't hold the portal, and it fades away again.
+ * The server changes the blocks and plays the sounds; every watching client draws the beams and the light itself from
+ * one {@link RitualPayload} (RitualEffects), on the same timeline (the constants below).
+ *
+ * <p>The opening is the air in the gate's plane round the point {@link #GATE_DISTANCE} blocks in front of the crystal's
+ * gem. A frame with a hole in it (more than {@link #MAX_PORTAL} blocks of air) can't hold a portal.
  */
 public final class SculkRitual {
 	/** How far round the crystal, and how far below it, the candle stands may be. */
 	private static final int RING_REACH = 8;
 	private static final int RING_DEPTH = 12;
-	/** From the crystal to the middle of the gate: this many blocks the way it faces, and this many up. */
-	private static final int GATE_DISTANCE = 6;
-	private static final int GATE_RISE = 4;
+	/** The middle of the gate is this many blocks in front of the crystal's gem, the way it faces. */
+	public static final int GATE_DISTANCE = 6;
+	/** How far from that point the opening may start (the first cities' crystals hung four blocks lower). */
+	private static final int GATE_SEARCH = 5;
 	private static final int MAX_PORTAL = 400;
-	private static final int CANDLE_BEAMS = 50;
-	private static final int CRYSTAL_BEAM = 40;
-	private static final double MESSAGE_RANGE = 48.0;
-	private static final int[] PINKS = {0xFF5FA2, 0xFFB3D1, 0xFFFFFF};
+	private static final double AUDIENCE = 96.0;
+
+	// The timeline, in ticks from the moment the circle is complete. The clients' light show follows the same one.
+	/** One candle beam starts every this many ticks, round the circle... */
+	public static final int CANDLE_INTERVAL = 4;
+	/** ...each taking this long to rise into the crystal. */
+	public static final int CANDLE_GROW = 8;
+	/** The crystal wakes... */
+	public static final int AWAKEN = 44;
+	/** ...fires at the gate... */
+	public static final int FIRE = 56;
+	/** ...its beam takes this long to cross... */
+	public static final int FIRE_GROW = 5;
+	/** ...and the portal starts in the middle of the gate, gaining a ring of blocks every {@link #RING_TICKS}. */
+	public static final int OPEN = FIRE + FIRE_GROW;
+	public static final int RING_TICKS = 2;
+	/** Once the last ring is in, the light lingers this long, fading out over the last {@link #FADE} ticks. */
+	public static final int LINGER = 40;
+	public static final int FADE = 20;
 
 	private static final List<Ritual> RUNNING = new ArrayList<>();
 
@@ -65,6 +87,21 @@ public final class SculkRitual {
 
 	public static void initialize() {
 		ServerTickEvents.END_LEVEL_TICK.register(SculkRitual::tick);
+	}
+
+	/**
+	 * Where the crystal's beam leaves it: the middle of its floating gem. The gem hangs half a block above its block's
+	 * middle and half a block to its clockwise side, so a crystal can sit exactly level with, and in line with, the
+	 * middle of a gate that's an even number of blocks wide and tall (the ancient city's is 20 by 6).
+	 */
+	public static Vec3 beamOrigin(BlockPos crystal, Direction facing) {
+		Direction side = facing.getClockWise();
+		return Vec3.atCenterOf(crystal).add(side.getStepX() * 0.5, 0.5, side.getStepZ() * 0.5);
+	}
+
+	/** Where a crystal aims: the middle of its gate, if the gate is where the city puts it. */
+	public static Vec3 aim(BlockPos crystal, Direction facing) {
+		return beamOrigin(crystal, facing).add(facing.getStepX() * GATE_DISTANCE, 0.0, facing.getStepZ() * GATE_DISTANCE);
 	}
 
 	/** A candle was just set on a stand: if that completes its circle, the ritual begins. */
@@ -107,15 +144,26 @@ public final class SculkRitual {
 			return;
 		}
 		Direction facing = crystalState.getValue(RitualCrystalBlock.FACING);
-		BlockPos start = findGateMiddle(level, crystal, facing);
-		if (start == null) {
+		Set<BlockPos> opening = findOpening(level, aim(crystal, facing), facing);
+		if (opening.isEmpty()) {
 			player.sendOverlayMessage(Component.translatable("message.transdimension.ritual.blocked"));
 			return;
 		}
-		RUNNING.add(new Ritual(level, crystal, facing, stands, start));
+		if (opening.size() > MAX_PORTAL) {
+			player.sendOverlayMessage(Component.translatable("message.transdimension.ritual.broken"));
+			return;
+		}
+		Gate gate = Gate.of(opening, facing);
+		Vec3 origin = beamOrigin(crystal, facing);
+		List<Vec3> candles = candleTips(stands, origin, facing);
+		RUNNING.add(new Ritual(level, crystal, facing, candles, gate));
+
+		RitualPayload payload = new RitualPayload(crystal, facing, origin, gate.centre, gate.halfAlong, gate.halfUp, gate.rings.size(), candles);
+		for (ServerPlayer watcher : level.getPlayers(p -> p.distanceToSqr(origin) < AUDIENCE * AUDIENCE)) {
+			ServerPlayNetworking.send(watcher, payload);
+		}
 		level.playSound(null, crystal, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 2.0F, 1.2F);
-		level.playSound(null, crystal, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 2.0F, 0.8F);
-		tell(level, crystal, "message.transdimension.ritual.begin");
+		tell(level, origin, "message.transdimension.ritual.begin");
 	}
 
 	private static boolean isRunning(ServerLevel level, BlockPos crystal) {
@@ -147,22 +195,63 @@ public final class SculkRitual {
 		return stands;
 	}
 
-	/** The air block at the middle of the gate the crystal faces (or the nearest air in the gate's plane), or null. */
-	@Nullable
-	private static BlockPos findGateMiddle(ServerLevel level, BlockPos crystal, Direction facing) {
-		BlockPos middle = crystal.relative(facing, GATE_DISTANCE).above(GATE_RISE);
+	/** The flame of each stand's candle, going round the circle clockwise from the stand nearest the gate. */
+	private static List<Vec3> candleTips(List<BlockPos> stands, Vec3 origin, Direction facing) {
+		double front = Math.atan2(facing.getStepZ(), facing.getStepX());
+		List<BlockPos> sorted = new ArrayList<>(stands);
+		sorted.sort(Comparator.comparingDouble(stand -> {
+			double angle = Math.atan2(stand.getZ() + 0.5 - origin.z, stand.getX() + 0.5 - origin.x) - front;
+			return Mth.positiveModulo(angle, Math.PI * 2.0);
+		}));
+		List<Vec3> tips = new ArrayList<>(sorted.size());
+		for (BlockPos stand : sorted) {
+			tips.add(Vec3.atBottomCenterOf(stand).add(0.0, 1.15, 0.0));
+		}
+		return tips;
+	}
+
+	/**
+	 * The air in the gate's plane joined to the air nearest the point the crystal aims at: empty if there's no air near
+	 * that point, and more than {@link #MAX_PORTAL} blocks (where the search stops) if the frame has a hole in it.
+	 */
+	private static Set<BlockPos> findOpening(ServerLevel level, Vec3 aim, Direction facing) {
 		Direction along = facing.getClockWise();
-		for (int r = 0; r <= 2; r++) {
+		BlockPos middle = BlockPos.containing(aim);
+		Set<BlockPos> opening = new HashSet<>();
+		BlockPos start = null;
+		search:
+		for (int r = 0; r <= GATE_SEARCH; r++) {
 			for (int dy = -r; dy <= r; dy++) {
 				for (int da = -r; da <= r; da++) {
+					if (Math.max(Math.abs(dy), Math.abs(da)) != r) {
+						continue;
+					}
 					BlockPos pos = middle.above(dy).relative(along, da);
 					if (level.getBlockState(pos).isAir()) {
-						return pos;
+						start = pos;
+						break search;
 					}
 				}
 			}
 		}
-		return null;
+		if (start == null) {
+			return opening;
+		}
+		Direction[] plane = {Direction.UP, Direction.DOWN, along, along.getOpposite()};
+		ArrayDeque<BlockPos> queue = new ArrayDeque<>();
+		opening.add(start);
+		queue.add(start);
+		while (!queue.isEmpty() && opening.size() <= MAX_PORTAL) {
+			BlockPos pos = queue.poll();
+			for (Direction direction : plane) {
+				BlockPos next = pos.relative(direction);
+				if (!opening.contains(next) && level.getBlockState(next).isAir()) {
+					opening.add(next);
+					queue.add(next);
+				}
+			}
+		}
+		return opening;
 	}
 
 	private static void tick(ServerLevel level) {
@@ -181,24 +270,45 @@ public final class SculkRitual {
 		}
 	}
 
-	private static void tell(ServerLevel level, BlockPos at, String key) {
-		Vec3 centre = Vec3.atCenterOf(at);
-		for (ServerPlayer player : level.getPlayers(p -> p.distanceToSqr(centre) < MESSAGE_RANGE * MESSAGE_RANGE)) {
+	private static void tell(ServerLevel level, Vec3 at, String key) {
+		for (ServerPlayer player : level.getPlayers(p -> p.distanceToSqr(at) < AUDIENCE * AUDIENCE)) {
 			player.sendOverlayMessage(Component.translatable(key));
 		}
 	}
 
-	/** A line of glittering dust from one point to another, with a spark racing along it. */
-	private static void beam(ServerLevel level, Vec3 from, Vec3 to, int age, float size) {
-		Vec3 delta = to.subtract(from);
-		int steps = Math.max(2, (int) (delta.length() * 2.5));
-		for (int i = 0; i <= steps; i++) {
-			Vec3 point = from.add(delta.scale(i / (double) steps));
-			level.sendParticles(new DustParticleOptions(PINKS[(i + age) % PINKS.length], size), point.x, point.y, point.z, 1, 0.03, 0.03, 0.03, 0.0);
+	/** A gate's opening: its middle, half its width and height, and its blocks in rings out from the middle. */
+	private record Gate(Vec3 centre, float halfAlong, float halfUp, List<List<BlockPos>> rings) {
+		static Gate of(Set<BlockPos> opening, Direction facing) {
+			Direction.Axis across = facing.getClockWise().getAxis();
+			int minA = Integer.MAX_VALUE;
+			int maxA = Integer.MIN_VALUE;
+			int minY = Integer.MAX_VALUE;
+			int maxY = Integer.MIN_VALUE;
+			int plane = 0;
+			for (BlockPos pos : opening) {
+				int a = pos.get(across);
+				minA = Math.min(minA, a);
+				maxA = Math.max(maxA, a);
+				minY = Math.min(minY, pos.getY());
+				maxY = Math.max(maxY, pos.getY());
+				plane = pos.get(facing.getAxis());
+			}
+			double ca = (minA + maxA + 1) / 2.0;
+			double cy = (minY + maxY + 1) / 2.0;
+			double cp = plane + 0.5;
+			Vec3 centre = across == Direction.Axis.X ? new Vec3(ca, cy, cp) : new Vec3(cp, cy, ca);
+			// Rings are squares round the middle: a block's ring is how many whole blocks out it is, either way.
+			List<List<BlockPos>> rings = new ArrayList<>();
+			for (BlockPos pos : opening) {
+				double out = Math.max(Math.abs(pos.get(across) + 0.5 - ca), Math.abs(pos.getY() + 0.5 - cy));
+				int ring = (int) Math.floor(out + 1.0E-6);
+				while (rings.size() <= ring) {
+					rings.add(new ArrayList<>());
+				}
+				rings.get(ring).add(pos);
+			}
+			return new Gate(centre, (maxA - minA + 1) / 2.0F, (maxY - minY + 1) / 2.0F, rings);
 		}
-		// count 0: the offset becomes the spark's velocity
-		Vec3 velocity = delta.normalize();
-		level.sendParticles(ParticleTypes.END_ROD, from.x, from.y, from.z, 0, velocity.x, velocity.y, velocity.z, 0.45);
 	}
 
 	/** One ritual in progress. */
@@ -206,99 +316,66 @@ public final class SculkRitual {
 		final ServerLevel level;
 		final BlockPos crystal;
 		final Direction facing;
-		final List<BlockPos> stands;
-		final BlockPos start;
-		final Direction.Axis axis;
-		final Direction[] plane;
-		final Set<BlockPos> seen = new HashSet<>();
-		final List<BlockPos> portal = new ArrayList<>();
-		List<BlockPos> frontier = new ArrayList<>();
+		final List<Vec3> candles;
+		final Gate gate;
+		final Vec3 origin;
 		int age;
 
-		Ritual(ServerLevel level, BlockPos crystal, Direction facing, List<BlockPos> stands, BlockPos start) {
+		Ritual(ServerLevel level, BlockPos crystal, Direction facing, List<Vec3> candles, Gate gate) {
 			this.level = level;
 			this.crystal = crystal;
 			this.facing = facing;
-			this.stands = stands;
-			this.start = start;
-			this.axis = facing.getClockWise().getAxis();
-			this.plane = new Direction[] {Direction.UP, Direction.DOWN, facing.getClockWise(), facing.getCounterClockWise()};
+			this.candles = candles;
+			this.gate = gate;
+			this.origin = beamOrigin(crystal, facing);
 		}
 
 		/** Runs one tick; true once the ritual is over. */
 		boolean advance() {
 			int t = this.age++;
-			Vec3 heart = Vec3.atCenterOf(this.crystal);
-			if (t < CANDLE_BEAMS) {
-				if (t % 3 == 0) {
-					for (BlockPos stand : this.stands) {
-						beam(this.level, Vec3.atCenterOf(stand).add(0.0, 0.7, 0.0), heart, t, 0.8F);
-					}
+			for (int i = 0; i < this.candles.size(); i++) {
+				if (t == i * CANDLE_INTERVAL) {
+					// Each candle flares with a chime, a note higher than the last.
+					Vec3 tip = this.candles.get(i);
+					this.level.playSound(null, tip.x, tip.y, tip.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.8F, 0.8F + i * 0.1F);
+					this.level.sendParticles(ParticleTypes.END_ROD, tip.x, tip.y, tip.z, 6, 0.05, 0.05, 0.05, 0.03);
 				}
-				if (t == CANDLE_BEAMS - 15) {
-					this.level.playSound(null, this.crystal, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 2.0F, 1.4F);
+			}
+			if (t == AWAKEN - 16) {
+				this.level.playSound(null, this.crystal, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 2.0F, 1.0F);
+			}
+			if (t == AWAKEN) {
+				BlockState state = this.level.getBlockState(this.crystal);
+				this.level.setBlock(this.crystal, state.setValue(RitualCrystalBlock.AWAKE, true), Block.UPDATE_ALL);
+				this.level.playSound(null, this.crystal, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 2.5F, 0.9F);
+				this.level.sendParticles(ParticleTypes.END_ROD, this.origin.x, this.origin.y, this.origin.z, 40, 0.1, 0.1, 0.1, 0.12);
+			}
+			if (t == FIRE) {
+				this.level.playSound(null, this.origin.x, this.origin.y, this.origin.z, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 2.5F, 1.6F);
+				this.level.playSound(null, this.origin.x, this.origin.y, this.origin.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 2.5F, 1.5F);
+			}
+			if (t >= OPEN && (t - OPEN) % RING_TICKS == 0) {
+				int ring = (t - OPEN) / RING_TICKS;
+				Vec3 centre = this.gate.centre;
+				if (ring == 0) {
+					this.level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.PORTAL_TRIGGER, SoundSource.BLOCKS, 1.5F, 1.4F);
 				}
-				return false;
-			}
-			if (t < CANDLE_BEAMS + CRYSTAL_BEAM) {
-				if (t == CANDLE_BEAMS) {
-					BlockState state = this.level.getBlockState(this.crystal);
-					this.level.setBlock(this.crystal, state.setValue(RitualCrystalBlock.AWAKE, true), Block.UPDATE_ALL);
-					this.level.playSound(null, this.crystal, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 2.5F, 0.8F);
-				}
-				beam(this.level, heart, Vec3.atCenterOf(this.start), t, 1.4F);
-				return false;
-			}
-			if (t == CANDLE_BEAMS + CRYSTAL_BEAM) {
-				this.frontier.add(this.start);
-				this.seen.add(this.start);
-				this.level.playSound(null, this.start, SoundEvents.PORTAL_TRIGGER, SoundSource.BLOCKS, 1.5F, 1.4F);
-			}
-			if (t % 2 != 0) {
-				return false;
-			}
-			// The portal grows one ring of blocks every other tick until the frame stops it everywhere.
-			BlockState sheet = ModBlocks.SKY_PORTAL.defaultBlockState().setValue(SkyPortalBlock.AXIS, this.axis);
-			List<BlockPos> next = new ArrayList<>();
-			for (BlockPos pos : this.frontier) {
-				if (!this.level.getBlockState(pos).isAir()) {
-					continue;
-				}
-				this.level.setBlock(pos, sheet, Block.UPDATE_CLIENTS);
-				this.portal.add(pos);
-				if (this.portal.size() > MAX_PORTAL) {
-					this.collapse();
+				if (ring >= this.gate.rings.size()) {
+					this.level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.END_PORTAL_SPAWN, SoundSource.BLOCKS, 1.0F, 1.3F);
+					tell(this.level, this.origin, "message.transdimension.ritual.opened");
 					return true;
 				}
-				for (Direction direction : this.plane) {
-					BlockPos neighbour = pos.relative(direction);
-					if (this.seen.add(neighbour) && this.level.getBlockState(neighbour).isAir()) {
-						next.add(neighbour);
+				BlockState sheet = ModBlocks.SKY_PORTAL.defaultBlockState().setValue(SkyPortalBlock.AXIS, this.facing.getClockWise().getAxis());
+				for (BlockPos pos : this.gate.rings.get(ring)) {
+					if (this.level.getBlockState(pos).isAir()) {
+						this.level.setBlock(pos, sheet, Block.UPDATE_CLIENTS);
+						if (this.level.getRandom().nextInt(3) == 0) {
+							this.level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 2, 0.3, 0.3, 0.3, 0.02);
+						}
 					}
 				}
-				if (this.level.getRandom().nextInt(4) == 0) {
-					this.level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 2, 0.3, 0.3, 0.3, 0.02);
-				}
-			}
-			this.frontier = next;
-			if (next.isEmpty()) {
-				this.level.playSound(null, this.start, SoundEvents.END_PORTAL_SPAWN, SoundSource.BLOCKS, 1.0F, 1.3F);
-				tell(this.level, this.crystal, "message.transdimension.ritual.opened");
-				return true;
 			}
 			return false;
-		}
-
-		/** The frame has a hole: the light spills out and fades. */
-		private void collapse() {
-			for (BlockPos pos : this.portal) {
-				this.level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
-			}
-			BlockState state = this.level.getBlockState(this.crystal);
-			if (state.is(ModBlocks.RITUAL_CRYSTAL)) {
-				this.level.setBlock(this.crystal, state.setValue(RitualCrystalBlock.AWAKE, false), Block.UPDATE_ALL);
-			}
-			tell(this.level, this.crystal, "message.transdimension.ritual.broken");
 		}
 	}
 }

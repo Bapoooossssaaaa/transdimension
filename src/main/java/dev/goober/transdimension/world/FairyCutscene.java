@@ -6,17 +6,22 @@ import org.jspecify.annotations.Nullable;
 
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import net.fabricmc.fabric.api.entity.event.v1.ServerEntityLevelChangeEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
@@ -32,34 +37,45 @@ import dev.goober.transdimension.registry.ModItems;
  * The ritual at the Fairy Altar and the cutscene that starts the first fight.
  *
  * <p>The Trans Fairy isn't waiting when you first arrive. Throw a Trans Crystal (or a Crystal Pearl) onto the altar, or
- * use one on it, and the scene plays: letterbox bars close in, a portal opens north of the altar and Maddie steps
- * through it, crying out that she has done something horrible and that the Trans Fairy is a horrible being. Before she
- * can finish, the Trans Fairy appears over the altar and strikes her down with a bolt from her wand. Maddie is gone from
- * the realm from then on ({@link FairyRealmState#maddieGone}), the bars open and the fight begins.
+ * use one on it, and the scene plays: a portal opens north of the altar and Maddie steps through it, horrified that you
+ * have summoned the Trans Fairy, an ancient and horrible being, and begging you to get away from her. Before she can
+ * finish, light gathers over the altar and the Trans Fairy appears in a falling column of it, silences Maddie and strikes
+ * her down with a bolt from her wand, then turns to you: you woke her, so now you'll show her what you're worth. Maddie
+ * is gone from the realm from then on ({@link FairyRealmState#maddieGone}) and the fight begins.
  *
- * <p>Every later offering calls the fairy straight back for a rematch. The scene runs on the server (one at a time;
- * it isn't saved), and its subtitles and bars are drawn by each watching player's client (FairyCutsceneOverlay).
+ * <p>Every later offering calls the fairy straight back for a rematch. The scene runs on the server (one at a time; it
+ * isn't saved) and holds its audience still while it plays; each watching player's client moves the camera through it
+ * (FairyCutsceneCamera, on the timeline below), hides the HUD and shows the subtitles (FairyCutsceneOverlay).
  */
 public final class FairyCutscene {
 	/** Maddie's portal: on the arena floor, north of the altar, facing anyone standing at the altar. */
-	private static final Vec3 MADDIE_PORTAL = new Vec3(0.5, FairyRealm.ALTAR.getY(), -8.5);
+	public static final Vec3 MADDIE_PORTAL = new Vec3(0.5, FairyRealm.ALTAR.getY(), -8.5);
 	/** How far from the altar players see and hear the scene. */
 	private static final double AUDIENCE = 96.0;
 	private static final String MADDIE = "entity.transdimension.maddie";
+	private static final String FAIRY = "entity.transdimension.trans_fairy";
 	private static final int[] SPARKLES = {0xF5A9B8, 0x5BCEFA, 0xFFFFFF};
+	/** Holds the audience still while the scene plays (no walking, no jumping). */
+	private static final Identifier HOLD = TransDimension.id("cutscene_hold");
 
-	// The timeline, in ticks.
-	private static final int PORTAL_OPENS = 30;
-	private static final int MADDIE_ARRIVES = 55;
-	private static final int PORTAL_CLOSES = 70;
-	private static final int LINE_ONE = 70;
-	private static final int LINE_TWO = 135;
-	private static final int LINE_THREE = 205;
-	private static final int FAIRY_APPEARS = 255;
-	private static final int WAND_RAISED = 275;
-	private static final int SHOT = 285;
-	private static final int MADDIE_FALLS = 300;
-	private static final int FIGHT = 345;
+	// The timeline, in ticks. The clients' camera follows it too (FairyCutsceneCamera).
+	public static final int PORTAL_OPENS = 30;
+	public static final int MADDIE_ARRIVES = 55;
+	public static final int PORTAL_CLOSES = 70;
+	public static final int LINE_ONE = 70;
+	public static final int LINE_TWO = 130;
+	public static final int LINE_THREE = 195;
+	/** Light gathers over the altar... */
+	public static final int GATHER = 228;
+	/** ...and the Trans Fairy appears in it. */
+	public static final int FAIRY_APPEARS = 250;
+	public static final int FAIRY_LINE_ONE = 266;
+	public static final int WAND_RAISED = 290;
+	public static final int SHOT = 300;
+	public static final int MADDIE_FALLS = 315;
+	public static final int FAIRY_LINE_TWO = 335;
+	public static final int FAIRY_LINE_THREE = 400;
+	public static final int FIGHT = 460;
 
 	@Nullable
 	private static Scene scene;
@@ -81,6 +97,8 @@ public final class FairyCutscene {
 				tick(level);
 			}
 		});
+		// Leaving the realm mid-scene lets that player go at once.
+		ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register((player, origin, destination) -> release(player));
 	}
 
 	public static boolean running() {
@@ -97,10 +115,40 @@ public final class FairyCutscene {
 	static void start(ServerLevel level) {
 		scene = new Scene();
 		send(level, new FairyCutscenePayload(FairyCutscenePayload.START, "", ""));
+		hold(level, true);
 		Vec3 altar = altarTop();
 		FairyRealm.sparkle(level, altar, 90, 0.8);
 		level.playSound(null, altar.x, altar.y, altar.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 2.0F, 0.9F);
 		level.playSound(null, altar.x, altar.y, altar.z, SoundEvents.END_PORTAL_FRAME_FILL, SoundSource.BLOCKS, 1.5F, 0.8F);
+	}
+
+	/**
+	 * Holds everyone watching still (or lets everyone go, wherever they've got to): movement speed and jump strength drop
+	 * to nothing. The modifier is transient, so it never outlives a session.
+	 */
+	private static void hold(ServerLevel level, boolean still) {
+		Vec3 altar = altarTop();
+		for (ServerPlayer player : still ? level.players() : level.getServer().getPlayerList().getPlayers()) {
+			release(player);
+			if (!still || player.position().distanceToSqr(altar) >= AUDIENCE * AUDIENCE) {
+				continue;
+			}
+			for (var attribute : List.of(Attributes.MOVEMENT_SPEED, Attributes.JUMP_STRENGTH)) {
+				AttributeInstance instance = player.getAttribute(attribute);
+				if (instance != null) {
+					instance.addTransientModifier(new AttributeModifier(HOLD, -1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+				}
+			}
+		}
+	}
+
+	private static void release(ServerPlayer player) {
+		for (var attribute : List.of(Attributes.MOVEMENT_SPEED, Attributes.JUMP_STRENGTH)) {
+			AttributeInstance instance = player.getAttribute(attribute);
+			if (instance != null) {
+				instance.removeModifier(HOLD);
+			}
+		}
 	}
 
 	private static void tick(ServerLevel level) {
@@ -127,13 +175,21 @@ public final class FairyCutscene {
 			FairyRealm.sparkle(level, portal.add(0.0, 1.2, 0.0), 40, 0.6);
 		}
 		if (t == LINE_ONE) {
-			say(level, "message.transdimension.cutscene.maddie_1");
+			say(level, MADDIE, "message.transdimension.cutscene.maddie_1");
 		}
 		if (t == LINE_TWO) {
-			say(level, "message.transdimension.cutscene.maddie_2");
+			say(level, MADDIE, "message.transdimension.cutscene.maddie_2");
 		}
 		if (t == LINE_THREE) {
-			say(level, "message.transdimension.cutscene.maddie_3");
+			say(level, MADDIE, "message.transdimension.cutscene.maddie_3");
+		}
+		if (t >= GATHER && t < FAIRY_APPEARS) {
+			gather(level, t);
+		}
+		if (t == GATHER) {
+			Vec3 at = FairyRealm.FAIRY_SPAWN;
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.BEACON_POWER_SELECT, SoundSource.HOSTILE, 2.0F, 0.7F);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.HOSTILE, 2.0F, 0.6F);
 		}
 		if (t == FAIRY_APPEARS) {
 			s.fairy = FairyRealm.spawnFairy(level, FairyRealm.FAIRY_SPAWN);
@@ -141,6 +197,12 @@ public final class FairyCutscene {
 				s.fairy.setIntro(true);
 				s.fairy.lookAtDuringIntro(portal.add(0.0, 1.6, 0.0));
 			}
+			Vec3 at = FairyRealm.FAIRY_SPAWN;
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 2.5F, 1.4F);
+			level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 0.8, at.z, 60, 0.2, 0.2, 0.2, 0.25);
+		}
+		if (t == FAIRY_LINE_ONE) {
+			say(level, FAIRY, "message.transdimension.cutscene.fairy_1");
 		}
 		if (t == WAND_RAISED && s.fairy != null) {
 			s.fairy.playSound(SoundEvents.ILLUSIONER_PREPARE_MIRROR, 1.5F, 1.6F);
@@ -160,12 +222,29 @@ public final class FairyCutscene {
 			FairyRealmState state = level.getAttachedOrElse(ModAttachments.FAIRY_REALM_STATE, FairyRealmState.NEW);
 			level.setAttached(ModAttachments.FAIRY_REALM_STATE, state.withMaddieGone());
 		}
+		if (t == FAIRY_LINE_TWO) {
+			if (s.fairy != null) {
+				// she turns from Maddie to whoever woke her
+				ServerPlayer nearest = level.getNearestPlayer(s.fairy, AUDIENCE) instanceof ServerPlayer player ? player : null;
+				if (nearest != null) {
+					s.fairy.lookAtDuringIntro(nearest.getEyePosition());
+				}
+			}
+			say(level, FAIRY, "message.transdimension.cutscene.fairy_2");
+		}
+		if (t == FAIRY_LINE_THREE) {
+			say(level, FAIRY, "message.transdimension.cutscene.fairy_3");
+			if (s.fairy != null) {
+				s.fairy.playSound(SoundEvents.AMETHYST_BLOCK_RESONATE, 2.0F, 1.3F);
+			}
+		}
 		if (t >= FIGHT) {
 			if (s.fairy != null && s.fairy.isAlive()) {
 				s.fairy.setIntro(false);
 			} else {
 				FairyRealm.spawnFairy(level, FairyRealm.FAIRY_SPAWN);
 			}
+			hold(level, false);
 			send(level, new FairyCutscenePayload(FairyCutscenePayload.END, "", ""));
 			scene = null;
 		}
@@ -204,9 +283,24 @@ public final class FairyCutscene {
 		}
 	}
 
-	/** A line of Maddie's, shown as a subtitle to everyone watching. */
-	private static void say(ServerLevel level, String line) {
-		send(level, new FairyCutscenePayload(FairyCutscenePayload.LINE, MADDIE, line));
+	/** Light gathers over the altar where the Trans Fairy is about to appear: sparkles spiralling in from all round. */
+	private static void gather(ServerLevel level, int t) {
+		Vec3 at = FairyRealm.FAIRY_SPAWN.add(0.0, 0.8, 0.0);
+		double closeness = (t - GATHER) / (double) (FAIRY_APPEARS - GATHER);
+		for (int i = 0; i < 4; i++) {
+			float angle = t * 0.5F + i * Mth.TWO_PI / 4.0F;
+			double radius = 4.5 * (1.0 - closeness) + 0.4;
+			double x = at.x + Mth.cos(angle) * radius;
+			double z = at.z + Mth.sin(angle) * radius;
+			double y = at.y + Mth.sin(t * 0.3F + i) * 0.6;
+			level.sendParticles(new DustParticleOptions(SPARKLES[i % SPARKLES.length], 1.4F), x, y, z, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(ParticleTypes.END_ROD, x, y, z, 0, at.x - x, at.y - y, at.z - z, 0.08);
+		}
+	}
+
+	/** A line of the scene, shown as a subtitle to everyone watching under the speaker's name. */
+	private static void say(ServerLevel level, String speaker, String line) {
+		send(level, new FairyCutscenePayload(FairyCutscenePayload.LINE, speaker, line));
 	}
 
 	private static void send(ServerLevel level, FairyCutscenePayload payload) {

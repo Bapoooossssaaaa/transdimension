@@ -32,6 +32,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.BlockColorRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRenderEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
@@ -157,13 +158,13 @@ public class TransDimensionClient implements ClientModInitializer {
 				registrationHelper.register(new TransWingsLayer(avatarRenderer, context));
 			}
 		});
-		HudElementRegistry.attachElementBefore(VanillaHudElements.HOTBAR, TransDimension.id("trans_wings"), WingsController::extractHud);
+		HudElementRegistry.attachElementBefore(VanillaHudElements.HOTBAR, TransDimension.id("trans_wings"), hiddenInCutscene(WingsController::extractHud));
 		// A cape would poke through the folded feathers, so players wearing the wings don't show theirs.
 		LivingEntityFeatureRenderEvents.ALLOW_CAPE_RENDER.register(state -> state.getData(WingPose.KEY) == null);
 
 		ClientPlayNetworking.registerGlobalReceiver(OpenMaddieDialoguePayload.TYPE, (payload, context) ->
 				context.client().gui.setScreen(new MaddieDialogueScreen(payload.entityId(), payload.gifted())));
-		// The Fairy Realm cutscene's letterbox bars and subtitles.
+		// The Fairy Realm cutscene: its subtitles, moving camera and hidden HUD.
 		ClientPlayNetworking.registerGlobalReceiver(FairyCutscenePayload.TYPE, (payload, context) -> FairyCutsceneOverlay.handle(payload));
 		// A Bottled Fairy saved you: it pops up on screen the way a totem does (the sparkles come from the server).
 		ClientPlayNetworking.registerGlobalReceiver(FairyRescuePayload.TYPE, (payload, context) ->
@@ -175,11 +176,24 @@ public class TransDimensionClient implements ClientModInitializer {
 		});
 
 		// Cat spit sits under the hotbar like the pumpkin overlay; the dimension intro draws on top of everything.
-		HudElementRegistry.attachElementBefore(VanillaHudElements.HOTBAR, TransDimension.id("saliva"), SalivaOverlay::extract);
-		// The Trans Fairy's own boss bar sits where vanilla's would; the Fairy Realm cutscene's bars cover everything.
-		HudElementRegistry.attachElementAfter(VanillaHudElements.BOSS_BAR, TransDimension.id("trans_fairy_bar"), TransFairyBossBar::extract);
+		HudElementRegistry.attachElementBefore(VanillaHudElements.HOTBAR, TransDimension.id("saliva"), hiddenInCutscene(SalivaOverlay::extract));
+		// The Trans Fairy's own boss bar sits where vanilla's would; the Fairy Realm cutscene's subtitles go over everything.
+		HudElementRegistry.attachElementAfter(VanillaHudElements.BOSS_BAR, TransDimension.id("trans_fairy_bar"),
+				hiddenInCutscene(TransFairyBossBar::extract));
 		HudElementRegistry.addLast(TransDimension.id("fairy_cutscene"), FairyCutsceneOverlay::extract);
 		HudElementRegistry.addLast(TransDimension.id("trans_intro"), TransIntroOverlay::extract);
+		// While the Fairy Realm cutscene plays, the HUD is hidden: every vanilla element but the sound subtitles.
+		for (Identifier element : List.of(VanillaHudElements.MISC_OVERLAYS, VanillaHudElements.CROSSHAIR, VanillaHudElements.SPECTATOR_MENU,
+				VanillaHudElements.HOTBAR, VanillaHudElements.ARMOR_BAR, VanillaHudElements.HEALTH_BAR, VanillaHudElements.FOOD_BAR,
+				VanillaHudElements.AIR_BAR, VanillaHudElements.MOUNT_HEALTH, VanillaHudElements.INFO_BAR, VanillaHudElements.EXPERIENCE_LEVEL,
+				VanillaHudElements.HELD_ITEM_TOOLTIP, VanillaHudElements.SPECTATOR_TOOLTIP, VanillaHudElements.MOB_EFFECTS,
+				VanillaHudElements.BOSS_BAR, VanillaHudElements.SLEEP, VanillaHudElements.DEMO_TIMER, VanillaHudElements.SCOREBOARD,
+				VanillaHudElements.OVERLAY_MESSAGE, VanillaHudElements.TITLE_AND_SUBTITLE, VanillaHudElements.CHAT, VanillaHudElements.PLAYER_LIST)) {
+			HudElementRegistry.replaceElement(element, TransDimensionClient::hiddenInCutscene);
+		}
+		// The candle ritual's beams and light, and the cutscene's moving camera and column of light.
+		RitualEffects.register();
+		FairyCutsceneCamera.register();
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			ResourceKey<Level> dimension = client.level != null ? client.level.dimension() : null;
@@ -212,5 +226,14 @@ public class TransDimensionClient implements ClientModInitializer {
 			TransRecolor.clearCache();
 		});
 		loader.addListenerOrdering(ResourceReloaderKeys.Client.CLOUD_RENDERER, reloaderId);
+	}
+
+	/** A HUD element that draws as usual, except while the Fairy Realm cutscene plays (FairyCutsceneCamera). */
+	private static HudElement hiddenInCutscene(HudElement element) {
+		return (graphics, deltaTracker) -> {
+			if (!FairyCutsceneCamera.isActive()) {
+				element.extractRenderState(graphics, deltaTracker);
+			}
+		};
 	}
 }

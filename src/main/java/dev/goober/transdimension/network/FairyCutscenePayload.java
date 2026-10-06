@@ -8,9 +8,9 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import dev.goober.transdimension.TransDimension;
 
 /**
- * Server to client: a step of the Fairy Realm's cutscene (FairyCutscene). {@link #START} closes the letterbox bars,
- * {@link #LINE} shows a subtitle ({@code speaker} and {@code line} are translation keys), {@link #END} opens the bars
- * again as the fight begins.
+ * Server to client: a step of the Fairy Realm's cutscene (FairyCutscene). {@link #START} starts the scene on the client
+ * (the moving camera, the hidden HUD), {@link #LINE} shows a subtitle ({@code speaker} and {@code line} are translation
+ * keys), {@link #END} hands the camera back to the player as the fight begins.
  */
 public record FairyCutscenePayload(int kind, String speaker, String line) implements CustomPacketPayload {
 	public static final int START = 0;
