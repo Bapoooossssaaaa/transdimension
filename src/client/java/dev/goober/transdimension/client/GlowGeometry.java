@@ -26,8 +26,8 @@ import dev.goober.transdimension.client.compat.ShaderCompat;
  * the game does. (Round 13 drew them as beacon beams, which BSL boosts four times over: far too bright. Before that,
  * {@code debugFilledBox}, which BSL on Iris doesn't draw at all.) Plain ones ({@code glow} false) take the light they're
  * given ({@link #lit}). Every face is wound to face outwards, so it shows whether or not the render type culls back
- * faces. Used by the candle ritual (RitualEffects), the Fairy Realm cutscene (FairyCutsceneCamera) and the cloud boat's
- * lead (CloudBoatRenderer).
+ * faces. Used by the candle ritual (RitualEffects), the Fairy Realm cutscene's doors and shield (FairyCutsceneCamera) and
+ * the cloud boat's lead (CloudBoatRenderer).
  */
 public final class GlowGeometry {
 	private static final Identifier WHITE = TransDimension.id("textures/misc/glow.png");
@@ -86,6 +86,15 @@ public final class GlowGeometry {
 		Direction across = facing.getClockWise();
 		this.box(centre, new Vec3(across.getStepX() * along, 0.0, across.getStepZ() * along), new Vec3(0.0, up, 0.0),
 				new Vec3(facing.getStepX() * thickness, 0.0, facing.getStepZ() * thickness), argb);
+	}
+
+	/** A flat panel through the corners {@code a}, {@code b}, {@code c} and {@code d} (in order round it), seen from both sides. */
+	public void panel(Vec3 a, Vec3 b, Vec3 c, Vec3 d, int argb) {
+		if ((argb >>> 24) == 0) {
+			return;
+		}
+		this.quad(a, b, c, d, argb);
+		this.quad(d, c, b, a, argb);
 	}
 
 	/** A box centred on {@code c} with half-axes {@code ex}, {@code ey} and {@code ez}. */

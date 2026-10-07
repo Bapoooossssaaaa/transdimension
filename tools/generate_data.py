@@ -2423,6 +2423,25 @@ def generate_round14():
         NAMES[f"message.transdimension.kira.line_{i}"] = line
 
 
+def generate_round15():
+    """Maddie's two friends in the Fairy Realm's cutscene (entity/SculkArcher, world/FairyCutscene): their name, what drops
+    where they fall, and the scene's new lines."""
+    NAMES["entity.transdimension.sculk_archer"] = "Sculk Archer"
+    entity_loot("sculk_archer", [
+        {"entries": [{"type": "minecraft:item", "name": "minecraft:bow", "functions": [
+            {"function": "minecraft:set_damage", "damage": {"type": "minecraft:uniform", "min": 0.3, "max": 0.8}}]}], "rolls": 1.0},
+        {"entries": [counted("minecraft:arrow", 2, 6)], "rolls": 1.0},
+        {"entries": [counted("sculk_gem", 1, 2)], "rolls": 1.0},
+        {"conditions": [{"condition": "minecraft:random_chance", "chance": 0.25}],
+         "entries": [{"type": "minecraft:item", "name": "minecraft:echo_shard"}], "rolls": 1.0},
+    ])
+    NAMES.update({
+        "message.transdimension.cutscene.maddie_4": "I didn't come alone. NOW!",
+        "message.transdimension.cutscene.fairy_4": "Arrows? How quaint.",
+        "message.transdimension.cutscene.maddie_5": "No... no, no, NO!",
+    })
+
+
 # What Kira says once you have Maddie's gifts, picked at random (one per talk).
 KIRA_LINES = [
     "Hi! I'm Kira. I'm looking after Maddie's house now.",
@@ -2774,6 +2793,7 @@ def main():
     generate_round11()
     generate_round12()
     generate_round14()
+    generate_round15()
     generate_sounds()
     generate_advancements()
     generate_round9_advancements()

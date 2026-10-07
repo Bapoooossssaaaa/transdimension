@@ -34,6 +34,7 @@ import dev.goober.transdimension.entity.Kira;
 import dev.goober.transdimension.entity.Maddie;
 import dev.goober.transdimension.entity.PastelSlime;
 import dev.goober.transdimension.entity.PinkWarden;
+import dev.goober.transdimension.entity.SculkArcher;
 import dev.goober.transdimension.entity.SculkPerson;
 import dev.goober.transdimension.entity.Seat;
 import dev.goober.transdimension.entity.SillyCat;
@@ -185,6 +186,7 @@ public final class ModEntities {
 
 	public static final ResourceKey<EntityType<?>> PINK_WARDEN_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("pink_warden"));
 	public static final ResourceKey<EntityType<?>> SCULK_PERSON_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("sculk_person"));
+	public static final ResourceKey<EntityType<?>> SCULK_ARCHER_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("sculk_archer"));
 	public static final ResourceKey<EntityType<?>> CLOUDY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("cloudy"));
 
 	/** The pink deep dark's friendly warden, sized like vanilla's. One guards every pink ancient city; a few roam. */
@@ -205,6 +207,14 @@ public final class ModEntities {
 					.eyeHeight(1.62F)
 					.clientTrackingRange(10)
 					.build(SCULK_PERSON_KEY));
+	/** Maddie's two friends in the Fairy Realm's cutscene (FairyCutscene); they only ever act there, so they're never saved. */
+	public static final EntityType<SculkArcher> SCULK_ARCHER = Registry.register(BuiltInRegistries.ENTITY_TYPE, SCULK_ARCHER_KEY,
+			FabricEntityType.Builder.createMob(SculkArcher::new, MobCategory.MISC, mob -> mob.defaultAttributes(SculkArcher::createAttributes))
+					.noSave()
+					.sized(0.6F, 1.95F)
+					.eyeHeight(1.62F)
+					.clientTrackingRange(10)
+					.build(SCULK_ARCHER_KEY));
 	/** The Cloud Realm's rideable little clouds. */
 	public static final EntityType<Cloudy> CLOUDY = Registry.register(BuiltInRegistries.ENTITY_TYPE, CLOUDY_KEY,
 			FabricEntityType.Builder.createMob(Cloudy::new, MobCategory.CREATURE, mob -> mob

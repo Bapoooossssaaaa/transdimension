@@ -49,6 +49,7 @@ public final class FairyCutsceneOverlay {
 				line = Component.translatable(payload.line()).getString();
 				lineNanos = now;
 			}
+			case FairyCutscenePayload.SHIELD -> FairyCutsceneCamera.shieldHit();
 			default -> {
 				active = false;
 				endedNanos = now;

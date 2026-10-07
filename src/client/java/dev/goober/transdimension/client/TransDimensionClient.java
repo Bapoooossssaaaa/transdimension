@@ -55,6 +55,7 @@ import dev.goober.transdimension.client.entity.KiraRenderer;
 import dev.goober.transdimension.client.entity.MaddieRenderer;
 import dev.goober.transdimension.client.entity.PastelSlimeModel;
 import dev.goober.transdimension.client.entity.PastelSlimeRenderer;
+import dev.goober.transdimension.client.entity.SculkArcherRenderer;
 import dev.goober.transdimension.client.entity.SculkPersonRenderer;
 import dev.goober.transdimension.client.entity.SeatRenderer;
 import dev.goober.transdimension.client.entity.SillyCatModel;
@@ -146,6 +147,8 @@ public class TransDimensionClient implements ClientModInitializer {
 		EntityRenderers.register(ModEntities.PINK_WARDEN, WardenRenderer::new);
 		ModelLayerRegistry.registerModelLayer(SculkPersonRenderer.LAYER, SculkPersonRenderer::createLayer);
 		EntityRenderers.register(ModEntities.SCULK_PERSON, SculkPersonRenderer::new);
+		// Maddie's friends in the Fairy Realm's cutscene: sculk people with bows.
+		EntityRenderers.register(ModEntities.SCULK_ARCHER, SculkArcherRenderer::new);
 		PinkSculkParticles.register();
 		// The Cloud Realm's Cloudies and angels, and the cloud turtle with his white boat (CloudRescue).
 		ModelLayerRegistry.registerModelLayer(CloudyRenderer.LAYER, CloudyModel::createLayer);
