@@ -16,24 +16,36 @@ import net.minecraft.world.phys.Vec3;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 
+import dev.goober.transdimension.entity.Maddie;
+import dev.goober.transdimension.entity.SculkArcher;
 import dev.goober.transdimension.entity.TransFairy;
 import dev.goober.transdimension.world.FairyCutscene;
 import dev.goober.transdimension.world.FairyRealm;
 
 /**
- * The Fairy Realm cutscene's camera (the scene itself runs on the server: FairyCutscene). While it plays, the view leaves
- * the player and glides along a path of shots through the scene: up from the player's eyes into a crane shot of the
- * altar, round to the door of light that opens for Maddie (drawn here, {@link #renderDoor}), in front of her as she walks
- * out of it, slowly round her as she speaks, over her shoulder to the altar, up at the Trans Fairy as she appears and
- * speaks, back to Maddie as she calls her friends, wide on the two doors that open for them, over an archer's shoulder
- * as they draw, on the fairy as the arrows stop on her shield (drawn here, {@link #renderShield}), high behind her as she
- * strikes both archers down, to Maddie, low on the fairy as she raises her wand, across to Maddie as the bolt strikes
- * her, back to the fairy, and at last back down to the player's own eyes, turned to face the fairy as the fight begins.
+ * The Fairy Realm cutscene's camera (the scene itself runs on the server: FairyCutscene), shot like a film: a list of
+ * takes with hard cuts between them. Each take frames whoever is acting, looking at where they really are this frame (so
+ * someone walking or falling stays in frame), and holds still or creeps slowly in. In order:
+ * <ol>
+ * <li>the player's view rises into a wide shot of the arena;</li>
+ * <li>the door of light opening for Maddie (drawn here, {@link #renderDoor}), then backing away in front of her as she
+ * walks out of it;</li>
+ * <li>close on her first line, over her shoulder at the player for her second, pushing in on her third;</li>
+ * <li>over her shoulder at the empty air above the altar, where the Trans Fairy appears, then up at the fairy as she
+ * hushes Maddie;</li>
+ * <li>low on Maddie as she calls her friends, then wide on the three doors as two more open;</li>
+ * <li>low on the first archer walking out, over the second's shoulder as they draw and shoot, on the fairy as the arrows
+ * stop on her shield (drawn here, {@link #renderShield}), side on as the second volley flies, close on her scorn;</li>
+ * <li>over her shoulder as she strikes each archer down, close on Maddie's cry, low on the fairy raising her wand, on
+ * Maddie as the bolt strikes her;</li>
+ * <li>side on as the fairy turns to the player, and close on her last line, before the view cuts back to the player, who
+ * now faces her.</li>
+ * </ol>
  *
- * <p>The path is a smooth curve through key shots timed to the server's timeline (FairyCutscene's constants), counted
- * from the client's game time when the scene's START packet came in. The camera itself is moved by CameraMixin; the view
- * switches to third person meanwhile (so the player is seen in the scene and no hand floats in front of the camera), and
- * the HUD is hidden (TransDimensionClient). Everything goes back the way it was when the scene ends.
+ * <p>The takes are timed to the server's timeline (FairyCutscene's constants), counted from the client's game time when
+ * the scene's START packet came in. The camera itself is moved by CameraMixin; the view switches to third person
+ * meanwhile (so the player is seen in the scene and no hand floats in front of the camera), and the HUD is hidden
+ * (TransDimensionClient). Everything goes back the way it was when the scene ends.
  */
 public final class FairyCutsceneCamera {
 	private static final int WHITE = 0xFFFFFF;
@@ -48,8 +60,39 @@ public final class FairyCutsceneCamera {
 	private static final int SHIELD_FADE = 8;
 	private static final int SHIELD_FLARE = 7;
 
-	/** One key shot: where the camera is and what it looks at, {@code tick} ticks into the scene. */
-	private record Key(int tick, Vec3 position, Vec3 look) {
+	// Where everyone is meant to be: the takes are placed from these (where the actors really are is looked up each frame).
+	private static final Vec3 ALTAR = Vec3.atBottomCenterOf(FairyRealm.ALTAR).add(0.0, 1.0, 0.0);
+	private static final Vec3 PORTAL = FairyCutscene.MADDIE_PORTAL;
+	private static final Vec3 DOOR = PORTAL.add(0.0, 1.4, 0.0);
+	/** Where Maddie stops, having walked out of her door, and her eyes there. */
+	private static final Vec3 STAND = PORTAL.add(0.0, 0.0, FairyCutscene.WALK_DISTANCE - FairyCutscene.WALK_FROM);
+	private static final Vec3 MADDIE_EYE = STAND.add(0.0, 1.62, 0.0);
+	private static final Vec3 FAIRY_EYE = FairyRealm.FAIRY_SPAWN.add(0.0, 2.0, 0.0);
+	private static final Vec3 FAIRY_MIDDLE = FairyRealm.FAIRY_SPAWN.add(0.0, 1.2, 0.0);
+	/** Each archer's eyes (west, then east) where they stop. */
+	private static final List<Vec3> ARCHER_EYES = List.of(archerEye(0), archerEye(1));
+	/** How far round the altar the actors are looked for. */
+	private static final double STAGE = 24.0;
+
+	/** Where the camera stands, or what it looks at, this frame, given where everyone is. */
+	@FunctionalInterface
+	private interface Place {
+		Vec3 at(Cast cast);
+	}
+
+	/**
+	 * One take, from {@code start} until the next one cuts in: the camera eases from {@code from} to {@code to} (a slow
+	 * push or drift, if anything) while it looks from {@code lookFrom} to {@code lookTo}.
+	 */
+	private record Take(int start, Place from, Place to, Place lookFrom, Place lookTo) {
+		Take(int start, Place from, Place to, Place look) {
+			this(start, from, to, look, look);
+		}
+	}
+
+	/** Where the actors are this frame (or where they're meant to be, while one isn't there). */
+	private record Cast(Vec3 player, Vec3 maddieEye, Vec3 maddieBody, Vec3 fairyEye, Vec3 fairyMiddle, Vec3 westEye,
+			Vec3 westBody, Vec3 eastEye, Vec3 eastBody) {
 	}
 
 	/** Where the camera is and which way it faces this frame. */
@@ -60,7 +103,7 @@ public final class FairyCutsceneCamera {
 	private static long startTick;
 	/** When (scene time) the last arrow stopped on the fairy's shield. */
 	private static double lastShieldHit = -100.0;
-	private static List<Key> path = List.of();
+	private static List<Take> takes = List.of();
 	@Nullable
 	private static CameraType savedCameraType;
 
@@ -82,7 +125,7 @@ public final class FairyCutsceneCamera {
 		return active;
 	}
 
-	/** The scene starts: plan the shots from where the player stands and looks now. */
+	/** The scene starts: plan the takes from where the player stands and looks now. */
 	public static void start() {
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
@@ -90,7 +133,7 @@ public final class FairyCutsceneCamera {
 			return;
 		}
 		Vec3 eye = player.getEyePosition();
-		path = plan(eye, eye.add(player.getLookAngle().scale(4.0)));
+		takes = plan(eye, eye.add(player.getLookAngle().scale(4.0)));
 		startTick = minecraft.level.getGameTime();
 		lastShieldHit = -100.0;
 		if (!active) {
@@ -100,7 +143,7 @@ public final class FairyCutsceneCamera {
 		active = true;
 	}
 
-	/** The scene ends (or is cut short): the camera returns to the player, who now faces the fairy as the camera did. */
+	/** The scene ends (or is cut short): the camera returns to the player, who now faces the fairy. */
 	public static void stop() {
 		if (!active) {
 			return;
@@ -112,9 +155,8 @@ public final class FairyCutsceneCamera {
 			savedCameraType = null;
 		}
 		LocalPlayer player = minecraft.player;
-		if (player != null && !path.isEmpty()) {
-			Key last = path.get(path.size() - 1);
-			Shot facing = aim(last.position(), last.look());
+		if (player != null && minecraft.level != null) {
+			Shot facing = aim(player.getEyePosition(), cast(minecraft).fairyEye());
 			player.setYRot(facing.yaw());
 			player.setXRot(facing.pitch());
 			player.yRotO = facing.yaw();
@@ -135,27 +177,21 @@ public final class FairyCutsceneCamera {
 	@Nullable
 	public static Shot current() {
 		Minecraft minecraft = Minecraft.getInstance();
-		if (!active || minecraft.level == null || path.size() < 2) {
+		if (!active || minecraft.level == null || takes.isEmpty()) {
 			return null;
 		}
 		double t = time(minecraft);
-		Key last = path.get(path.size() - 1);
-		if (t >= last.tick()) {
-			return aim(last.position(), last.look());
-		}
 		int i = 0;
-		while (i < path.size() - 2 && path.get(i + 1).tick() <= t) {
+		while (i < takes.size() - 1 && takes.get(i + 1).start() <= t) {
 			i++;
 		}
-		Key a = path.get(i);
-		Key b = path.get(i + 1);
-		Key before = path.get(Math.max(0, i - 1));
-		Key after = path.get(Math.min(path.size() - 1, i + 2));
-		double u = Mth.clamp((t - a.tick()) / (double) (b.tick() - a.tick()), 0.0, 1.0);
-		// ease each shot in and out a little, on top of the curve's own smoothness
-		u = u * u * (3.0 - 2.0 * u) * 0.35 + u * 0.65;
-		Vec3 position = catmullRom(before.position(), a.position(), b.position(), after.position(), u);
-		Vec3 look = catmullRom(before.look(), a.look(), b.look(), after.look(), u);
+		Take take = takes.get(i);
+		double end = i < takes.size() - 1 ? takes.get(i + 1).start() : FairyCutscene.FIGHT;
+		double u = Mth.clamp((t - take.start()) / Math.max(1.0, end - take.start()), 0.0, 1.0);
+		u = u * u * (3.0 - 2.0 * u);
+		Cast cast = cast(minecraft);
+		Vec3 position = take.from().at(cast).lerp(take.to().at(cast), u);
+		Vec3 look = take.lookFrom().at(cast).lerp(take.lookTo().at(cast), u);
 		return aim(position, look);
 	}
 
@@ -163,61 +199,117 @@ public final class FairyCutsceneCamera {
 		return minecraft.level.getGameTime() - startTick + minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 	}
 
-	/** The shots, timed to FairyCutscene's timeline. */
-	private static List<Key> plan(Vec3 eye, Vec3 gaze) {
-		Vec3 altar = Vec3.atBottomCenterOf(FairyRealm.ALTAR).add(0.0, 1.0, 0.0);
-		Vec3 portal = FairyCutscene.MADDIE_PORTAL;
-		Vec3 door = portal.add(0.0, DOOR_HEIGHT / 2.0, 0.0);
-		// where Maddie stops, having walked out of the door towards the altar
-		Vec3 stand = portal.add(0.0, 0.0, FairyCutscene.WALK_DISTANCE - FairyCutscene.WALK_FROM);
-		Vec3 maddie = stand.add(0.0, 1.5, 0.0);
-		Vec3 fairy = FairyRealm.FAIRY_SPAWN;
-		Vec3 fairyBody = fairy.add(0.0, 1.2, 0.0);
-		// where the first (west) archer stops, having walked out of their door
-		Vec3 archer = FairyCutscene.HELP_PORTALS.get(0).add(0.0, 0.0, FairyCutscene.HELP_WALK_DISTANCE - FairyCutscene.WALK_FROM);
-		List<Key> keys = new ArrayList<>();
-		// the player's own view, rising into a crane shot of the glowing altar
-		keys.add(new Key(0, eye, gaze));
-		keys.add(new Key(26, altar.add(5.5, 4.5, 8.0), altar.add(0.0, 0.6, 0.0)));
-		// round to face the door as it opens, and in as Maddie steps through it
-		keys.add(new Key(FairyCutscene.PORTAL_OPENS + DOOR_OPENING, portal.add(2.4, 1.9, 7.0), door));
-		keys.add(new Key(FairyCutscene.MADDIE_ARRIVES + 6, portal.add(1.3, 1.6, 4.4), door.add(0.0, 0.1, 0.0)));
-		// backing away in front of her as she walks out, until she stops
-		keys.add(new Key(FairyCutscene.MADDIE_ARRIVES + FairyCutscene.WALK, stand.add(1.6, 1.7, 3.8), maddie.add(0.0, -0.1, 0.0)));
-		// slowly round her as she speaks, closer with every line, the door closing behind her
-		keys.add(new Key(FairyCutscene.LINE_TWO - 20, stand.add(1.8, 1.65, 3.4), maddie));
-		keys.add(new Key(FairyCutscene.LINE_THREE - 25, stand.add(-1.7, 1.6, 3.0), maddie));
-		keys.add(new Key(FairyCutscene.LINE_THREE + 8, stand.add(-0.7, 1.7, 2.2), maddie.add(0.0, 0.05, 0.0)));
-		// over her shoulder to the altar beyond her
-		keys.add(new Key(FairyCutscene.LOOK_TO_ALTAR - 2, stand.add(0.9, 2.1, -1.6), fairy.add(0.0, -1.0, 0.0)));
-		// the fairy appears over the altar
-		keys.add(new Key(FairyCutscene.FAIRY_APPEARS - 4, altar.add(2.8, 2.5, 7.5), fairy.add(0.0, -0.5, 0.0)));
-		keys.add(new Key(FairyCutscene.FAIRY_LINE_ONE - 4, altar.add(2.0, 3.6, 5.0), fairy));
-		// back to Maddie as she calls her friends, then wide on the three doors as theirs open
-		keys.add(new Key(FairyCutscene.CALL_FOR_HELP - 6, stand.add(-1.4, 1.7, 2.8), maddie));
-		keys.add(new Key(FairyCutscene.HELP_OPENS + DOOR_OPENING - 4, stand.add(1.5, 3.2, 9.5), stand.add(0.0, 1.4, -2.0)));
-		// over the first archer's shoulder as they draw, up at the fairy
-		keys.add(new Key(FairyCutscene.HELP_ARRIVES + FairyCutscene.HELP_WALK, archer.add(-1.3, 2.1, -1.8), fairyBody));
-		// on the fairy as the arrows stop on her shield, closer as she scoffs
-		keys.add(new Key(FairyCutscene.VOLLEY_ONE + 6, fairy.add(-3.2, -0.6, 5.6), fairyBody));
-		keys.add(new Key(FairyCutscene.FAIRY_LINE_FOUR, fairy.add(-1.6, 0.2, 4.2), fairyBody));
-		// high behind her, both archers before her, as she strikes them down one after the other
-		keys.add(new Key(FairyCutscene.STRIKE_ONE - 4, altar.add(0.0, 7.0, 10.5), altar.add(0.0, 1.5, -6.5)));
-		keys.add(new Key(FairyCutscene.STRIKE_TWO + 14, altar.add(-0.8, 6.0, 9.0), altar.add(0.0, 1.0, -7.0)));
-		// down to Maddie as she cries out
-		keys.add(new Key(FairyCutscene.MADDIE_CRIES + 6, stand.add(1.3, 1.65, 2.6), maddie));
-		// a low hero shot as the fairy raises her wand
-		keys.add(new Key(FairyCutscene.SHOT - 8, altar.add(-2.6, 1.6, 3.4), fairy.add(0.0, 0.3, 0.0)));
-		// across to Maddie as the bolt strikes, and down as she falls
-		keys.add(new Key(FairyCutscene.SHOT + 6, altar.add(stand.subtract(altar).scale(0.5)).add(5.5, 3.0, 0.0), maddie.add(0.0, -0.3, 0.0)));
-		keys.add(new Key(FairyCutscene.MADDIE_FALLS + 14, stand.add(2.5, 1.6, 2.6), stand.add(0.0, 0.4, 0.0)));
-		// back to the fairy, closer as she speaks
-		keys.add(new Key(FairyCutscene.FAIRY_LINE_TWO + 6, fairy.add(1.0, -1.5, 7.5), fairy));
-		keys.add(new Key(FairyCutscene.FAIRY_LINE_THREE, fairy.add(0.5, -1.0, 5.0), fairy));
-		keys.add(new Key(FairyCutscene.FAIRY_LINE_THREE + 32, fairy.add(-1.5, -0.8, 4.0), fairy));
-		// and home to the player's eyes, facing her
-		keys.add(new Key(FairyCutscene.FIGHT, eye, fairy));
-		return keys;
+	/** Where everyone is this frame: Maddie, the fairy and the archers if they're about, the player always. */
+	private static Cast cast(Minecraft minecraft) {
+		float partialTick = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+		AABB stage = new AABB(ALTAR, ALTAR).inflate(STAGE);
+		Vec3 maddieEye = MADDIE_EYE;
+		Vec3 maddieBody = STAND.add(0.0, 0.9, 0.0);
+		for (Maddie maddie : minecraft.level.getEntitiesOfClass(Maddie.class, stage)) {
+			maddieEye = maddie.getEyePosition(partialTick);
+			maddieBody = maddie.getPosition(partialTick).add(0.0, maddie.getBbHeight() / 2.0, 0.0);
+		}
+		Vec3 fairyEye = FAIRY_EYE;
+		Vec3 fairyMiddle = FAIRY_MIDDLE;
+		for (TransFairy fairy : minecraft.level.getEntitiesOfClass(TransFairy.class, stage)) {
+			fairyEye = fairy.getEyePosition(partialTick);
+			fairyMiddle = fairy.getPosition(partialTick).add(0.0, fairy.getBbHeight() / 2.0, 0.0);
+		}
+		Vec3[] eyes = {ARCHER_EYES.get(0), ARCHER_EYES.get(1)};
+		Vec3[] bodies = {eyes[0].add(0.0, -0.7, 0.0), eyes[1].add(0.0, -0.7, 0.0)};
+		for (SculkArcher archer : minecraft.level.getEntitiesOfClass(SculkArcher.class, stage)) {
+			int i = archer.getX() < PORTAL.x ? 0 : 1;
+			eyes[i] = archer.getEyePosition(partialTick);
+			bodies[i] = archer.getPosition(partialTick).add(0.0, archer.getBbHeight() / 2.0, 0.0);
+		}
+		LocalPlayer player = minecraft.player;
+		Vec3 playerEye = player != null ? player.getEyePosition(partialTick) : ALTAR.add(0.0, 1.6, 3.0);
+		return new Cast(playerEye, maddieEye, maddieBody, fairyEye, fairyMiddle, eyes[0], bodies[0], eyes[1], bodies[1]);
+	}
+
+	/**
+	 * The takes, timed to FairyCutscene's timeline. {@code eye} and {@code gaze}: where the player's eyes are and what
+	 * they look at as it starts (they're held still through the scene, so the takes that frame them can be placed now).
+	 */
+	private static List<Take> plan(Vec3 eye, Vec3 gaze) {
+		Vec3 westEye = ARCHER_EYES.get(0);
+		Vec3 eastEye = ARCHER_EYES.get(1);
+		Vec3 westDoor = FairyCutscene.HELP_PORTALS.get(0);
+		List<Take> list = new ArrayList<>();
+		// The player's view rises into a wide shot of the arena, looking past the altar to where the door will open.
+		list.add(new Take(0, cast -> eye, fixed(ALTAR.add(6.5, 5.0, 8.5)), cast -> gaze, fixed(ALTAR.add(0.0, 0.5, -6.5))));
+		// The door opens; Maddie walks out of it towards us as we back away.
+		list.add(new Take(FairyCutscene.PORTAL_OPENS, fixed(PORTAL.add(1.2, 1.5, 7.0)), fixed(PORTAL.add(1.0, 1.5, 6.2)), fixed(DOOR)));
+		list.add(new Take(FairyCutscene.MADDIE_ARRIVES + 4, fixed(PORTAL.add(0.9, 1.5, 3.4)), fixed(STAND.add(0.9, 1.5, 2.6)),
+				Cast::maddieEye));
+		// Her lines: close from her right, over her shoulder at the player she's talking to, pushing in from her left.
+		list.add(new Take(FairyCutscene.LINE_ONE - 2, fixed(around(MADDIE_EYE, ALTAR, 2.0, 0.8, 0.0)),
+				fixed(around(MADDIE_EYE, ALTAR, 1.75, 0.7, 0.0)), Cast::maddieEye));
+		Vec3 behindMaddie = around(MADDIE_EYE, eye, -1.2, -0.55, 0.25);
+		list.add(new Take(FairyCutscene.LINE_TWO - 4, fixed(behindMaddie), fixed(behindMaddie), Cast::player));
+		list.add(new Take(FairyCutscene.LINE_THREE - 4, fixed(around(MADDIE_EYE, ALTAR, 2.0, -0.9, 0.0)),
+				fixed(around(MADDIE_EYE, ALTAR, 1.3, -0.55, 0.0)), Cast::maddieEye));
+		// Over her shoulder at the empty air over the altar, where the fairy appears; then up at her as she hushes Maddie.
+		list.add(new Take(FairyCutscene.LOOK_TO_ALTAR - 4, fixed(around(MADDIE_EYE, FAIRY_MIDDLE, -1.1, 0.6, 0.3)),
+				fixed(around(MADDIE_EYE, FAIRY_MIDDLE, -0.85, 0.55, 0.3)), fixed(FAIRY_MIDDLE)));
+		list.add(new Take(FairyCutscene.FAIRY_APPEARS + 11, fixed(ALTAR.add(2.2, 3.8, -4.8)), fixed(ALTAR.add(1.8, 4.0, -4.1)),
+				Cast::fairyEye));
+		// Low on Maddie as she calls her friends, then wide on the three doors as theirs open either side of hers.
+		list.add(new Take(FairyCutscene.CALL_FOR_HELP - 5, fixed(around(MADDIE_EYE, ALTAR, 1.9, 0.7, -0.45)),
+				fixed(around(MADDIE_EYE, ALTAR, 1.55, 0.55, -0.4)), Cast::maddieEye));
+		list.add(new Take(FairyCutscene.HELP_OPENS, fixed(PORTAL.add(0.0, 2.6, 7.5)), fixed(PORTAL.add(0.0, 2.6, 6.9)),
+				fixed(PORTAL.add(0.0, 1.6, 0.0))));
+		// Low by the floor as the first archer walks out of their door.
+		list.add(new Take(FairyCutscene.HELP_ARRIVES + 2, fixed(westDoor.add(1.7, 0.55, 3.2)), fixed(westDoor.add(1.55, 0.6, 3.4)),
+				Cast::westEye));
+		// Over the second archer's shoulder as they draw and loose at the fairy.
+		list.add(new Take(FairyCutscene.DRAW, fixed(around(eastEye, FAIRY_MIDDLE, -1.0, -0.55, -0.3)),
+				fixed(around(eastEye, FAIRY_MIDDLE, -0.9, -0.5, -0.3)), Cast::fairyMiddle));
+		// The arrows stop on her shield; then side on, the first archer and the fairy both in frame, as the second volley flies.
+		list.add(new Take(FairyCutscene.VOLLEY_ONE + 6, fixed(FAIRY_MIDDLE.add(-2.6, -0.9, -3.6)), fixed(FAIRY_MIDDLE.add(-2.3, -0.8, -3.2)),
+				Cast::fairyMiddle));
+		Vec3 crossfire = westEye.lerp(FAIRY_MIDDLE, 0.4);
+		list.add(new Take(FairyCutscene.VOLLEY_TWO, fixed(ALTAR.add(-9.0, 2.8, -3.0)), fixed(ALTAR.add(-8.7, 2.9, -2.7)), fixed(crossfire)));
+		// Close on the fairy's scorn.
+		list.add(new Take(FairyCutscene.FAIRY_LINE_FOUR - 2, fixed(FAIRY_EYE.add(0.9, -0.5, -3.2)), fixed(FAIRY_EYE.add(0.7, -0.45, -2.7)),
+				Cast::fairyEye));
+		// Over her shoulder as she strikes each archer down.
+		list.add(new Take(FairyCutscene.STRIKE_ONE - 4, fixed(around(FAIRY_EYE, westEye, -2.5, 0.7, 0.4)),
+				fixed(around(FAIRY_EYE, westEye, -2.35, 0.65, 0.4)), Cast::westBody));
+		list.add(new Take(FairyCutscene.STRIKE_TWO + 4, fixed(around(FAIRY_EYE, eastEye, -2.5, -0.7, 0.4)),
+				fixed(around(FAIRY_EYE, eastEye, -2.35, -0.65, 0.4)), Cast::eastBody));
+		// Close on Maddie's cry; low on the fairy as she raises her wand; on Maddie as the bolt strikes her, following her down.
+		list.add(new Take(FairyCutscene.MADDIE_CRIES - 4, fixed(around(MADDIE_EYE, ALTAR, 1.9, -0.6, 0.0)),
+				fixed(around(MADDIE_EYE, ALTAR, 1.4, -0.45, 0.0)), Cast::maddieEye));
+		list.add(new Take(FairyCutscene.WAND_RAISED - 4, fixed(ALTAR.add(-2.6, 3.0, -6.2)), fixed(ALTAR.add(-2.3, 2.8, -5.8)),
+				Cast::fairyEye));
+		list.add(new Take(FairyCutscene.SHOT + 4, fixed(around(MADDIE_EYE, ALTAR, 1.0, -2.4, -0.4)),
+				fixed(around(MADDIE_EYE, ALTAR, 0.9, -2.2, -0.5)), Cast::maddieBody));
+		// Side on as she turns from Maddie to the player, then close on her from their side for her last line.
+		list.add(new Take(FairyCutscene.FAIRY_LINE_TWO - 3, fixed(FAIRY_EYE.add(4.2, -0.5, 0.3)), fixed(FAIRY_EYE.add(3.8, -0.45, 0.4)),
+				Cast::fairyEye));
+		list.add(new Take(FairyCutscene.FAIRY_LINE_THREE - 2, fixed(around(FAIRY_EYE, eye, 3.8, 0.35, -0.6)),
+				fixed(around(FAIRY_EYE, eye, 2.9, 0.25, -0.5)), Cast::fairyEye));
+		return list;
+	}
+
+	private static Place fixed(Vec3 point) {
+		return cast -> point;
+	}
+
+	/**
+	 * A point near {@code from}, placed by someone there facing {@code toward}: {@code forward} blocks ahead (negative:
+	 * behind), {@code right} to their right (negative: left) and {@code up} above. Facing is taken level; straight
+	 * above or below, they face south.
+	 */
+	private static Vec3 around(Vec3 from, Vec3 toward, double forward, double right, double up) {
+		Vec3 flat = new Vec3(toward.x - from.x, 0.0, toward.z - from.z);
+		Vec3 ahead = flat.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : flat.normalize();
+		return from.add(ahead.scale(forward)).add(-ahead.z * right, up, ahead.x * right);
+	}
+
+	private static Vec3 archerEye(int i) {
+		return FairyCutscene.HELP_PORTALS.get(i).add(0.0, 1.62, FairyCutscene.HELP_WALK_DISTANCE - FairyCutscene.WALK_FROM);
 	}
 
 	/** A camera at {@code position} looking at {@code look}. */
@@ -227,17 +319,6 @@ public final class FairyCutsceneCamera {
 		float yaw = (float) (Mth.atan2(d.z, d.x) * Mth.RAD_TO_DEG) - 90.0F;
 		float pitch = (float) -(Mth.atan2(d.y, flat) * Mth.RAD_TO_DEG);
 		return new Shot(position, yaw, pitch);
-	}
-
-	private static Vec3 catmullRom(Vec3 p0, Vec3 p1, Vec3 p2, Vec3 p3, double u) {
-		double u2 = u * u;
-		double u3 = u2 * u;
-		return new Vec3(spline(p0.x, p1.x, p2.x, p3.x, u, u2, u3), spline(p0.y, p1.y, p2.y, p3.y, u, u2, u3),
-				spline(p0.z, p1.z, p2.z, p3.z, u, u2, u3));
-	}
-
-	private static double spline(double a, double b, double c, double d, double u, double u2, double u3) {
-		return 0.5 * (2.0 * b + (c - a) * u + (2.0 * a - 5.0 * b + 4.0 * c - d) * u2 + (3.0 * b - a - 3.0 * c + d) * u3);
 	}
 
 	/** The scene's light: the doors and the fairy's shield. */
@@ -271,7 +352,7 @@ public final class FairyCutsceneCamera {
 		flare *= flare;
 		double alpha = shown * (0.08 + 0.3 * flare);
 		double radius = FairyCutscene.SHIELD_RADIUS * (1.0 + 0.04 * flare);
-		Vec3 middle = fairyMiddle(minecraft);
+		Vec3 middle = cast(minecraft).fairyMiddle();
 		int rings = 9;
 		int segments = 16;
 		for (int i = 0; i < rings; i++) {
@@ -285,18 +366,6 @@ public final class FairyCutsceneCamera {
 						onSphere(middle, radius, to, a), colour);
 			}
 		}
-	}
-
-	/** The fairy's middle this frame (where the shield is), or where she hovers if she isn't there. */
-	private static Vec3 fairyMiddle(Minecraft minecraft) {
-		Vec3 spawn = FairyRealm.FAIRY_SPAWN;
-		List<TransFairy> fairies = minecraft.level.getEntitiesOfClass(TransFairy.class, new AABB(spawn, spawn).inflate(12.0));
-		if (fairies.isEmpty()) {
-			return spawn.add(0.0, 1.2, 0.0);
-		}
-		TransFairy fairy = fairies.get(0);
-		float partialTick = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
-		return fairy.getPosition(partialTick).add(0.0, fairy.getBbHeight() / 2.0, 0.0);
 	}
 
 	/** A point on a sphere: {@code down} radians from its top, {@code round} radians round it. */

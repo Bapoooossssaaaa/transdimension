@@ -13,6 +13,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.BaseCoralFanBlock;
 import net.minecraft.world.level.block.BaseCoralPlantBlock;
 import net.minecraft.world.level.block.BaseCoralWallFanBlock;
@@ -63,10 +64,10 @@ import dev.goober.transdimension.TransDimension;
  * dull lava, flat holy water. Just before Iris stores a pack's block id map, {@link #addTwins} gives each of our block
  * states the id of its vanilla twin (our leaves get oak leaves', our flowers a poppy's, pink lava lava's, holy water
  * water's), with the properties matched up, so a tall flower's top half gets a sunflower's top half's id and a lit lamp
- * a lit lamp's. A block the pack lists itself keeps the pack's id. Only real light sources glow under a pack (lava,
- * fire, lamps, lanterns, sea lanterns, glow berries, the Sky Portal): crystals, gold and the like get plain ids, as
- * amethyst and gold blocks do, because a pack's glow on top of a block's own light made them far too bright. This works
- * with any pack that maps vanilla blocks, not just BSL.
+ * a lit lamp's. A block the pack lists itself keeps the pack's id. Our blocks glow under a pack exactly where their
+ * vanilla twins do (lava, fire, lamps, lanterns, sea lanterns, glow berries, amethyst clusters, the Sky Portal), and
+ * blocks whose twins don't glow (crystal and prism blocks, like amethyst blocks; holy gold, like gold) get plain ids. This
+ * works with any pack that maps vanilla blocks, not just BSL.
  *
  * <p><b>Clouds.</b> With BSL's clouds set to Vanilla, Iris draws the game's clouds, shapes and colour, but BSL's cloud
  * shader only keeps their alpha and lights them with its own sunlight colour, so the realm's heart clouds came out
@@ -92,6 +93,8 @@ public final class ShaderCompat {
 			Map.entry("sky_portal", "nether_portal"),
 			Map.entry("fairy_jar", "glass"),
 			Map.entry("trans_sea_lantern", "sea_lantern"),
+			// a floating crystal, glowing like an amethyst cluster (which packs draw glowing too)
+			Map.entry("ritual_crystal", "amethyst_cluster"),
 			Map.entry("trans_lamp", "redstone_lamp"),
 			Map.entry("pink_sculk_catalyst", "sculk_catalyst"));
 	/** The cloud program's line the tint goes after, in BSL (program/gbuffers_clouds.glsl). */
@@ -251,6 +254,9 @@ public final class ShaderCompat {
 		}
 		if (block instanceof SeaPickleBlock) {
 			return "sea_pickle";
+		}
+		if (block instanceof AmethystClusterBlock) {
+			return "amethyst_cluster";
 		}
 		if (block instanceof LanternBlock) {
 			return "lantern";

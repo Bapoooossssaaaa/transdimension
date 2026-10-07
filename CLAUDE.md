@@ -37,7 +37,8 @@ The cloud environment can't download Minecraft or Fabric, so **the owner builds 
 - Vanilla's `assets/minecraft/textures/entity/chest/` textures are overridden by the texture script (glowy pink chests); the vanilla originals are in `tools/vanilla_extra/entity/chest/`.
 - Data formats learned the hard way: an `exploration_map` loot function's `destination` is a plain structure tag id (`transdimension:fairy_sanctums`, no `#`). With a `#`, the whole loot table fails to load and its chests come up empty (that emptied the Egg House and village chests in round 4). The validator checks this now. And `generate_data.py` wipes our block and item tags before rewriting its own: a tag another generator writes must be listed in its `OTHER_GENERATORS_TAGS`, or the world won't load ("Missing tag"). The validator checks every tag of ours that our data refers to.
 - Learned in play: `Entity#startRiding` refuses (on the server) a vehicle whose entity type is `noSave()`, and Iris/BSL don't draw `RenderTypes.debugFilledBox()`.
-- The owner wants vanilla-like light: a block only glows if its vanilla cousin does (amethyst blocks don't), at about the same level; no full-bright (`light_emission`) faces in block models; few, soft effects. See HANDOFF "Light levels".
+- The owner wants vanilla-like light: a block glows exactly where its vanilla twin does, at the same level (amethyst clusters 5, amethyst blocks 0), and under shaders it takes that twin's id; no full-bright (`light_emission`) faces in block models; few, soft effects. See HANDOFF "Light levels".
+- The owner wants cutscenes shot like a film: hard cuts between takes that frame the actor and hold still or push in slowly, never one long fly-through (`FairyCutsceneCamera`).
 - Shaders (from the BSL 10.1.8 zip and Iris 1.11.4 jar the owner shared; see HANDOFF "Shaders (Iris and BSL)"):
   - Packs only know vanilla block ids, so `ShaderCompat` gives our blocks their vanilla twins' ids.
   - Glowing shapes use `RenderTypes.entityTranslucent` on a white texture, at light 13 under shaders. `RenderTypes.beaconBeam` (round 13) made BSL draw them as pure light, far too bright.
@@ -46,6 +47,7 @@ The cloud environment can't download Minecraft or Fabric, so **the owner builds 
 
 ## Status (latest first)
 
+- **Round 16 is written, not compiled yet**: the cutscene camera as cut takes (`FairyCutsceneCamera#plan`), the archers' longer walk in, and clusters glowing like amethyst clusters (light 5, and their shader id).
 - **Round 15 is written, not compiled yet**: Maddie's two sculk archers in the Fairy Realm cutscene (`entity/SculkArcher`, `SculkArcherRenderer`, `FairyCutscene#helpArrives`), the fairy's shield (`FairyCutsceneCamera#renderShield`) and their loot. HANDOFF's "Unverified APIs (round 15)" lists what to check.
 - **Round 14's first build failed only on `Mob#shouldDespawnInPeaceful` (not in 26.2; removed), so `src/main` for rounds 12 to 14 compiles. The client isn't compiled yet.** It covers:
   - the cloud rescue: nearest land, a planned way that never clips, eased flight, a sitting turtle and a golden lead (`CloudRescue`);

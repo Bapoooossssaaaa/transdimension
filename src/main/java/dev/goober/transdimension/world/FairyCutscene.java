@@ -93,27 +93,27 @@ public final class FairyCutscene {
 	/** ...their doors open... */
 	public static final int HELP_OPENS = 318;
 	/** ...and a sculk archer walks out of each, {@link #HELP_WALK_DISTANCE} blocks in {@link #HELP_WALK} ticks... */
-	public static final int HELP_ARRIVES = 336;
-	public static final int HELP_WALK = 16;
-	public static final double HELP_WALK_DISTANCE = 2.2;
-	public static final int HELP_CLOSES = 362;
+	public static final int HELP_ARRIVES = 334;
+	public static final int HELP_WALK = 24;
+	public static final double HELP_WALK_DISTANCE = 2.4;
+	public static final int HELP_CLOSES = 366;
 	/** ...and draws their bow. The fairy raises her shield, and two volleys (an arrow from each) stop on it. */
-	public static final int DRAW = 354;
-	public static final int SHIELD_UP = 358;
-	public static final int VOLLEY_ONE = 362;
-	public static final int VOLLEY_TWO = 380;
-	public static final int FAIRY_LINE_FOUR = 396;
-	public static final int SHIELD_DOWN = 410;
+	public static final int DRAW = 360;
+	public static final int SHIELD_UP = 364;
+	public static final int VOLLEY_ONE = 368;
+	public static final int VOLLEY_TWO = 388;
+	public static final int FAIRY_LINE_FOUR = 406;
+	public static final int SHIELD_DOWN = 418;
 	/** She strikes the first archer down, then the second. */
-	public static final int STRIKE_ONE = 418;
-	public static final int STRIKE_TWO = 432;
-	public static final int MADDIE_CRIES = 456;
-	public static final int WAND_RAISED = 486;
-	public static final int SHOT = 496;
-	public static final int MADDIE_FALLS = 511;
-	public static final int FAIRY_LINE_TWO = 531;
-	public static final int FAIRY_LINE_THREE = 596;
-	public static final int FIGHT = 656;
+	public static final int STRIKE_ONE = 426;
+	public static final int STRIKE_TWO = 442;
+	public static final int MADDIE_CRIES = 468;
+	public static final int WAND_RAISED = 496;
+	public static final int SHOT = 506;
+	public static final int MADDIE_FALLS = 521;
+	public static final int FAIRY_LINE_TWO = 541;
+	public static final int FAIRY_LINE_THREE = 606;
+	public static final int FIGHT = 666;
 	/** Ticks after a strike before someone it missed falls anyway. */
 	private static final int FALLS_AFTER = 15;
 	/** Ticks between the two archers' shots in a volley. */

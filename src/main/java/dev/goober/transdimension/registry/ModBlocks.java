@@ -285,13 +285,13 @@ public final class ModBlocks {
 	public static final Block TRANS_CRYSTAL_BLOCK = register("trans_crystal_block", Block::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK).strength(5.0F, 6.0F).requiresCorrectToolForDrops());
 	/**
-	 * A glowing prism cluster that grows on any face, like amethyst clusters (height 7, width 10). It drops prism shards;
-	 * the id is older than the name.
+	 * A prism cluster that grows on any face and glows like an amethyst cluster (light 5; height 7, width 10). It drops
+	 * prism shards; the id is older than the name.
 	 */
 	public static final Block TRANS_CRYSTAL_CLUSTER = register("trans_crystal_cluster",
 			properties -> new AmethystClusterBlock(7.0F, 10.0F, properties),
-			BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_CLUSTER).lightLevel(state -> 3));
-	/** Glowing pastel crystal rock lining the realm's geodes and crystal spikes; four prism shards make one. */
+			BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_CLUSTER));
+	/** Pastel crystal rock lining the realm's geodes and crystal spikes; four prism shards make one. Like an amethyst block, it doesn't glow. */
 	public static final Block PASTEL_PRISM = register("pastel_prism", Block::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK));
 
@@ -635,10 +635,10 @@ public final class ModBlocks {
 	public static final Block RITUAL_PEDESTAL = register("ritual_pedestal", RitualPedestalBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.DEEPSLATE).strength(-1.0F, 3600000.0F).noLootTable().noOcclusion()
 					.sound(SoundType.DEEPSLATE_BRICKS).lightLevel(state -> state.getValue(RitualPedestalBlock.CANDLE) ? 3 : 0));
-	/** The crystal floating over the ritual circle; it beams the candles' light into the gate. Unbreakable. */
+	/** The crystal floating over the ritual circle; it beams the candles' light into the gate. Unbreakable. It glows like an amethyst cluster (5), a little more once awake. */
 	public static final Block RITUAL_CRYSTAL = register("ritual_crystal", RitualCrystalBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(-1.0F, 3600000.0F).noLootTable().noOcclusion()
-					.sound(SoundType.AMETHYST).lightLevel(state -> state.getValue(RitualCrystalBlock.AWAKE) ? 6 : 3));
+					.sound(SoundType.AMETHYST).lightLevel(state -> state.getValue(RitualCrystalBlock.AWAKE) ? 7 : 5));
 	/** The white and pink light of an open Sky Portal (the way to the Cloud Realm). */
 	public static final Block SKY_PORTAL = registerWithoutItem("sky_portal", SkyPortalBlock::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.END_PORTAL).mapColor(MapColor.SNOW).lightLevel(state -> 11));
