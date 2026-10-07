@@ -4543,9 +4543,10 @@ def trans_torch():
     return img
 
 
-# Kira's skin, as the owner made it, once it's in the repo (64x64, the player layout, slim arms like Maddie's).
+# Kira's skin, as the owner made it (64x64, the player layout, slim arms like Maddie's): tools/art/kira_skin.png is the
+# owner's kiraskin.webp from main, saved as a PNG. A kiraskintexture.png at the root would take its place.
 KIRA_SKINS = [os.path.join(ROOT, "kiraskintexture.png"), os.path.join(HERE, "art", "kira_skin.png")]
-# The stand-in's colours, until then.
+# The stand-in's colours, if the skin were ever missing.
 KIRA = {"hair": hexc("5A2A30"), "hair2": hexc("47212A"), "hair3": hexc("703A42"), "skin": hexc("F6DACE"), "skin2": hexc("EAC5B7"),
         "shirt": hexc("F1EBEA"), "shirt2": hexc("DCD3D2"), "red": hexc("B8293F"), "trousers": hexc("33303D"),
         "trousers2": hexc("28252F"), "shoes": hexc("1F1B22"), "eye": hexc("F7F2F0"), "iris": hexc("6B3B2E"),
@@ -4615,7 +4616,7 @@ def kira_stand_in():
 
 
 def kira_skin():
-    """Kira's skin: the owner's (KIRA_SKINS) when it's in the repo, else the stand-in."""
+    """Kira's skin: the owner's (KIRA_SKINS), or the stand-in if it's missing."""
     for path in KIRA_SKINS:
         if os.path.exists(path):
             img = Image.open(path).convert("RGBA")
@@ -4623,7 +4624,7 @@ def kira_skin():
             if any(img.getpixel((55, y))[3] for y in range(20, 32)):
                 print(f"note: {os.path.basename(path)} has wide (4-pixel) arms; Kira's model has slim ones (MaddieRenderer)")
             return img
-    print("note: Kira's skin isn't in the repo yet (kiraskintexture.png at the root), so she wears a stand-in")
+    print("note: Kira's skin (tools/art/kira_skin.png) is missing, so she wears a stand-in")
     return kira_stand_in()
 
 

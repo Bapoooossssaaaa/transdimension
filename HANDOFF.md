@@ -22,7 +22,7 @@ State of the mod for whoever picks it up next (person or AI). The README covers 
   - **Calmer effects**: the ritual, the portals and the altar make fewer and softer particles, and glowing shapes are dimmer under shaders.
   - **Heavenly ruins are rarer** (one chunk in 40, was 9), and some are **ruined churches**: pews, a bell, a holy gold altar, and a lectern holding the **Cloud Bible** (a written book, `ModItems.CLOUD_BIBLE`, which their chest always has too).
   - **The trans torch** (`ModBlocks.TRANS_TORCH` and its wall twin), with pink flames.
-  - **Kira** lives in Maddie's home once Maddie is gone, and her head is comically big (see "Kira"). Until her skin is in the repo she wears a stand-in.
+  - **Kira** lives in Maddie's home once Maddie is gone, and her head is comically big (see "Kira"). She wears the owner's skin.
 
   See "Unverified APIs (round 14)".
 - **Round 13 is written, not compiled yet** (nor is round 12). The owner's notes, and the shader files they shared (BSL 10.1.8 and Iris 1.11.4+mc26.2, uploaded to `main` for this; nothing in the build uses them):
@@ -119,7 +119,7 @@ When the island is placed, the item frames may log "Hanging entity at invalid po
 
 Once the Trans Fairy has struck Maddie down (`FairyCutscene.maddieGone`), every Maddie outside the Fairy Realm hands her home to Kira on her next check (`Maddie#mustLeave` and `leave`, every 20 ticks): a `Kira` appears where she stood, with her home, and Maddie goes. New Egg Houses still place a Maddie (the structure's entity), so they get Kira too. `Kira extends Maddie` (the same home, goals, saving and invulnerability) but stays (`mustLeave` is false). Talking to her hands Maddie's Trans Wand and Trans Wings to a player who never got them (`Maddie#giveGifts`, the same once-per-player attachment) and otherwise says one of `KIRA_LINES` in chat (`generate_data.py`; `Kira.LINES` must match their number). `KiraRenderer` draws her on Maddie's slim-armed mesh with the head (and its hat layer) scaled 2x from the neck, and lifts her name tag 0.55 blocks so it clears the head. Her hitbox is a player's.
 
-Her skin is `textures/entity/kira/kira.png`, from `generate_textures.py` `kira_skin()`. That's the owner's skin once `kiraskintexture.png` is at the repo's root (like `maddieskintexture.png`; `tools/art/kira_skin.png` works too), and a stand-in until then (dark red hair, white shirt with red trim). The script warns if the skin has wide arms, since her model's are slim. Her spawn egg is her face from the skin, filling the whole egg.
+Her skin is `textures/entity/kira/kira.png`, from `generate_textures.py` `kira_skin()`. That's the owner's skin: `tools/art/kira_skin.png`, their `kiraskin.webp` from `main` saved as a PNG (a `kiraskintexture.png` at the repo's root would take its place). Without one the script draws a stand-in. The script warns if the skin has wide arms, since her model's are slim. Her spawn egg is her face from the skin, filling the whole egg.
 
 ### How the mobs work
 

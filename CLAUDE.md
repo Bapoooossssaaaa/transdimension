@@ -56,7 +56,7 @@ The cloud environment can't download Minecraft or Fabric, so **the owner builds 
   - no steady ritual beam;
   - vanilla-like light levels and calmer effects;
   - rarer heavenly ruins, ruined churches with the Cloud Bible, and the trans torch;
-  - Kira (`entity/Kira`, `KiraRenderer`), who replaces Maddie once she's gone. Her skin is a stand-in until `kiraskintexture.png` is in the repo.
+  - Kira (`entity/Kira`, `KiraRenderer`), who replaces Maddie once she's gone, in the owner's skin (`tools/art/kira_skin.png`, from `kiraskin.webp` on main).
 
   HANDOFF's "Unverified APIs (round 14)" lists what to check.
 - **Round 13 is written, not compiled yet**: the calm Fairy Jar fairy, shader support (block id twins, BSL's cloud colours, dimmer glowing mobs) and a valid BSL 10.1.8 preset. HANDOFF's "Unverified APIs (round 13)" lists what to check.
