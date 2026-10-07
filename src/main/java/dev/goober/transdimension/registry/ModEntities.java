@@ -30,6 +30,7 @@ import dev.goober.transdimension.entity.CrystalEye;
 import dev.goober.transdimension.entity.Fairy;
 import dev.goober.transdimension.entity.FairyCrystalSpike;
 import dev.goober.transdimension.entity.JarFairy;
+import dev.goober.transdimension.entity.Kira;
 import dev.goober.transdimension.entity.Maddie;
 import dev.goober.transdimension.entity.PastelSlime;
 import dev.goober.transdimension.entity.PinkWarden;
@@ -118,6 +119,7 @@ public final class ModEntities {
 
 	public static final ResourceKey<EntityType<?>> MADDIE_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("maddie"));
 	public static final ResourceKey<EntityType<?>> TRANS_MAGIC_BOLT_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("trans_magic_bolt"));
+	public static final ResourceKey<EntityType<?>> KIRA_KEY = ResourceKey.create(Registries.ENTITY_TYPE, TransDimension.id("kira"));
 
 	/** Maddie of the Egg House; she is placed by the island's structure template and never spawns on her own. */
 	public static final EntityType<Maddie> MADDIE = Registry.register(BuiltInRegistries.ENTITY_TYPE, MADDIE_KEY,
@@ -126,6 +128,13 @@ public final class ModEntities {
 					.eyeHeight(1.62F)
 					.clientTrackingRange(10)
 					.build(MADDIE_KEY));
+	/** Kira, who lives in Maddie's home once Maddie is gone (Maddie hands it over herself, see Maddie#leave). */
+	public static final EntityType<Kira> KIRA = Registry.register(BuiltInRegistries.ENTITY_TYPE, KIRA_KEY,
+			FabricEntityType.Builder.createMob(Kira::new, MobCategory.MISC, mob -> mob.defaultAttributes(Maddie::createAttributes))
+					.sized(0.6F, 1.8F)
+					.eyeHeight(1.62F)
+					.clientTrackingRange(10)
+					.build(KIRA_KEY));
 	/** The Trans Wand's spell. */
 	public static final EntityType<TransMagicBolt> TRANS_MAGIC_BOLT = Registry.register(BuiltInRegistries.ENTITY_TYPE, TRANS_MAGIC_BOLT_KEY,
 			EntityType.Builder.<TransMagicBolt>of(TransMagicBolt::new, MobCategory.MISC)

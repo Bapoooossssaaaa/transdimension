@@ -2,7 +2,6 @@ package dev.goober.transdimension.block;
 
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -43,13 +42,6 @@ public class RitualCrystalBlock extends Block {
 	/** Set once the ritual has opened the gate: the crystal glows brighter for good. */
 	public static final BooleanProperty AWAKE = BooleanProperty.create("awake");
 	private static final Map<Direction, VoxelShape> SHAPES = new EnumMap<>(Direction.class);
-	/**
-	 * Called on the client for an awake crystal near the player, so its steady beam into the open gate gets drawn
-	 * (RitualEffects sets this; common code can't reach client classes).
-	 */
-	public static Consumer<BlockPos> onAwakeCrystalShown = pos -> {
-	};
-
 	static {
 		for (Direction facing : Direction.Plane.HORIZONTAL) {
 			Direction side = facing.getClockWise();
@@ -84,21 +76,13 @@ public class RitualCrystalBlock extends Block {
 
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
-		boolean awake = state.getValue(AWAKE);
-		if (awake) {
-			onAwakeCrystalShown.accept(pos);
-		}
-		Vec3 gem = SculkRitual.beamOrigin(pos, state.getValue(FACING));
-		int motes = awake ? 3 : 1;
-		for (int i = 0; i < motes; i++) {
+		// Now and then a mote of light drifts up round the gem (a little more often once it's awake).
+		if (random.nextInt(state.getValue(AWAKE) ? 3 : 8) == 0) {
+			Vec3 gem = SculkRitual.beamOrigin(pos, state.getValue(FACING));
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			double radius = 0.5 + random.nextDouble() * 0.4;
 			level.addParticle(ModParticles.PRISM_SPARK, gem.x + Math.cos(angle) * radius, gem.y - 0.3 + random.nextDouble() * 0.8,
 					gem.z + Math.sin(angle) * radius, 0.0, 0.02, 0.0);
-		}
-		if (random.nextInt(awake ? 2 : 6) == 0) {
-			level.addParticle(ModParticles.PRISM_SPARK, gem.x + random.nextGaussian() * 0.3, gem.y + random.nextGaussian() * 0.3,
-					gem.z + random.nextGaussian() * 0.3, 0.0, 0.0, 0.0);
 		}
 	}
 

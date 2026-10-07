@@ -1,18 +1,13 @@
 package dev.goober.transdimension.client;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -20,9 +15,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 
-import dev.goober.transdimension.block.RitualCrystalBlock;
 import dev.goober.transdimension.network.RitualPayload;
-import dev.goober.transdimension.registry.ModBlocks;
 import dev.goober.transdimension.registry.ModParticles;
 import dev.goober.transdimension.world.SculkRitual;
 
@@ -33,25 +26,21 @@ import dev.goober.transdimension.world.SculkRitual;
  * <li>one after another round the circle, a beam of pink, blue or white light rises from each candle into the crystal,
  * <li>the crystal, glowing every colour in turn like a prism, wakes in a flash and a great white and pink beam shoots
  * from it into the middle of the gate,
- * <li>a sheet of light spreads out from the middle of the gate until it fills the frame, just ahead of the portal blocks
- * the server places ring by ring, then fades as the portal takes over.
+ * <li>while the server builds the portal ring by ring from the middle of the gate out to the frame (the way it formed
+ * in the first version: a couple of sparks per block, no sheet of light over it), and the beam fades soon after.
  * </ul>
- * Once the gate is open, every awake crystal near the player keeps a steady, gently pulsing beam on its gate (the crystal
- * block reports itself from its display ticks: {@link RitualCrystalBlock#onAwakeCrystalShown}).
- *
- * <p>The light is drawn as glowing, full-bright boxes ({@link GlowGeometry}), so it shows up bright in the darkest city,
- * and our own particles ({@link #sparkle}) follow it.
+ * Nothing stays lit afterwards: the crystal's beam fires during the ritual only. The light is drawn with
+ * {@link GlowGeometry} (soft, not full bright, under a shader pack), and a few of our own particles ({@link #sparkle})
+ * follow it.
  */
 public final class RitualEffects {
 	private static final int PINK = 0xF5A9B8;
-	private static final int DEEP_PINK = 0xFF7EB3;
 	private static final int BLUE = 0x5BCEFA;
 	private static final int WHITE = 0xFFFFFF;
 	private static final int[] CANDLE_COLOURS = {PINK, BLUE, WHITE};
 	private static final double RANGE = 160.0;
 
 	private static final List<Show> SHOWS = new ArrayList<>();
-	private static final Set<BlockPos> AWAKE = new HashSet<>();
 	private static ClientLevel lastLevel;
 
 	private RitualEffects() {
@@ -68,18 +57,15 @@ public final class RitualEffects {
 		ClientPlayNetworking.registerGlobalReceiver(RitualPayload.TYPE, (payload, context) -> {
 			if (context.client().level != null) {
 				SHOWS.add(new Show(payload, context.client().level.getGameTime()));
-				AWAKE.add(payload.crystal());
 			}
 		});
-		RitualCrystalBlock.onAwakeCrystalShown = pos -> AWAKE.add(pos.immutable());
 		LevelRenderEvents.COLLECT_SUBMITS.register(RitualEffects::render);
 		ClientTickEvents.END_CLIENT_TICK.register(RitualEffects::sparkle);
 	}
 
 	/**
-	 * The light show's sparkles, our own particles following the light: streaming up each candle's beam into the crystal,
-	 * bursting from the crystal, pouring along the great beam, and dancing round the edge of the light as it spreads
-	 * across the gate.
+	 * The light show's sparkles, a few of our own particles following the light: drifting up each candle's beam into the
+	 * crystal, a small burst as the crystal wakes, and the odd one along the great beam.
 	 */
 	private static void sparkle(Minecraft minecraft) {
 		ClientLevel level = minecraft.level;
@@ -97,18 +83,18 @@ public final class RitualEffects {
 				if (grow <= 0.0 || age > SculkRitual.FIRE) {
 					continue;
 				}
+				if (random.nextInt(3) != 0) {
+					continue;
+				}
 				Vec3 tip = candles.get(i);
 				Vec3 head = tip.lerp(origin, Math.min(1.0, grow));
 				Vec3 at = tip.lerp(head, random.nextDouble());
-				Vec3 flow = origin.subtract(tip).normalize().scale(0.08);
+				Vec3 flow = origin.subtract(tip).normalize().scale(0.06);
 				level.addParticle(ModParticles.PRISM_SPARK, at.x, at.y, at.z, flow.x, flow.y, flow.z);
-				if (grow < 1.0) {
-					level.addParticle(ModParticles.PINK_FLAME, head.x, head.y, head.z, 0.0, 0.0, 0.0);
-				}
 			}
 			double sinceWake = age - SculkRitual.AWAKEN;
-			if (sinceWake >= 0.0 && sinceWake < 4.0) {
-				for (int n = 0; n < 12; n++) {
+			if (sinceWake >= 0.0 && sinceWake < 2.0) {
+				for (int n = 0; n < 6; n++) {
 					level.addParticle(ModParticles.PRISM_SPARK, origin.x, origin.y, origin.z, random.nextGaussian() * 0.2, random.nextGaussian() * 0.2,
 							random.nextGaussian() * 0.2);
 				}
@@ -117,31 +103,9 @@ public final class RitualEffects {
 			if (fire > 0.0 && age < show.length() - SculkRitual.FADE) {
 				Vec3 end = origin.lerp(ritual.centre(), Math.min(1.0, fire));
 				Vec3 flow = ritual.centre().subtract(origin).normalize().scale(0.25);
-				for (int n = 0; n < 3; n++) {
+				if (random.nextInt(3) == 0) {
 					Vec3 at = origin.lerp(end, random.nextDouble());
 					level.addParticle(ModParticles.PRISM_SPARK, at.x, at.y, at.z, flow.x, flow.y, flow.z);
-				}
-			}
-			double open = age - SculkRitual.OPEN;
-			double full = ritual.rings() * SculkRitual.RING_TICKS;
-			if (open > 0.0 && open < full + 10.0) {
-				// round the edge of the spreading light
-				double reach = 1.0 + open / SculkRitual.RING_TICKS;
-				double along = Math.min(reach, ritual.halfAlong());
-				double up = Math.min(reach, ritual.halfUp());
-				Direction across = ritual.facing().getClockWise();
-				for (int n = 0; n < 6; n++) {
-					double a;
-					double u;
-					if (random.nextBoolean()) {
-						a = (random.nextBoolean() ? 1.0 : -1.0) * along;
-						u = (random.nextDouble() * 2.0 - 1.0) * up;
-					} else {
-						a = (random.nextDouble() * 2.0 - 1.0) * along;
-						u = (random.nextBoolean() ? 1.0 : -1.0) * up;
-					}
-					Vec3 at = ritual.centre().add(across.getStepX() * a, u, across.getStepZ() * a);
-					level.addParticle(ModParticles.PRISM_SPARK, at.x, at.y, at.z, 0.0, 0.01, 0.0);
 				}
 			}
 		}
@@ -152,17 +116,15 @@ public final class RitualEffects {
 		ClientLevel level = minecraft.level;
 		if (level != lastLevel) {
 			SHOWS.clear();
-			AWAKE.clear();
 			lastLevel = level;
 		}
-		if (level == null || (SHOWS.isEmpty() && AWAKE.isEmpty())) {
+		if (level == null || SHOWS.isEmpty()) {
 			return;
 		}
 		Vec3 camera = context.levelState().cameraRenderState.pos;
 		double now = level.getGameTime() + minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		GlowGeometry geometry = new GlowGeometry(camera);
 
-		Set<BlockPos> showing = new HashSet<>();
 		Iterator<Show> shows = SHOWS.iterator();
 		while (shows.hasNext()) {
 			Show show = shows.next();
@@ -171,24 +133,8 @@ public final class RitualEffects {
 				shows.remove();
 				continue;
 			}
-			showing.add(show.ritual.crystal());
 			if (show.ritual.origin().distanceToSqr(camera) < RANGE * RANGE) {
 				drawShow(geometry, show.ritual, age, show.length(), now);
-			}
-		}
-		Iterator<BlockPos> crystals = AWAKE.iterator();
-		while (crystals.hasNext()) {
-			BlockPos pos = crystals.next();
-			if (showing.contains(pos)) {
-				continue;
-			}
-			BlockState state = level.getBlockState(pos);
-			if (!state.is(ModBlocks.RITUAL_CRYSTAL) || !state.getValue(RitualCrystalBlock.AWAKE)) {
-				crystals.remove();
-				continue;
-			}
-			if (Vec3.atCenterOf(pos).distanceToSqr(camera) < RANGE * RANGE) {
-				drawSteadyBeam(geometry, pos, state.getValue(RitualCrystalBlock.FACING), now);
 			}
 		}
 		geometry.submit(context);
@@ -209,76 +155,31 @@ public final class RitualEffects {
 			Vec3 tip = candles.get(i);
 			Vec3 end = tip.lerp(origin, Math.min(1.0, grow));
 			int colour = CANDLE_COLOURS[i % CANDLE_COLOURS.length];
-			g.beam(tip, end, 0.03, spin, argb(0.9 * fade, WHITE));
-			g.beam(tip, end, 0.085, -spin, argb(0.4 * fade, colour));
+			g.beam(tip, end, 0.025, spin, argb(0.6 * fade, WHITE));
+			g.beam(tip, end, 0.07, -spin, argb(0.25 * fade, colour));
 			if (grow < 1.0) {
-				g.cube(end, 0.09, argb(0.9, WHITE));
-				g.cube(end, 0.18, argb(0.35, colour));
-			}
-			// the flame flares as its beam leaves it
-			double flare = 1.0 - Math.min(1.0, grow);
-			if (flare > 0.0) {
-				g.cube(tip, 0.1 + 0.25 * (1.0 - flare), argb(0.5 * flare, colour));
+				g.cube(end, 0.07, argb(0.6, WHITE));
 			}
 		}
 
 		// 2. The crystal: it gathers the light (a prismatic glow that swells as the candles feed it), then wakes in a flash.
 		double fed = Mth.clamp(age / SculkRitual.AWAKEN, 0.0, 1.0);
 		double pulse = 0.5 + 0.5 * Math.sin(now * 0.4);
-		g.cube(origin, 0.3 + 0.25 * fed + 0.04 * pulse, argb((0.15 + 0.25 * fed) * fade, prism(now * 0.015)));
-		g.cube(origin, 0.22 + 0.18 * fed, argb((0.12 + 0.2 * fed) * fade, prism(now * 0.015 + 0.5)));
+		g.cube(origin, 0.25 + 0.15 * fed + 0.03 * pulse, argb((0.08 + 0.15 * fed) * fade, prism(now * 0.015)));
 		double sinceWake = age - SculkRitual.AWAKEN;
-		if (sinceWake >= 0.0 && sinceWake < 16.0) {
-			double k = sinceWake / 16.0;
-			g.cube(origin, 0.3 + 2.6 * k, argb(0.55 * (1.0 - k), DEEP_PINK));
-			g.cube(origin, 0.2 + 1.4 * k, argb(0.7 * (1.0 - k), WHITE));
+		if (sinceWake >= 0.0 && sinceWake < 10.0) {
+			double k = sinceWake / 10.0;
+			g.cube(origin, 0.25 + 0.9 * k, argb(0.4 * (1.0 - k), WHITE));
 		}
 
 		// 3. The great beam into the middle of the gate.
 		double fire = (age - SculkRitual.FIRE) / SculkRitual.FIRE_GROW;
 		if (fire > 0.0) {
 			Vec3 end = origin.lerp(ritual.centre(), Math.min(1.0, fire));
-			double throb = 1.0 + 0.15 * Math.sin(now * 0.6);
-			g.beam(origin, end, 0.07 * throb, spin, argb(0.95 * fade, WHITE));
-			g.beam(origin, end, 0.2 * throb, -spin, argb(0.35 * fade, DEEP_PINK));
-			g.beam(origin, end, 0.34 * throb, spin * 0.5, argb(0.12 * fade, PINK));
-			if (fire < 1.0) {
-				g.cube(end, 0.25, argb(0.9, WHITE));
-			}
+			double throb = 1.0 + 0.1 * Math.sin(now * 0.6);
+			g.beam(origin, end, 0.05 * throb, spin, argb(0.7 * fade, WHITE));
+			g.beam(origin, end, 0.15 * throb, -spin, argb(0.22 * fade, PINK));
 		}
-
-		// 4. The sheet of light, spreading from the middle of the gate a ring at a time until it meets the frame.
-		double open = age - SculkRitual.OPEN;
-		if (open > 0.0) {
-			double full = ritual.rings() * SculkRitual.RING_TICKS;
-			double reach = 1.0 + open / SculkRitual.RING_TICKS;
-			double along = Math.min(reach, ritual.halfAlong());
-			double up = Math.min(reach, ritual.halfUp());
-			double sheet = open < full ? 1.0 : Mth.clamp(1.0 - (open - full) / SculkRitual.FADE, 0.0, 1.0);
-			// a flash as it touches the frame all round
-			double flash = open >= full ? Math.max(0.0, 1.0 - (open - full) / 8.0) : 0.0;
-			Direction facing = ritual.facing();
-			Vec3 centre = ritual.centre();
-			g.sheet(centre, facing, along, up, 0.05, argb(Math.min(1.0, 0.55 * sheet + 0.4 * flash), WHITE));
-			g.sheet(centre, facing, along + 0.12, up + 0.12, 0.14, argb(0.3 * sheet + 0.3 * flash, PINK));
-			// its leading edge shines brighter while it grows
-			if (open < full) {
-				g.sheet(centre, facing, along, up, 0.2, argb(0.18, DEEP_PINK));
-			}
-		}
-	}
-
-	/** An awake crystal's steady beam on its gate (the gate's middle is where SculkRitual says it is). */
-	private static void drawSteadyBeam(GlowGeometry g, BlockPos crystal, Direction facing, double now) {
-		Vec3 origin = SculkRitual.beamOrigin(crystal, facing);
-		Vec3 target = SculkRitual.aim(crystal, facing);
-		double pulse = 0.5 + 0.5 * Math.sin(now * 0.15 + crystal.hashCode());
-		double spin = now * 0.08;
-		g.beam(origin, target, 0.035 + 0.01 * pulse, spin, argb(0.6 + 0.25 * pulse, WHITE));
-		g.beam(origin, target, 0.12 + 0.03 * pulse, -spin, argb(0.22 + 0.1 * pulse, DEEP_PINK));
-		// the crystal's prismatic glow, its colours turning
-		g.cube(origin, 0.42 + 0.05 * pulse, argb(0.18 + 0.1 * pulse, prism(now * 0.01 + crystal.hashCode() * 0.1)));
-		g.cube(origin, 0.3 + 0.03 * pulse, argb(0.14 + 0.08 * pulse, prism(now * 0.01 + crystal.hashCode() * 0.1 + 0.5)));
 	}
 
 	/** A soft rainbow colour, {@code phase} of the way round the colour wheel (it wraps every 1). */

@@ -61,15 +61,16 @@ public class SkyPortalBlock extends Block implements Portal {
 
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+		// A gate is a whole wall of these blocks, so each one sparkles only now and then.
 		boolean alongX = state.getValue(AXIS) == Direction.Axis.X;
-		for (int i = 0; i < 2; i++) {
+		if (random.nextInt(4) == 0) {
 			double along = random.nextDouble();
 			double across = 0.5 + (random.nextDouble() - 0.5) * 0.6;
 			level.addParticle(random.nextInt(3) == 0 ? ModParticles.HOLY_SPARK : ModParticles.PRISM_SPARK,
 					pos.getX() + (alongX ? along : across), pos.getY() + random.nextDouble(), pos.getZ() + (alongX ? across : along),
 					0.0, 0.03, 0.0);
 		}
-		if (random.nextInt(8) == 0) {
+		if (random.nextInt(24) == 0) {
 			level.addParticle(ModParticles.PRISM_SPARK, pos.getX() + 0.5, pos.getY() + random.nextDouble(), pos.getZ() + 0.5,
 					(random.nextDouble() - 0.5) * 0.05, 0.02, (random.nextDouble() - 0.5) * 0.05);
 		}

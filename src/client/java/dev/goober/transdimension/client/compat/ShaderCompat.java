@@ -13,7 +13,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.BaseCoralFanBlock;
 import net.minecraft.world.level.block.BaseCoralPlantBlock;
 import net.minecraft.world.level.block.BaseCoralWallFanBlock;
@@ -46,6 +45,8 @@ import net.minecraft.world.level.block.TallDryGrassBlock;
 import net.minecraft.world.level.block.TallFlowerBlock;
 import net.minecraft.world.level.block.TallGrassBlock;
 import net.minecraft.world.level.block.TallSeagrassBlock;
+import net.minecraft.world.level.block.TorchBlock;
+import net.minecraft.world.level.block.WallTorchBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 
@@ -62,8 +63,10 @@ import dev.goober.transdimension.TransDimension;
  * dull lava, flat holy water. Just before Iris stores a pack's block id map, {@link #addTwins} gives each of our block
  * states the id of its vanilla twin (our leaves get oak leaves', our flowers a poppy's, pink lava lava's, holy water
  * water's), with the properties matched up, so a tall flower's top half gets a sunflower's top half's id and a lit lamp
- * a lit lamp's. A block the pack lists itself keeps the pack's id. Anything of ours that gives off light and has no twin
- * gets glowstone's id, so the pack makes it glow. This works with any pack that maps vanilla blocks, not just BSL.
+ * a lit lamp's. A block the pack lists itself keeps the pack's id. Only real light sources glow under a pack (lava,
+ * fire, lamps, lanterns, sea lanterns, glow berries, the Sky Portal): crystals, gold and the like get plain ids, as
+ * amethyst and gold blocks do, because a pack's glow on top of a block's own light made them far too bright. This works
+ * with any pack that maps vanilla blocks, not just BSL.
  *
  * <p><b>Clouds.</b> With BSL's clouds set to Vanilla, Iris draws the game's clouds, shapes and colour, but BSL's cloud
  * shader only keeps their alpha and lights them with its own sunlight colour, so the realm's heart clouds came out
@@ -85,12 +88,9 @@ public final class ShaderCompat {
 	private static final Map<String, String> TWINS_BY_ID = Map.ofEntries(
 			Map.entry("pink_lava", "lava"),
 			Map.entry("holy_water", "water"),
-			// The Fairy Portal is drawn solid, so it takes an emissive id; the Sky Portal is see-through, like a nether
-			// portal, which packs draw glowing (BSL adds depth).
-			Map.entry("fairy_portal", "glowstone"),
+			// The Sky Portal is see-through, like a nether portal, which packs draw glowing (BSL adds depth).
 			Map.entry("sky_portal", "nether_portal"),
 			Map.entry("fairy_jar", "glass"),
-			Map.entry("ritual_crystal", "amethyst_cluster"),
 			Map.entry("trans_sea_lantern", "sea_lantern"),
 			Map.entry("trans_lamp", "redstone_lamp"),
 			Map.entry("pink_sculk_catalyst", "sculk_catalyst"));
@@ -144,7 +144,6 @@ public final class ShaderCompat {
 					vanilla.put(id.getPath(), block);
 				}
 			}
-			BlockState glowstone = vanilla.containsKey("glowstone") ? vanilla.get("glowstone").defaultBlockState() : null;
 			int added = 0;
 			for (Block block : BuiltInRegistries.BLOCK) {
 				Identifier id = BuiltInRegistries.BLOCK.getKey(block);
@@ -160,9 +159,6 @@ public final class ShaderCompat {
 					BlockState twinState = twin == null ? null : twinState(state, twin);
 					if (twinState != null && ids.containsKey(twinState)) {
 						ids.put(state, ids.getInt(twinState));
-						added++;
-					} else if (glowstone != null && state.getLightEmission() > 0 && ids.containsKey(glowstone)) {
-						ids.put(state, ids.getInt(glowstone));
 						added++;
 					}
 				}
@@ -259,8 +255,11 @@ public final class ShaderCompat {
 		if (block instanceof LanternBlock) {
 			return "lantern";
 		}
-		if (block instanceof AmethystClusterBlock) {
-			return "amethyst_cluster";
+		if (block instanceof WallTorchBlock) {
+			return "wall_torch";
+		}
+		if (block instanceof TorchBlock) {
+			return "torch";
 		}
 		if (block instanceof SlimeBlock) {
 			return "slime_block";

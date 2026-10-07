@@ -85,6 +85,11 @@ def java_names():
             blocks.update({f"{prefix}{c}_coral_block", f"{prefix}{c}_coral", f"{prefix}{c}_coral_fan", f"{prefix}{c}_coral_wall_fan"})
             no_item.add(f"{prefix}{c}_coral_wall_fan")
     items |= blocks - no_item
+    # Blocks registered without an item that get a standing-and-wall item from fanItem(STANDING, WALL) (the trans torch).
+    ids = dict(re.findall(r'public static final Block ([A-Z0-9_]+) = \w+\("([a-z0-9_]+)"', src))
+    for m in re.finditer(r'\bfanItem\(([A-Z0-9_]+), ([A-Z0-9_]+)\)', src):
+        if m.group(1) in ids:
+            items.add(ids[m.group(1)])
     src = open(os.path.join(JAVA, "registry", "ModItems.java"), encoding="utf-8").read()
     for m in re.finditer(r'register\("([a-z0-9_]+)"', src):
         items.add(m.group(1))

@@ -84,10 +84,12 @@ import net.minecraft.world.level.block.SugarCaneBlock;
 import net.minecraft.world.level.block.TallDryGrassBlock;
 import net.minecraft.world.level.block.TallFlowerBlock;
 import net.minecraft.world.level.block.TallSeagrassBlock;
+import net.minecraft.world.level.block.TorchBlock;
 import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.UntintedParticleLeavesBlock;
 import net.minecraft.world.level.block.WallBlock;
+import net.minecraft.world.level.block.WallTorchBlock;
 import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -276,22 +278,22 @@ public final class ModBlocks {
 	// ---------------------------------------------------------------- crystals (rare, deep ore) and prisms (common decoration)
 	public static final Block TRANS_CRYSTAL_ORE = register("trans_crystal_ore",
 			properties -> new DropExperienceBlock(UniformInt.of(3, 7), properties),
-			BlockBehaviour.Properties.ofFullCopy(Blocks.DIAMOND_ORE).lightLevel(state -> 3));
+			BlockBehaviour.Properties.ofFullCopy(Blocks.DIAMOND_ORE));
 	public static final Block TRANS_DEEPSLATE_CRYSTAL_ORE = register("trans_deepslate_crystal_ore",
 			properties -> new DropExperienceBlock(UniformInt.of(3, 7), properties),
-			BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_DIAMOND_ORE).lightLevel(state -> 3));
+			BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_DIAMOND_ORE));
 	public static final Block TRANS_CRYSTAL_BLOCK = register("trans_crystal_block", Block::new,
-			BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK).strength(5.0F, 6.0F).requiresCorrectToolForDrops().lightLevel(state -> 6));
+			BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK).strength(5.0F, 6.0F).requiresCorrectToolForDrops());
 	/**
 	 * A glowing prism cluster that grows on any face, like amethyst clusters (height 7, width 10). It drops prism shards;
 	 * the id is older than the name.
 	 */
 	public static final Block TRANS_CRYSTAL_CLUSTER = register("trans_crystal_cluster",
 			properties -> new AmethystClusterBlock(7.0F, 10.0F, properties),
-			BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_CLUSTER).lightLevel(state -> 7));
+			BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_CLUSTER).lightLevel(state -> 3));
 	/** Glowing pastel crystal rock lining the realm's geodes and crystal spikes; four prism shards make one. */
 	public static final Block PASTEL_PRISM = register("pastel_prism", Block::new,
-			BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK).lightLevel(state -> 5));
+			BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK));
 
 	// ---------------------------------------------------------------- trans wood family
 	public static final Block TRANS_LOG = register("trans_log", RotatedPillarBlock::new,
@@ -382,9 +384,9 @@ public final class ModBlocks {
 	public static final Block POTTED_TRANS_ROSE = potted("potted_trans_rose", TRANS_ROSE);
 	/** A white star-shaped flower with a blue heart that glows softly at night. */
 	public static final Block STAR_BLOOM = register("star_bloom", properties -> new FlowerBlock(MobEffects.NIGHT_VISION, 8.0F, properties),
-			BlockBehaviour.Properties.ofFullCopy(Blocks.POPPY).lightLevel(state -> 5));
+			BlockBehaviour.Properties.ofFullCopy(Blocks.POPPY));
 	public static final Block POTTED_STAR_BLOOM = registerWithoutItem("potted_star_bloom", properties -> new FlowerPotBlock(STAR_BLOOM, properties),
-			BlockBehaviour.Properties.ofFullCopy(Blocks.POTTED_POPPY).lightLevel(state -> 5));
+			BlockBehaviour.Properties.ofFullCopy(Blocks.POTTED_POPPY));
 	public static final Block FAIRY_BELL = flower("fairy_bell", MobEffects.JUMP_BOOST, 6.0F);
 	public static final Block POTTED_FAIRY_BELL = potted("potted_fairy_bell", FAIRY_BELL);
 	// Tall flowers (two blocks high, like the Pride Peony).
@@ -514,6 +516,18 @@ public final class ModBlocks {
 			new Item.Properties().stacksTo(1));
 	public static final Block TRANS_LANTERN = register("trans_lantern", LanternBlock::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.LANTERN));
+	/**
+	 * The trans torch: a torch of pale pink wood with a flame in the flag's colours, giving off the mod's pink flame
+	 * particles; light 14, like a torch. Its one item places it on floors and its wall twin on walls, like vanilla's.
+	 */
+	public static final Block TRANS_TORCH = registerWithoutItem("trans_torch", properties -> new TorchBlock(ModParticles.PINK_FLAME, properties),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.TORCH));
+	public static final Block TRANS_WALL_TORCH = registerWithoutItem("trans_wall_torch",
+			properties -> new WallTorchBlock(ModParticles.PINK_FLAME, properties), BlockBehaviour.Properties.ofFullCopy(Blocks.WALL_TORCH));
+
+	static {
+		fanItem(TRANS_TORCH, TRANS_WALL_TORCH);
+	}
 
 	// ---------------------------------------------------------------- furniture (the chair, stool, armchair and cushions are seats)
 	public static final Block TRANS_CHAIR = register("trans_chair",
@@ -580,14 +594,14 @@ public final class ModBlocks {
 	/** The twelve frames of a Fairy Portal, found in the Fairy Sanctums; they take Trans Crystal Pearls. Unbreakable. */
 	public static final Block FAIRY_PORTAL_FRAME = register("fairy_portal_frame", FairyPortalFrameBlock::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.END_PORTAL_FRAME).mapColor(MapColor.COLOR_PINK).sound(SoundType.AMETHYST)
-					.lightLevel(state -> state.getValue(FairyPortalFrameBlock.PEARL) ? 7 : 1));
+					.lightLevel(state -> 1));
 	/** The shimmering surface of an open Fairy Portal. */
 	public static final Block FAIRY_PORTAL = registerWithoutItem("fairy_portal", FairyPortalBlock::new,
 			BlockBehaviour.Properties.ofFullCopy(Blocks.END_PORTAL).mapColor(MapColor.COLOR_PINK));
 	/** The crystal altar in the middle of the fairy arena: offer it a crystal pearl for a rematch. Unbreakable. */
 	public static final Block FAIRY_ALTAR = register("fairy_altar", FairyAltarBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(-1.0F, 3600000.0F).noLootTable().noOcclusion()
-					.sound(SoundType.AMETHYST).lightLevel(state -> 10));
+					.sound(SoundType.AMETHYST).lightLevel(state -> 5));
 	/** The trophy for beating the Trans Fairy: a jar with a little winged light dancing inside. */
 	public static final Block FAIRY_JAR = register("fairy_jar", FairyJarBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
@@ -620,14 +634,14 @@ public final class ModBlocks {
 	/** A candle stand of the ritual circle in a pink ancient city ({@code SculkRitual}). Unbreakable, like the city's gate. */
 	public static final Block RITUAL_PEDESTAL = register("ritual_pedestal", RitualPedestalBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.DEEPSLATE).strength(-1.0F, 3600000.0F).noLootTable().noOcclusion()
-					.sound(SoundType.DEEPSLATE_BRICKS).lightLevel(state -> state.getValue(RitualPedestalBlock.CANDLE) ? 12 : 0));
+					.sound(SoundType.DEEPSLATE_BRICKS).lightLevel(state -> state.getValue(RitualPedestalBlock.CANDLE) ? 3 : 0));
 	/** The crystal floating over the ritual circle; it beams the candles' light into the gate. Unbreakable. */
 	public static final Block RITUAL_CRYSTAL = register("ritual_crystal", RitualCrystalBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(-1.0F, 3600000.0F).noLootTable().noOcclusion()
-					.sound(SoundType.AMETHYST).lightLevel(state -> state.getValue(RitualCrystalBlock.AWAKE) ? 15 : 10));
+					.sound(SoundType.AMETHYST).lightLevel(state -> state.getValue(RitualCrystalBlock.AWAKE) ? 6 : 3));
 	/** The white and pink light of an open Sky Portal (the way to the Cloud Realm). */
 	public static final Block SKY_PORTAL = registerWithoutItem("sky_portal", SkyPortalBlock::new,
-			BlockBehaviour.Properties.ofFullCopy(Blocks.END_PORTAL).mapColor(MapColor.SNOW));
+			BlockBehaviour.Properties.ofFullCopy(Blocks.END_PORTAL).mapColor(MapColor.SNOW).lightLevel(state -> 11));
 
 	// ---------------------------------------------------------------- the Cloud Realm
 	/** The Cloud Realm's grass: snow-white blades over pale cloud soil. */
@@ -651,7 +665,7 @@ public final class ModBlocks {
 	public static final Block CHISELED_CLOUDCITE = copy("chiseled_cloudcite", Blocks.CHISELED_STONE_BRICKS);
 	/** Cloudcite bricks veined with holy gold, glowing softly: the heavenly ruins' trim. */
 	public static final Block GILDED_CLOUDCITE = register("gilded_cloudcite", Block::new,
-			BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BRICKS).mapColor(MapColor.GOLD).lightLevel(state -> 5));
+			BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BRICKS).mapColor(MapColor.GOLD));
 	/**
 	 * The Cloud Realm's white-and-gold chest (CloudChestBlock: a chest-shaped barrel). Its item is named, so the screen of a
 	 * placed one says "Cloud Chest" rather than "Barrel".
@@ -662,7 +676,7 @@ public final class ModBlocks {
 					Component.translatable("block.transdimension.cloud_chest").withStyle(style -> style.withItalic(false))));
 	/** Holy gold: far brighter than vanilla's, and it glows. The heavenly ruins are trimmed with it. */
 	public static final Block HOLY_GOLD_BLOCK = register("holy_gold_block", Block::new,
-			BlockBehaviour.Properties.ofFullCopy(Blocks.GOLD_BLOCK).lightLevel(state -> 8));
+			BlockBehaviour.Properties.ofFullCopy(Blocks.GOLD_BLOCK));
 	/** The cloud trees' leaves: soft white puffs that shed wisps of cloud. */
 	public static final Block CLOUD_LEAVES = register("cloud_leaves", properties -> new UntintedParticleLeavesBlock(0.02F, ParticleTypes.WHITE_ASH, properties),
 			BlockBehaviour.Properties.ofFullCopy(Blocks.CHERRY_LEAVES).mapColor(MapColor.SNOW));
@@ -688,7 +702,7 @@ public final class ModBlocks {
 				living.addEffect(new MobEffectInstance(ModEffects.BLESSED, 20 * 12, 0));
 			}
 		}
-	}, BlockBehaviour.Properties.ofFullCopy(Blocks.WATER).mapColor(MapColor.GOLD).lightLevel(state -> 6));
+	}, BlockBehaviour.Properties.ofFullCopy(Blocks.WATER).mapColor(MapColor.GOLD));
 
 	private ModBlocks() {
 	}
@@ -726,7 +740,10 @@ public final class ModBlocks {
 		return new CoralSet(block, deadBlock, plant, deadPlant, fan, deadFan, wallFan, deadWallFan);
 	}
 
-	/** The item of a coral fan: it places the standing fan on floors and the wall fan on walls, like vanilla's. */
+	/**
+	 * The item of a block with a wall twin (a coral fan, the trans torch): it places the standing block on floors and the
+	 * wall one on walls, like vanilla's.
+	 */
 	private static void fanItem(Block standing, Block wall) {
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, BuiltInRegistries.BLOCK.getKey(standing));
 		Registry.register(BuiltInRegistries.ITEM, key, new StandingAndWallBlockItem(standing, wall, Direction.DOWN,

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "P": "transdimension:prism_shard",
+    "C": "#minecraft:coals",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    "P",
+    "C",
+    "S"
+  ],
+  "result": {
+    "count": 4,
+    "id": "transdimension:trans_torch"
+  }
+}

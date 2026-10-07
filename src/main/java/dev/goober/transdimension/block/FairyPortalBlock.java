@@ -52,12 +52,12 @@ public class FairyPortalBlock extends Block implements Portal {
 
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
-		// Trans sparks drift up out of the pool, and now and then a prismatic star twinkles over it.
-		for (int i = 0; i < 2; i++) {
+		// Now and then a trans spark drifts up out of the pool, and more rarely a prismatic star twinkles over it.
+		if (random.nextInt(3) == 0) {
 			level.addParticle(ModParticles.TRANS_SPARK, pos.getX() + random.nextDouble(), pos.getY() + 0.8, pos.getZ() + random.nextDouble(),
 					0.0, 0.04 + random.nextDouble() * 0.04, 0.0);
 		}
-		if (random.nextInt(6) == 0) {
+		if (random.nextInt(16) == 0) {
 			level.addParticle(ModParticles.PRISM_SPARK, pos.getX() + random.nextDouble(), pos.getY() + 0.9, pos.getZ() + random.nextDouble(),
 					0.0, 0.02, 0.0);
 		}

@@ -11,6 +11,9 @@ holy gold and glowing gilded cloudcite, each with holy water and a white-and-gol
     temple         a small temple of white columns with golden capitals on a stepped platform, part of its roof fallen,
                    round a long pool of holy water, with an altar and a cloud chest at the far end
     sky_shrine     a ring of eight white columns under a stepped golden dome, round a fountain of holy water
+    ruined_church  a roofless little chapel: pews of trans wood down the nave, a trans-striped window over a golden
+                   altar, a lectern holding a Cloud Bible, a cloud chest of church loot, a broken bell tower with its
+                   bell still hanging, and one corner fallen in
 
 Each template's bottom layer is its floor: it takes the place of the top of the ground (HeavenlyRuinFeature.FOUNDATION
 must agree), and the feature shores it up with cloudcite wherever the ground dips under it. Inside each ruin the air is
@@ -19,20 +22,21 @@ set too, so a hummock of the island can't fill it.
 The giant beanstalk (BeanstalkFeature) has a cloud chest of the same loot at its top.
 
 Outputs (under src/main/resources/data/transdimension):
-    structure/heavenly_ruin/{spiral_tower,temple,sky_shrine}.nbt
-    loot_table/chests/heavenly_ruin.json
+    structure/heavenly_ruin/{spiral_tower,temple,sky_shrine,ruined_church}.nbt
+    loot_table/chests/heavenly_ruin.json, loot_table/chests/ruined_church.json
 
     python3 tools/generate_heavenly_ruins.py      (needs: pip install nbtlib)
 """
 import math
 import os
 
-from nbtlib import Compound, String
+from nbtlib import Compound, Int, String
 
 from generate_fairy_realm import DATA, NS, Template, write
 
 T = NS + ":"
 LOOT = T + "chests/heavenly_ruin"
+CHURCH_LOOT = T + "chests/ruined_church"
 FOUNDATION = 1          # template layer 0 is the floor, level with the top of the ground
 
 STAIRS = {"half": "bottom", "shape": "straight", "waterlogged": "false"}
@@ -41,11 +45,18 @@ HOLY_WATER = ("holy_water", {"level": "0"})
 WALL = {"up": "true", "north": "low", "east": "low", "south": "low", "west": "low", "waterlogged": "false"}
 
 
-def cloud_chest(facing):
+def cloud_chest(facing, loot=LOOT):
     """A cloud chest (a barrel underneath) full of holy loot, named like one a player places."""
     return (T + "cloud_chest", {"facing": facing, "open": "false"},
-            Compound({"id": String("minecraft:barrel"), "LootTable": String(LOOT),
+            Compound({"id": String("minecraft:barrel"), "LootTable": String(loot),
                       "CustomName": Compound({"translate": String("block.transdimension.cloud_chest")})}))
+
+
+def lectern_with_bible(facing):
+    """A lectern with a Cloud Bible open on it (the item carries its pages itself, so the book needs only its id)."""
+    return ("minecraft:lectern", {"facing": facing, "has_book": "true", "powered": "false"},
+            Compound({"id": String("minecraft:lectern"), "Page": Int(0),
+                      "Book": Compound({"id": String(T + "cloud_bible"), "count": Int(1)})}))
 
 
 def ring_angle(dx, dz):
@@ -250,6 +261,103 @@ def sky_shrine():
     return t
 
 
+# ============================================================================================ the ruined church
+def ruined_church():
+    """A small chapel, 9 by 15, its roof long gone. The altar end is north (z 0), the door south (z 14)."""
+    w, d = 9, 15
+    h = 13
+    t = Template((w, h, d))
+    # The floor: polished cloudcite, a brick aisle up the middle, bricks under the walls.
+    for x in range(w):
+        for z in range(d):
+            wall = x in (0, w - 1) or z in (0, d - 1)
+            t.put((x, 0, z), "cloudcite_bricks" if wall or (x == 4 and 4 <= z <= 13) else "polished_cloudcite")
+    # The sanctuary, a step up at the north end.
+    for x in range(1, w - 1):
+        for z in range(1, 4):
+            t.put((x, 1, z), "polished_cloudcite")
+        t.put((x, 1, 4), "cloudcite_brick_stairs", {"facing": "north", **STAIRS})
+    # The walls: bricks, chiselled at the corners, mostly about five high but broken down unevenly, and fallen in
+    # altogether at the south-east corner.
+    tops = [5, 6, 5, 4, 5, 6, 5, 5, 4, 5, 6, 5, 4, 3, 5]
+    for z in range(d):
+        for x in (0, w - 1):
+            top = tops[z] if x == 0 else (tops[d - 1 - z] if z < 9 else 2 + (z % 2))
+            for y in range(1, top + 1):
+                t.put((x, y, z), "chiseled_cloudcite" if z in (0, d - 1) else "cloudcite_bricks")
+    for x in range(1, w - 1):
+        back = 6 if 2 <= x <= 6 else 5
+        for y in range(1, back + 1):
+            t.put((x, y, 0), "cloudcite_bricks")
+        front = 5 if x <= 4 else 2
+        for y in range(1, front + 1):
+            t.put((x, y, d - 1), "cloudcite_bricks")
+    # The window over the altar: the flag in stained glass, top to bottom.
+    for y, glass in zip(range(2, 7), ("trans_blue_stained_glass", "trans_pink_stained_glass", "trans_stained_glass",
+                                       "trans_pink_stained_glass", "trans_blue_stained_glass")):
+        t.put((4, y, 0), glass)
+    # Side windows, white glass with a pink head (where the wall still stands that high).
+    for z in (5, 8, 11):
+        for x in (0, w - 1):
+            if t.get((x, 4, z)) is not None:
+                t.put((x, 3, z), "trans_stained_glass")
+                t.put((x, 4, z), "trans_pink_stained_glass")
+    # The door.
+    for x in range(3, 6):
+        for y in range(1, 4):
+            t.clear((x, y, d - 1))
+    # The bell tower over the door's west side, its top fallen, the bell still hanging.
+    for y in range(1, 11):
+        for x in range(0, 3):
+            for z in range(12, 15):
+                ring = x in (0, 2) or z in (12, 14)
+                if ring and not (y >= 9 and (x == 2 or z == 12)):
+                    t.put((x, y, z), "cloudcite_bricks")
+    # A beam across the tower holds the bell (a hanging bell needs a full block over it).
+    t.put((1, 8, 13), "cloudcite_bricks")
+    t.put((1, 7, 13), "minecraft:bell", {"attachment": "ceiling", "facing": "north", "powered": "false"})
+    for y in range(1, 4):
+        t.clear((2, y, 13))
+    # The altar: a golden block with candles on it, a lectern with the Cloud Bible before it, and a cloud chest beside.
+    t.put((4, 2, 2), "holy_gold_block")
+    t.put((4, 3, 2), "minecraft:white_candle", {"candles": "3", "lit": "false", "waterlogged": "false"})
+    t.put((3, 2, 2), "gilded_cloudcite")
+    t.put((5, 2, 2), "gilded_cloudcite")
+    t.put((4, 2, 3), *lectern_with_bible("south"))
+    t.put((6, 2, 1), *cloud_chest("south", CHURCH_LOOT))
+    # Pews of trans wood either side of the aisle, a few gone.
+    for z in (6, 8, 10):
+        for x in (1, 2, 3, 5, 6, 7):
+            if (x, z) in ((6, 10), (7, 10), (2, 8)):
+                continue
+            t.put((x, 1, z), "trans_stairs", {"facing": "south", **STAIRS})
+    # Rubble where the corner fell in.
+    for (x, y, z) in ((7, 1, 12), (6, 1, 13), (7, 2, 12), (7, 1, 11)):
+        t.put((x, y, z), "cloudcite_bricks" if y == 1 else "cloudcite_brick_slab",
+              None if y == 1 else BOTTOM_SLAB)
+    t.put((5, 1, 12), "cloudcite_brick_slab", BOTTOM_SLAB)
+    clear_inside(t, [(x, z) for x in range(1, w - 1) for z in range(1, d - 1)], 1, h - 1)
+    return t
+
+
+def church_loot_table():
+    """A ruined church's cloud chest: a Cloud Bible always (there's one on the lectern too), with candles, holy water,
+    cloud candy and a little gold; now and then a piece of holy gear."""
+    return {
+        "type": "minecraft:chest",
+        "pools": [
+            {"rolls": 1.0, "entries": [item("cloud_bible", 1)]},
+            {"rolls": {"type": "minecraft:uniform", "min": 2, "max": 5}, "entries": [
+                item("minecraft:white_candle", 10, 1, 3), item("minecraft:pink_candle", 6, 1, 2), item("minecraft:light_blue_candle", 6, 1, 2),
+                item("holy_water_bucket", 4), item("cloud_candy", 12, 1, 3), item("minecraft:gold_nugget", 10, 3, 9),
+                item("minecraft:gold_ingot", 5, 1, 3), item("minecraft:paper", 6, 2, 5), item("minecraft:feather", 6, 1, 3),
+                item("halo_lily", 5, 1, 2), item("cloud_puff", 5, 1, 2)]},
+            {"rolls": 1.0, "entries": [item("holy_golden_sword", 1), item("holy_golden_helmet", 1), {"type": "minecraft:empty", "weight": 10}]},
+        ],
+        "random_sequence": CHURCH_LOOT,
+    }
+
+
 # ============================================================================================ holy loot
 def item(name, weight, lo=1, hi=1, functions=()):
     e = {"type": "minecraft:item", "name": name if ":" in name else T + name, "weight": weight}
@@ -292,9 +400,11 @@ def main():
         for f in os.listdir(folder):
             os.remove(os.path.join(folder, f))
     counts = []
-    for name, build in (("spiral_tower", spiral_tower), ("temple", temple), ("sky_shrine", sky_shrine)):
+    for name, build in (("spiral_tower", spiral_tower), ("temple", temple), ("sky_shrine", sky_shrine),
+                        ("ruined_church", ruined_church)):
         counts.append(f"{name} {build().save('heavenly_ruin/' + name)}")
     write(os.path.join(DATA, NS, "loot_table", "chests", "heavenly_ruin.json"), loot_table())
+    write(os.path.join(DATA, NS, "loot_table", "chests", "ruined_church.json"), church_loot_table())
     print("Heavenly ruins written:", ", ".join(counts), "blocks.")
 
 

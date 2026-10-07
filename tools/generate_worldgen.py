@@ -1461,7 +1461,7 @@ def generate_round9_features():
     # and, very rarely, a giant concrete beanstalk up to a cloud of its own (BeanstalkFeature). Both centre themselves on
     # their chunk.
     cf("heavenly_ruin", {"type": f"{NS}:heavenly_ruin", "config": {}})
-    pf("heavenly_ruins", f"{NS}:heavenly_ruin", [{"type": "minecraft:rarity_filter", "chance": 9}, {"type": "minecraft:biome"}])
+    pf("heavenly_ruins", f"{NS}:heavenly_ruin", [{"type": "minecraft:rarity_filter", "chance": 40}, {"type": "minecraft:biome"}])
     cf("beanstalk", {"type": f"{NS}:beanstalk", "config": {}})
     pf("beanstalk", f"{NS}:beanstalk", [{"type": "minecraft:rarity_filter", "chance": 400}, {"type": "minecraft:biome"}])
     cf("cloud_tree", {"type": "minecraft:tree", "config": {

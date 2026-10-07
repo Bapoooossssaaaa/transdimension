@@ -10,7 +10,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -21,6 +20,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityLevelChangeEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
@@ -31,7 +31,6 @@ import dev.goober.transdimension.network.FairyCutscenePayload;
 import dev.goober.transdimension.registry.ModAttachments;
 import dev.goober.transdimension.registry.ModEntities;
 import dev.goober.transdimension.registry.ModItems;
-import dev.goober.transdimension.registry.ModParticles;
 
 /**
  * The ritual at the Fairy Altar and the cutscene that starts the first fight.
@@ -64,7 +63,9 @@ public final class FairyCutscene {
 	public static final int MADDIE_ARRIVES = 50;
 	/** ...walking this many ticks, {@link #WALK_DISTANCE} blocks, before she stops... */
 	public static final int WALK = 30;
-	public static final double WALK_DISTANCE = 3.0;
+	public static final double WALK_DISTANCE = 3.5;
+	/** How far behind the door she starts, inside its haze, so she's seen walking out through it. */
+	public static final double WALK_FROM = 1.2;
 	/** ...and it closes behind her. */
 	public static final int PORTAL_CLOSES = 88;
 	public static final int LINE_ONE = 86;
@@ -104,6 +105,9 @@ public final class FairyCutscene {
 		});
 		// Leaving the realm mid-scene lets that player go at once.
 		ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register((player, origin, destination) -> release(player));
+		// The scene lives in memory only: a world closed mid-scene mustn't carry it into the next one opened (in single
+		// player the game keeps running between worlds), where it would block the altar or call her into an empty realm.
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> scene = null);
 	}
 
 	public static boolean running() {
@@ -165,10 +169,12 @@ public final class FairyCutscene {
 			return;
 		}
 		int t = ++s.tick;
-		Vec3 portal = MADDIE_PORTAL;
-		if (t >= PORTAL_OPENS && t < PORTAL_CLOSES + 12 && t % 2 == 0) {
-			doorSparkles(level, portal);
+		if (level.players().isEmpty()) {
+			// Everyone left the realm (or logged out) mid-scene.
+			endUnwatched(level, s, t);
+			return;
 		}
+		Vec3 portal = MADDIE_PORTAL;
 		// Each step is its own check, so two that fall on the same tick both happen.
 		if (t == PORTAL_OPENS) {
 			level.playSound(null, portal.x, portal.y, portal.z, SoundEvents.BEACON_ACTIVATE, SoundSource.NEUTRAL, 1.2F, 1.8F);
@@ -197,23 +203,14 @@ public final class FairyCutscene {
 		if (t == LINE_THREE) {
 			say(level, MADDIE, "message.transdimension.cutscene.maddie_3");
 		}
-		if (t >= GATHER && t < FAIRY_APPEARS) {
-			gather(level, t);
-		}
-		if (t == GATHER) {
-			Vec3 at = FairyRealm.FAIRY_SPAWN;
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.BEACON_POWER_SELECT, SoundSource.HOSTILE, 2.0F, 0.7F);
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.HOSTILE, 2.0F, 0.6F);
-		}
 		if (t == FAIRY_APPEARS) {
+			// She appears the way she always has: in a burst of sparkles, with a chime (FairyRealm#spawnFairy). The intro
+			// only holds her still and unhurt over the altar until the fight.
 			s.fairy = FairyRealm.spawnFairy(level, FairyRealm.FAIRY_SPAWN);
 			if (s.fairy != null) {
 				s.fairy.setIntro(true);
 				s.fairy.lookAtDuringIntro(portal.add(0.0, 1.6, 0.0));
 			}
-			Vec3 at = FairyRealm.FAIRY_SPAWN;
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 2.5F, 1.4F);
-			level.sendParticles(ModParticles.PRISM_SPARK, at.x, at.y + 0.8, at.z, 60, 0.2, 0.2, 0.2, 0.25);
 		}
 		if (t == FAIRY_LINE_ONE) {
 			say(level, FAIRY, "message.transdimension.cutscene.fairy_1");
@@ -271,7 +268,7 @@ public final class FairyCutscene {
 		if (maddie == null) {
 			return null;
 		}
-		maddie.snapTo(door.x, door.y, door.z - 0.7, 0.0F, 0.0F);
+		maddie.snapTo(door.x, door.y, door.z - WALK_FROM, 0.0F, 0.0F);
 		maddie.setYHeadRot(0.0F);
 		maddie.yBodyRot = 0.0F;
 		maddie.actInCutscene();
@@ -292,30 +289,28 @@ public final class FairyCutscene {
 		}
 	}
 
-	/** Prismatic sparks drifting off the door's edges while it stands open (the door itself is drawn by each client). */
-	private static void doorSparkles(ServerLevel level, Vec3 door) {
-		RandomSource random = level.getRandom();
-		for (int i = 0; i < 2; i++) {
-			boolean side = random.nextBoolean();
-			double x = side ? door.x + (random.nextBoolean() ? -0.75 : 0.75) : door.x + (random.nextDouble() - 0.5) * 1.5;
-			double y = side ? door.y + random.nextDouble() * 2.8 : door.y + (random.nextBoolean() ? 0.0 : 2.8);
-			level.sendParticles(ModParticles.PRISM_SPARK, x, y, door.z, 1, 0.02, 0.02, 0.02, 0.01);
+	/**
+	 * Nobody's left in the realm mid-scene. Before Maddie has fallen the scene is called off: she and the fairy go, the
+	 * offering is given back on the altar, and throwing it again starts the scene over. After it, the story has moved on:
+	 * the fairy is there for the fight (spawned now if she isn't).
+	 */
+	private static void endUnwatched(ServerLevel level, Scene s, int t) {
+		if (t < MADDIE_FALLS) {
+			if (s.maddie != null && !s.maddie.isRemoved()) {
+				s.maddie.discard();
+			}
+			if (s.fairy != null && !s.fairy.isRemoved()) {
+				s.fairy.discard();
+			}
+			Vec3 altar = altarTop();
+			level.addFreshEntity(new ItemEntity(level, altar.x, altar.y + 0.2, altar.z, new ItemStack(ModItems.TRANS_CRYSTAL)));
+		} else if (s.fairy != null && s.fairy.isAlive()) {
+			s.fairy.setIntro(false);
+		} else if (!FairyRealm.fairyNearby(level, FairyRealm.ALTAR)) {
+			FairyRealm.spawnFairy(level, FairyRealm.FAIRY_SPAWN);
 		}
-	}
-
-	/** Light gathers over the altar where the Trans Fairy is about to appear: sparkles spiralling in from all round. */
-	private static void gather(ServerLevel level, int t) {
-		Vec3 at = FairyRealm.FAIRY_SPAWN.add(0.0, 0.8, 0.0);
-		double closeness = (t - GATHER) / (double) (FAIRY_APPEARS - GATHER);
-		for (int i = 0; i < 4; i++) {
-			float angle = t * 0.5F + i * Mth.TWO_PI / 4.0F;
-			double radius = 4.5 * (1.0 - closeness) + 0.4;
-			double x = at.x + Mth.cos(angle) * radius;
-			double z = at.z + Mth.sin(angle) * radius;
-			double y = at.y + Mth.sin(t * 0.3F + i) * 0.6;
-			level.sendParticles(ModParticles.TRANS_SPARK, x, y, z, 1, 0.0, 0.0, 0.0, 0.0);
-			level.sendParticles(ModParticles.PRISM_SPARK, x, y, z, 0, at.x - x, at.y - y, at.z - z, 0.08);
-		}
+		hold(level, false);
+		scene = null;
 	}
 
 	/** A line of the scene, shown as a subtitle to everyone watching under the speaker's name. */

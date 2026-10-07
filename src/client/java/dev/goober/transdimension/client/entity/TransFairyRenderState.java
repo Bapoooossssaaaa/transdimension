@@ -8,6 +8,4 @@ public class TransFairyRenderState extends LivingEntityRenderState {
 	public int action;
 	/** Ticks since the current action began. */
 	public float actionTime;
-	/** How far she has appeared in the cutscene, 0 to 1 (1 the rest of the time). */
-	public float appear = 1.0F;
 }

@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 @Mixin(BlockBehaviour.BlockStateBase.class)
 public abstract class ChestLightMixin {
 	@Unique
-	private static final int CHEST_GLOW = 10;
+	private static final int CHEST_GLOW = 4;
 
 	@Shadow
 	public abstract Block getBlock();

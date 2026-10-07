@@ -1698,14 +1698,15 @@ def generate_fairy_realm_data():
     """The endgame: Fairy Portal frames (twelve make a portal), the portal itself, the arena's altar, the Fairy Jar
     trophy, the Trans Fairy and her crystals, the crystal pearl's messages and the endgame advancements' names.
     (Structures: generate_fairy_realm.py. Dimension and islands: generate_worldgen.py.)"""
-    # ---- the portal frame: vanilla's end portal frame shape, a crystal pearl glowing in its socket when filled
+    # ---- the portal frame: vanilla's end portal frame shape, a crystal pearl set in its socket when filled (lit like any
+    # block: no full-bright faces, and light 1 like an end portal frame)
     frame_tex = {"particle": block_tex("fairy_portal_frame_side"), "bottom": block_tex("trans_stone"),
                  "top": block_tex("fairy_portal_frame_top"), "side": block_tex("fairy_portal_frame_side")}
     base = {"from": [0, 0, 0], "to": [16, 13, 16], "faces": {
         "down": {"uv": [0, 0, 16, 16], "texture": "#bottom", "cullface": "down"},
         "up": {"uv": [0, 0, 16, 16], "texture": "#top"},
         **{side: {"uv": [0, 3, 16, 16], "texture": "#side", "cullface": side} for side in ("north", "south", "west", "east")}}}
-    pearl = {"from": [4, 13, 4], "to": [12, 16, 12], "light_emission": 15, "faces": {
+    pearl = {"from": [4, 13, 4], "to": [12, 16, 12], "faces": {
         "up": {"uv": [4, 4, 12, 12], "texture": "#pearl", "cullface": "up"},
         **{side: {"uv": [4, 0, 12, 3], "texture": "#pearl"} for side in ("north", "south", "west", "east")}}}
     model("fairy_portal_frame", {"parent": "minecraft:block/block", "textures": frame_tex, "elements": [base]})
@@ -1732,8 +1733,8 @@ def generate_fairy_realm_data():
     blockstate("fairy_portal", {"variants": {"": {"model": f"{NS}:block/fairy_portal"}}})
     name("fairy_portal", "Fairy Portal")
 
-    # ---- the altar: a stone base, a glowing prism pillar, a capstone, and a crystal growing out of the top
-    crystal = lambda angle_from, angle_to: {"from": angle_from, "to": angle_to, "light_emission": 15, "shade": False,
+    # ---- the altar: a stone base, a prism pillar, a capstone, and a crystal growing out of the top (all lit by the world)
+    crystal = lambda angle_from, angle_to: {"from": angle_from, "to": angle_to,
                                             "rotation": {"origin": [8, 20, 8], "axis": "y", "angle": 45, "rescale": True},
                                             "faces": {f: {"uv": [0, 0, 16, 16], "texture": "#crystal"} for f in
                                                       (("north", "south") if angle_from[2] == angle_to[2] else ("west", "east"))}}
@@ -1742,7 +1743,7 @@ def generate_fairy_realm_data():
         "cap": block_tex("chiseled_trans_stone_bricks"), "crystal": block_tex("trans_crystal_cluster")},
         "elements": [
             {"from": [1, 0, 1], "to": [15, 4, 15], "faces": _faces("#base", (1, 12, 15, 16), (1, 1, 15, 15), cull=("down",))},
-            {"from": [4, 4, 4], "to": [12, 12, 12], "light_emission": 10, "faces": _faces("#pillar", (4, 4, 12, 12), (4, 4, 12, 12), skip=("up", "down"))},
+            {"from": [4, 4, 4], "to": [12, 12, 12], "faces": _faces("#pillar", (4, 4, 12, 12), (4, 4, 12, 12), skip=("up", "down"))},
             {"from": [2, 12, 2], "to": [14, 15, 14], "faces": _faces("#cap", (2, 0, 14, 3), (2, 2, 14, 14))},
             crystal([3, 15, 8], [13, 25, 8]), crystal([8, 15, 3], [8, 25, 13])]})
     blockstate("fairy_altar", {"variants": {"": {"model": f"{NS}:block/fairy_altar"}}})
@@ -1803,7 +1804,7 @@ def generate_fairy_realm_data():
         "message.transdimension.fairy_already_here": "The Trans Fairy is already here!",
         "message.transdimension.fairy_summoned": "The Trans Fairy answers your call!",
         "message.transdimension.fairy_defeated": "✦ The Trans Fairy is beaten! A portal home has opened north of the arena. ✦",
-        "message.transdimension.fairy_peaceful": "The Trans Fairy rests while the world is peaceful. A portal home is open north of the arena.",
+        "message.transdimension.fairy_peaceful": "The world is peaceful, so the Trans Fairy can't hurt you here. A portal home is open north of the arena.",
     })
 
 
@@ -2285,7 +2286,7 @@ def generate_round9():
         # middle (SculkRitual.beamOrigin), so it can hang dead level with, and in line with, the middle of an even-sized
         # gate. The item shows it unshifted.
         def gem(frm, to, origin, axis, angle):
-            e = faced_box(frm, to, "#crystal", light=15)
+            e = faced_box(frm, to, "#crystal")
             e["from"] = [frm[0] + shift, frm[1] + shift, frm[2]]
             e["to"] = [to[0] + shift, to[1] + shift, to[2]]
             e["rotation"] = {"origin": [origin[0] + shift, origin[1] + shift, origin[2]], "axis": axis, "angle": angle}
@@ -2310,9 +2311,9 @@ def generate_round9():
     name("ritual_crystal", "Ritual Crystal")
 
     portal_tex = {"particle": block_tex("sky_portal"), "portal": translucent("sky_portal")}
-    model("sky_portal_ns", {"textures": portal_tex, "elements": [{"from": [0, 0, 6], "to": [16, 16, 10], "light_emission": 15, "faces": {
+    model("sky_portal_ns", {"textures": portal_tex, "elements": [{"from": [0, 0, 6], "to": [16, 16, 10], "faces": {
         "north": {"uv": [0, 0, 16, 16], "texture": "#portal"}, "south": {"uv": [0, 0, 16, 16], "texture": "#portal"}}}]})
-    model("sky_portal_ew", {"textures": portal_tex, "elements": [{"from": [6, 0, 0], "to": [10, 16, 16], "light_emission": 15, "faces": {
+    model("sky_portal_ew", {"textures": portal_tex, "elements": [{"from": [6, 0, 0], "to": [10, 16, 16], "faces": {
         "east": {"uv": [0, 0, 16, 16], "texture": "#portal"}, "west": {"uv": [0, 0, 16, 16], "texture": "#portal"}}}]})
     blockstate("sky_portal", {"variants": {"axis=x": {"model": f"{NS}:block/sky_portal_ns"}, "axis=z": {"model": f"{NS}:block/sky_portal_ew"}}})
     name("sky_portal", "Sky Portal")
@@ -2394,6 +2395,56 @@ HOLY_GEAR = {"sword": ("Sword", "swords"), "pickaxe": ("Pickaxe", "pickaxes"), "
 ROUND11_PARTICLES = {"pink_flame": 5, "prism_spark": 8, "holy_spark": 6}
 
 
+# ============================================================================================ round 14
+def generate_round14():
+    """The trans torch (ModBlocks.TRANS_TORCH and its wall twin): vanilla's torch models with our texture, one item that
+    places either, and four from a prism shard, coal and a stick."""
+    model("trans_torch", {"parent": "minecraft:block/template_torch", "textures": {"torch": block_tex("trans_torch")}})
+    model("trans_wall_torch", {"parent": "minecraft:block/template_torch_wall", "textures": {"torch": block_tex("trans_torch")}})
+    blockstate("trans_torch", {"variants": {"": {"model": f"{NS}:block/trans_torch"}}})
+    wall = f"{NS}:block/trans_wall_torch"
+    blockstate("trans_wall_torch", {"variants": {"facing=east": {"model": wall}, "facing=north": {"model": wall, "y": 270},
+                                                 "facing=south": {"model": wall, "y": 90}, "facing=west": {"model": wall, "y": 180}}})
+    model("trans_torch", {"parent": "minecraft:item/generated", "textures": {"layer0": block_tex("trans_torch")}}, kind="item")
+    item_def("trans_torch", f"{NS}:item/trans_torch")
+    name("trans_torch", "Trans Torch")
+    name("trans_wall_torch", "Trans Wall Torch")
+    loot("trans_torch", loot_self("trans_torch"))
+    loot("trans_wall_torch", loot_self("trans_wall_torch", drop="trans_torch"))
+    recipe("trans_torch", shaped("trans_torch", ["P", "C", "S"], {"P": "prism_shard", "C": "#minecraft:coals", "S": "minecraft:stick"},
+                                 count=4, category="equipment"))
+
+    # ---- Kira, in Maddie's home once Maddie is gone (entity/Kira). Her lines: Kira.LINES must match KIRA_LINES' length.
+    simple_item("kira_spawn_egg", "Kira Spawn Egg")
+    NAMES["entity.transdimension.kira"] = "Kira"
+    NAMES["message.transdimension.kira.gifts"] = ("Maddie wanted everyone who finds her house to have these: her Trans Wand "
+                                                 "and her Trans Wings. Look after them for her, okay?")
+    for i, line in enumerate(KIRA_LINES, 1):
+        NAMES[f"message.transdimension.kira.line_{i}"] = line
+
+
+# What Kira says once you have Maddie's gifts, picked at random (one per talk).
+KIRA_LINES = [
+    "Hi! I'm Kira. I'm looking after Maddie's house now.",
+    "My head is a perfectly normal size. Everyone else's is just tiny.",
+    "Maddie talked about the Trans Fairy all the time. I hope you showed her what you're worth.",
+    "I water Maddie's flowers every morning. They still come up in trans colours.",
+    "Fly safe! And if you fall out of the sky, the turtle on the cloud will fish you out.",
+]
+
+
+# The Cloud Bible's pages, in order (ModItems.CLOUD_BIBLE_PAGES must match their number).
+CLOUD_BIBLE = [
+    "\u2601 The Cloud Bible \u2601\n\nThe words of the angels of the Cloud Realm, for anyone who climbs this high.",
+    "In the beginning there was the sky, and the sky was soft.\n\nAnd the clouds said: let there be blue, and pink, and white. And it was good.",
+    "Blessed are they who become who they are, for the sky has always known their name.",
+    "Thou shalt not deadname.\n\nThou shalt share thy cloud candy.\n\nThou shalt pet the Cloudies, gently.",
+    "When thou fallest, fear not: the turtle upon the cloud shall fish thee out of the sky, in a white boat, on a golden lead.",
+    "Rest a while in the holy water, and be made whole. Leave the golden things for those who come after.",
+    "Go now, and be valid.\n\nAmen. \u2726",
+]
+
+
 def generate_round11():
     # ---- cloudcite: the realm's own stone (in place of calcite) and what's made from it
     stone_family("cloudcite", "Cloudcite", "cloudcite", "Cloudcite")
@@ -2412,7 +2463,7 @@ def generate_round11():
     for result, count in (("polished_cloudcite", 1), ("cloudcite_bricks", 1), ("chiseled_cloudcite", 1)):
         R(f"{result}_from_cloudcite_stonecutting", stonecutting(result, "cloudcite", count))
 
-    # ---- holy gold: far brighter than gold, and it glows (the heavenly ruins' trim; never crafted)
+    # ---- holy gold: far brighter than gold (the heavenly ruins' trim; never crafted)
     cube("holy_gold_block", "Block of Holy Gold")
     tag("block", "needs_iron_tool", "holy_gold_block")
     tag("block", "beacon_base_blocks", "holy_gold_block")
@@ -2450,6 +2501,13 @@ def generate_round11():
     simple_item("holy_water_bucket", "Bucket of Holy Water")
     tag("fluid", "water", "holy_water", "flowing_holy_water")
     NAMES["effect.transdimension.blessed"] = "Blessed"
+
+    # ---- the Cloud Bible (ModItems.CLOUD_BIBLE, a written book of its own; ruined churches): its name, its pages, and a
+    # place on lecterns
+    simple_item("cloud_bible", "Cloud Bible")
+    for i, page in enumerate(CLOUD_BIBLE, start=1):
+        NAMES[f"book.transdimension.cloud_bible.{i}"] = page
+    tag("item", "lectern_books", "cloud_bible")
 
     # ---- cloud candy: sugar spun round a stick with a tuft of cloud
     simple_item("cloud_candy", "Cloud Candy")
@@ -2715,6 +2773,7 @@ def main():
     generate_round9()
     generate_round11()
     generate_round12()
+    generate_round14()
     generate_sounds()
     generate_advancements()
     generate_round9_advancements()

@@ -4508,6 +4508,150 @@ def prismatic_crystal(awake=False, n=16):
     return strip
 
 
+CLOUD_BIBLE_ROWS = [
+    "................",
+    "..GGGGGGGGGGGG..",
+    "..GWWWWWWWWWWGp.",
+    "..GWWWWWWWWWWGp.",
+    "..GWWWbbWbbWWGp.",
+    "..GWWbBBbBBbWGp.",
+    "..GWbBBBBBBBbGp.",
+    "..GWPPPPPPPPWGp.",
+    "..GWoPPPPPPoWGp.",
+    "..GWWooooooWWGp.",
+    "..GWWWWWWWWWWGp.",
+    "..GWWWWWWWWWWGp.",
+    "..GWWWWWWWWWWGp.",
+    "..GGGGGGGGGGGGp.",
+    "...ppppppppppp..",
+    "................",
+]
+
+
+def trans_torch():
+    """The trans torch, laid out like vanilla's torch texture (vanilla's template_torch models use x 7-8, y 6-15): a stick
+    of pale pink wood, a glowing tip, and a two-by-two flame in the flag's colours (white over pink, pink over blue)."""
+    img = new()
+    flame = {(7, 6): WHITE, (8, 6): hexc("F5A9B8"), (7, 7): hexc("F5A9B8"), (8, 7): hexc("5BCEFA")}
+    for (x, y), colour in flame.items():
+        img.putpixel((x, y), (*colour, 255))
+    img.putpixel((7, 8), (*hexc("FBE3EC"), 255))
+    img.putpixel((8, 8), (*hexc("E9BFD0"), 255))
+    for y in range(9, 16):
+        img.putpixel((7, y), (*hexc("D9B8AA"), 255))
+        img.putpixel((8, y), (*hexc("B8907F"), 255))
+    return img
+
+
+# Kira's skin, as the owner made it, once it's in the repo (64x64, the player layout, slim arms like Maddie's).
+KIRA_SKINS = [os.path.join(ROOT, "kiraskintexture.png"), os.path.join(HERE, "art", "kira_skin.png")]
+# The stand-in's colours, until then.
+KIRA = {"hair": hexc("5A2A30"), "hair2": hexc("47212A"), "hair3": hexc("703A42"), "skin": hexc("F6DACE"), "skin2": hexc("EAC5B7"),
+        "shirt": hexc("F1EBEA"), "shirt2": hexc("DCD3D2"), "red": hexc("B8293F"), "trousers": hexc("33303D"),
+        "trousers2": hexc("28252F"), "shoes": hexc("1F1B22"), "eye": hexc("F7F2F0"), "iris": hexc("6B3B2E"),
+        "mouth": hexc("D98C98"), "blush": hexc("F1BDB3")}
+
+
+def skin_box(img, u, v, w, h, d, paint):
+    """Paints the six faces of a model box laid out at (u, v) in a skin (w wide, h tall, d deep), the way vanilla lays
+    out box UVs: paint(face, x, y) gives each pixel's colour, x and y counted within the face."""
+    faces = {"top": (u + d, v, w, d), "bottom": (u + d + w, v, w, d), "right": (u, v + d, d, h),
+             "front": (u + d, v + d, w, h), "left": (u + d + w, v + d, d, h), "back": (u + 2 * d + w, v + d, w, h)}
+    for face, (x0, y0, fw, fh) in faces.items():
+        for y in range(fh):
+            for x in range(fw):
+                img.putpixel((x0 + x, y0 + y), (*paint(face, x, y), 255))
+
+
+def kira_stand_in():
+    """Kira's stand-in skin, until hers is in the repo: long dark red hair, a white shirt with red trim, dark trousers."""
+    K = KIRA
+    img = new(64, 64)
+
+    def hair(x, y):
+        return K["hair2"] if (x * 5 + y * 3) % 7 == 0 else K["hair3"] if (x + 2 * y) % 9 == 0 else K["hair"]
+
+    def head(face, x, y):
+        if face == "bottom":
+            return K["skin2"]
+        if face != "front" or y < 2 or (y == 2 and x in (0, 1, 6, 7)) or x in (0, 7):
+            return hair(x, y)
+        if y == 4:
+            return {1: K["eye"], 2: K["iris"], 5: K["iris"], 6: K["eye"]}.get(x, K["skin"])
+        if y == 5 and x in (1, 6):
+            return K["blush"]
+        if y == 6 and x in (3, 4):
+            return K["mouth"]
+        return K["skin"]
+
+    def body(face, x, y):
+        if face == "bottom" or y >= 10:
+            return K["trousers"]
+        if y == 9 or (face == "front" and y == 0 and x not in (3, 4)):
+            return K["red"]
+        if face == "front" and y == 0:
+            return K["skin"]
+        return K["shirt2"] if face in ("right", "left") or (face == "front" and x in (0, 7)) else K["shirt"]
+
+    def arm(face, x, y):
+        if face == "top" or (face != "bottom" and y < 5):
+            return K["shirt2"] if face in ("right", "left") else K["shirt"]
+        if face != "bottom" and y == 5:
+            return K["red"]
+        return K["skin2"] if face in ("bottom", "right", "left") else K["skin"]
+
+    def leg(face, x, y):
+        if face == "bottom" or (face != "top" and y >= 10):
+            return K["shoes"]
+        return K["trousers2"] if face in ("right", "left") else K["trousers"]
+
+    skin_box(img, 0, 0, 8, 8, 8, head)
+    skin_box(img, 16, 16, 8, 12, 4, body)
+    skin_box(img, 40, 16, 3, 12, 4, arm)
+    skin_box(img, 32, 48, 3, 12, 4, arm)
+    skin_box(img, 0, 16, 4, 12, 4, leg)
+    skin_box(img, 16, 48, 4, 12, 4, leg)
+    return img
+
+
+def kira_skin():
+    """Kira's skin: the owner's (KIRA_SKINS) when it's in the repo, else the stand-in."""
+    for path in KIRA_SKINS:
+        if os.path.exists(path):
+            img = Image.open(path).convert("RGBA")
+            assert img.size == (64, 64), f"{path} must be a 64x64 skin"
+            if any(img.getpixel((55, y))[3] for y in range(20, 32)):
+                print(f"note: {os.path.basename(path)} has wide (4-pixel) arms; Kira's model has slim ones (MaddieRenderer)")
+            return img
+    print("note: Kira's skin isn't in the repo yet (kiraskintexture.png at the root), so she wears a stand-in")
+    return kira_stand_in()
+
+
+def kira_spawn_egg(skin):
+    """Spawn eggs are faces in 26.2: Kira's, from her skin (with its hat layer), filling the whole egg, since her head
+    really is that big."""
+    face = skin.crop((8, 8, 16, 16))
+    face.alpha_composite(skin.crop((40, 8, 48, 16)))
+    img = face.resize((16, 16), Image.NEAREST)
+    for corner in ((0, 0), (15, 0), (0, 15), (15, 15)):
+        img.putpixel(corner, CLEAR)
+    return img
+
+
+def cloud_bible():
+    """The Cloud Bible: a white book bound in holy gold, its pages' edges showing at the side and bottom, with a little
+    cloud on the cover in the flag's colours (blue over pink over white)."""
+    palette = {"G": hexc("D9A93A"), "W": hexc("F7F4FB"), "b": hexc("8FD9F7"), "B": hexc("5BCEFA"), "o": hexc("D6CCE8"),
+               "p": hexc("F2D7A1"), "P": hexc("F5A9B8")}
+    img = from_ascii(CLOUD_BIBLE_ROWS, palette)
+    # the binding's gold catches the light along its top and left
+    for x in range(3, 14):
+        img.putpixel((x, 1), (*hexc("F2CF63"), 255))
+    for y in range(2, 13):
+        img.putpixel((2, y), (*hexc("F2CF63"), 255))
+    return img
+
+
 def cloud_candy():
     """Cloud candy: a fluffy swirl of cotton candy, pink, white and blue, on a white paper stick."""
     img = new()
@@ -4761,6 +4905,11 @@ def round11_textures():
     yield "block/ritual_crystal.png", prismatic_crystal(), crystal_meta
     yield "block/ritual_crystal_awake.png", prismatic_crystal(awake=True), crystal_meta
     yield "item/cloud_candy.png", cloud_candy(), None
+    yield "item/cloud_bible.png", cloud_bible(), None
+    yield "block/trans_torch.png", trans_torch(), None
+    kira = kira_skin()
+    yield "entity/kira/kira.png", kira, None
+    yield "item/kira_spawn_egg.png", kira_spawn_egg(kira), None
     yield "item/holy_water_bucket.png", holy_water_bucket(), None
     for name in HOLY_GEAR:
         yield f"item/holy_golden_{name}.png", holy_gear_item(name), None

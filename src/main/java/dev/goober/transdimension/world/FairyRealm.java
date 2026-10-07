@@ -292,9 +292,12 @@ public final class FairyRealm {
 		}
 	}
 
-	/** A burst of trans sparks (our own particle, turning blue, pink and white), a few of them flung out fast. */
+	/**
+	 * A burst of trans sparks (our own particle, turning blue, pink and white), a few of them flung out fast. It sends
+	 * half of {@code count} (the callers' counts were set for a busier look than the owner wants).
+	 */
 	public static void sparkle(ServerLevel level, Vec3 at, int count, double spread) {
-		level.sendParticles(ModParticles.TRANS_SPARK, at.x, at.y, at.z, count, spread, spread * 0.6, spread, 0.02);
-		level.sendParticles(ModParticles.TRANS_SPARK, at.x, at.y, at.z, count / 4, spread * 0.5, spread * 0.5, spread * 0.5, 0.1);
+		level.sendParticles(ModParticles.TRANS_SPARK, at.x, at.y, at.z, Math.max(1, count / 2), spread, spread * 0.6, spread, 0.02);
+		level.sendParticles(ModParticles.TRANS_SPARK, at.x, at.y, at.z, count / 8, spread * 0.5, spread * 0.5, spread * 0.5, 0.1);
 	}
 }

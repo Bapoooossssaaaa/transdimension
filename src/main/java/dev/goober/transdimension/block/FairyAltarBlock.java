@@ -52,7 +52,7 @@ public class FairyAltarBlock extends Block {
 
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
-		if (random.nextInt(2) == 0) {
+		if (random.nextInt(5) == 0) {
 			level.addParticle(ModParticles.TRANS_SPARK, pos.getX() + 0.2 + random.nextDouble() * 0.6, pos.getY() + 1.0,
 					pos.getZ() + 0.2 + random.nextDouble() * 0.6, 0.0, 0.05, 0.0);
 		}

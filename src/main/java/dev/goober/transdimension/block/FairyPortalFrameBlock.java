@@ -76,7 +76,7 @@ public class FairyPortalFrameBlock extends Block {
 
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
-		if (state.getValue(PEARL) && random.nextInt(3) == 0) {
+		if (state.getValue(PEARL) && random.nextInt(6) == 0) {
 			level.addParticle(ModParticles.TRANS_SPARK, pos.getX() + 0.3 + random.nextDouble() * 0.4, pos.getY() + 1.05,
 					pos.getZ() + 0.3 + random.nextDouble() * 0.4, 0.0, 0.03, 0.0);
 		}

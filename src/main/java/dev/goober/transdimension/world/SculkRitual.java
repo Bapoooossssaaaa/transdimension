@@ -77,8 +77,8 @@ public final class SculkRitual {
 	public static final int OPEN = FIRE + FIRE_GROW;
 	public static final int RING_TICKS = 2;
 	/** Once the last ring is in, the light lingers this long, fading out over the last {@link #FADE} ticks. */
-	public static final int LINGER = 40;
-	public static final int FADE = 20;
+	public static final int LINGER = 24;
+	public static final int FADE = 14;
 
 	private static final List<Ritual> RUNNING = new ArrayList<>();
 

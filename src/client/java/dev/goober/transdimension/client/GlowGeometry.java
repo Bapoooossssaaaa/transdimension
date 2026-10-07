@@ -16,24 +16,28 @@ import net.minecraft.world.phys.Vec3;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.client.compat.ShaderCompat;
 
 /**
  * Coloured boxes (beams, cubes, sheets of light), gathered for one frame and handed to the renderer in one go, relative
- * to the camera (or to an entity, from an entity renderer), on a plain white texture. Glowing ones (the default) use the
- * beacon beam's render type ({@code RenderTypes.beaconBeam}, see-through): unlit and unshaded without shaders, and under
- * Iris drawn by the pack's beacon beam program, which shader packs treat as pure light (BSL boosts it four times, so it
- * blooms) instead of lighting it like a mob. Plain ones ({@code glow} false: the cloud boat's line) use see-through mobs'
- * render type ({@code RenderTypes.entityTranslucent}), full bright. (They first used {@code debugFilledBox}, which BSL on
- * Iris doesn't draw at all.) Every face is wound to face outwards, so it shows whether or not the render type culls back
+ * to the camera (or to an entity, from an entity renderer), on a plain white texture, with see-through mobs' render type
+ * ({@code RenderTypes.entityTranslucent}). Glowing ones (the default) light themselves: full bright without shaders, and
+ * a moderate block light ({@link #SHADER_GLOW}) under a shader pack, which lights full-bright things far brighter than
+ * the game does. (Round 13 drew them as beacon beams, which BSL boosts four times over: far too bright. Before that,
+ * {@code debugFilledBox}, which BSL on Iris doesn't draw at all.) Plain ones ({@code glow} false) take the light they're
+ * given ({@link #lit}). Every face is wound to face outwards, so it shows whether or not the render type culls back
  * faces. Used by the candle ritual (RitualEffects), the Fairy Realm cutscene (FairyCutsceneCamera) and the cloud boat's
- * line (CloudBoatRenderer).
+ * lead (CloudBoatRenderer).
  */
 public final class GlowGeometry {
 	private static final Identifier WHITE = TransDimension.id("textures/misc/glow.png");
 	private static final int FULL_BRIGHT = 0xF000F0;
+	/** Glowing geometry's light under a shader pack: block light 13, no sky light (packed as the game packs it). */
+	private static final int SHADER_GLOW = 13 << 4;
 
 	private final Vec3 camera;
 	private final boolean glow;
+	private int light = FULL_BRIGHT;
 	private float[] positions = new float[3 * 24 * 32];
 	private int[] colours = new int[24 * 32];
 	private int vertices;
@@ -42,10 +46,16 @@ public final class GlowGeometry {
 		this(camera, true);
 	}
 
-	/** {@code glow}: drawn as light (the beacon beam's render type) rather than as a see-through solid. */
+	/** {@code glow}: lights itself (see the class comment) rather than taking the light it's given. */
 	public GlowGeometry(Vec3 camera, boolean glow) {
 		this.camera = camera;
 		this.glow = glow;
+	}
+
+	/** Lights plain geometry with {@code packedLight} (the world's light where it is) instead of full bright. */
+	public GlowGeometry lit(int packedLight) {
+		this.light = packedLight;
+		return this;
 	}
 
 	/** A square beam from {@code from} to {@code to}, {@code half} wide either side, turned {@code spin} radians about itself. */
@@ -140,14 +150,14 @@ public final class GlowGeometry {
 		}
 		float[] xyz = Arrays.copyOf(this.positions, this.vertices * 3);
 		int[] argb = Arrays.copyOf(this.colours, this.vertices);
-		// Every vertex gets everything an entity's needs (a beacon beam needs less, and skips the rest): a spot on the
-		// (white) texture, no hurt overlay, full light, and a normal (straight up for all of them, so no face is shaded
-		// darker than another).
-		RenderType type = this.glow ? RenderTypes.beaconBeam(WHITE, true) : RenderTypes.entityTranslucent(WHITE);
+		// Every vertex gets everything an entity's needs: a spot on the (white) texture, no hurt overlay, its light, and a
+		// normal (straight up for all of them, so no face is shaded darker than another).
+		RenderType type = RenderTypes.entityTranslucent(WHITE);
+		int light = !this.glow ? this.light : ShaderCompat.shadersInUse() ? SHADER_GLOW : FULL_BRIGHT;
 		nodeCollector.submitCustomGeometry(poseStack, type, (pose, buffer) -> {
 			for (int i = 0; i < argb.length; i++) {
 				buffer.addVertex(pose, xyz[i * 3], xyz[i * 3 + 1], xyz[i * 3 + 2]).setColor(argb[i]).setUv(0.5F, 0.5F)
-						.setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(pose, 0.0F, 1.0F, 0.0F);
+						.setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, 1.0F, 0.0F);
 			}
 		});
 	}

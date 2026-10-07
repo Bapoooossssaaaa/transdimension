@@ -22,7 +22,7 @@ import dev.goober.transdimension.entity.JarFairy;
 public class FairyJarBlock extends Block {
 	private static final VoxelShape SHAPE = Shapes.or(Block.box(3.0, 0.0, 3.0, 13.0, 11.0, 13.0), Block.box(3.5, 11.0, 3.5, 12.5, 14.5, 12.5));
 	/** The jar's light level. Its fairy is lit at the same level (JarFairyRenderer), not full bright, so shaders don't blow it out. */
-	public static final int LIGHT = 12;
+	public static final int LIGHT = 9;
 
 	public FairyJarBlock(Properties properties) {
 		super(properties);

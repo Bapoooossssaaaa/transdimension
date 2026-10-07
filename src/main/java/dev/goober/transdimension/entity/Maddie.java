@@ -13,6 +13,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -32,6 +33,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 import dev.goober.transdimension.network.OpenMaddieDialoguePayload;
 import dev.goober.transdimension.registry.ModAttachments;
+import dev.goober.transdimension.registry.ModEntities;
 import dev.goober.transdimension.registry.ModItems;
 import dev.goober.transdimension.world.FairyCutscene;
 import dev.goober.transdimension.world.FairyRealm;
@@ -41,7 +43,8 @@ import dev.goober.transdimension.world.FairyRealm;
  * anything) to open her dialogue; the first time, she gives you her Trans Wand and Trans Wings.
  *
  * <p>She can't be hurt (only by creative players and the void), never despawns, can't be pushed or leashed, and
- * potters around within a few blocks of where she first stood.
+ * potters around within a few blocks of where she first stood. Once the Trans Fairy has struck her down, {@link Kira}
+ * lives in her home instead.
  */
 public class Maddie extends PathfinderMob {
 	private static final int HOME_RADIUS = 4;
@@ -78,10 +81,8 @@ public class Maddie extends PathfinderMob {
 	public void tick() {
 		super.tick();
 		if (this.level() instanceof ServerLevel level) {
-			// After the Trans Fairy struck her down, Maddie is gone from the realm for good (new Egg Houses stand empty too).
-			// The only Maddie ever in the Fairy Realm is the one acting in the cutscene.
-			if (!this.cutsceneActor && this.tickCount % 20 == 0 && (FairyRealm.isFairyRealm(level) || FairyCutscene.maddieGone(level))) {
-				this.discard();
+			if (!this.cutsceneActor && this.tickCount % 20 == 0 && this.mustLeave(level)) {
+				this.leave(level);
 				return;
 			}
 			if (this.home == null) {
@@ -90,13 +91,36 @@ public class Maddie extends PathfinderMob {
 		}
 	}
 
+	/**
+	 * Whether this Maddie has to go. After the Trans Fairy struck her down, Maddie is gone from the realm for good, and
+	 * the only Maddie ever in the Fairy Realm is the one acting in the cutscene. Kira stays.
+	 */
+	protected boolean mustLeave(ServerLevel level) {
+		return FairyRealm.isFairyRealm(level) || FairyCutscene.maddieGone(level);
+	}
+
+	/** Maddie goes; outside the Fairy Realm, Kira moves into her home (new Egg Houses get Kira too). */
+	private void leave(ServerLevel level) {
+		if (!FairyRealm.isFairyRealm(level)) {
+			Kira kira = ModEntities.KIRA.create(level, EntitySpawnReason.EVENT);
+			if (kira != null) {
+				kira.snapTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0F);
+				kira.setYHeadRot(this.getYHeadRot());
+				kira.yBodyRot = this.yBodyRot;
+				kira.setHome(this.home != null ? this.home : this.blockPosition());
+				level.addFreshEntity(kira);
+			}
+		}
+		this.discard();
+	}
+
 	/** Makes this Maddie the cutscene's: she stands where she's put and does nothing on her own. */
 	public void actInCutscene() {
 		this.cutsceneActor = true;
 		this.setNoAi(true);
 	}
 
-	private void setHome(BlockPos pos) {
+	void setHome(BlockPos pos) {
 		this.home = pos.immutable();
 		this.setHomeTo(this.home, HOME_RADIUS);
 	}

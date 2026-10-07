@@ -13,6 +13,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.network.Filterable;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
@@ -36,10 +37,12 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.ToolMaterial;
+import net.minecraft.world.item.WrittenBookItem;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.component.WrittenBookContent;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.equipment.ArmorType;
@@ -243,6 +246,17 @@ public final class ModItems {
 	/** A bucket of the heavenly ruins' holy water. */
 	public static final Item HOLY_WATER_BUCKET = register("holy_water_bucket", properties -> new BucketItem(ModFluids.HOLY_WATER, properties),
 			new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1));
+	/** How many pages the Cloud Bible has (lang keys book.transdimension.cloud_bible.1 to this). */
+	public static final int CLOUD_BIBLE_PAGES = 7;
+	/**
+	 * The Cloud Bible, found in the Cloud Realm's ruined churches (open on the lectern, and in the cloud chest): a written
+	 * book with a cover of its own, its pages the angels' verses. Being a {@link WrittenBookItem} with its own
+	 * {@code WRITTEN_BOOK_CONTENT}, it opens like any written book wherever it came from, and it's in
+	 * {@code #minecraft:lectern_books}, so it sits on a lectern. Its pages are translatable, so they read in each player's
+	 * language.
+	 */
+	public static final Item CLOUD_BIBLE = register("cloud_bible", WrittenBookItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)
+			.component(DataComponents.WRITTEN_BOOK_CONTENT, cloudBible()));
 
 	// ---------------------------------------------------------------- holy gold gear: the heavenly ruins' loot, never crafted
 	public static final TagKey<Item> REPAIRS_HOLY_GEAR = TagKey.create(Registries.ITEM, TransDimension.id("repairs_holy_gear"));
@@ -296,6 +310,8 @@ public final class ModItems {
 	// ---------------------------------------------------------------- Maddie and her gifts
 	public static final Item MADDIE_SPAWN_EGG = register("maddie_spawn_egg", SpawnEggItem::new,
 			new Item.Properties().spawnEgg(ModEntities.MADDIE));
+	public static final Item KIRA_SPAWN_EGG = register("kira_spawn_egg", SpawnEggItem::new,
+			new Item.Properties().spawnEgg(ModEntities.KIRA));
 	/** Shoots a sparkling heart of trans magic; see {@link TransWandItem}. */
 	public static final Item TRANS_WAND = register("trans_wand", TransWandItem::new, new Item.Properties()
 			.stacksTo(1)
@@ -369,6 +385,15 @@ public final class ModItems {
 
 	private static Consumable withEffect(Consumable.Builder builder, MobEffectInstance effect) {
 		return builder.onConsume(new ApplyStatusEffectsConsumeEffect(effect, 1.0F)).build();
+	}
+
+	/** The Cloud Bible's text: its title, author and pages (translatable, see CLOUD_BIBLE_PAGES). */
+	private static WrittenBookContent cloudBible() {
+		List<Filterable<Component>> pages = new ArrayList<>();
+		for (int i = 1; i <= CLOUD_BIBLE_PAGES; i++) {
+			pages.add(Filterable.passThrough(Component.translatable("book.transdimension.cloud_bible." + i)));
+		}
+		return new WrittenBookContent(Filterable.passThrough("Cloud Bible"), "the Angels", 0, pages, true);
 	}
 
 	private static Item register(String name, Function<Item.Properties, Item> factory, Item.Properties properties) {

@@ -6,7 +6,7 @@ Claude Code loads this file at the start of every session, so it stays short. Fo
 
 Fabric mod for **Minecraft Java 26.2**: a trans-flag dimension (the Trans Realm). Mod id `transdimension`, package `dev.goober.transdimension`. Fabric Loader 0.19.5, Fabric API 0.161.0+26.2, Loom 1.18, Java 25. Minecraft 26.x is unobfuscated, so it uses Mojang's names and has no mappings. `README.md` lists every feature.
 
-- `src/main`: common code. `registry/` (ModBlocks, ModItems, ModEntities, ModAttachments...), `block/` (incl. the fairy portal, altar, jar and cloud chest), `entity/` (Maddie, SillyCat, TransMagicBolt, TransFish, TransEnderman, PastelSlime, TransFairy, FairyCrystalSpike, Fairy, JarFairy, Seat, CrystalEye, PinkWarden, SculkPerson, Cloudy, Angel, CloudTurtle, CloudBoat), `effect/` (SlobberedEffect, BlessedEffect), `fluid/` (PinkLavaFluid, HolyWaterFluid), `item/` (TransWings, TransWandItem, TransCrystalPearlItem, BottledFairy), `network/`, `event/RealmEvents`, `world/` (PlushLedger, FairyRealm, FairyRealmState, FairyCutscene, FairyIslandFeature, HeartTreeFeature, TransCoralReefFeature, PinkDeepDark, PinkSculkPatchFeature, SculkRitual, CloudRealm, WoolCloudFeature, CloudRescue, HeavenlyRuinFeature, BeanstalkFeature, PinkLavaFeature), `teleport/`, `mixin/` (EnderManMixin, fire and lava mixins, SculkSensorBlockMixin, SculkShriekerBlockEntityMixin, ChestLightMixin).
+- `src/main`: common code. `registry/` (ModBlocks, ModItems, ModEntities, ModAttachments...), `block/` (incl. the fairy portal, altar, jar and cloud chest), `entity/` (Maddie, Kira, SillyCat, TransMagicBolt, TransFish, TransEnderman, PastelSlime, TransFairy, FairyCrystalSpike, Fairy, JarFairy, Seat, CrystalEye, PinkWarden, SculkPerson, Cloudy, Angel, CloudTurtle, CloudBoat), `effect/` (SlobberedEffect, BlessedEffect), `fluid/` (PinkLavaFluid, HolyWaterFluid), `item/` (TransWings, TransWandItem, TransCrystalPearlItem, BottledFairy), `network/`, `event/RealmEvents`, `world/` (PlushLedger, FairyRealm, FairyRealmState, FairyCutscene, FairyIslandFeature, HeartTreeFeature, TransCoralReefFeature, PinkDeepDark, PinkSculkPatchFeature, SculkRitual, CloudRealm, WoolCloudFeature, CloudRescue, HeavenlyRuinFeature, BeanstalkFeature, PinkLavaFeature), `teleport/`, `mixin/` (EnderManMixin, fire and lava mixins, SculkSensorBlockMixin, SculkShriekerBlockEntityMixin, ChestLightMixin).
 - `src/client`: `TransDimensionClient`, `HeartClouds`, `TransRecolor`, `TransIntroOverlay`, `wings/`, `FairyCutsceneOverlay`, `FairyCutsceneCamera`, `TransFairyBossBar`, `PinkSculkParticles`, `RitualEffects`, `GlowGeometry`, `screen/MaddieDialogueScreen`, `entity/` models and renderers, `compat/ShaderCompat` (Iris/shader pack support), `mixin/` (AvatarRendererMixin, CameraMixin, TextureManagerMixin, ClientPacketListenerMixin, and the optional `@Pseudo` Iris mixins IrisWorldRenderingSettingsMixin and IrisIncludeGraphMixin).
 - `extras/BSL_Trans_Realm.txt`: a preset for BSL Shaders 10.1.8 (not part of the jar). Check it with `python3 tools/check_bsl_preset.py <BSL zip>`: BSL silently ignores any value it doesn't list (`CG_TM=0.2`, not `0.20`).
 
@@ -37,20 +37,26 @@ The cloud environment can't download Minecraft or Fabric, so **the owner builds 
 - Vanilla's `assets/minecraft/textures/entity/chest/` textures are overridden by the texture script (glowy pink chests); the vanilla originals are in `tools/vanilla_extra/entity/chest/`.
 - Data formats learned the hard way: an `exploration_map` loot function's `destination` is a plain structure tag id (`transdimension:fairy_sanctums`, no `#`). With a `#`, the whole loot table fails to load and its chests come up empty (that emptied the Egg House and village chests in round 4). The validator checks this now. And `generate_data.py` wipes our block and item tags before rewriting its own: a tag another generator writes must be listed in its `OTHER_GENERATORS_TAGS`, or the world won't load ("Missing tag"). The validator checks every tag of ours that our data refers to.
 - Learned in play: `Entity#startRiding` refuses (on the server) a vehicle whose entity type is `noSave()`, and Iris/BSL don't draw `RenderTypes.debugFilledBox()`.
+- The owner wants vanilla-like light: a block only glows if its vanilla cousin does (amethyst blocks don't), at about the same level; no full-bright (`light_emission`) faces in block models; few, soft effects. See HANDOFF "Light levels".
 - Shaders (from the BSL 10.1.8 zip and Iris 1.11.4 jar the owner shared; see HANDOFF "Shaders (Iris and BSL)"):
   - Packs only know vanilla block ids, so `ShaderCompat` gives our blocks their vanilla twins' ids.
-  - Glowing shapes use `RenderTypes.beaconBeam`, which packs draw as pure light.
+  - Glowing shapes use `RenderTypes.entityTranslucent` on a white texture, at light 13 under shaders. `RenderTypes.beaconBeam` (round 13) made BSL draw them as pure light, far too bright.
   - BSL lights full-bright mobs about 1.86 times over, so pale glowing mobs need `ShaderCompat.glowLight()` and shaded textures, never flat white.
 - Fabric API source, if a session has it, is the best reference. Never guess silently: say which names are unverified.
 
 ## Status (latest first)
 
-- **Round 13 is written, not compiled yet** (round 12 isn't either). It covers:
-  - the Fairy Jar's fairy: slow, one colour, a pearly white instead of flat `#FFFFFF`, lit at the jar's level;
-  - shader support: block id twins, BSL's clouds keep the flag colours, beacon-beam glow, dimmer glowing mobs under shaders;
-  - a BSL 10.1.8 preset that is actually valid.
+- **Round 14 is written, not compiled yet** (nor are rounds 12 and 13). It covers:
+  - the cloud rescue: nearest land, a planned way that never clips, eased flight, a sitting turtle and a golden lead (`CloudRescue`);
+  - Maddie's time door opening top to bottom in a trans gradient, with no other effects;
+  - the Trans Fairy always appearing (Peaceful, a stale cutscene, nobody watching), with her old spawn burst;
+  - no steady ritual beam;
+  - vanilla-like light levels and calmer effects;
+  - rarer heavenly ruins, ruined churches with the Cloud Bible, and the trans torch;
+  - Kira (`entity/Kira`, `KiraRenderer`), who replaces Maddie once she's gone. Her skin is a stand-in until `kiraskintexture.png` is in the repo.
 
-  HANDOFF's "Unverified APIs (round 13)" lists what to check.
+  HANDOFF's "Unverified APIs (round 14)" lists what to check.
+- **Round 13 is written, not compiled yet**: the calm Fairy Jar fairy, shader support (block id twins, BSL's cloud colours, dimmer glowing mobs) and a valid BSL 10.1.8 preset. HANDOFF's "Unverified APIs (round 13)" lists what to check.
 - **Round 12 is written, not compiled yet.** It covers the owner's round 12 list:
   - the cloud turtle now really catches you (the boat's type was `noSave`), and falls in the Cloud Realm drift down slowly;
   - angels are glowing orbs like the wild fairies;

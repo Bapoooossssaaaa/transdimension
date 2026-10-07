@@ -35,7 +35,7 @@ import dev.goober.transdimension.registry.ModBlocks;
  */
 public class HeavenlyRuinFeature extends Feature<NoneFeatureConfiguration> {
 	private static final Identifier[] TEMPLATES = {TransDimension.id("heavenly_ruin/spiral_tower"), TransDimension.id("heavenly_ruin/temple"),
-			TransDimension.id("heavenly_ruin/sky_shrine")};
+			TransDimension.id("heavenly_ruin/sky_shrine"), TransDimension.id("heavenly_ruin/ruined_church")};
 	/** How deep each template's floor sits: its bottom layer, in place of the top of the ground. */
 	private static final int FOUNDATION = 1;
 	/** How far down the floor is shored up where the ground falls away under it. */

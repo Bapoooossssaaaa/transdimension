@@ -72,7 +72,6 @@
           "texture": "#crystal"
         }
       },
-      "light_emission": 15,
       "rotation": {
         "origin": [
           8,
@@ -150,7 +149,6 @@
           "texture": "#crystal"
         }
       },
-      "light_emission": 15,
       "rotation": {
         "origin": [
           4.5,
@@ -228,7 +226,6 @@
           "texture": "#crystal"
         }
       },
-      "light_emission": 15,
       "rotation": {
         "origin": [
           11.5,

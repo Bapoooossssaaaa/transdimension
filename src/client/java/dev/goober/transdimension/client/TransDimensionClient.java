@@ -51,6 +51,7 @@ import dev.goober.transdimension.client.entity.FairyLightModel;
 import dev.goober.transdimension.client.entity.FairyRenderer;
 import dev.goober.transdimension.client.entity.FairyCrystalSpikeRenderer;
 import dev.goober.transdimension.client.entity.JarFairyRenderer;
+import dev.goober.transdimension.client.entity.KiraRenderer;
 import dev.goober.transdimension.client.entity.MaddieRenderer;
 import dev.goober.transdimension.client.entity.PastelSlimeModel;
 import dev.goober.transdimension.client.entity.PastelSlimeRenderer;
@@ -174,6 +175,8 @@ public class TransDimensionClient implements ClientModInitializer {
 		// Maddie, her wand's spell and her wings (a layer on every player renderer; it only draws for wearers).
 		ModelLayerRegistry.registerModelLayer(MaddieRenderer.LAYER, MaddieRenderer::createLayer);
 		EntityRenderers.register(ModEntities.MADDIE, MaddieRenderer::new);
+		// Kira, in Maddie's home once Maddie is gone, on Maddie's model with a much bigger head.
+		EntityRenderers.register(ModEntities.KIRA, KiraRenderer::new);
 		EntityRenderers.register(ModEntities.TRANS_MAGIC_BOLT, context -> new ThrownItemRenderer<>(context, 1.25F, true));
 		EntityRenderers.register(ModEntities.CRYSTAL_EYE, context -> new ThrownItemRenderer<>(context, 1.0F, true));
 		ModelLayerRegistry.registerModelLayer(TransWingsModel.LAYER, TransWingsModel::createLayer);
