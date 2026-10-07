@@ -585,15 +585,6 @@ public class TransFairy extends Monster {
 		return false;
 	}
 
-	/**
-	 * She's the story's boss, not a stray monster: Peaceful doesn't make her vanish (it did, the moment she arrived, so
-	 * on Peaceful the cutscene played and no fairy ever came). On Peaceful her attacks can't hurt players anyway.
-	 */
-	@Override
-	protected boolean shouldDespawnInPeaceful() {
-		return false;
-	}
-
 	@Override
 	public boolean isPushable() {
 		return false;
