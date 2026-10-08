@@ -1,13 +1,9 @@
 {
-  "feature": "transdimension:deep_cave_ceiling_moss",
+  "feature": "transdimension:frosted_cave_ceiling",
   "placement": [
     {
-      "type": "minecraft:rarity_filter",
-      "chance": 6
-    },
-    {
       "type": "minecraft:count",
-      "count": 1
+      "count": 30
     },
     {
       "type": "minecraft:in_square"
@@ -16,11 +12,11 @@
       "type": "minecraft:height_range",
       "height": {
         "type": "minecraft:uniform",
-        "min_inclusive": {
-          "above_bottom": 8
-        },
         "max_inclusive": {
-          "absolute": 0
+          "absolute": 256
+        },
+        "min_inclusive": {
+          "above_bottom": 0
         }
       }
     },

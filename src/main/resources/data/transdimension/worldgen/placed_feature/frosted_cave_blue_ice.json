@@ -1,5 +1,5 @@
 {
-  "feature": "transdimension:ore_trans_crystal_small",
+  "feature": "transdimension:frosted_cave_blue_ice",
   "placement": [
     {
       "type": "minecraft:count",
@@ -12,11 +12,11 @@
       "type": "minecraft:height_range",
       "height": {
         "type": "minecraft:uniform",
-        "max_inclusive": {
-          "absolute": 48
-        },
         "min_inclusive": {
-          "absolute": -32
+          "above_bottom": 0
+        },
+        "max_inclusive": {
+          "absolute": 64
         }
       }
     },

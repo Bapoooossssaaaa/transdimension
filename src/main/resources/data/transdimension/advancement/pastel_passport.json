@@ -400,6 +400,22 @@
           }
         ]
       }
+    },
+    "frosted_caves": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:frosted_caves"
+              }
+            }
+          }
+        ]
+      }
     }
   },
   "display": {
@@ -489,6 +505,9 @@
     ],
     [
       "candy_cane_grove"
+    ],
+    [
+      "frosted_caves"
     ]
   ]
 }

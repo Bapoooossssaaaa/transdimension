@@ -1,0 +1,37 @@
+{
+  "parent": "transdimension:crystal_caves",
+  "criteria": {
+    "frosted_caves": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:frosted_caves"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:blue_ice"
+    },
+    "title": {
+      "translate": "advancements.transdimension.frosted_caves.title"
+    },
+    "description": {
+      "translate": "advancements.transdimension.frosted_caves.description"
+    }
+  },
+  "requirements": [
+    [
+      "frosted_caves"
+    ]
+  ]
+}

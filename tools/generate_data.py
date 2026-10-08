@@ -1947,7 +1947,7 @@ BIOMES = {
     "twilight_thicket": "Twilight Thicket", "candy_floss_grove": "Candy Floss Grove", "pastel_lush_caves": "Pastel Lush Caves",
     "pride_flower_fields": "Pride Flower Fields", "moonlit_meadow": "Moonlit Meadow", "gumdrop_glade": "Gumdrop Glade",
     "pastel_reef": "Pastel Reef", "blooming_caverns": "Blooming Caverns", "pink_deep_dark": "Pink Deep Dark",
-    "candy_cane_grove": "Candy Cane Grove",
+    "candy_cane_grove": "Candy Cane Grove", "frosted_caves": "Frosted Caves",
 }
 
 
@@ -2027,6 +2027,8 @@ def generate_advancements():
       {"pastel_lush_caves": in_biome("pastel_lush_caves")})
     A("blooming_caverns", "crystal_caves", "star_bloom", "Underground Garden", "Find the Blooming Caverns",
       {"blooming_caverns": in_biome("blooming_caverns")})
+    A("frosted_caves", "crystal_caves", "minecraft:blue_ice", "Cold Feet", "Find the Frosted Caves, under the realm's coldest land",
+      {"frosted_caves": in_biome("frosted_caves")})
     A("pastel_reef", "goober", "blush_coral_fan", "Reef Dreams", "Swim through the Pastel Reef",
       {"reef": in_biome("pastel_reef")})
     A("mermaid_ruin", "pastel_reef", "minecraft:heart_of_the_sea", "Mermaid Tales", "Find the ruins of a mermaid's home under the sea",

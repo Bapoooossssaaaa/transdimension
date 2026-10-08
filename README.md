@@ -8,7 +8,7 @@ A Fabric mod for **Minecraft Java 26.2** that adds the **Trans Realm**, a whole 
 
 ### The Trans Realm
 
-Overworld-style hills, caves, rivers and oceans with twenty-three biomes. The ground is trans grass and dirt over soft grey trans stone, with twilight-purple trans deepslate further down (layered with faint pink and blue strata), and rose granite, pearl diorite, sky andesite and trans gravel (soft pink, blue and white pebbles in grey grit) mixed in. Riverbeds and lake floors have patches of trans gravel, trans sand and lilac **trans clay** (it breaks into clay balls and smelts into pink terracotta). All the vanilla ores are there too (coal, iron, copper, gold, redstone, lapis, diamond and emerald, in stone and deepslate versions, set into the realm's own rock), so you can live in the realm.
+Overworld-style hills, caves, rivers and oceans with twenty-six biomes. The ground is trans grass and dirt over soft grey trans stone, with twilight-purple trans deepslate further down (layered with faint pink and blue strata), and rose granite, pearl diorite, sky andesite and trans gravel (soft pink, blue and white pebbles in grey grit) mixed in. Riverbeds and lake floors have patches of trans gravel, trans sand and lilac **trans clay** (it breaks into clay balls and smelts into pink terracotta). All the vanilla ores are there too (coal, iron, copper, gold, redstone, lapis, diamond and emerald, in stone and deepslate versions, set into the realm's own rock), at the overworld's heights but more of them (half again as many diamonds, gold and lapis, nearly twice the iron and copper), so you can live in the realm. The caves are the overworld's modern caves (huge caverns, winding tunnels, noodle caves and pillars, plus the old-style carved tunnels and ravines); most are plain stone caves, with a cave biome here and there.
 
 The realm has its own landscape (not a pink copy of the overworld's: its mountains, valleys, caves and biomes are laid out differently), and its **lava is pink**, all of it: pink lava burns, sets fires and makes stone just like lava, water turns a pink lava source into **pink obsidian** (as tough as obsidian), and you can carry it in a bucket. Its **fire is pink** too: anything lit in the Trans Realm or the Fairy Realm (by flint and steel, a fire charge, lava or lightning) burns with pink flames that spread and burn out like any fire. Soul fire stays blue. Its caves have glow lichen, and deep down, mossy patches with glowing Starblooms and **trans cave vines**: lilac vines hung with glowing pink and blue **Trans Glow Berries** (eat them like glow berries, or plant them on a cave ceiling to grow more vines). Its **dungeons** are built of trans cobblestone and stone bricks over mossy floors, with a monster spawner, unlit pink and blue candles, and chests of dungeon loot with the realm's treasures mixed in.
 
@@ -29,13 +29,14 @@ The realm has its own landscape (not a pink copy of the overworld's: its mountai
 | Pastel Peaks | Snow-capped mountains with lilac grass. |
 | Trans Beach, Trans Ocean, Deep Trans Ocean | Blue water, dolphins and drowned. |
 | Pastel River | Rivers of pink water. |
-| Crystal Caves | Rare, deep caves lined with prism clusters and geodes (the only caves with crystals in them). |
-| Pastel Lush Caves | Pink and blue moss, cave vines, spore blossoms, the realm's flowers, and trans-coloured axolotls. |
+| Crystal Caves | Deep caves far inland, lined with prism clusters and geodes, with extra trans crystal ore. |
+| Pastel Lush Caves | Under the wettest land: pink and blue moss, cave vines, spore blossoms, the realm's flowers, and trans-coloured axolotls. |
+| Frosted Caves | Under the coldest land: packed and blue ice in the walls, snow drifts on the floors, packed ice overhead, and strays. |
 | Pride Flower Fields | Rolling fields of every flower in the realm, tall flowers and blossom hedges, with **heart trees**: blushwood trees whose crowns are big puffy hearts. |
 | Moonlit Meadow | Pale silver grass under drifting fireflies, glowing Starblooms, Forget-Me-Nots and frost flowers. |
 | Gumdrop Glade | Candy-pink grass, candy floss trees, wobbly mounds of pink and blue gel, and the **pastel slimes**. |
 | Pastel Reef | Warm shallow seas full of blush, sky and pearl coral reefs and trans fish. |
-| Blooming Caverns | Flower caves: floors of trans moss thick with flowers and glowing Starblooms, ceilings of flowering blush leaves hung with lanterns, spore blossoms. |
+| Blooming Caverns | Under hot, fairly dry land, and rare: flower caves with floors of trans moss thick with flowers and glowing Starblooms, ceilings of flowering blush leaves hung with lanterns, spore blossoms. |
 
 - **Flowers.** Vanilla's flowers are replaced in the realm by its own: Trans Tulips, Pearl Daisies, Sky Bells, Flag Lilies, Lavender Puffs, Trans Orchids, Heart Blooms, Blush Carnations, Pearl Snowdrops, Forget-Me-Nots, Trans Roses, Fairy Bells and glowing **Starblooms**, the tall Pride Peony, Sky Delphinium, Blush Foxglove and Pearl Lupine, Trans Petals and Pride Blossoms. They make dye and the small ones can be potted. **Blossom, Bluebell and Pearl Hedges** are flowering leafy blocks for gardens.
 - **Plants.** Trans grass, tall grass and ferns (they take each biome's grass colour, like the grass blocks under them), pastel bushes, firefly bushes with pink and blue fireflies, sugar grass, white cacti and dry sugar bushes in the dunes, **trans sugar cane** by the water (blue, pink and white stalks; it makes sugar and paper), trans seagrass, trans kelp, lily pads with a tiny flower, three colours of coral (blush, sky and pearl) with fans, blocks and dead versions, and pink **trans sea pickles** with glowing blue tips on the reefs.
@@ -160,9 +161,11 @@ The **Trans Dimension** tab has 55 advancements: exploring every biome, finding 
 2. Put the built jar into your `mods` folder. It needs to be on both the client and any server.
 3. Load any world, new or existing, and type **Goober** in chat. New terrain (biomes, ores, villages, islands) only appears in chunks that haven't been generated yet.
 
+**Resetting just the Trans Realm** (to get the new ores and caves in a world that already has it): close the game, back up the world, and delete the folder `dimensions/transdimension/trans_realm` inside the world's save folder (`.minecraft/saves/<world name>/`). Leave everything else, including `fairy_realm` and `cloud_realm` next to it. Make sure nobody is standing in the Trans Realm when you close the world. Everything built or left there is gone, and the Egg House, villages and plushes come back in new places; the Overworld, the Fairy Realm, the Cloud Realm, inventories and advancements stay as they are. Next time anyone says **Goober**, the realm is generated fresh.
+
 Some tips:
 - Villages spawn in **Trans Meadows**, **Frosted Fields** and **Sugar Dunes**. `/locate structure transdimension:trans_village` finds the nearest one.
-- Trans crystal ore is rare and deep: dig below y≈16, ideally near the bottom of the world, or explore the Crystal Caves.
+- Trans crystal ore is about as common as diamond and at the same depths, in every biome: below y≈16, most of it near the bottom of the world (best around y −58), with a few small veins higher up (y −16 to 48) that show in cave walls. Crystal Groves, Pastel Peaks and the Crystal Caves have extra.
 - `/locate structure transdimension:fairy_sanctum` finds the nearest Fairy Sanctum.
 - Everything is in the **Trans Dimension** creative tab, including spawn eggs for Maddie, Kira, the realm's creatures and the Trans Fairy.
 - **Shaders (Iris).** The mod works with shader packs:

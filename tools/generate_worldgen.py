@@ -283,9 +283,40 @@ def generate_features():
         scan[2] = {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "min_inclusive": {"above_bottom": 8},
                                                                  "max_inclusive": {"absolute": 0}}}
         return scan
-    pf("deep_cave_moss", f"{NS}:deep_cave_moss", deep_scan(5, "down", 1))
-    pf("deep_cave_ceiling_moss", f"{NS}:deep_cave_ceiling_moss", deep_scan(3, "up", -1))
+    # Now and then, not in every deep cave (round 20: five a chunk made every deep cave look like the Blooming Caverns).
+    pf("deep_cave_moss", f"{NS}:deep_cave_moss", [{"type": "minecraft:rarity_filter", "chance": 4}] + deep_scan(1, "down", 1))
+    pf("deep_cave_ceiling_moss", f"{NS}:deep_cave_ceiling_moss", [{"type": "minecraft:rarity_filter", "chance": 6}] + deep_scan(1, "up", -1))
     pf("trans_lush_caves_ceiling_vegetation", f"{NS}:trans_moss_patch_ceiling", cave_scan(125, "up", -1))
+
+    # ---- the Frosted Caves (round 20): packed ice, blue ice and snow in the walls, snow drifts on the floors, packed ice
+    # overhead. The blobs are ores that never mind air, so they show in the cave walls.
+    def frost_blob(name, block, size):
+        cf(name, {"type": "minecraft:ore", "config": {"discard_chance_on_air_exposure": 0.0, "size": size, "targets": [
+            {"state": state(block), "target": {"predicate_type": "minecraft:tag_match", "tag": f"{NS}:trans_base_stone"}}]}})
+    frost_blob("frosted_cave_packed_ice", "minecraft:packed_ice", 28)
+    frost_blob("frosted_cave_blue_ice", "minecraft:blue_ice", 12)
+    frost_blob("frosted_cave_snow", "minecraft:snow_block", 24)
+    in_caves = {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "min_inclusive": {"above_bottom": 0},
+                                                             "max_inclusive": {"absolute": 64}}}
+    for name, count in (("frosted_cave_packed_ice", 16), ("frosted_cave_blue_ice", 6), ("frosted_cave_snow", 10)):
+        pf(name, f"{NS}:{name}", [{"type": "minecraft:count", "count": count}, {"type": "minecraft:in_square"}, in_caves,
+                                  {"type": "minecraft:biome"}])
+    cf("frosted_cave_snow_layer", {"type": "minecraft:simple_block", "config": {"to_place": {
+        "type": "minecraft:weighted_state_provider", "entries": [
+            {"data": state("minecraft:snow", layers=1), "weight": 3}, {"data": state("minecraft:snow", layers=2), "weight": 2},
+            {"data": state("minecraft:snow", layers=3), "weight": 1}]}}})
+
+    def frost_patch(surface, ground, chance, radius):
+        return {"type": "minecraft:vegetation_patch", "config": {
+            "depth": 1, "extra_bottom_block_chance": 0.0, "extra_edge_column_chance": 0.3,
+            "ground_state": {"type": "minecraft:weighted_state_provider", "entries": [{"data": state(b), "weight": w} for b, w in ground]},
+            "replaceable": f"#{NS}:trans_base_stone", "surface": surface, "vegetation_chance": chance,
+            "vegetation_feature": {"feature": f"{NS}:frosted_cave_snow_layer", "placement": []}, "vertical_range": 5,
+            "xz_radius": {"type": "minecraft:uniform", "min_inclusive": radius[0], "max_inclusive": radius[1]}}}
+    cf("frosted_cave_floor", frost_patch("floor", [("minecraft:snow_block", 3), ("minecraft:packed_ice", 1)], 0.7, (3, 6)))
+    cf("frosted_cave_ceiling", frost_patch("ceiling", [("minecraft:packed_ice", 3), ("minecraft:ice", 1)], 0.0, (2, 5)))
+    pf("frosted_cave_floor", f"{NS}:frosted_cave_floor", cave_scan(60, "down", 1))
+    pf("frosted_cave_ceiling", f"{NS}:frosted_cave_ceiling", cave_scan(30, "up", -1))
 
     # ---- flowers and ground cover
     cf("pride_blossom_patch", {"type": "minecraft:simple_block", "config": {"to_place": simple(state("pride_blossom"))}})
@@ -556,24 +587,31 @@ def generate_features():
     pf("trans_crystal_geode", f"{NS}:trans_crystal_geode", geode(28, 30))
     pf("trans_crystal_geode_common", f"{NS}:trans_crystal_geode", geode(10, 50))
 
-    # ---- ores: trans crystals are rare, deep and mostly small, rarer than diamonds (vanilla's diamond placements,
-    # scaled down). Crystal Groves and Pastel Peaks get a few small veins higher up. Geodes and spikes are pastel prism.
+    # ---- ores: trans crystals are about as common as diamonds and in the same deep band (vanilla's diamond placements,
+    # a little smaller), in every biome, with a few small veins higher up everywhere so caving turns some up too (round 20:
+    # before, they were rarer than diamonds and hard to find at all). Crystal Groves, Pastel Peaks and the Crystal Caves
+    # get extra veins higher up. Geodes and spikes are pastel prism.
     def crystal_ore(name, size, discard):
         cf(name, {"type": "minecraft:ore", "config": {"discard_chance_on_air_exposure": discard, "size": size, "targets": [
             {"state": state("trans_crystal_ore"), "target": {"predicate_type": "minecraft:tag_match", "tag": f"{NS}:trans_stone_ore_replaceables"}},
             {"state": state("trans_deepslate_crystal_ore"),
              "target": {"predicate_type": "minecraft:tag_match", "tag": f"{NS}:trans_deepslate_ore_replaceables"}}]}})
-    crystal_ore("ore_trans_crystal_small", 3, 0.5)
-    crystal_ore("ore_trans_crystal_buried", 6, 1.0)
-    crystal_ore("ore_trans_crystal_large", 9, 0.7)
+    crystal_ore("ore_trans_crystal_small", 4, 0.5)
+    crystal_ore("ore_trans_crystal_buried", 7, 1.0)
+    crystal_ore("ore_trans_crystal_large", 10, 0.7)
+    crystal_ore("ore_trans_crystal_exposed", 3, 0.0)
     generate_vanilla_ores()
     deep = {"type": "minecraft:height_range", "height": {"type": "minecraft:trapezoid", "max_inclusive": {"above_bottom": 80},
                                                          "min_inclusive": {"above_bottom": -80}}}
-    pf("ore_trans_crystal", f"{NS}:ore_trans_crystal_small", [{"type": "minecraft:count", "count": 4}, {"type": "minecraft:in_square"}, deep, {"type": "minecraft:biome"}])
-    pf("ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_buried", [{"type": "minecraft:count", "count": 2}, {"type": "minecraft:in_square"}, deep, {"type": "minecraft:biome"}])
-    pf("ore_trans_crystal_large", f"{NS}:ore_trans_crystal_large", [{"type": "minecraft:rarity_filter", "chance": 14}, {"type": "minecraft:in_square"}, deep, {"type": "minecraft:biome"}])
+    pf("ore_trans_crystal", f"{NS}:ore_trans_crystal_small", [{"type": "minecraft:count", "count": 7}, {"type": "minecraft:in_square"}, deep, {"type": "minecraft:biome"}])
+    pf("ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_buried", [{"type": "minecraft:count", "count": 4}, {"type": "minecraft:in_square"}, deep, {"type": "minecraft:biome"}])
+    pf("ore_trans_crystal_large", f"{NS}:ore_trans_crystal_large", [{"type": "minecraft:rarity_filter", "chance": 8}, {"type": "minecraft:in_square"}, deep, {"type": "minecraft:biome"}])
+    pf("ore_trans_crystal_middle", f"{NS}:ore_trans_crystal_exposed", [
+        {"type": "minecraft:count", "count": 4}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "max_inclusive": {"absolute": 48}, "min_inclusive": {"absolute": -16}}},
+        {"type": "minecraft:biome"}])
     pf("ore_trans_crystal_extra", f"{NS}:ore_trans_crystal_small", [
-        {"type": "minecraft:count", "count": 3}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:count", "count": 6}, {"type": "minecraft:in_square"},
         {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "max_inclusive": {"absolute": 48}, "min_inclusive": {"absolute": -32}}},
         {"type": "minecraft:biome"}])
 
@@ -682,15 +720,36 @@ def swap_ids(obj):
 
 
 def generate_vanilla_ores():
-    """Vanilla 26.2's overworld ores and rock blobs (same sizes, counts and heights), placing trans ores in trans rock,
-    and its cave vines, growing trans cave vines. Each vanilla feature X becomes transdimension:trans_X."""
-    copy_vanilla_features(VANILLA_ORES)
+    """Vanilla 26.2's overworld ores and rock blobs (same sizes and heights, the ores' counts raised by ORE_BOOST), placing
+    trans ores in trans rock, and its cave vines, growing trans cave vines. Each vanilla feature X becomes
+    transdimension:trans_X."""
+    copy_vanilla_features(VANILLA_ORES, boost=True)
     copy_vanilla_features(VANILLA_CAVE_VINES)
 
 
-def copy_vanilla_features(root):
+# Round 20: the realm's ores are more plentiful than vanilla's: each vanilla ore placement's count is multiplied by this
+# (and a rarity filter's chance divided by it). The realm has no big ore veins (they're vanilla's raw iron and copper
+# blocks in tuff and granite), so iron and copper get the most. Rock blobs, clay and emeralds stay as they are.
+ORE_BOOST = {"coal": 1.3, "iron": 1.8, "copper": 1.8, "gold": 1.5, "redstone": 1.3, "lapis": 1.5, "diamond": 1.5}
+
+
+def boosted(name, placement):
+    """A vanilla ore's placement with its count (or rarity) scaled by ORE_BOOST."""
+    boost = next((b for ore, b in ORE_BOOST.items() if name.startswith(f"ore_{ore}")), 1.0)
+    out = []
+    for modifier in placement:
+        modifier = dict(modifier)
+        if boost != 1.0 and modifier["type"] == "minecraft:count" and isinstance(modifier["count"], int):
+            modifier["count"] = max(1, round(modifier["count"] * boost))
+        elif boost != 1.0 and modifier["type"] == "minecraft:rarity_filter":
+            modifier["chance"] = max(1, round(modifier["chance"] / boost))
+        out.append(modifier)
+    return out
+
+
+def copy_vanilla_features(root, boost=False):
     """Copies vanilla features from tools/vanilla_extra/templates/worldgen/<root>/{configured,placed}, swapping in our
-    blocks (VANILLA_SWAPS)."""
+    blocks (VANILLA_SWAPS), and with {@code boost}, ORE_BOOST's counts."""
     for kind in ("configured", "placed"):
         folder = os.path.join(root, kind)
         for f in sorted(os.listdir(folder)):
@@ -700,7 +759,8 @@ def copy_vanilla_features(root):
             if kind == "configured":
                 cf(name, d)
             else:
-                pf(name, f"{NS}:trans_" + d["feature"].split(":", 1)[1], d["placement"])
+                placement = boosted(f[:-5], d["placement"]) if boost else d["placement"]
+                pf(name, f"{NS}:trans_" + d["feature"].split(":", 1)[1], placement)
 
 
 # Rock blobs first, then ores, in vanilla's order.
@@ -732,8 +792,8 @@ BATS = [spawn("minecraft:bat", 10, 8, 8)]
 # Trans dungeons (TransDungeonFeature) instead of vanilla's cobblestone monster rooms, placed the same way.
 UNDERGROUND = [f"{NS}:trans_dungeon", f"{NS}:trans_dungeon_deep"]
 # Clay and gravel disks under shallow water (vanilla's only replace vanilla dirt, so they never showed up in the realm).
-ORES = TRANS_ORES + [f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_large", f"{NS}:trans_disk_clay",
-                     f"{NS}:trans_disk_gravel"]
+ORES = TRANS_ORES + [f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_large",
+                     f"{NS}:ore_trans_crystal_middle", f"{NS}:trans_disk_clay", f"{NS}:trans_disk_gravel"]
 # The realm's own springs: vanilla's only break out of vanilla stone, and the realm's lava is pink.
 SPRINGS = [f"{NS}:spring_trans_water", f"{NS}:spring_pink_lava"]
 # Every cave: glow lichen on trans rock (vanilla's only grows on vanilla stone), and deep down, now and then, a patch of
@@ -988,6 +1048,15 @@ def generate_biomes():
                     7: CAVE_DECOR + [f"{NS}:trans_crystal_clusters_cave_floor", f"{NS}:trans_crystal_clusters_cave_ceiling"], 8: SPRINGS},
           creatures=[])
 
+    # ---- the Frosted Caves (round 20): under the realm's coldest land, ice in the walls and snow on the floors, strays
+    # instead of skeletons.
+    biome("frosted_caves", fairies=2, temperature=-0.5, downfall=0.5, grass="#d8f0ff", foliage="#cfe8f8", water="#bfe8ff",
+          water_fog="#4a7fb0", sky="#9fb8ff", fog="#dcecff", music_sound="minecraft:music.overworld.frozen_peaks",
+          particles=particles("minecraft:snowflake", 0.003),
+          features={3: UNDERGROUND, 6: ORES + [f"{NS}:frosted_cave_packed_ice", f"{NS}:frosted_cave_blue_ice", f"{NS}:frosted_cave_snow"],
+                    7: CAVE_DECOR, 8: SPRINGS, 9: [f"{NS}:frosted_cave_ceiling", f"{NS}:frosted_cave_floor"]},
+          creatures=[], monsters=[m for m in MONSTERS if m["type"] != "minecraft:skeleton"] + [spawn("minecraft:stray", 100, 4, 4)])
+
     # ---- the pink deep dark: the realm's deep dark, deep under its mountains, all in pink. Monsters spawn as anywhere
     # else (the pink wardens hunt them), fairies far more often (Fairy#checkFairySpawnRules), and sculk people trade.
     biome("pink_deep_dark", fairies=40, temperature=0.8, downfall=0.4, grass="#f5a9b8", foliage="#f5a9b8", water="#d86aa8",
@@ -1018,7 +1087,8 @@ FEATURE_RANK = [
     f"{NS}:trans_dungeon", f"{NS}:trans_dungeon_deep",
     # ores
     *TRANS_ORES, f"{NS}:trans_ore_copper_large", f"{NS}:trans_ore_emerald", f"{NS}:trans_ore_clay",
-    f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_large", f"{NS}:ore_trans_crystal_extra",
+    f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_large", f"{NS}:ore_trans_crystal_middle",
+    f"{NS}:ore_trans_crystal_extra", f"{NS}:frosted_cave_packed_ice", f"{NS}:frosted_cave_blue_ice", f"{NS}:frosted_cave_snow",
     f"{NS}:ore_sculk_gem",
     f"{NS}:trans_disk_clay", f"{NS}:trans_disk_gravel", f"{NS}:trans_disk_sand",
     # underground decoration
@@ -1037,7 +1107,7 @@ FEATURE_RANK = [
     f"{NS}:cloud_grass",
     f"{NS}:tall_trans_grass", f"{NS}:trans_lush_caves_ceiling_vegetation", f"{NS}:trans_cave_vines", "minecraft:lush_caves_clay",
     f"{NS}:trans_lush_caves_vegetation", f"{NS}:blooming_cave_ceiling", f"{NS}:blooming_cave_floor", "minecraft:spore_blossom",
-    "minecraft:classic_vines_cave_feature",
+    "minecraft:classic_vines_cave_feature", f"{NS}:frosted_cave_ceiling", f"{NS}:frosted_cave_floor",
     f"{NS}:trans_coral_reefs", f"{NS}:trans_coral_reefs_dense", f"{NS}:trans_coral_reefs_rare", f"{NS}:trans_seagrass_warm", f"{NS}:trans_seagrass_deep", f"{NS}:trans_seagrass_river",
     f"{NS}:trans_seagrass_swamp", f"{NS}:trans_sea_pickles", f"{NS}:trans_kelp_warm", f"{NS}:trans_kelp_cold",
     f"{NS}:pride_blossoms_dense", f"{NS}:pride_blossoms", f"{NS}:trans_flowers", f"{NS}:meadow_flowers", f"{NS}:forest_flowers", f"{NS}:heartwood_flowers",
@@ -1299,13 +1369,19 @@ def generate_dimension():
         for lo, hi in merge_cells(by_biome[name]):
             rng = [(bands[a][lo[a]][0], bands[a][hi[a]][1]) for a in range(5)]
             entries.append(entry(name, rng[1], rng[2], rng[0], rng[3], rng[4]))
-    # Cave biomes deep under the wetter, more inland parts of the realm: crystal caves (only a narrow, deep band, so they're
-    # a find rather than every cave), and lush caves where it's wettest.
-    entries.append(entry("crystal_caves", full, (0.45, 0.65), (0.0, 1.0), full, full, depth=[0.45, 0.9]))
-    entries.append(entry("pastel_lush_caves", full, (0.65, 1.0), (0.0, 1.0), full, full, depth=[0.2, 0.9]))
-    # Blooming caverns under the drier middle of the realm.
-    entries.append(entry("blooming_caverns", full, (-0.1, 0.3), (0.0, 1.0), full, full, depth=[0.2, 0.9]))
-    # The pink deep dark lies where vanilla's deep dark does: far down, under the mountains (low erosion).
+    # Round 20: like vanilla, every surface biome also sits at depth 1, so underground it's the land above's own plain caves
+    # unless a cave biome is closer. With the land only at depth 0, the cave biomes (the Blooming Caverns most of all)
+    # won almost every cave.
+    entries += [{"biome": e["biome"], "parameters": {**e["parameters"], "depth": 1.0}} for e in entries]
+    # The cave biomes, placed like vanilla's (tools: a Monte Carlo of the climate gives about 55% plain caves, 12% Crystal
+    # Caves, 7 to 10% each Pastel Lush Caves, Frosted Caves and the Pink Deep Dark, 5% Blooming Caverns): lush caves where
+    # it's wettest (vanilla's lush caves), crystal caves far inland (its dripstone caves), frosted caves under the coldest
+    # land, blooming caverns under hot, fairly dry land...
+    entries.append(entry("pastel_lush_caves", full, (0.7, 1.0), full, full, full, depth=[0.2, 0.9]))
+    entries.append(entry("crystal_caves", full, full, (0.8, 1.0), full, full, depth=[0.2, 0.9]))
+    entries.append(entry("frosted_caves", (-1.0, -0.7), full, full, full, full, depth=[0.2, 0.9]))
+    entries.append(entry("blooming_caverns", (0.7, 1.0), (0.1, 0.45), full, full, full, depth=[0.2, 0.9]))
+    # ...and the pink deep dark where vanilla's deep dark is: right at the bottom, under the mountains (low erosion).
     entries.append(entry("pink_deep_dark", full, full, full, (-1.0, -0.375), full, depth=1.1))
     dimension = {"type": f"{NS}:trans_realm", "generator": {
         "type": "minecraft:noise", "settings": f"{NS}:trans_realm",
