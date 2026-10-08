@@ -342,7 +342,7 @@ def ruined_church():
 
 def church_loot_table():
     """A ruined church's cloud chest: a Cloud Bible always (there's one on the lectern too), with candles, holy water,
-    cloud candy and a little gold; now and then a piece of holy gear."""
+    cloud candy and a little gold; now and then a piece of holy gear or the Holy Bow."""
     return {
         "type": "minecraft:chest",
         "pools": [
@@ -352,7 +352,8 @@ def church_loot_table():
                 item("holy_water_bucket", 4), item("cloud_candy", 12, 1, 3), item("minecraft:gold_nugget", 10, 3, 9),
                 item("minecraft:gold_ingot", 5, 1, 3), item("minecraft:paper", 6, 2, 5), item("minecraft:feather", 6, 1, 3),
                 item("halo_lily", 5, 1, 2), item("cloud_puff", 5, 1, 2)]},
-            {"rolls": 1.0, "entries": [item("holy_golden_sword", 1), item("holy_golden_helmet", 1), {"type": "minecraft:empty", "weight": 10}]},
+            {"rolls": 1.0, "entries": [item("holy_golden_sword", 1), item("holy_golden_helmet", 1), item("holy_bow", 1),
+                                       {"type": "minecraft:empty", "weight": 10}]},
         ],
         "random_sequence": CHURCH_LOOT,
     }
@@ -370,14 +371,14 @@ def item(name, weight, lo=1, hi=1, functions=()):
 
 
 def loot_table():
-    """Holy loot: three chests in four hold a piece of holy gold gear (now and then enchanted, as if from the table),
-    with cloud candy, holy water, golden apples, gold and the realm's flowers."""
+    """Holy loot: three chests in four hold a piece of holy gold gear or the Holy Bow (now and then enchanted, as if from
+    the table), with cloud candy, holy water, golden apples, gold, arrows and the realm's flowers."""
     enchanted = {"function": "minecraft:enchant_with_levels", "levels": {"type": "minecraft:uniform", "min": 15, "max": 30},
                  "options": "#minecraft:in_enchanting_table",
                  "conditions": [{"condition": "minecraft:random_chance", "chance": 0.4}]}
     gear = [item(f"holy_golden_{piece}", weight, functions=[enchanted]) for piece, weight in (
         ("sword", 10), ("pickaxe", 10), ("axe", 8), ("shovel", 8), ("hoe", 6), ("helmet", 8), ("chestplate", 6),
-        ("leggings", 6), ("boots", 8))]
+        ("leggings", 6), ("boots", 8))] + [item("holy_bow", 8, functions=[enchanted])]
     return {
         "type": "minecraft:chest",
         "pools": [
@@ -388,7 +389,7 @@ def loot_table():
                 item("minecraft:gold_nugget", 10, 4, 12), item("holy_gold_block", 3), item("minecraft:glowstone_dust", 10, 2, 6),
                 item("minecraft:feather", 10, 2, 5), item("minecraft:white_wool", 8, 2, 6), item("minecraft:diamond", 4, 1, 2),
                 item("minecraft:experience_bottle", 6, 1, 3), item("cloud_puff", 5, 1, 3), item("halo_lily", 5, 1, 3),
-                item("breezebell", 5, 1, 3), item("stardust_daisy", 5, 1, 3)]},
+                item("breezebell", 5, 1, 3), item("stardust_daisy", 5, 1, 3), item("minecraft:arrow", 8, 4, 12)]},
         ],
         "random_sequence": LOOT,
     }

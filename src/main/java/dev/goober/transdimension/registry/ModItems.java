@@ -63,6 +63,7 @@ import net.fabricmc.fabric.api.registry.StrippableBlockRegistry;
 import net.fabricmc.fabric.api.registry.TillableBlockRegistry;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.item.HolyBowItem;
 import dev.goober.transdimension.item.TransCrystalPearlItem;
 import dev.goober.transdimension.item.TransWandItem;
 import dev.goober.transdimension.item.TransWings;
@@ -309,6 +310,9 @@ public final class ModItems {
 	public static final Item HOLY_GOLDEN_BOOTS = register("holy_golden_boots", Item::new, holy()
 			.humanoidArmor(HOLY_ARMOR_MATERIAL, ArmorType.BOOTS)
 			.durability(ArmorType.BOOTS.getDurability(ARMOR_BASE_DURABILITY)));
+	/** The Holy Bow: every shot is two arrows (HolyBowItem); a bow's durability, never used up, and gold's enchantability. */
+	public static final Item HOLY_BOW = register("holy_bow", HolyBowItem::new, holy().durability(384).enchantable(22)
+			.component(DataComponents.LORE, lore("item.transdimension.holy_gear.lore", "item.transdimension.holy_bow.lore")));
 
 	// ---------------------------------------------------------------- boats
 	public static final Item TRANS_BOAT = register("trans_boat",

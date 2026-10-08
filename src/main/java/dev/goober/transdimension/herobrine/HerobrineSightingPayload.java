@@ -7,19 +7,20 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import dev.goober.transdimension.TransDimension;
 
 /**
- * Server to one player: Herobrine stands here, for you alone, until you come too close, look at him too long (if
- * {@code stare}) or {@code lingerTicks} pass. Nothing else in the game is told he's there.
+ * Server to one player: Herobrine stands here, for you alone, until you've had a glimpse of him, come too close, or
+ * {@code lingerTicks} pass. Nothing else in the game is told he's there.
  *
  * @param x, y, z        where his feet are
  * @param yaw            which way his body faces (towards the player)
  * @param lingerTicks    how long he stays at most
  * @param vanishDistance how close the player may come (a far-off sighting)
- * @param behind         he's right behind the player: he goes the moment they turn to look
- * @param stare          he goes when looked at for a moment
+ * @param behind         he's right behind the player: he goes the moment they turn and catch sight of him
+ * @param seenTicks      how long he may be on the player's screen before he goes (0: as long as he likes)
+ * @param eyes           his eyes glow
  * @param sounds         a cave sound plays where he stood as he goes
  */
 public record HerobrineSightingPayload(double x, double y, double z, float yaw, int lingerTicks, int vanishDistance, boolean behind,
-		boolean stare, boolean sounds) implements CustomPacketPayload {
+		int seenTicks, boolean eyes, boolean sounds) implements CustomPacketPayload {
 	public static final Type<HerobrineSightingPayload> TYPE = new Type<>(TransDimension.id("herobrine_sighting"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, HerobrineSightingPayload> CODEC = StreamCodec.of(
 			(buf, sighting) -> {
@@ -30,11 +31,12 @@ public record HerobrineSightingPayload(double x, double y, double z, float yaw, 
 				buf.writeVarInt(sighting.lingerTicks());
 				buf.writeVarInt(sighting.vanishDistance());
 				buf.writeBoolean(sighting.behind());
-				buf.writeBoolean(sighting.stare());
+				buf.writeVarInt(sighting.seenTicks());
+				buf.writeBoolean(sighting.eyes());
 				buf.writeBoolean(sighting.sounds());
 			},
 			buf -> new HerobrineSightingPayload(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readFloat(), buf.readVarInt(),
-					buf.readVarInt(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean()));
+					buf.readVarInt(), buf.readBoolean(), buf.readVarInt(), buf.readBoolean(), buf.readBoolean()));
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {

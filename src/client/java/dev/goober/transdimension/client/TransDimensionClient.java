@@ -75,6 +75,7 @@ import dev.goober.transdimension.client.wings.WingPose;
 import dev.goober.transdimension.client.wings.WingsController;
 import dev.goober.transdimension.herobrine.HerobrineMenuPayload;
 import dev.goober.transdimension.herobrine.HerobrineSightingPayload;
+import dev.goober.transdimension.herobrine.HerobrineSoundPayload;
 import dev.goober.transdimension.network.FairyCutscenePayload;
 import dev.goober.transdimension.network.FairyRescuePayload;
 import dev.goober.transdimension.network.OpenMaddieDialoguePayload;
@@ -198,9 +199,10 @@ public class TransDimensionClient implements ClientModInitializer {
 
 		ClientPlayNetworking.registerGlobalReceiver(OpenMaddieDialoguePayload.TYPE, (payload, context) ->
 				context.client().gui.setScreen(new MaddieDialogueScreen(payload.entityId(), payload.gifted())));
-		// Herobrine: drawn for this player alone when the server says so (never an entity), and the host's secret settings.
+		// Herobrine: drawn (never an entity) or heard by this player alone when the server says so, and the host's secret settings.
 		HerobrineClient.register();
 		ClientPlayNetworking.registerGlobalReceiver(HerobrineSightingPayload.TYPE, (payload, context) -> HerobrineClient.show(payload));
+		ClientPlayNetworking.registerGlobalReceiver(HerobrineSoundPayload.TYPE, (payload, context) -> HerobrineClient.prank(payload));
 		ClientPlayNetworking.registerGlobalReceiver(HerobrineMenuPayload.TYPE, (payload, context) ->
 				context.client().gui.setScreen(new HerobrineScreen(payload.settings())));
 		// The Fairy Realm cutscene: its subtitles, moving camera and hidden HUD.

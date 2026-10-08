@@ -2443,6 +2443,25 @@ def generate_round15():
     })
 
 
+def generate_round18():
+    """The Holy Bow (item/HolyBowItem): holy gold like the rest of the holy gear (unbreakable), and every shot is two
+    arrows. Its three drawn frames work like vanilla's bow; it takes the bow's enchantments. Found in the Cloud Realm's
+    heavenly ruins and ruined churches (tools/generate_heavenly_ruins.py)."""
+    def frame(suffix):
+        return {"type": "minecraft:model", "model": f"{NS}:item/holy_bow{suffix}"}
+
+    for suffix in ("", "_pulling_0", "_pulling_1", "_pulling_2"):
+        model(f"holy_bow{suffix}", {"parent": "minecraft:item/bow", "textures": {"layer0": f"{NS}:item/holy_bow{suffix}"}}, kind="item")
+    write(os.path.join(ASSETS, "items", "holy_bow.json"), {"model": {
+        "type": "minecraft:condition", "property": "minecraft:using_item", "on_false": frame(""),
+        "on_true": {"type": "minecraft:range_dispatch", "property": "minecraft:use_duration", "scale": 0.05,
+                    "entries": [{"threshold": 0.65, "model": frame("_pulling_1")}, {"threshold": 0.9, "model": frame("_pulling_2")}],
+                    "fallback": frame("_pulling_0")}}})
+    name("holy_bow", "Holy Bow", kind="item")
+    NAMES["item.transdimension.holy_bow.lore"] = "Every arrow flies twice"
+    tag("item", "enchantable/bow", "holy_bow")
+
+
 def generate_round17():
     """Candy canes from the Candy Cane Grove: the candy cane (ModBlocks.CANDY_CANE in the ground, a cross like a flower;
     ModItems.CANDY_CANE in the hand, a snack that plants itself back) and the candy cane block of the giant canes
@@ -2634,7 +2653,7 @@ def generate_round12():
 def generate_round11_advancements():
     A = advancement
     A("holy_loot", "sky_portal", "holy_golden_sword", "Holy Loot", "Find a piece of holy gold gear in a heavenly ruin",
-      {"holy": has_any([f"holy_golden_{piece}" for piece in HOLY_GEAR])})
+      {"holy": has_any([f"holy_golden_{piece}" for piece in HOLY_GEAR] + ["holy_bow"])})
     A("blessed", "sky_portal", "holy_water_bucket", "Bless You!", "Be blessed by an angel, or by bathing in holy water",
       {"blessed": {"trigger": "minecraft:effects_changed", "conditions": {"effects": {f"{NS}:blessed": {}}}}})
     A("lucky_catch", "sky_portal", "cloud_candy", "Lucky Catch", "Fall off the Cloud Realm and get fished out by the cloud turtle",
@@ -2821,6 +2840,7 @@ def main():
     generate_round14()
     generate_round15()
     generate_round17()
+    generate_round18()
     generate_sounds()
     generate_advancements()
     generate_round9_advancements()

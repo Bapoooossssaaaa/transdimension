@@ -4771,6 +4771,33 @@ def holy_armor_layer(rel):
 
 
 HOLY_GEAR = ("sword", "pickaxe", "axe", "shovel", "hoe", "helmet", "chestplate", "leggings", "boots")
+HOLY_BOW = ("bow", "bow_pulling_0", "bow_pulling_1", "bow_pulling_2")
+BOW_STRING = hexc("444444")
+BOW_GRIP = {hexc("6B6B6B"): hexc("F6F1E8"), hexc("969696"): hexc("FFFFFF")}
+
+
+def holy_bow(name):
+    """
+    The Holy Bow (and its drawn frames): vanilla's bow in holy gold, with a pale gold string and a white grip. A drawn
+    arrow keeps its own colours: its shaft runs down the sprite's diagonal (x - y is 0 or 1), its head beyond the bow.
+    """
+    img = vitem(name)
+    drawn = name != "bow"
+
+    def shaft(p, px):
+        return drawn and px[:3] in (hexc("281E0B"), hexc("896727")) and p[0] - p[1] in (0, 1)
+
+    out = gradient_map(img, R_HOLY_GOLD_ITEM, mask=lambda p, px: px[:3] in STICK_COLOURS and not shaft(p, px),
+                       curve=lambda t: 0.05 + 0.7 * t)
+    for p in pixels(img):
+        px = img.getpixel(p)
+        if px[3] == 0 or shaft(p, px):
+            continue
+        if px[:3] == BOW_STRING:
+            out.putpixel(p, (*hexc("E8C66A"), px[3]))
+        elif px[:3] in BOW_GRIP and not (drawn and p[0] < 4 and p[1] < 4):
+            out.putpixel(p, (*BOW_GRIP[px[:3]], px[3]))
+    return out
 
 
 def angel_spawn_egg():
@@ -4999,6 +5026,8 @@ def round11_textures():
     yield "item/holy_water_bucket.png", holy_water_bucket(), None
     for name in HOLY_GEAR:
         yield f"item/holy_golden_{name}.png", holy_gear_item(name), None
+    for name in HOLY_BOW:
+        yield f"item/holy_{name}.png", holy_bow(name), None
     yield "item/angel_spawn_egg.png", angel_spawn_egg(), None
     yield "entity/equipment/humanoid/holy_gold.png", holy_armor_layer("equipment/humanoid/gold.png"), None
     yield "entity/equipment/humanoid_leggings/holy_gold.png", holy_armor_layer("equipment/humanoid_leggings/gold.png"), None
