@@ -40,7 +40,7 @@ import dev.goober.transdimension.world.FairyRealm;
 
 /**
  * Maddie, who lives in the Egg House on its floating island. Talk to her (use her with an empty hand, or with
- * anything) to open her dialogue; the first time, she gives you her Trans Wand and Trans Wings.
+ * anything) to open her dialogue (MaddieDialogueScreen); she offers you her Trans Wand and Trans Wings.
  *
  * <p>She can't be hurt (only by creative players and the void), never despawns, can't be pushed or leashed, and
  * potters around within a few blocks of where she first stood. Once the Trans Fairy has struck her down, {@link Kira}
@@ -134,8 +134,8 @@ public class Maddie extends PathfinderMob {
 			this.getNavigation().stop();
 			this.getLookControl().setLookAt(player, 30.0F, 30.0F);
 			this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.NEUTRAL,
-					0.6F, 1.8F);
-			ServerPlayNetworking.send(serverPlayer, new OpenMaddieDialoguePayload(this.getId(), hasGifted(serverPlayer)));
+					0.6F, this instanceof Kira ? 1.4F : 1.8F);
+			ServerPlayNetworking.send(serverPlayer, new OpenMaddieDialoguePayload(this.getId(), hasGifted(serverPlayer), this instanceof Kira));
 		}
 		return InteractionResult.SUCCESS;
 	}

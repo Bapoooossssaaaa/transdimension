@@ -10,14 +10,16 @@ import dev.goober.transdimension.TransDimension;
 /**
  * Server to client: a step of the Fairy Realm's cutscene (FairyCutscene). {@link #START} starts the scene on the client
  * (the moving camera, the hidden HUD), {@link #LINE} shows a subtitle ({@code speaker} and {@code line} are translation
- * keys), {@link #SHIELD} flashes the Trans Fairy's shield as an arrow stops on it, {@link #END} hands the camera back to
- * the player as the fight begins.
+ * keys), {@link #SHIELD} flashes the Trans Fairy's shield as an arrow stops on it, {@link #PRUNE} starts Maddie coming
+ * apart into light where the fairy's wand touches her, {@link #END} hands the camera back to the player as the fight
+ * begins.
  */
 public record FairyCutscenePayload(int kind, String speaker, String line) implements CustomPacketPayload {
 	public static final int START = 0;
 	public static final int LINE = 1;
 	public static final int END = 2;
 	public static final int SHIELD = 3;
+	public static final int PRUNE = 4;
 
 	public static final Type<FairyCutscenePayload> TYPE = new Type<>(TransDimension.id("fairy_cutscene"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, FairyCutscenePayload> CODEC = StreamCodec.composite(

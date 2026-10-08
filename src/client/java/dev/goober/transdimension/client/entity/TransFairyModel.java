@@ -11,6 +11,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
 import dev.goober.transdimension.entity.TransFairy;
+import dev.goober.transdimension.world.FairyCutscene;
 
 /**
  * The Trans Fairy: a girl with long pink hair fading to blue, a crystal tiara and big blue eyes, in a gown that runs
@@ -32,6 +33,7 @@ public class TransFairyModel extends EntityModel<TransFairyRenderState> {
 	private final ModelPart head;
 	private final ModelPart backHair;
 	private final ModelPart rightArm;
+	private final ModelPart wand;
 	private final ModelPart leftArm;
 	private final ModelPart rightLeg;
 	private final ModelPart leftLeg;
@@ -47,6 +49,7 @@ public class TransFairyModel extends EntityModel<TransFairyRenderState> {
 		this.head = body.getChild("head");
 		this.backHair = this.head.getChild("back_hair");
 		this.rightArm = body.getChild("right_arm");
+		this.wand = this.rightArm.getChild("wand");
 		this.leftArm = body.getChild("left_arm");
 		this.rightLeg = body.getChild("right_leg");
 		this.leftLeg = body.getChild("left_leg");
@@ -192,6 +195,18 @@ public class TransFairyModel extends EntityModel<TransFairyRenderState> {
 				this.rightArm.zRot = 0.1F;
 				this.leftArm.xRot = -0.35F + thrust;
 				this.leftArm.zRot = -0.1F;
+			}
+			case TransFairy.PRUNE -> {
+				// The cutscene's last touch: her arm reaches out level and the wand turns to point straight ahead, so its tip
+				// ends up where FairyCutscene.WAND_UP, WAND_AHEAD and WAND_RIGHT say; her other hand draws back.
+				float k = Mth.clamp(t / FairyCutscene.REACH, 0.0F, 1.0F);
+				k = k * k * (3.0F - 2.0F * k);
+				this.rightArm.xRot = Mth.lerp(k, -0.55F, -1.45F);
+				this.rightArm.zRot = Mth.lerp(k, 0.18F, 0.0F);
+				this.wand.xRot = 1.45F * k;
+				this.leftArm.xRot = 0.2F * k;
+				this.leftArm.zRot = -0.3F - 0.4F * k;
+				this.head.xRot = Mth.lerp(k, this.head.xRot, 0.15F);
 			}
 			case TransFairy.SUMMON, TransFairy.STARFALL -> {
 				// Arms raised to the sky, looking up.

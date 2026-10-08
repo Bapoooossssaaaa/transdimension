@@ -2415,13 +2415,11 @@ def generate_round14():
     recipe("trans_torch", shaped("trans_torch", ["P", "C", "S"], {"P": "prism_shard", "C": "#minecraft:coals", "S": "minecraft:stick"},
                                  count=4, category="equipment"))
 
-    # ---- Kira, in Maddie's home once Maddie is gone (entity/Kira). Her lines: Kira.LINES must match KIRA_LINES' length.
+    # ---- Kira, in Maddie's home once Maddie is gone (entity/Kira), and her dialogue (KIRA_DIALOGUE).
     simple_item("kira_spawn_egg", "Kira Spawn Egg")
     NAMES["entity.transdimension.kira"] = "Kira"
-    NAMES["message.transdimension.kira.gifts"] = ("Maddie wanted everyone who finds her house to have these: her Trans Wand "
-                                                 "and her Trans Wings. Look after them for her, okay?")
-    for i, line in enumerate(KIRA_LINES, 1):
-        NAMES[f"message.transdimension.kira.line_{i}"] = line
+    for key, line in KIRA_DIALOGUE.items():
+        NAMES[f"dialogue.transdimension.kira.{key}"] = line
 
 
 def generate_round15():
@@ -2488,13 +2486,38 @@ def generate_round17():
 
 
 # What Kira says once you have Maddie's gifts, picked at random (one per talk).
-KIRA_LINES = [
-    "Hi! I'm Kira. I'm looking after Maddie's house now.",
-    "My head is a perfectly normal size. Everyone else's is just tiny.",
-    "Maddie talked about the Trans Fairy all the time. I hope you showed her what you're worth.",
-    "I water Maddie's flowers every morning. They still come up in trans colours.",
-    "Fly safe! And if you fall out of the sky, the turtle on the cloud will fish you out.",
-]
+# Kira's dialogue (MaddieDialogueScreen with Kira talking): Maddie was her girlfriend. Some answers only come up after
+# others (asking about Maddie leads on to "fairy", asking how she is leads on to "now").
+KIRA_DIALOGUE = {
+    "greeting": "Oh... hi. Sorry, I wasn't expecting anyone. I'm Kira. This is Maddie's house. Was. I'm looking after it "
+                "now.",
+    "greeting_again": "Hey, you came back. It's nice, having someone around. The house is so quiet without her.",
+    "who": "I'm Kira. Maddie was my girlfriend. We met under the heart clouds; she talked about eggs for an hour and I "
+           "fell for her before she'd even finished. She said my head was the perfect size for kissing.",
+    "maddie": "Someone woke the Trans Fairy, and Maddie went through her door to warn them. She said she'd be home for "
+              "dinner. She never came back. Nobody found anything of her. It's like she was just... erased.",
+    "fairy": "If you ever face her... make her pay. No. Sorry. Maddie never wanted anyone hurt, not even her. Just be "
+             "careful out there. I can't lose anyone else.",
+    "okay": "Not really. Some mornings I still make two cups of cocoa. Her pillow still smells like strawberries. I keep "
+            "waiting for her to float in through the window and laugh at me for crying. ...Thanks for asking.",
+    "now": "Keep the house. Water her flowers; they still come up in trans colours every morning, like she's still here. "
+           "She wanted the Egg House to be a safe place for anyone who needs one. So I'll keep it that way. For her.",
+    "gifts": "She left these with me: her Trans Wand and her Trans Wings. She made them for travellers, and she always "
+             "said the next one to find the house should have them. It's what she'd want. Will you look after them?",
+    "gifts_given": "How are her wings treating you? Crouch to charge, jump to launch, tap jump to flap: she made me learn it "
+                   "by heart. Fly far for her. And come back sometimes and tell me where they took you.",
+    "thanks": "Thank you. She'd be so happy to see them fly again. Come and visit, okay? I don't like being alone up here.",
+    "later": "That's okay. They'll be here when you're ready. She'd have said the same.",
+    "option.who": "Who are you?",
+    "option.maddie": "What happened to Maddie?",
+    "option.fairy": "And the fairy?",
+    "option.okay": "Are you okay?",
+    "option.now": "What will you do now?",
+    "option.gifts": "Did she leave anything?",
+    "option.accept": "I'll look after them. I promise.",
+    "option.back": "Not yet.",
+    "option.bye": "Take care, Kira.",
+}
 
 
 # The Cloud Bible's pages, in order (ModItems.CLOUD_BIBLE_PAGES must match their number).

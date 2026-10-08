@@ -198,7 +198,7 @@ public class TransDimensionClient implements ClientModInitializer {
 		LivingEntityFeatureRenderEvents.ALLOW_CAPE_RENDER.register(state -> state.getData(WingPose.KEY) == null);
 
 		ClientPlayNetworking.registerGlobalReceiver(OpenMaddieDialoguePayload.TYPE, (payload, context) ->
-				context.client().gui.setScreen(new MaddieDialogueScreen(payload.entityId(), payload.gifted())));
+				context.client().gui.setScreen(new MaddieDialogueScreen(payload.entityId(), payload.gifted(), payload.kira())));
 		// Herobrine: drawn (never an entity) or heard by this player alone when the server says so, and the host's secret settings.
 		HerobrineClient.register();
 		ClientPlayNetworking.registerGlobalReceiver(HerobrineSightingPayload.TYPE, (payload, context) -> HerobrineClient.show(payload));

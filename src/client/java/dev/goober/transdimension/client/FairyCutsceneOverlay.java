@@ -50,6 +50,7 @@ public final class FairyCutsceneOverlay {
 				lineNanos = now;
 			}
 			case FairyCutscenePayload.SHIELD -> FairyCutsceneCamera.shieldHit();
+			case FairyCutscenePayload.PRUNE -> FairyCutsceneCamera.prune();
 			default -> {
 				active = false;
 				endedNanos = now;

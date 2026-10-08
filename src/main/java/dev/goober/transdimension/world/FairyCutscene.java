@@ -46,9 +46,11 @@ import dev.goober.transdimension.registry.ModItems;
  * that you have summoned the Trans Fairy, an ancient and horrible being, and begging you to get away from her. Before
  * she can finish, the fairy appears over the altar and hushes her. Maddie didn't come alone: at her call two more doors
  * open either side of hers and two sculk archers ({@link SculkArcher}) step out and loose arrows at the fairy, which stop
- * on a shield of light round her. She strikes the archers down one after the other (their loot drops where they fall),
- * then Maddie, and turns to you: you woke her, so now you'll show her what you're worth. Maddie is gone from the realm
- * from then on ({@link FairyRealmState#maddieGone}) and the fight begins.
+ * on a shield of light round her. She strikes the archers down one after the other (their loot drops where they fall).
+ * Then she lifts Maddie off her feet, flies up close and touches her heart with the tip of her wand, and Maddie is
+ * pruned: the flag's light spreads over her from the wand and she comes apart into it and drifts away (the clients draw
+ * it: PruneEffect). The fairy floats back over the altar and turns to you: you woke her, so now you'll show her what
+ * you're worth. Maddie is gone from the realm from then on ({@link FairyRealmState#maddieGone}) and the fight begins.
  *
  * <p>Every later offering calls the fairy straight back for a rematch. The scene runs on the server (one at a time; it
  * isn't saved) and holds its audience still while it plays; each watching player's client moves the camera through it
@@ -76,8 +78,11 @@ public final class FairyCutscene {
 	/** ...walking this many ticks, {@link #WALK_DISTANCE} blocks, before she stops... */
 	public static final int WALK = 30;
 	public static final double WALK_DISTANCE = 3.5;
-	/** How far behind a door its walker starts, inside its haze, so they're seen walking out through it. */
-	public static final double WALK_FROM = 1.2;
+	/**
+	 * How far behind a door its walker starts: just behind its face of light, which hides them (FairyCutsceneCamera draws
+	 * it bright, not see-through), so they step out of the front of the door rather than being seen walking up to it.
+	 */
+	public static final double WALK_FROM = 0.5;
 	/** ...and it closes behind her. */
 	public static final int PORTAL_CLOSES = 88;
 	public static final int LINE_ONE = 86;
@@ -92,9 +97,12 @@ public final class FairyCutscene {
 	public static final int CALL_FOR_HELP = 305;
 	/** ...their doors open... */
 	public static final int HELP_OPENS = 318;
-	/** ...and a sculk archer walks out of each, {@link #HELP_WALK_DISTANCE} blocks in {@link #HELP_WALK} ticks... */
-	public static final int HELP_ARRIVES = 334;
-	public static final int HELP_WALK = 24;
+	/**
+	 * ...and once they're fully open (FairyCutsceneCamera.DOOR_OPENING after), a sculk archer walks out of each,
+	 * {@link #HELP_WALK_DISTANCE} blocks in {@link #HELP_WALK} ticks...
+	 */
+	public static final int HELP_ARRIVES = 338;
+	public static final int HELP_WALK = 22;
 	public static final double HELP_WALK_DISTANCE = 2.4;
 	public static final int HELP_CLOSES = 366;
 	/** ...and draws their bow. The fairy raises her shield, and two volleys (an arrow from each) stop on it. */
@@ -108,12 +116,38 @@ public final class FairyCutscene {
 	public static final int STRIKE_ONE = 426;
 	public static final int STRIKE_TWO = 442;
 	public static final int MADDIE_CRIES = 468;
-	public static final int WAND_RAISED = 496;
-	public static final int SHOT = 506;
-	public static final int MADDIE_FALLS = 521;
-	public static final int FAIRY_LINE_TWO = 541;
-	public static final int FAIRY_LINE_THREE = 606;
-	public static final int FIGHT = 666;
+	/** The fairy raises her wand and Maddie is lifted off her feet, {@link #LIFT_HEIGHT} blocks in {@link #LIFT_TIME} ticks... */
+	public static final int LIFT = 492;
+	public static final int LIFT_TIME = 30;
+	public static final double LIFT_HEIGHT = 1.4;
+	/** ...the fairy flies up close to her in {@link #APPROACH_TIME} ticks, to where her wand's tip just reaches ({@link #touchSpot})... */
+	public static final int APPROACH = 508;
+	public static final int APPROACH_TIME = 26;
+	/** ...reaches out with it, taking this many ticks (the model's PRUNE pose)... */
+	public static final int REACH = 6;
+	/**
+	 * ...and touches her heart with it. Maddie is pruned: the flag's light spreads over her from the wand and she comes
+	 * apart into it (the clients draw it: PruneEffect). From {@link #PRUNED} only the light is left of her.
+	 */
+	public static final int TOUCH = 540;
+	public static final int PRUNED = 550;
+	/** The fairy floats back over the altar, in {@link #RETURN_TIME} ticks, and turns to the player. */
+	public static final int RETURN = 570;
+	public static final int RETURN_TIME = 26;
+	public static final int FAIRY_LINE_TWO = 600;
+	public static final int FAIRY_LINE_THREE = 665;
+	public static final int FIGHT = 725;
+	/** Where Maddie stands once she's walked out of her door. */
+	public static final Vec3 STAND = MADDIE_PORTAL.add(0.0, 0.0, WALK_DISTANCE - WALK_FROM);
+	/**
+	 * The touch: where the tip of the fairy's wand is in her PRUNE pose (up from her feet, ahead of her and to her right,
+	 * from TransFairyModel's arm and wand), and where on Maddie it touches (up from her feet, and in front of her middle).
+	 */
+	public static final double WAND_UP = 1.56;
+	public static final double WAND_AHEAD = 1.15;
+	public static final double WAND_RIGHT = 0.25;
+	public static final double HEART = 1.25;
+	public static final double HEART_AHEAD = 0.14;
 	/** Ticks after a strike before someone it missed falls anyway. */
 	private static final int FALLS_AFTER = 15;
 	/** Ticks between the two archers' shots in a volley. */
@@ -132,6 +166,13 @@ public final class FairyCutscene {
 		final SculkArcher[] archers = new SculkArcher[2];
 		/** The arrows in flight, for the shield to stop. */
 		final List<AbstractArrow> arrows = new ArrayList<>();
+		/** Where Maddie stood when she was lifted, and where the fairy flew in from and back from. */
+		@Nullable
+		Vec3 liftFrom;
+		@Nullable
+		Vec3 approachFrom;
+		@Nullable
+		Vec3 returnFrom;
 	}
 
 	private FairyCutscene() {
@@ -262,24 +303,7 @@ public final class FairyCutscene {
 				s.fairy.lookAtDuringIntro(s.maddie.getEyePosition());
 			}
 		}
-		if (t == WAND_RAISED && s.fairy != null) {
-			s.fairy.playSound(SoundEvents.ILLUSIONER_PREPARE_MIRROR, 1.5F, 1.6F);
-		}
-		if (t == SHOT && s.fairy != null && s.maddie != null && s.maddie.isAlive()) {
-			// The bolt is what cuts her off; she's left with one heart so it's the bolt that ends it.
-			s.maddie.setInvulnerable(false);
-			s.maddie.setHealth(1.0F);
-			s.fairy.castAt(s.maddie);
-		}
-		if (t == MADDIE_FALLS) {
-			if (s.maddie != null && s.maddie.isAlive()) {
-				s.maddie.setInvulnerable(false);
-				s.maddie.hurtServer(level, s.fairy != null ? s.maddie.damageSources().indirectMagic(s.fairy, s.fairy)
-						: s.maddie.damageSources().magic(), 100.0F);
-			}
-			FairyRealmState state = level.getAttachedOrElse(ModAttachments.FAIRY_REALM_STATE, FairyRealmState.NEW);
-			level.setAttached(ModAttachments.FAIRY_REALM_STATE, state.withMaddieGone());
-		}
+		prune(level, s, t);
 		if (t == FAIRY_LINE_TWO) {
 			if (s.fairy != null) {
 				// she turns from Maddie to whoever woke her
@@ -379,6 +403,112 @@ public final class FairyCutscene {
 		}
 	}
 
+	/**
+	 * The end of the scene for Maddie: the fairy lifts her off her feet, flies up close, reaches out and touches her heart
+	 * with her wand, and Maddie is pruned (each client draws her coming apart into light: PruneEffect); then the fairy
+	 * floats back over the altar. Each step is its own check, like tick's.
+	 */
+	private static void prune(ServerLevel level, Scene s, int t) {
+		Maddie maddie = s.maddie;
+		TransFairy fairy = s.fairy;
+		if (t == LIFT && maddie != null && maddie.isAlive()) {
+			s.liftFrom = maddie.position();
+			maddie.setNoGravity(true);
+			face(maddie, fairyMiddle(s));
+			level.playSound(null, maddie.getX(), maddie.getY() + 1.0, maddie.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.NEUTRAL,
+					1.4F, 0.7F);
+			if (fairy != null) {
+				fairy.lookAtDuringIntro(maddie.getEyePosition());
+				fairy.playSound(SoundEvents.ILLUSIONER_PREPARE_MIRROR, 1.5F, 1.6F);
+			}
+		}
+		Vec3 from = s.liftFrom;
+		if (maddie != null && from != null && t > LIFT && t <= LIFT + LIFT_TIME) {
+			maddie.setPos(from.x, from.y + LIFT_HEIGHT * ease((double) (t - LIFT) / LIFT_TIME), from.z);
+			if ((t - LIFT) % 5 == 0) {
+				FairyRealm.sparkle(level, maddie.position().add(0.0, 0.9, 0.0), 3, 0.35);
+			}
+		}
+		if (from != null && fairy != null) {
+			Vec3 lifted = from.add(0.0, LIFT_HEIGHT, 0.0);
+			Vec3 spot = touchSpot(lifted);
+			if (t == APPROACH) {
+				s.approachFrom = fairy.position();
+				fairy.lookAtDuringIntro(lifted.add(0.0, HEART, 0.0));
+				fairy.playSound(SoundEvents.ILLUSIONER_MIRROR_MOVE, 1.2F, 1.4F);
+			}
+			Vec3 approachFrom = s.approachFrom;
+			if (approachFrom != null && t > APPROACH && t <= APPROACH + APPROACH_TIME) {
+				hold(fairy, approachFrom.lerp(spot, ease((double) (t - APPROACH) / APPROACH_TIME)));
+				if (t == APPROACH + APPROACH_TIME) {
+					// square on to her (not at her middle: the wand is in her right hand), so its tip meets her heart
+					fairy.lookAtDuringIntro(spot.subtract(towardFairy(lifted).scale(4.0)));
+				}
+			}
+			if (t == TOUCH - REACH) {
+				fairy.reachOut(true);
+			}
+		}
+		if (t == TOUCH && maddie != null && maddie.isAlive()) {
+			send(level, new FairyCutscenePayload(FairyCutscenePayload.PRUNE, "", ""));
+			Vec3 heart = maddie.position().add(0.0, HEART, 0.0);
+			level.playSound(null, heart.x, heart.y, heart.z, SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.NEUTRAL, 1.5F, 1.2F);
+			level.playSound(null, heart.x, heart.y, heart.z, SoundEvents.BEACON_DEACTIVATE, SoundSource.NEUTRAL, 1.5F, 1.5F);
+		}
+		if (t == PRUNED) {
+			if (maddie != null && !maddie.isRemoved()) {
+				Vec3 heart = maddie.position().add(0.0, HEART, 0.0);
+				level.playSound(null, heart.x, heart.y, heart.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.NEUTRAL, 0.8F, 1.7F);
+				level.playSound(null, heart.x, heart.y, heart.z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.NEUTRAL, 1.2F, 0.8F);
+				maddie.discard();
+			}
+			FairyRealmState state = level.getAttachedOrElse(ModAttachments.FAIRY_REALM_STATE, FairyRealmState.NEW);
+			level.setAttached(ModAttachments.FAIRY_REALM_STATE, state.withMaddieGone());
+		}
+		if (t == TOUCH + 24 && from != null) {
+			Vec3 heart = from.add(0.0, LIFT_HEIGHT + HEART + 0.8, 0.0);
+			level.playSound(null, heart.x, heart.y, heart.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.NEUTRAL, 1.2F, 0.6F);
+		}
+		if (fairy != null && t == RETURN) {
+			fairy.reachOut(false);
+			s.returnFrom = fairy.position();
+		}
+		Vec3 returnFrom = s.returnFrom;
+		if (fairy != null && returnFrom != null && t > RETURN && t <= RETURN + RETURN_TIME) {
+			hold(fairy, returnFrom.lerp(FairyRealm.FAIRY_SPAWN, ease((double) (t - RETURN) / RETURN_TIME)));
+		}
+	}
+
+	/**
+	 * Where the fairy's feet go to touch Maddie (her feet at {@code maddieFeet}, facing the fairy over the altar) on the
+	 * heart with the tip of her wand: in front of Maddie, a little to the fairy's left so the wand in her right hand lines
+	 * up, and low enough for the wand to meet Maddie's heart.
+	 */
+	public static Vec3 touchSpot(Vec3 maddieFeet) {
+		Vec3 ahead = towardFairy(maddieFeet);
+		// the fairy faces back along `ahead`; her right hand is then this way
+		Vec3 herRight = new Vec3(ahead.z, 0.0, -ahead.x);
+		return maddieFeet.add(ahead.scale(HEART_AHEAD + WAND_AHEAD)).subtract(herRight.scale(WAND_RIGHT)).add(0.0, HEART - WAND_UP, 0.0);
+	}
+
+	/** Level, from Maddie (her feet at {@code maddieFeet}) towards where the fairy appears over the altar. */
+	public static Vec3 towardFairy(Vec3 maddieFeet) {
+		Vec3 toFairy = new Vec3(FairyRealm.FAIRY_SPAWN.x - maddieFeet.x, 0.0, FairyRealm.FAIRY_SPAWN.z - maddieFeet.z);
+		return toFairy.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : toFairy.normalize();
+	}
+
+	/** Puts the fairy at {@code at}, still (the cutscene flies her by hand). */
+	private static void hold(TransFairy fairy, Vec3 at) {
+		fairy.setPos(at.x, at.y, at.z);
+		fairy.setDeltaMovement(Vec3.ZERO);
+	}
+
+	/** 0 to 1, easing in and out. */
+	private static double ease(double k) {
+		double c = Mth.clamp(k, 0.0, 1.0);
+		return c * c * (3.0 - 2.0 * c);
+	}
+
 	/** The fairy's shield: any arrow that reaches it stops there with a flash (all of them, once it's lowered). */
 	private static void stopArrows(ServerLevel level, Scene s, boolean all) {
 		Vec3 middle = fairyMiddle(s);
@@ -408,7 +538,7 @@ public final class FairyCutscene {
 				: FairyRealm.FAIRY_SPAWN.add(0.0, 1.2, 0.0);
 	}
 
-	/** An archer steps into their doorway from behind it, bow in hand, facing the altar (they walk on: helpArrives). */
+	/** An archer is put just behind their door's face, bow in hand, facing the altar (they step out of it: helpArrives). */
 	@Nullable
 	private static SculkArcher bringArcher(ServerLevel level, Vec3 door) {
 		SculkArcher archer = ModEntities.SCULK_ARCHER.create(level, EntitySpawnReason.EVENT);
@@ -439,7 +569,7 @@ public final class FairyCutscene {
 		s.arrows.clear();
 	}
 
-	/** Maddie steps into the doorway from behind it, facing the altar (she walks the rest of the way: see tick). */
+	/** Maddie is put just behind her door's face, facing the altar (she steps out of it and walks on: see tick). */
 	@Nullable
 	private static Maddie bringMaddie(ServerLevel level, Vec3 door) {
 		Maddie maddie = ModEntities.MADDIE.create(level, EntitySpawnReason.EVENT);
@@ -482,7 +612,7 @@ public final class FairyCutscene {
 	 */
 	private static void endUnwatched(ServerLevel level, Scene s, int t) {
 		clearHelp(s);
-		if (t < MADDIE_FALLS) {
+		if (t < PRUNED) {
 			if (s.maddie != null && !s.maddie.isRemoved()) {
 				s.maddie.discard();
 			}

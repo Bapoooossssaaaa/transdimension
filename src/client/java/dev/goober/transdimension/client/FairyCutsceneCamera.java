@@ -36,8 +36,10 @@ import dev.goober.transdimension.world.FairyRealm;
  * <li>low on Maddie as she calls her friends, then wide on the three doors as two more open;</li>
  * <li>low on the first archer walking out, over the second's shoulder as they draw and shoot, on the fairy as the arrows
  * stop on her shield (drawn here, {@link #renderShield}), side on as the second volley flies, close on her scorn;</li>
- * <li>over her shoulder as she strikes each archer down, close on Maddie's cry, low on the fairy raising her wand, on
- * Maddie as the bolt strikes her;</li>
+ * <li>over her shoulder as she strikes each archer down, close on Maddie's cry, low at Maddie's side as the fairy lifts
+ * her off her feet, over Maddie's shoulder as the fairy swoops in close, side on as her wand touches Maddie's heart, in
+ * front of Maddie as she comes apart into light (drawn by {@link PruneEffect}), and wide as the last of it rises and the
+ * fairy floats back over the altar;</li>
  * <li>side on as the fairy turns to the player, and close on her last line, before the view cuts back to the player, who
  * now faces her.</li>
  * </ol>
@@ -65,8 +67,14 @@ public final class FairyCutsceneCamera {
 	private static final Vec3 PORTAL = FairyCutscene.MADDIE_PORTAL;
 	private static final Vec3 DOOR = PORTAL.add(0.0, 1.4, 0.0);
 	/** Where Maddie stops, having walked out of her door, and her eyes there. */
-	private static final Vec3 STAND = PORTAL.add(0.0, 0.0, FairyCutscene.WALK_DISTANCE - FairyCutscene.WALK_FROM);
+	private static final Vec3 STAND = FairyCutscene.STAND;
 	private static final Vec3 MADDIE_EYE = STAND.add(0.0, 1.62, 0.0);
+	/** Maddie held up in the air: her feet, eyes and heart; where the wand touches her, and the fairy's middle as it does. */
+	private static final Vec3 LIFTED = STAND.add(0.0, FairyCutscene.LIFT_HEIGHT, 0.0);
+	private static final Vec3 LIFTED_EYE = LIFTED.add(0.0, 1.62, 0.0);
+	private static final Vec3 LIFTED_HEART = LIFTED.add(0.0, FairyCutscene.HEART, 0.0);
+	private static final Vec3 TOUCH_POINT = LIFTED_HEART.add(FairyCutscene.towardFairy(LIFTED).scale(FairyCutscene.HEART_AHEAD));
+	private static final Vec3 TOUCH_FAIRY = FairyCutscene.touchSpot(LIFTED).add(0.0, 1.2, 0.0);
 	private static final Vec3 FAIRY_EYE = FairyRealm.FAIRY_SPAWN.add(0.0, 2.0, 0.0);
 	private static final Vec3 FAIRY_MIDDLE = FairyRealm.FAIRY_SPAWN.add(0.0, 1.2, 0.0);
 	/** Each archer's eyes (west, then east) where they stop. */
@@ -136,6 +144,7 @@ public final class FairyCutsceneCamera {
 		takes = plan(eye, eye.add(player.getLookAngle().scale(4.0)));
 		startTick = minecraft.level.getGameTime();
 		lastShieldHit = -100.0;
+		PruneEffect.clear();
 		if (!active) {
 			savedCameraType = minecraft.options.getCameraType();
 			minecraft.options.setCameraType(CameraType.THIRD_PERSON_BACK);
@@ -149,6 +158,7 @@ public final class FairyCutsceneCamera {
 			return;
 		}
 		active = false;
+		PruneEffect.clear();
 		Minecraft minecraft = Minecraft.getInstance();
 		if (savedCameraType != null) {
 			minecraft.options.setCameraType(savedCameraType);
@@ -163,6 +173,33 @@ public final class FairyCutsceneCamera {
 			player.xRotO = facing.pitch();
 			player.setYHeadRot(facing.yaw());
 		}
+	}
+
+	/** The fairy's wand touched Maddie (FairyCutscenePayload.PRUNE): she starts coming apart into light (PruneEffect). */
+	public static void prune() {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (!active || minecraft.level == null) {
+			return;
+		}
+		// where she's meant to be, facing the fairy, unless she's here to say otherwise
+		Vec3 feet = LIFTED;
+		Vec3 ahead = FairyCutscene.towardFairy(LIFTED);
+		float yaw = (float) (Mth.atan2(ahead.z, ahead.x) * Mth.RAD_TO_DEG) - 90.0F;
+		for (Maddie maddie : minecraft.level.getEntitiesOfClass(Maddie.class, new AABB(ALTAR, ALTAR).inflate(STAGE))) {
+			feet = maddie.position();
+			yaw = maddie.yBodyRot;
+		}
+		PruneEffect.start(feet, yaw, time(minecraft));
+	}
+
+	/** How far Maddie has been lifted off her feet (0 to 1, eased), for her held-up pose (MaddieRenderer); 0 with no scene. */
+	public static float lift() {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (!active || minecraft.level == null) {
+			return 0.0F;
+		}
+		double k = Mth.clamp((time(minecraft) - FairyCutscene.LIFT) / FairyCutscene.LIFT_TIME, 0.0, 1.0);
+		return (float) (k * k * (3.0 - 2.0 * k));
 	}
 
 	/** An arrow stopped on the fairy's shield (FairyCutscenePayload.SHIELD): it flares. */
@@ -278,13 +315,25 @@ public final class FairyCutsceneCamera {
 				fixed(around(FAIRY_EYE, westEye, -2.35, 0.65, 0.4)), Cast::westBody));
 		list.add(new Take(FairyCutscene.STRIKE_TWO + 4, fixed(around(FAIRY_EYE, eastEye, -2.5, -0.7, 0.4)),
 				fixed(around(FAIRY_EYE, eastEye, -2.35, -0.65, 0.4)), Cast::eastBody));
-		// Close on Maddie's cry; low on the fairy as she raises her wand; on Maddie as the bolt strikes her, following her down.
+		// Close on Maddie's cry.
 		list.add(new Take(FairyCutscene.MADDIE_CRIES - 4, fixed(around(MADDIE_EYE, ALTAR, 1.9, -0.6, 0.0)),
 				fixed(around(MADDIE_EYE, ALTAR, 1.4, -0.45, 0.0)), Cast::maddieEye));
-		list.add(new Take(FairyCutscene.WAND_RAISED - 4, fixed(ALTAR.add(-2.6, 3.0, -6.2)), fixed(ALTAR.add(-2.3, 2.8, -5.8)),
-				Cast::fairyEye));
-		list.add(new Take(FairyCutscene.SHOT + 4, fixed(around(MADDIE_EYE, ALTAR, 1.0, -2.4, -0.4)),
-				fixed(around(MADDIE_EYE, ALTAR, 0.9, -2.2, -0.5)), Cast::maddieBody));
+		// Low at her side, looking up at her as the fairy lifts her off her feet.
+		list.add(new Take(FairyCutscene.LIFT - 2, fixed(around(MADDIE_EYE, TOUCH_FAIRY, 0.6, 3.4, -1.1)),
+				fixed(around(MADDIE_EYE, TOUCH_FAIRY, 0.5, 3.0, -1.0)), Cast::maddieBody));
+		// Over her shoulder as the fairy swoops in close.
+		list.add(new Take(FairyCutscene.APPROACH, fixed(around(LIFTED_EYE, TOUCH_FAIRY, -1.7, 0.75, 0.3)),
+				fixed(around(LIFTED_EYE, TOUCH_FAIRY, -1.55, 0.7, 0.3)), Cast::fairyEye));
+		// Side on, the two of them face to face, as the wand reaches out and touches her heart.
+		list.add(new Take(FairyCutscene.TOUCH - 10, fixed(around(TOUCH_POINT, TOUCH_FAIRY, 0.0, -3.4, 0.15)),
+				fixed(around(TOUCH_POINT, TOUCH_FAIRY, 0.0, -2.9, 0.1)), fixed(TOUCH_POINT)));
+		// In front of her as she comes apart into the flag's light, easing back and up as it drifts away.
+		list.add(new Take(FairyCutscene.PRUNED - 2, fixed(around(LIFTED_HEART, TOUCH_FAIRY, 1.4, -2.2, -0.25)),
+				fixed(around(LIFTED_HEART, TOUCH_FAIRY, 1.8, -2.8, -0.15)), fixed(LIFTED_HEART.add(0.0, 0.2, 0.0)),
+				fixed(LIFTED_HEART.add(0.0, 0.5, 0.0))));
+		// Wide and low as the last of her light rises, then after the fairy as she floats back over the altar.
+		list.add(new Take(FairyCutscene.RETURN - 2, fixed(LIFTED.add(-6.5, -1.0, 3.5)), fixed(LIFTED.add(-6.3, -0.95, 3.6)),
+				fixed(LIFTED_HEART.add(0.0, 1.0, 0.0)), Cast::fairyEye));
 		// Side on as she turns from Maddie to the player, then close on her from their side for her last line.
 		list.add(new Take(FairyCutscene.FAIRY_LINE_TWO - 3, fixed(FAIRY_EYE.add(4.2, -0.5, 0.3)), fixed(FAIRY_EYE.add(3.8, -0.45, 0.4)),
 				Cast::fairyEye));
@@ -321,7 +370,7 @@ public final class FairyCutsceneCamera {
 		return new Shot(position, yaw, pitch);
 	}
 
-	/** The scene's light: the doors and the fairy's shield. */
+	/** The scene's light: the doors, the fairy's shield and Maddie's last light. */
 	private static void renderLight(LevelRenderContext context) {
 		Minecraft minecraft = Minecraft.getInstance();
 		if (!active || minecraft.level == null) {
@@ -334,6 +383,7 @@ public final class FairyCutsceneCamera {
 			renderDoor(g, t, door, FairyCutscene.HELP_OPENS, FairyCutscene.HELP_CLOSES);
 		}
 		renderShield(g, t, minecraft);
+		PruneEffect.render(g, t);
 		g.submit(context);
 	}
 
@@ -381,8 +431,9 @@ public final class FairyCutsceneCamera {
 
 	/**
 	 * A door like the time doors in the show (Maddie's, and her friends'): a doorway outlined by a thin bright frame with a
-	 * soft glow round it, filled with a see-through haze of light that its walker comes out of. Here it's the trans flag as
-	 * a smooth gradient: blue at the sides, through pink, to white down the middle. It opens from the top down (a bar of
+	 * soft glow round it, filled with a face of light that hides whoever is behind it, so its walker steps out of the front
+	 * of it (they start just behind it: FairyCutscene.WALK_FROM). Here it's the trans flag as a smooth gradient: blue at the
+	 * sides, through pink, to white down the middle. It opens from the top down (a bar of
 	 * light draws out across the top, then the doorway comes down from it to the floor) and closes from the bottom up.
 	 * Standing on {@code base}, open from {@code opens} to {@code closes}. The doors are the only effect as people
 	 * arrive: no sparks, no extra particles.
@@ -403,13 +454,13 @@ public final class FairyCutsceneCamera {
 		Vec3 middle = new Vec3(base.x, (top + bottom) / 2.0, base.z);
 		double shimmer = 0.5 + 0.5 * Math.sin(t * 0.35);
 		if (up > 0.01) {
-			// The haze: thin upright bands, their colour following the gradient across the doorway.
+			// The face of light: thin upright bands, their colour following the gradient across the doorway, all but opaque.
 			int bands = 12;
 			double band = along * 2.0 / bands;
 			for (int i = 0; i < bands; i++) {
 				int colour = gradient(Math.abs((i + 0.5) / bands * 2.0 - 1.0));
 				Vec3 at = middle.add(-along + band * (i + 0.5), 0.0, 0.0);
-				g.sheet(at, Direction.SOUTH, band / 2.0, up, 0.015, GlowGeometry.argb(0.32 + 0.06 * shimmer, colour));
+				g.sheet(at, Direction.SOUTH, band / 2.0, up, 0.015, GlowGeometry.argb(0.84 + 0.08 * shimmer, colour));
 			}
 		}
 		// The frame: a thin bright core, a pink glow round it and a fainter blue one; the top first, the sides coming down

@@ -60,7 +60,8 @@ import dev.goober.transdimension.world.FairyRealm;
  * diving for a swoop, wand down for the spikes, arms up to summon.
  *
  * <p>The first time she's called she arrives in the middle of a cutscene ({@code FairyCutscene}): while {@link #INTRO}
- * is set she only hovers and watches, can't be hurt, and fires the one shot the scene asks for ({@link #castAt}). Her
+ * is set she only hovers and watches, can't be hurt, and does only what the scene asks: strike the archers ({@link #castAt})
+ * and reach out to touch Maddie with her wand ({@link #reachOut}), flown about by the scene itself. Her
  * health bar is the client's own trans bar ({@code TransFairyBossBar}), drawn from her synced health once the intro is
  * over, so she has no vanilla boss bar.
  */
@@ -71,6 +72,8 @@ public class TransFairy extends Monster {
 	public static final int SPIKES = 3;
 	public static final int SUMMON = 4;
 	public static final int STARFALL = 5;
+	/** The cutscene's last touch: wand held out at arm's length (only ever set by {@link #reachOut}). */
+	public static final int PRUNE = 6;
 	private static final EntityDataAccessor<Integer> ACTION = SynchedEntityData.defineId(TransFairy.class, EntityDataSerializers.INT);
 	/** True during the cutscene that brings her in (not saved: after a reload she just fights). */
 	private static final EntityDataAccessor<Boolean> INTRO = SynchedEntityData.defineId(TransFairy.class, EntityDataSerializers.BOOLEAN);
@@ -140,7 +143,12 @@ public class TransFairy extends Monster {
 		this.introLook = point;
 	}
 
-	/** A single spell from her wand at {@code target} (the cutscene's shot at Maddie). */
+	/** The cutscene: she reaches out to touch someone with the tip of her wand (the model's PRUNE pose), or lowers it. */
+	public void reachOut(boolean reach) {
+		this.setAction(reach ? PRUNE : HOVER);
+	}
+
+	/** A single spell from her wand at {@code target} (the cutscene's strike on each archer). */
 	public void castAt(LivingEntity target) {
 		if (!(this.level() instanceof ServerLevel level)) {
 			return;
