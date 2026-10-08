@@ -30,7 +30,7 @@
     }
   },
   "start_height": {
-    "absolute": -32
+    "absolute": -27
   },
   "start_jigsaw_name": "minecraft:city_anchor",
   "start_pool": "transdimension:pink_ancient_city/city_center",

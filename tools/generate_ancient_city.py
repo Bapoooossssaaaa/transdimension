@@ -349,13 +349,12 @@ def generate_processors():
     write(os.path.join(DATA, NS, "tags", "block", f"{CITY}_replaceable.json"), {"values": REPLACEABLE})
 
 
-# The city is needed for the candle ritual (the way to the Cloud Realm), so it's commoner than vanilla's (round 20):
-# it starts 5 blocks deeper (its floor at y -56, still clear of the bedrock), where more of the ground is Pink Deep Dark
-# (only there can a city start), and its tries are 16 chunks apart instead of 24. A try lands somewhere in the first 4
-# chunks of its 16, so two cities' middles are never under 13 chunks apart (a city reaches 116 blocks from its middle).
-START_HEIGHT = -32
-SPACING = 16
-SEPARATION = 12
+# Exactly as rare as vanilla's ancient cities, on the owner's word: vanilla's start height (its floor at y -51) and
+# vanilla's spacing (a try every 24 chunks, at least 8 apart), in the Pink Deep Dark, placed like vanilla's deep dark.
+# Maps to them (city_map) are this mod's own addition, so the candle ritual's city can always be found.
+START_HEIGHT = -27
+SPACING = 24
+SEPARATION = 8
 MAP_TAG = "on_pink_ancient_city_maps"
 
 

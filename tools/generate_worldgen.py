@@ -1381,12 +1381,9 @@ def generate_dimension():
     entries.append(entry("crystal_caves", full, full, (0.8, 1.0), full, full, depth=[0.2, 0.9]))
     entries.append(entry("frosted_caves", (-1.0, -0.7), full, full, full, full, depth=[0.2, 0.9]))
     entries.append(entry("blooming_caverns", (0.7, 1.0), (0.1, 0.45), full, full, full, depth=[0.2, 0.9]))
-    # ...and the pink deep dark right at the bottom, under the mountains and hills (low erosion; vanilla's deep dark only
-    # under erosion -0.375). It starts just past where the land's own depth-1 caves are nearer (vanilla's starts at
-    # depth 1.05), never above it: a range starting any shallower is nearer than depth 1 all the way up to mid-depth.
-    # The pink ancient city (the candle ritual) can only start in it, so more of it means more cities
-    # (generate_ancient_city.py also starts them deeper and closer together).
-    entries.append(entry("pink_deep_dark", full, full, full, (-1.0, -0.2), full, depth=[1.01, 2.0]))
+    # ...and the pink deep dark exactly where vanilla's deep dark is: right at the bottom, under the mountains (low
+    # erosion), from depth 1.05 down. The owner wants its pink ancient cities exactly as rare as vanilla's ancient cities.
+    entries.append(entry("pink_deep_dark", full, full, full, (-1.0, -0.375), full, depth=1.1))
     dimension = {"type": f"{NS}:trans_realm", "generator": {
         "type": "minecraft:noise", "settings": f"{NS}:trans_realm",
         "biome_source": {"type": "minecraft:multi_noise", "biomes": entries}}}
