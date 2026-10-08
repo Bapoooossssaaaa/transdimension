@@ -7,6 +7,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 
 import dev.goober.transdimension.TransDimension;
 import dev.goober.transdimension.world.BeanstalkFeature;
+import dev.goober.transdimension.world.CandyCaneFeature;
 import dev.goober.transdimension.world.FairyIslandFeature;
 import dev.goober.transdimension.world.HeartTreeFeature;
 import dev.goober.transdimension.world.HeavenlyRuinFeature;
@@ -43,6 +44,10 @@ public final class ModFeatures {
 	/** A very rare giant beanstalk of green concrete, climbing from an island up to a cloud. */
 	public static final Feature<NoneFeatureConfiguration> BEANSTALK = Registry.register(BuiltInRegistries.FEATURE,
 			TransDimension.id("beanstalk"), new BeanstalkFeature(NoneFeatureConfiguration.CODEC));
+
+	/** A giant candy cane in the Candy Cane Grove, hooked over at the top. */
+	public static final Feature<NoneFeatureConfiguration> CANDY_CANE = Registry.register(BuiltInRegistries.FEATURE,
+			TransDimension.id("candy_cane"), new CandyCaneFeature(NoneFeatureConfiguration.CODEC));
 
 	private ModFeatures() {
 	}

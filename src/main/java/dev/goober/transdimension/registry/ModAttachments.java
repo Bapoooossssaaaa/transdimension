@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.herobrine.HerobrineSettings;
 import dev.goober.transdimension.world.FairyRealmState;
 import dev.goober.transdimension.world.PlushLedger;
 
@@ -20,6 +21,10 @@ public final class ModAttachments {
 	/** On a player: Maddie already gave them her wand and wings. Survives death. */
 	public static final AttachmentType<Boolean> MADDIE_GIFTED = AttachmentRegistry.create(TransDimension.id("maddie_gifted"),
 			builder -> builder.persistent(Codec.BOOL).copyOnDeath());
+
+	/** On the Overworld: how Herobrine behaves in this world (the host's secret settings; see Herobrine). */
+	public static final AttachmentType<HerobrineSettings> HEROBRINE = AttachmentRegistry.createPersistent(
+			TransDimension.id("herobrine"), HerobrineSettings.CODEC);
 
 	/** On the Fairy Realm's level: whether the arena island is built and the Trans Fairy beaten. */
 	public static final AttachmentType<FairyRealmState> FAIRY_REALM_STATE = AttachmentRegistry.createPersistent(

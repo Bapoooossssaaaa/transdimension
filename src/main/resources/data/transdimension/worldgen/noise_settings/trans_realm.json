@@ -648,6 +648,30 @@
                     "if_true": {
                       "type": "minecraft:biome",
                       "biome_is": [
+                        "transdimension:candy_cane_grove"
+                      ]
+                    },
+                    "then_run": {
+                      "type": "minecraft:condition",
+                      "if_true": {
+                        "type": "minecraft:noise_threshold",
+                        "max_threshold": 1.7976931348623157e+308,
+                        "min_threshold": 0.45,
+                        "noise": "minecraft:surface"
+                      },
+                      "then_run": {
+                        "type": "minecraft:block",
+                        "result_state": {
+                          "Name": "minecraft:snow_block"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "type": "minecraft:condition",
+                    "if_true": {
+                      "type": "minecraft:biome",
+                      "biome_is": [
                         "transdimension:crystal_grove"
                       ]
                     },

@@ -65,12 +65,16 @@ import dev.goober.transdimension.client.entity.TransEndermanRenderer;
 import dev.goober.transdimension.client.entity.TransFairyModel;
 import dev.goober.transdimension.client.entity.TransFairyRenderer;
 import dev.goober.transdimension.client.entity.TransFishRenderer;
+import dev.goober.transdimension.client.herobrine.HerobrineClient;
+import dev.goober.transdimension.client.herobrine.HerobrineScreen;
 import dev.goober.transdimension.client.screen.MaddieDialogueScreen;
 import dev.goober.transdimension.client.wings.TransWingsLayer;
 import dev.goober.transdimension.client.wings.TransWingsModel;
 import dev.goober.transdimension.client.wings.WingAnimations;
 import dev.goober.transdimension.client.wings.WingPose;
 import dev.goober.transdimension.client.wings.WingsController;
+import dev.goober.transdimension.herobrine.HerobrineMenuPayload;
+import dev.goober.transdimension.herobrine.HerobrineSightingPayload;
 import dev.goober.transdimension.network.FairyCutscenePayload;
 import dev.goober.transdimension.network.FairyRescuePayload;
 import dev.goober.transdimension.network.OpenMaddieDialoguePayload;
@@ -194,6 +198,11 @@ public class TransDimensionClient implements ClientModInitializer {
 
 		ClientPlayNetworking.registerGlobalReceiver(OpenMaddieDialoguePayload.TYPE, (payload, context) ->
 				context.client().gui.setScreen(new MaddieDialogueScreen(payload.entityId(), payload.gifted())));
+		// Herobrine: drawn for this player alone when the server says so (never an entity), and the host's secret settings.
+		HerobrineClient.register();
+		ClientPlayNetworking.registerGlobalReceiver(HerobrineSightingPayload.TYPE, (payload, context) -> HerobrineClient.show(payload));
+		ClientPlayNetworking.registerGlobalReceiver(HerobrineMenuPayload.TYPE, (payload, context) ->
+				context.client().gui.setScreen(new HerobrineScreen(payload.settings())));
 		// The Fairy Realm cutscene: its subtitles, moving camera and hidden HUD.
 		ClientPlayNetworking.registerGlobalReceiver(FairyCutscenePayload.TYPE, (payload, context) -> FairyCutsceneOverlay.handle(payload));
 		// A Bottled Fairy saved you: it pops up on screen the way a totem does (the sparkles come from the server).

@@ -24,6 +24,7 @@ The realm has its own landscape (not a pink copy of the overworld's: its mountai
 | Sugar Dunes | Pale pink sand dunes, sandstone underneath, **white cacti** (some with pink flowers), dry sugar bushes and sugar grass, the odd crystal spike and camels. Villages grow here too. |
 | Lavender Marsh | Purple-tinted wetland with pools, vine-draped marsh trees, lavender flowers and frogs. |
 | Frosted Fields | Snowy pale-blue plains with frosted trees, ice spikes and frost flowers. Villages grow here too. |
+| Candy Cane Grove | Snowy fields of giant candy canes in the flag's stripes, with candy canes to pick everywhere. |
 | Crystal Grove | Blue grass, trans crystal spikes and clusters breaking through the surface, crystal-hung trees. |
 | Pastel Peaks | Snow-capped mountains with lilac grass. |
 | Trans Beach, Trans Ocean, Deep Trans Ocean | Blue water, dolphins and drowned. |
@@ -112,6 +113,9 @@ Minecraft 26.3's **abandoned camps**, brought back to 26.2 and made trans: a ten
   | Trans Macaron | Night Vision |
   | Trans Boba Tea | Dolphin's Grace; returns the bottle |
   | Trans Cake | Placeable and eaten slice by slice, like vanilla cake |
+  | Candy Cane | A quick sugar rush (Speed); picked in the Candy Cane Grove, and planted back by using it on the ground |
+
+- **Candy Cane Blocks**: the striped peppermint of the grove's giant candy canes. Break one for two to four candy canes (Silk Touch keeps the block); four candy canes make one.
 
 - **Intro cinematic.** On arriving in the Trans Realm, a starry indigo screen unfurls a waving trans flag, a heart pops in with sparkles, "Welcome to the Trans Realm" types itself out, and a little bell jingle plays.
 

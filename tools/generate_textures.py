@@ -4639,6 +4639,84 @@ def kira_spawn_egg(skin):
     return img
 
 
+# Candy canes in the flag's stripes: white, pink, white, blue, round and round.
+CANDY = [hexc("F7F2F4"), hexc("F5A9B8"), hexc("F7F2F4"), hexc("5BCEFA")]
+CANDY_SHADE = [hexc("DCD2D8"), hexc("D98A9C"), hexc("DCD2D8"), hexc("3FA9D6")]
+
+
+def candy_cane():
+    """A candy cane standing up with its hook at the top (the plant's cross texture, and the item's sprite): a two-pixel
+    stem from the bottom up, curving over to the right and a little way down, striped along its length, its right edge
+    shaded."""
+    img = new()
+    path = [(6.5, 15.5 - i * 0.25) for i in range(41)]               # the stem, bottom to top (y 15.5 to 5.5)
+    for i in range(1, 25):                                             # the hook: half a circle over to the right
+        a = math.pi * i / 24
+        path.append((9.0 - 2.5 * math.cos(a), 5.5 - 2.5 * math.sin(a)))
+    path += [(11.5, 5.5 + i * 0.25) for i in range(1, 5)]              # and a little way down
+    length = [0.0]
+    for (x0, y0), (x1, y1) in zip(path, path[1:]):
+        length.append(length[-1] + math.hypot(x1 - x0, y1 - y0))
+    for y in range(16):
+        for x in range(16):
+            cx, cy = x + 0.5, y + 0.5
+            best, along = min((math.hypot(cx - px, cy - py), length[i]) for i, (px, py) in enumerate(path))
+            if best <= 1.0:
+                stripe = int((along + cy * 0.3) / 1.6) % 4
+                shade = best > 0.55 and cx > 7.0
+                img.putpixel((x, y), (*(CANDY_SHADE if shade else CANDY)[stripe], 255))
+    return img
+
+
+def candy_cane_block():
+    """The giant canes' side: diagonal peppermint stripes, rounded off with a light edge on the left and shade on the right."""
+    img = new()
+    rng = random.Random(1225)
+    for y in range(16):
+        for x in range(16):
+            stripe = ((x + y) // 3) % 4
+            colour = CANDY_SHADE[stripe] if x >= 13 else CANDY[stripe]
+            if x <= 1 and stripe % 2 == 0:
+                colour = WHITE
+            img.putpixel((x, y), (*shade(colour, 1.0 + rng.uniform(-0.04, 0.03)), 255))
+    return img
+
+
+def candy_cane_block_top():
+    """A cut candy cane: a peppermint pinwheel of white wedges between pink and blue ones, in a pale rim."""
+    img = new()
+    for y in range(16):
+        for x in range(16):
+            dx, dy = x - 7.5, y - 7.5
+            r = math.hypot(dx, dy)
+            if r > 7.4:
+                colour = CANDY_SHADE[0]
+            else:
+                wedge = int((math.atan2(dy, dx) + math.pi) / (2 * math.pi) * 8 + r * 0.18) % 8
+                colour = CANDY[wedge % 4] if r > 1.2 else CANDY[0]
+            img.putpixel((x, y), (*colour, 255))
+    return img
+
+
+def herobrine_skin():
+    """Herobrine's skin, as the owner shared it (herobrineskin.png on main, saved as tools/art/herobrine_skin.png)."""
+    img = Image.open(os.path.join(HERE, "art", "herobrine_skin.png")).convert("RGBA")
+    assert img.size == (64, 64), "herobrine_skin.png must be a 64x64 skin"
+    return img
+
+
+def herobrine_eyes(skin):
+    """Just his eyes: the near-white pixels of the face (and of the hat layer's front), drawn full bright so they glow."""
+    eyes = new(64, 64)
+    for u, v in ((8, 8), (40, 8)):
+        for x in range(u, u + 8):
+            for y in range(v, v + 8):
+                r, g, b, a = skin.getpixel((x, y))
+                if a and min(r, g, b) >= 220:
+                    eyes.putpixel((x, y), (r, g, b, 255))
+    return eyes
+
+
 def cloud_bible():
     """The Cloud Bible: a white book bound in holy gold, its pages' edges showing at the side and bottom, with a little
     cloud on the cover in the flag's colours (blue over pink over white)."""
@@ -4908,6 +4986,13 @@ def round11_textures():
     yield "item/cloud_candy.png", cloud_candy(), None
     yield "item/cloud_bible.png", cloud_bible(), None
     yield "block/trans_torch.png", trans_torch(), None
+    yield "block/candy_cane.png", candy_cane(), CUTOUT
+    yield "item/candy_cane.png", candy_cane(), None
+    yield "block/candy_cane_block.png", candy_cane_block(), None
+    yield "block/candy_cane_block_top.png", candy_cane_block_top(), None
+    herobrine = herobrine_skin()
+    yield "entity/herobrine/herobrine.png", herobrine, None
+    yield "entity/herobrine/herobrine_eyes.png", herobrine_eyes(herobrine), None
     kira = kira_skin()
     yield "entity/kira/kira.png", kira, None
     yield "item/kira_spawn_egg.png", kira_spawn_egg(kira), None

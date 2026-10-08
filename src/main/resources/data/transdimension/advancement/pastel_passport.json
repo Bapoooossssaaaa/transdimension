@@ -384,6 +384,22 @@
           }
         ]
       }
+    },
+    "candy_cane_grove": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:location": {
+                "biomes": "transdimension:candy_cane_grove"
+              }
+            }
+          }
+        ]
+      }
     }
   },
   "display": {
@@ -470,6 +486,9 @@
     ],
     [
       "pink_deep_dark"
+    ],
+    [
+      "candy_cane_grove"
     ]
   ]
 }

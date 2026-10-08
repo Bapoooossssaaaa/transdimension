@@ -4,6 +4,11 @@ State of the mod for whoever picks it up next (person or AI). The README covers 
 
 ## Status
 
+- **Round 17 is written, not compiled yet** (nor are rounds 15 and 16):
+  - **Herobrine**, the owner's secret (see "Herobrine"). He is never an entity. Keep him out of the README: the owner's friend reads it, and the candy canes are the update's cover story.
+  - **Candy canes**: the Candy Cane Grove (a snowy biome taking half of the coldest, driest land), giant candy canes (`CandyCaneFeature`), candy canes to pick and eat (`CandyCanePlantBlock`, `ModItems.CANDY_CANE`) and the candy cane block.
+
+  See "Unverified APIs (round 17)".
 - Target: Minecraft Java **26.2**, Fabric Loader 0.19.5, Fabric API 0.161.0+26.2, Java 25. Mod id `transdimension`, package `dev.goober.transdimension`.
 - **Rounds 1 and 2 compiled and loaded.** The owner ran them on 26.2 next to Sodium, Iris and Xaero's maps. The first run hung on "Preparing for world creation" because the sky timeline repeated vanilla's time markers; commit 2e490ee fixed that.
 - **Round 3 compiles and runs**: the owner's screenshots show Maddie (in her new skin) and the wings in game.
@@ -121,6 +126,16 @@ Once the Trans Fairy has struck Maddie down (`FairyCutscene.maddieGone`), every 
 
 Her skin is `textures/entity/kira/kira.png`, from `generate_textures.py` `kira_skin()`. That's the owner's skin: `tools/art/kira_skin.png`, their `kiraskin.webp` from `main` saved as a PNG (a `kiraskintexture.png` at the repo's root would take its place). Without one the script draws a stand-in. The script warns if the skin has wide arms, since her model's are slim. Her spawn egg is her face from the skin, filling the whole egg.
 
+### Herobrine
+
+`herobrine/Herobrine` (server) and `client/herobrine/` (client). He is never an entity. The server picks, for each player the host chose, when and where he stands. It sends that player alone a `HerobrineSightingPayload`, and their client draws him straight from his skin as custom geometry (`SkinFigure`: textured boxes laid out like the player model, `RenderTypes.entityCutout`, lit by the world's light where he stands, with a full-bright eyes texture over his face). So nothing that lists entities finds him: minimap radars like Xaero's, F3's entity count, hitboxes, the player list. Other players' clients are never told.
+
+- **Settings** (`HerobrineSettings`, a persistent attachment on the Overworld, `ModAttachments.HEROBRINE`): on or off (off until saved), who sees him (other players / only me / everyone; "me" is whoever saved the settings), far away / behind you / either, day and night / only at night / only by day (daytime is when the day timeline's `monsters_burn` attribute is on), any weather / clear / rain / thunder, the Overworld only or anywhere, about every N minutes, how long he stays, how close you can get, gone when stared at, and a cave sound as he goes.
+- **The secret command** `/tdsettings` (`Herobrine.COMMAND`) needs the singleplayer/LAN host (`MinecraftServer#isSingleplayerOwner`) or an operator; nobody else's game is even sent it. It opens `HerobrineScreen` (literal English labels, kept out of the lang file). "Save and show him now" saves and makes him appear at once to everyone who sees him, and tells the host how many it reached.
+- **Sightings**: each eligible player gets one chance a second (on average one sighting every N minutes), never in their first minute online or within 30 seconds of the last one ending. A far sighting stands 8 to 44 blocks beyond the vanish distance, on the surface (or a cave floor near their level, if they're underground), with nothing solid between their eyes and his head. A behind sighting stands 3 to 6 blocks straight behind them.
+- **Vanishing** is the client's (`HerobrineClient#tick`): when they come within the vanish distance, after 1.5 seconds of looking straight at him (within about 7 degrees, if "stared at" is on), 6 ticks after they turn to face one behind them, or when the time's up. The cave sound is `SoundEvents.AMBIENT_CAVE`, played only on their client.
+- **Skin**: `tools/art/herobrine_skin.png` (the owner's `herobrineskin.png` from `main`), copied by `generate_textures.py` to `entity/herobrine/herobrine.png`, with `herobrine_eyes.png` made from its near-white face pixels.
+
 ### How the mobs work
 
 - **Trans fish** extend vanilla's `Cod` (schooling, flopping, bucketing) with their own model and bucket item.
@@ -227,6 +242,21 @@ Written after round 4 compiled. The first round-5 build failed only on `EntityTy
 | `FurnitureBlock`, `TransLampBlock` | `useWithoutItem(BlockState, Level, BlockPos, Player, BlockHitResult)` (confirmed by NeoForge's NoteBlock patch), `Block.UPDATE_ALL`, `MapColor.SNOW` | |
 | `ModBlocks` desert plants | `new CactusBlock(p) {}`, `new SugarCaneBlock(p) {}`, `new DryVegetationBlock(p) {}` (anonymous subclasses, so a protected constructor is fine; `DryVegetationBlock` is 1.21.5's rename of `DeadBushBlock`). NeoForge's 26.2 patches show both `canSurvive`s check `is(this)` plus the `supports_cactus`/`supports_sugar_cane` tags, so our own cacti and canes stack. | Register them with `::new` if the anonymous classes cause trouble. |
 | `TransDirtPathBlock` | extends `DirtPathBlock` (protected constructor), overriding `getStateForPlacement` and `tick(BlockState, ServerLevel, BlockPos, RandomSource)`; `Block.pushEntitiesUp(old, new, level, pos)` | Extend `Block` and copy vanilla's `DirtPathBlock` (shape, `canSurvive`, `updateShape`). `FlattenableBlockRegistry.register(Block, BlockState)` is confirmed in Fabric's source. |
+
+## Unverified APIs (round 17)
+
+Written while rounds 15 and 16 weren't compiled. Every touched file parses, and its imports were checked. Confirmed from Fabric's and NeoForge's 26.2 sources: `Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)` for `requires`, `MinecraftServer#isSingleplayerOwner(new NameAndId(GameProfile))`, `net.minecraft.world.attribute.EnvironmentAttributes` and `level.environmentAttributes().getValue(attribute, position)`.
+
+| Where | API | If it doesn't compile or work |
+| --- | --- | --- |
+| `Herobrine#conditionsHold` | `EnvironmentAttributes.MONSTERS_BURN` (the day timeline's `minecraft:gameplay/monsters_burn`) | Use the boolean attribute holding that id under its real name, or drop the day/night setting. |
+| `Herobrine#mayConfigure` | `Commands.hasPermission(...)` assigned to a `Predicate<CommandSourceStack>`, `CommandSourceStack#getPlayer()`, `Player#getGameProfile()` | Use `.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))` alone (operators only). |
+| `HerobrineSettings`, payloads | `StreamCodec.of(encoder, decoder)`, `StreamCodec#map`, `UUIDUtil.CODEC` | `CustomPacketPayload.codec(write, read)` does the same as `StreamCodec.of`. |
+| `HerobrineClient`, `SkinFigure` | `RenderTypes.entityCutout(Identifier)` with `submitCustomGeometry`, `Level#getBrightness(LightLayer, BlockPos)`, `Entity#getViewVector(float)`, `SoundEvents.AMBIENT_CAVE` (a `Holder`, hence `.value()`), `ClientLevel#playLocalSound(..., boolean)` | If `AMBIENT_CAVE` is a plain `SoundEvent`, drop `.value()`. |
+| `HerobrineScreen` | `Screen#extractBackground` called through `super`, `Button#setMessage` | Drop the `super` call (no blur behind the buttons). |
+| `CandyCanePlantBlock` | `VegetationBlock` (1.21.5's name for the old `BushBlock`): its constructor, `codec()` and `mayPlaceOn(BlockState, BlockGetter, BlockPos)` | Extend `DryVegetationBlock` like `DRY_SUGAR_BUSH` (it stands on dirt and sand, not snow). |
+| `ModItems.CANDY_CANE` | `Consumable.Builder#consumeSeconds(float)` | Remove it: candy canes then take as long as other food. |
+| `ModBlocks` | `SoundType.BAMBOO_SAPLING`, `SoundType.BONE_BLOCK` | Any other sound type. |
 
 ## Unverified APIs (round 15)
 

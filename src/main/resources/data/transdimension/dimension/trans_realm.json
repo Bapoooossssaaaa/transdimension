@@ -196,6 +196,60 @@
           }
         },
         {
+          "biome": "transdimension:candy_cane_grove",
+          "parameters": {
+            "temperature": [
+              -1.0,
+              -0.45
+            ],
+            "humidity": [
+              -1.0,
+              0.1
+            ],
+            "continentalness": [
+              -0.11,
+              0.3
+            ],
+            "erosion": [
+              -1.0,
+              1.0
+            ],
+            "weirdness": [
+              0.05,
+              1.0
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "transdimension:candy_cane_grove",
+          "parameters": {
+            "temperature": [
+              -1.0,
+              -0.45
+            ],
+            "humidity": [
+              -1.0,
+              0.1
+            ],
+            "continentalness": [
+              0.3,
+              1.0
+            ],
+            "erosion": [
+              -0.375,
+              1.0
+            ],
+            "weirdness": [
+              0.05,
+              1.0
+            ],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
           "biome": "transdimension:candy_floss_grove",
           "parameters": {
             "temperature": [
@@ -342,33 +396,6 @@
               0.1
             ],
             "continentalness": [
-              -0.11,
-              0.3
-            ],
-            "erosion": [
-              -1.0,
-              1.0
-            ],
-            "weirdness": [
-              0.05,
-              1.0
-            ],
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "transdimension:frosted_fields",
-          "parameters": {
-            "temperature": [
-              -1.0,
-              -0.45
-            ],
-            "humidity": [
-              -1.0,
-              0.1
-            ],
-            "continentalness": [
               0.3,
               1.0
             ],
@@ -379,33 +406,6 @@
             "weirdness": [
               -1.0,
               -0.05
-            ],
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
-        {
-          "biome": "transdimension:frosted_fields",
-          "parameters": {
-            "temperature": [
-              -1.0,
-              -0.45
-            ],
-            "humidity": [
-              -1.0,
-              0.1
-            ],
-            "continentalness": [
-              0.3,
-              1.0
-            ],
-            "erosion": [
-              -0.375,
-              1.0
-            ],
-            "weirdness": [
-              0.05,
-              1.0
             ],
             "depth": 0.0,
             "offset": 0.0

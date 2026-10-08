@@ -100,6 +100,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 
 import dev.goober.transdimension.TransDimension;
+import dev.goober.transdimension.block.CandyCanePlantBlock;
 import dev.goober.transdimension.block.CloudChestBlock;
 import dev.goober.transdimension.block.FairyAltarBlock;
 import dev.goober.transdimension.block.FairyJarBlock;
@@ -570,6 +571,15 @@ public final class ModBlocks {
 	/** The invisible marker in village houses that becomes the village's plush; see {@link PlushSpotBlock}. */
 	public static final Block PLUSH_SPOT = registerWithoutItem("plush_spot", PlushSpotBlock::new,
 			BlockBehaviour.Properties.of().noCollision().noLootTable().strength(-1.0F, 3600000.0F).noOcclusion());
+
+	// ---------------------------------------------------------------- the Candy Cane Grove
+	/** A candy cane sticking out of the ground; its item is the candy cane (ModItems.CANDY_CANE), eaten or planted. */
+	public static final Block CANDY_CANE = registerWithoutItem("candy_cane", CandyCanePlantBlock::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).noCollision().instabreak().sound(SoundType.BAMBOO_SAPLING)
+					.pushReaction(PushReaction.DESTROY));
+	/** Striped peppermint candy in the flag's colours, the stuff of the grove's giant canes (CandyCaneFeature). */
+	public static final Block CANDY_CANE_BLOCK = register("candy_cane_block", RotatedPillarBlock::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(1.0F).sound(SoundType.BONE_BLOCK));
 
 	// ---------------------------------------------------------------- bakery
 	public static final Block TRANS_CAKE = register("trans_cake", CakeBlock::new,

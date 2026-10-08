@@ -318,6 +318,11 @@ def generate_features():
         {"data": state("flag_lily"), "weight": 2}, {"data": state("pearl_daisy"), "weight": 2},
         {"data": state("pearl_snowdrop"), "weight": 2}, {"data": state("sky_bell"), "weight": 1}]}}})
     pf("frost_flowers", f"{NS}:frost_flowers", [{"type": "minecraft:rarity_filter", "chance": 2}] + blossoms + patch(24))
+    # Candy Cane Grove: giant striped candy canes (CandyCaneFeature, on grass like a tree) and candy canes to pick.
+    cf("giant_candy_cane", {"type": f"{NS}:candy_cane", "config": {}})
+    pf("giant_candy_canes", f"{NS}:giant_candy_cane", surface_trees(weighted_count([(1, 3), (2, 2), (3, 1)])))
+    cf("candy_cane_patch", {"type": "minecraft:simple_block", "config": {"to_place": simple(state("candy_cane"))}})
+    pf("candy_cane_patch", f"{NS}:candy_cane_patch", [{"type": "minecraft:count", "count": 3}] + blossoms + patch(12))
     # Trans petals carpet meadows lightly and forests thickly (vanilla's wildflowers and cherry petals, re-coloured).
     cf("trans_petals", {"type": "minecraft:simple_block", "config": {"to_place": petals_provider()}})
     petal_spots = lambda below, above: [{"type": "minecraft:noise_threshold_count", "above_noise": above, "below_noise": below,
@@ -847,6 +852,14 @@ def generate_biomes():
           monsters=[m if m["type"] != "minecraft:skeleton" else spawn("minecraft:stray", 80, 4, 4) for m in MONSTERS]
           + [spawn("minecraft:skeleton", 20, 4, 4)])
 
+    # Candy Cane Grove: snowy fields of giant candy canes in the flag's stripes, with candy canes to pick everywhere.
+    biome("candy_cane_grove", temperature=-0.2, downfall=0.6, grass="#e6f4ff", foliage="#f7c6d4", water="#9be3fc", water_fog="#3d8fc0",
+          sky="#d4e4ff", fog="#fde6ef", music_sound="minecraft:music.overworld.grove",
+          particles=particles("minecraft:snowflake", 0.003),
+          features=land(f"{NS}:giant_candy_canes", f"{NS}:candy_cane_patch", f"{NS}:frost_flowers", f"{NS}:trans_grass_taiga",
+                        top=["minecraft:freeze_top_layer"]),
+          creatures=[spawn("minecraft:rabbit", 8, 2, 3), spawn("minecraft:fox", 4, 2, 4), spawn("silly_cat", 4, 1, 1)])
+
     biome("crystal_grove", temperature=0.5, downfall=0.4, grass="#8ed8f8", foliage="#f5a9b8", water="#a88cf5", water_fog="#4a3a8f",
           sky="#9fb8ff", fog="#d9c8ff", music_sound="minecraft:music.overworld.flower_forest",
           particles=particles("minecraft:end_rod", 0.0025),
@@ -1015,7 +1028,7 @@ FEATURE_RANK = [
     # springs
     f"{NS}:spring_trans_water", f"{NS}:spring_pink_lava",
     # vegetation: big things first, then flowers, grass and small decorations
-    f"{NS}:trans_crystal_spikes", f"{NS}:frosted_ice_spikes", f"{NS}:trans_crystal_spikes_rare",
+    f"{NS}:trans_crystal_spikes", f"{NS}:frosted_ice_spikes", f"{NS}:giant_candy_canes", f"{NS}:trans_crystal_spikes_rare",
     f"{NS}:trees_trans_meadow", f"{NS}:trees_blossom_forest", f"{NS}:trees_heartwood_grove", f"{NS}:trees_crystal_grove",
     f"{NS}:trees_frosted_fields", f"{NS}:trees_lavender_marsh", f"{NS}:trans_bushes",
     f"{NS}:heart_trees", f"{NS}:heart_trees_rare",
@@ -1028,7 +1041,7 @@ FEATURE_RANK = [
     f"{NS}:trans_coral_reefs", f"{NS}:trans_coral_reefs_dense", f"{NS}:trans_coral_reefs_rare", f"{NS}:trans_seagrass_warm", f"{NS}:trans_seagrass_deep", f"{NS}:trans_seagrass_river",
     f"{NS}:trans_seagrass_swamp", f"{NS}:trans_sea_pickles", f"{NS}:trans_kelp_warm", f"{NS}:trans_kelp_cold",
     f"{NS}:pride_blossoms_dense", f"{NS}:pride_blossoms", f"{NS}:trans_flowers", f"{NS}:meadow_flowers", f"{NS}:forest_flowers", f"{NS}:heartwood_flowers",
-    f"{NS}:crystal_flowers", f"{NS}:candy_flowers", f"{NS}:lavender_flowers", f"{NS}:frost_flowers",
+    f"{NS}:crystal_flowers", f"{NS}:candy_flowers", f"{NS}:lavender_flowers", f"{NS}:frost_flowers", f"{NS}:candy_cane_patch",
     f"{NS}:pride_peonies", f"{NS}:tall_trans_flowers_dense", f"{NS}:tall_trans_flowers", f"{NS}:field_flowers",
     f"{NS}:star_blooms_dense", f"{NS}:star_blooms", f"{NS}:forget_me_nots", f"{NS}:sky_bell_carpets", f"{NS}:heart_blooms", f"{NS}:trans_petals_forest", f"{NS}:trans_petals_meadow",
     f"{NS}:trans_crystal_clusters_surface",
@@ -1129,6 +1142,8 @@ def surface_rule():
                                            cond(STEEP, STONE))),
         # Frosted Fields: drifts of snow blocks (where ice spikes grow) between snowy grass.
         cond(biome_is("frosted_fields"), cond(noise("minecraft:surface", 0.35), block("minecraft:snow_block"))),
+        # Candy Cane Grove: smaller drifts of snow.
+        cond(biome_is("candy_cane_grove"), cond(noise("minecraft:surface", 0.45), block("minecraft:snow_block"))),
         # Crystal Grove: rocky patches of trans stone.
         cond(biome_is("crystal_grove"), cond(noise("minecraft:surface", 0.45), STONE)),
         # Everywhere else: grass above the water line, sand under water.
@@ -1217,7 +1232,7 @@ def land_biome(c, t, h, e, w):
     if c >= 1 and e == 0:
         return "pastel_peaks"
     if t == 0:
-        return "pearlwood_forest" if h >= 2 else "frosted_fields"
+        return "pearlwood_forest" if h >= 2 else "candy_cane_grove" if w >= 3 else "frosted_fields"
     if t == 3:
         return "sugar_dunes" if h <= 1 else "heartwood_grove"
     if h == 3:

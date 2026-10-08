@@ -1947,6 +1947,7 @@ BIOMES = {
     "twilight_thicket": "Twilight Thicket", "candy_floss_grove": "Candy Floss Grove", "pastel_lush_caves": "Pastel Lush Caves",
     "pride_flower_fields": "Pride Flower Fields", "moonlit_meadow": "Moonlit Meadow", "gumdrop_glade": "Gumdrop Glade",
     "pastel_reef": "Pastel Reef", "blooming_caverns": "Blooming Caverns", "pink_deep_dark": "Pink Deep Dark",
+    "candy_cane_grove": "Candy Cane Grove",
 }
 
 
@@ -2442,6 +2443,31 @@ def generate_round15():
     })
 
 
+def generate_round17():
+    """Candy canes from the Candy Cane Grove: the candy cane (ModBlocks.CANDY_CANE in the ground, a cross like a flower;
+    ModItems.CANDY_CANE in the hand, a snack that plants itself back) and the candy cane block of the giant canes
+    (CandyCaneFeature), which breaks into two to four candy canes unless mined with Silk Touch. Four candy canes make one."""
+    blockstate("candy_cane", {"variants": {"": {"model": f"{NS}:block/candy_cane"}}})
+    model("candy_cane", {"parent": "minecraft:block/cross", "textures": {"cross": block_tex("candy_cane")}})
+    simple_item("candy_cane", "Candy Cane")
+    name("candy_cane", "Candy Cane")
+    loot("candy_cane", loot_self("candy_cane"))
+    blockstate("candy_cane_block", from_template("cherry_log", "cherry_log", "candy_cane_block"))
+    textures = {"end": block_tex("candy_cane_block_top"), "side": block_tex("candy_cane_block")}
+    model("candy_cane_block", {"parent": "minecraft:block/cube_column", "textures": textures})
+    for axis in "xyz":
+        model(f"candy_cane_block_{axis}", {"parent": f"minecraft:block/cube_column_uv_locked_{axis}", "textures": textures})
+    item_def("candy_cane_block", f"{NS}:block/candy_cane_block")
+    name("candy_cane_block", "Candy Cane Block")
+    mine("candy_cane_block", "pickaxe")
+    loot("candy_cane_block", table("candy_cane_block", [{"entries": [{"type": "minecraft:alternatives", "children": [
+        {"type": "minecraft:item", "conditions": [SILK], "name": rid("candy_cane_block")},
+        {"type": "minecraft:item", "name": rid("candy_cane"), "functions": [
+            {"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 2.0, "max": 4.0}},
+            {"function": "minecraft:explosion_decay"}]}]}], "rolls": 1.0}]))
+    recipe("candy_cane_block", shaped("candy_cane_block", ["##", "##"], {"#": "candy_cane"}))
+
+
 # What Kira says once you have Maddie's gifts, picked at random (one per talk).
 KIRA_LINES = [
     "Hi! I'm Kira. I'm looking after Maddie's house now.",
@@ -2794,6 +2820,7 @@ def main():
     generate_round12()
     generate_round14()
     generate_round15()
+    generate_round17()
     generate_sounds()
     generate_advancements()
     generate_round9_advancements()

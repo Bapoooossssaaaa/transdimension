@@ -243,6 +243,15 @@ public final class ModItems {
 					.onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(MobEffects.LEVITATION, 20 * 3, 1), 1.0F))
 					.onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 20 * 15, 0), 1.0F))
 					.build()).component(DataComponents.LORE, lore("item.transdimension.cloud_candy.lore")));
+	// ---------------------------------------------------------------- the Candy Cane Grove
+	/**
+	 * A candy cane in the flag's stripes, picked in the Candy Cane Grove: a quick sweet snack with a short sugar rush (Speed
+	 * for six seconds). Used on the ground it plants itself back (it's the candy cane block's item, as glow berries are
+	 * cave vines').
+	 */
+	public static final Item CANDY_CANE = register("candy_cane", properties -> new BlockItem(ModBlocks.CANDY_CANE, properties),
+			new Item.Properties().food(food(2, 0.2F, false), Consumables.defaultFood().consumeSeconds(0.8F)
+					.onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(MobEffects.SPEED, 20 * 6, 0), 1.0F)).build()));
 	/** A bucket of the heavenly ruins' holy water. */
 	public static final Item HOLY_WATER_BUCKET = register("holy_water_bucket", properties -> new BucketItem(ModFluids.HOLY_WATER, properties),
 			new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1));
