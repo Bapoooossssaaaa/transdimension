@@ -173,6 +173,37 @@
           ]
         }
       ]
+    },
+    {
+      "rolls": 1.0,
+      "entries": [
+        {
+          "type": "minecraft:empty",
+          "weight": 11
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:map",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "minecraft:exploration_map",
+              "destination": "transdimension:on_pink_ancient_city_maps",
+              "decoration": "minecraft:red_x",
+              "zoom": 2,
+              "search_radius": 100,
+              "skip_existing_chunks": false
+            },
+            {
+              "function": "minecraft:set_name",
+              "name": {
+                "translate": "filled_map.transdimension.pink_ancient_city"
+              },
+              "target": "item_name"
+            }
+          ]
+        }
+      ]
     }
   ],
   "random_sequence": "transdimension:chests/trans_house"

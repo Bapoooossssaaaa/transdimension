@@ -1649,7 +1649,15 @@ def generate_creatures():
             entry("gumdrop", 15, 2, 5), entry("prism_shard", 15, 2, 6), entry("minecraft:redstone", 15, 1, 4),
             entry("minecraft:coal", 15, 1, 4), entry("star_bloom", 5, 1, 2)]},
         {"rolls": 3.0, "entries": [entry("minecraft:bone", 10, 1, 8), entry("minecraft:gunpowder", 10, 1, 8),
-                                   entry("minecraft:rotten_flesh", 10, 1, 8), entry("minecraft:string", 10, 1, 8)]}],
+                                   entry("minecraft:rotten_flesh", 10, 1, 8), entry("minecraft:string", 10, 1, 8)]},
+        # One dungeon chest in four holds a map to the nearest pink ancient city (the candle ritual's city; its structure
+        # tag is written by generate_ancient_city.py). The destination is the tag WITHOUT a '#'.
+        {"rolls": 1.0, "entries": [{"type": "minecraft:empty", "weight": 3}, {
+            "type": "minecraft:item", "name": "minecraft:map", "weight": 1, "functions": [
+                {"function": "minecraft:exploration_map", "destination": f"{NS}:on_pink_ancient_city_maps",
+                 "decoration": "minecraft:red_x", "zoom": 2, "search_radius": 100, "skip_existing_chunks": False},
+                {"function": "minecraft:set_name", "name": {"translate": f"filled_map.{NS}.pink_ancient_city"},
+                 "target": "item_name"}]}]}],
         "random_sequence": f"{NS}:chests/trans_dungeon"})
 
     # Fairies are much nicer met than fought (they give gifts), but they do leave some glitter behind.
@@ -1898,6 +1906,7 @@ def generate_misc():
         "entity.transdimension.trans_magic_bolt": "Trans Magic",
         "item.transdimension.trans_wand.lore": "Shoots sparkly hearts of trans magic",
         "filled_map.transdimension.egg_house": "Map to Maddie's Egg House",
+        "filled_map.transdimension.pink_ancient_city": "Map to a Pink Ancient City",
         "item.transdimension.trans_wings.lore": "Crouch to charge, jump to launch",
         "item.transdimension.trans_wings.lore2": "Jump while gliding to flap",
         "item.transdimension.trans_wings.lore3": "Crouch while gliding to hover",

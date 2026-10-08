@@ -349,17 +349,53 @@ def generate_processors():
     write(os.path.join(DATA, NS, "tags", "block", f"{CITY}_replaceable.json"), {"values": REPLACEABLE})
 
 
+# The city is needed for the candle ritual (the way to the Cloud Realm), so it's commoner than vanilla's (round 20):
+# it starts 5 blocks deeper (its floor at y -56, still clear of the bedrock), where more of the ground is Pink Deep Dark
+# (only there can a city start), and its tries are 16 chunks apart instead of 24. A try lands somewhere in the first 4
+# chunks of its 16, so two cities' middles are never under 13 chunks apart (a city reaches 116 blocks from its middle).
+START_HEIGHT = -32
+SPACING = 16
+SEPARATION = 12
+MAP_TAG = "on_pink_ancient_city_maps"
+
+
 def generate_structure():
     s = vanilla("structure/ancient_city.json")
     s["biomes"] = f"#{T}has_structure/{CITY}"
     s["start_pool"] = T + CITY + "/city_center"
+    s["start_height"] = {"absolute": START_HEIGHT}
     # Monsters stay out of the city (as in vanilla), but fairies and sculk people may wander in.
     s["spawn_overrides"] = {k: v for k, v in s["spawn_overrides"].items() if k not in ("ambient", "creature")}
     write(os.path.join(DATA, NS, "worldgen", "structure", f"{CITY}.json"), s)
     write(os.path.join(DATA, NS, "worldgen", "structure_set", "pink_ancient_cities.json"), {
-        "placement": {"type": "minecraft:random_spread", "salt": 20083233, "separation": 8, "spacing": 24},
+        "placement": {"type": "minecraft:random_spread", "salt": 20083233, "separation": SEPARATION, "spacing": SPACING},
         "structures": [{"structure": T + CITY, "weight": 1}]})
     write(os.path.join(DATA, NS, "tags", "worldgen", "biome", "has_structure", f"{CITY}.json"), {"values": [T + "pink_deep_dark"]})
+    # Maps to the nearest city (generate_data.py puts them in trans dungeon chests; maps_in_village_chests below).
+    write(os.path.join(DATA, NS, "tags", "worldgen", "structure", f"{MAP_TAG}.json"), {"values": [T + CITY]})
+
+
+def city_map(weight):
+    """A loot entry: a map to the nearest pink ancient city. Its destination is the structure tag WITHOUT a '#'
+    (with one, 26.2 can't read the loot table at all)."""
+    return {"type": "minecraft:item", "name": "minecraft:map", "weight": weight, "functions": [
+        {"function": "minecraft:exploration_map", "destination": T + MAP_TAG, "decoration": "minecraft:red_x",
+         "zoom": 2, "search_radius": 100, "skip_existing_chunks": False},
+        {"function": "minecraft:set_name", "name": {"translate": f"filled_map.{NS}.{CITY}"}, "target": "item_name"}]}
+
+
+def maps_in_village_chests():
+    """One trans village house chest in twelve also holds a map to the nearest pink ancient city. generate_villages.py
+    writes that chest's loot table; this (like generate_egg_house.py's Egg House map) adds its own pool to it, so run it
+    again after generate_villages.py."""
+    path = os.path.join(DATA, NS, "loot_table", "chests", "trans_house.json")
+    with open(path, encoding="utf-8") as f:
+        table = json.load(f)
+    mine = {T + MAP_TAG, f"#{T}{MAP_TAG}"}
+    table["pools"] = [p for p in table["pools"]
+                      if not any(fn.get("destination") in mine for e in p["entries"] for fn in e.get("functions", []))]
+    table["pools"].append({"rolls": 1.0, "entries": [{"type": "minecraft:empty", "weight": 11}, city_map(1)]})
+    write(path, table)
 
 
 # ============================================================================================ loot
@@ -393,6 +429,7 @@ def main():
     generate_pools()
     generate_processors()
     generate_structure()
+    maps_in_village_chests()
     generate_loot()
     print(f"Pink ancient city: {n} templates")
 

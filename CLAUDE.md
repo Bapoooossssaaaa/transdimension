@@ -22,7 +22,7 @@ Most assets and data are written by Python scripts. Change the script, rerun it,
 6. `tools/generate_fairy_realm.py`: the Fairy Sanctum and the Fairy Realm's arena island (its `ARENA_*` numbers must match `FairyRealm.java`)
 7. `tools/generate_camps.py`: trans camps (26.3's abandoned camp, converted from `tools/vanilla_extra/structures/abandoned_camp/`)
 8. `tools/generate_mermaid_ruins.py`: the mermaid ruins under the realm's seas
-9. `tools/generate_ancient_city.py`: the pink ancient city (vanilla's, converted from `tools/vanilla_extra/`; its ritual positions must match `SculkRitual.java`)
+9. `tools/generate_ancient_city.py`: the pink ancient city (vanilla's, converted from `tools/vanilla_extra/`; its ritual positions must match `SculkRitual.java`) and its maps in village house chests (rerun after `generate_villages.py`)
 10. `tools/generate_heavenly_ruins.py`: the Cloud Realm's heavenly ruins and their holy loot (its `FOUNDATION` must match `HeavenlyRuinFeature.java`)
 11. `tools/validate_resources.py <mcmeta>/registries/data.json`: must report 0 errors
 
@@ -47,7 +47,7 @@ The cloud environment can't download Minecraft or Fabric, so **the owner builds 
 
 ## Status (latest first)
 
-- **Round 20 is data only (worldgen)**: the realm's caves placed like vanilla's (surface biomes at depth 0 and 1, cave biomes in vanilla-like ranges: mostly plain caves now, Blooming Caverns rare), a new Frosted Caves biome, more ores (`ORE_BOOST`) and trans crystal ore as common as diamonds in every biome. HANDOFF's status explains the cause and the numbers; README says how to reset just the Trans Realm.
+- **Round 20 is data only (worldgen)**: the realm's caves placed like vanilla's (surface biomes at depth 0 and 1, cave biomes in vanilla-like ranges: mostly plain caves now, Blooming Caverns rare), a new Frosted Caves biome, more ores (`ORE_BOOST`) and trans crystal ore as common as diamonds in every biome; pink ancient cities commoner than before (more Pink Deep Dark at the bottom, deeper start, closer spacing) with maps to them in dungeon and village chests. HANDOFF's status explains the cause and the numbers; README says how to reset just the Trans Realm.
 - **Round 19 is written, not compiled yet**: Kira's own dialogue in Maddie's speech box (`KIRA_DIALOGUE`; Maddie was her girlfriend), time doors whose walkers step out of their face, and Maddie pruned instead of shot (lifted, touched by the fairy's wand, coming apart into the flag's light: `FairyCutscene#prune`, `client/PruneEffect`). HANDOFF's "Unverified APIs (round 19)".
 - **Round 18 is written, not compiled yet**: Herobrine made subtle (as far off as they can see, half hidden, appears only off screen, vanishes by what's on screen, saner defaults) and noises behind the chosen players with nothing there (`HerobrineSoundPayload`); the Holy Bow (`item/HolyBowItem`, two arrows a shot) in the heavenly ruins' loot. HANDOFF's "Herobrine" and "Unverified APIs (round 18)".
 - **Round 17 is written, not compiled yet**: Herobrine (the host's secret: never an entity, drawn only for the players chosen; `/tdsettings`), and candy canes with the Candy Cane Grove (the update's cover story). **Herobrine stays out of the README**: the owner's friend reads it. HANDOFF's "Herobrine" and "Unverified APIs (round 17)".
