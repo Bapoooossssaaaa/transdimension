@@ -4,7 +4,7 @@
     "type": "minecraft:cache_2d",
     "argument": {
       "type": "minecraft:shift_b",
-      "argument": "transdimension:trans/offset"
+      "argument": "transdimension:realm/offset"
     }
   }
 }

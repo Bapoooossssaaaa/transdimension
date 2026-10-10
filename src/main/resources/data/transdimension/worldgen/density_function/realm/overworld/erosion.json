@@ -2,10 +2,10 @@
   "type": "minecraft:flat_cache",
   "argument": {
     "type": "minecraft:shifted_noise",
-    "noise": "transdimension:trans/erosion",
-    "shift_x": "transdimension:trans/shift_x",
+    "noise": "transdimension:realm/erosion",
+    "shift_x": "transdimension:realm/shift_x",
     "shift_y": 0.0,
-    "shift_z": "transdimension:trans/shift_z",
+    "shift_z": "transdimension:realm/shift_z",
     "xz_scale": 0.25,
     "y_scale": 0.0
   }

@@ -9,17 +9,17 @@
         "type": "minecraft:mul",
         "argument1": {
           "type": "minecraft:add",
-          "argument1": "transdimension:trans/overworld/depth",
+          "argument1": "transdimension:realm/overworld/depth",
           "argument2": {
             "type": "minecraft:flat_cache",
             "argument": {
               "type": "minecraft:mul",
-              "argument1": "transdimension:trans/overworld/jaggedness",
+              "argument1": "transdimension:realm/overworld/jaggedness",
               "argument2": {
                 "type": "minecraft:half_negative",
                 "argument": {
                   "type": "minecraft:noise",
-                  "noise": "transdimension:trans/jagged",
+                  "noise": "transdimension:realm/jagged",
                   "xz_scale": 1500.0,
                   "y_scale": 0.0
                 }
@@ -27,9 +27,9 @@
             }
           }
         },
-        "argument2": "transdimension:trans/overworld/factor"
+        "argument2": "transdimension:realm/overworld/factor"
       }
     }
   },
-  "argument2": "transdimension:trans/overworld/base_3d_noise"
+  "argument2": "transdimension:realm/overworld/base_3d_noise"
 }

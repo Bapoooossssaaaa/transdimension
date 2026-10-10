@@ -8,7 +8,7 @@
       "argument1": -0.35000000000000003,
       "argument2": {
         "type": "minecraft:noise",
-        "noise": "transdimension:trans/spaghetti_2d_thickness",
+        "noise": "transdimension:realm/spaghetti_2d_thickness",
         "xz_scale": 2.0,
         "y_scale": 1.0
       }

@@ -1,5 +1,27 @@
 {
   "values": [
-    "transdimension:pink_deep_dark"
+    "transdimension:blooming_caverns",
+    "transdimension:bluebell_woods",
+    "transdimension:candy_cane_grove",
+    "transdimension:candy_floss_grove",
+    "transdimension:crystal_caves",
+    "transdimension:crystal_grove",
+    "transdimension:frosted_caves",
+    "transdimension:frosted_fields",
+    "transdimension:gumdrop_glade",
+    "transdimension:heartwood_grove",
+    "transdimension:lavender_marsh",
+    "transdimension:moonlit_meadow",
+    "transdimension:pastel_lush_caves",
+    "transdimension:pastel_peaks",
+    "transdimension:pearlwood_forest",
+    "transdimension:pink_deep_dark",
+    "transdimension:pride_flower_fields",
+    "transdimension:sugar_dunes",
+    "transdimension:trans_beach",
+    "transdimension:trans_forest",
+    "transdimension:trans_meadow",
+    "transdimension:trans_river",
+    "transdimension:twilight_thicket"
   ]
 }

@@ -1,5 +1,6 @@
 """
-Writes the pink ancient city: vanilla 26.2's ancient city rebuilt for the Trans Realm's pink deep dark.
+Writes the pink ancient city: vanilla 26.2's ancient city rebuilt for the Trans Realm, deep under any of its land (not
+only under its pink deep dark, as vanilla's are only in the deep dark: see SPACING).
 
   * It's built from the realm's own blocks: trans deepslate (bricks, tiles, cobbled, polished, chiseled, with their
     stairs, slabs and walls), a gate framed in pink reinforced trans deepslate, and pink wool and carpet everywhere
@@ -27,7 +28,9 @@ Outputs (under src/main/resources/data/transdimension):
     tags/worldgen/biome/has_structure/pink_ancient_city.json, tags/block/pink_ancient_city_replaceable.json
     loot_table/chests/pink_ancient_city.json, loot_table/chests/pink_ancient_city_ice_box.json
 
-    python3 tools/generate_ancient_city.py      (needs: pip install nbtlib)
+    python3 tools/generate_ancient_city.py      (needs: pip install nbtlib; run generate_worldgen.py and
+                                                 generate_villages.py first: it reads the realm's biomes and adds
+                                                 maps to the village chests)
 """
 import gzip
 import io
@@ -349,13 +352,25 @@ def generate_processors():
     write(os.path.join(DATA, NS, "tags", "block", f"{CITY}_replaceable.json"), {"values": REPLACEABLE})
 
 
-# Exactly as rare as vanilla's ancient cities, on the owner's word: vanilla's start height (its floor at y -51) and
-# vanilla's spacing (a try every 24 chunks, at least 8 apart), in the Pink Deep Dark, placed like vanilla's deep dark.
-# Maps to them (city_map) are this mod's own addition, so the candle ritual's city can always be found.
+# Round 21: the cities fit the realm's own terrain. Vanilla's ancient cities only start where their deep dark is, deep
+# under tall mountains, and how many of those the realm's hills and valleys happen to make is luck. Pink ancient cities
+# start under any land instead (every realm biome but the seas: CITY_BIOMES), at vanilla's depth (the floor at y -51,
+# deep under hills and valleys alike). As there's land at about three tries in five, the tries are further apart than
+# vanilla's (a try every 56 chunks, at least 20 apart) to keep them about as rare as vanilla's ancient cities, as the
+# owner wants. Maps to them (city_map) are this mod's own addition, so the candle ritual's city can always be found.
 START_HEIGHT = -27
-SPACING = 24
-SEPARATION = 8
+SPACING = 56
+SEPARATION = 20
 MAP_TAG = "on_pink_ancient_city_maps"
+SEAS = ("deep_trans_ocean", "trans_ocean", "pastel_reef")
+
+
+def city_biomes():
+    """Every biome of the Trans Realm (from the dimension generate_worldgen.py writes) but the seas."""
+    with open(os.path.join(DATA, NS, "dimension", "trans_realm.json"), encoding="utf-8") as f:
+        realm = json.load(f)
+    names = sorted({b["biome"] for b in realm["generator"]["biome_source"]["biomes"]})
+    return [n for n in names if n.split(":", 1)[1] not in SEAS]
 
 
 def generate_structure():
@@ -369,7 +384,7 @@ def generate_structure():
     write(os.path.join(DATA, NS, "worldgen", "structure_set", "pink_ancient_cities.json"), {
         "placement": {"type": "minecraft:random_spread", "salt": 20083233, "separation": SEPARATION, "spacing": SPACING},
         "structures": [{"structure": T + CITY, "weight": 1}]})
-    write(os.path.join(DATA, NS, "tags", "worldgen", "biome", "has_structure", f"{CITY}.json"), {"values": [T + "pink_deep_dark"]})
+    write(os.path.join(DATA, NS, "tags", "worldgen", "biome", "has_structure", f"{CITY}.json"), {"values": city_biomes()})
     # Maps to the nearest city (generate_data.py puts them in trans dungeon chests; maps_in_village_chests below).
     write(os.path.join(DATA, NS, "tags", "worldgen", "structure", f"{MAP_TAG}.json"), {"values": [T + CITY]})
 

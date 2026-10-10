@@ -24,7 +24,8 @@ import dev.goober.transdimension.registry.ModParticles;
 
 /**
  * The pink deep dark: the Trans Realm's deep dark, all in pink, under its mountains (biome
- * {@code transdimension:pink_deep_dark}, made by tools/generate_worldgen.py; its cities by tools/generate_ancient_city.py).
+ * {@code transdimension:pink_deep_dark}, made by tools/generate_worldgen.py). The pink ancient cities
+ * (tools/generate_ancient_city.py) start under any of the realm's land, not only in here.
  *
  * <ul>
  * <li>A pink sculk catalyst within {@link #CATALYST_REACH} blocks of a death blooms, and pink sculk spreads where the

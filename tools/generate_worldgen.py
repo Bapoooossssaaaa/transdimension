@@ -587,33 +587,33 @@ def generate_features():
     pf("trans_crystal_geode", f"{NS}:trans_crystal_geode", geode(28, 30))
     pf("trans_crystal_geode_common", f"{NS}:trans_crystal_geode", geode(10, 50))
 
-    # ---- ores: trans crystals are about as common as diamonds and in the same deep band (vanilla's diamond placements,
-    # a little smaller), in every biome, with a few small veins higher up everywhere so caving turns some up too (round 20:
-    # before, they were rarer than diamonds and hard to find at all). Crystal Groves, Pastel Peaks and the Crystal Caves
-    # get extra veins higher up. Geodes and spikes are pastel prism.
+    # ---- ores: trans crystal ore is diamond ore's twin (round 21, on the owner's word): vanilla's four diamond placements
+    # (small veins, medium ones low down, a rare large one and buried ones, same sizes and heights), boosted like the
+    # realm's diamonds (ORE_BOOST), in every biome. On top of that, veins higher up (y -32 to 64) that show in cave walls,
+    # with more in the Crystal Groves, Pastel Peaks and Crystal Caves. Geodes and spikes are pastel prism.
     def crystal_ore(name, size, discard):
         cf(name, {"type": "minecraft:ore", "config": {"discard_chance_on_air_exposure": discard, "size": size, "targets": [
             {"state": state("trans_crystal_ore"), "target": {"predicate_type": "minecraft:tag_match", "tag": f"{NS}:trans_stone_ore_replaceables"}},
             {"state": state("trans_deepslate_crystal_ore"),
              "target": {"predicate_type": "minecraft:tag_match", "tag": f"{NS}:trans_deepslate_ore_replaceables"}}]}})
-    crystal_ore("ore_trans_crystal_small", 4, 0.5)
-    crystal_ore("ore_trans_crystal_buried", 7, 1.0)
-    crystal_ore("ore_trans_crystal_large", 10, 0.7)
-    crystal_ore("ore_trans_crystal_exposed", 3, 0.0)
     generate_vanilla_ores()
-    deep = {"type": "minecraft:height_range", "height": {"type": "minecraft:trapezoid", "max_inclusive": {"above_bottom": 80},
-                                                         "min_inclusive": {"above_bottom": -80}}}
-    pf("ore_trans_crystal", f"{NS}:ore_trans_crystal_small", [{"type": "minecraft:count", "count": 7}, {"type": "minecraft:in_square"}, deep, {"type": "minecraft:biome"}])
-    pf("ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_buried", [{"type": "minecraft:count", "count": 4}, {"type": "minecraft:in_square"}, deep, {"type": "minecraft:biome"}])
-    pf("ore_trans_crystal_large", f"{NS}:ore_trans_crystal_large", [{"type": "minecraft:rarity_filter", "chance": 8}, {"type": "minecraft:in_square"}, deep, {"type": "minecraft:biome"}])
-    pf("ore_trans_crystal_middle", f"{NS}:ore_trans_crystal_exposed", [
-        {"type": "minecraft:count", "count": 4}, {"type": "minecraft:in_square"},
-        {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "max_inclusive": {"absolute": 48}, "min_inclusive": {"absolute": -16}}},
-        {"type": "minecraft:biome"}])
-    pf("ore_trans_crystal_extra", f"{NS}:ore_trans_crystal_small", [
-        {"type": "minecraft:count", "count": 6}, {"type": "minecraft:in_square"},
-        {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "max_inclusive": {"absolute": 48}, "min_inclusive": {"absolute": -32}}},
-        {"type": "minecraft:biome"}])
+    for diamond, crystal in (("ore_diamond", "ore_trans_crystal"), ("ore_diamond_medium", "ore_trans_crystal_medium"),
+                             ("ore_diamond_large", "ore_trans_crystal_large"), ("ore_diamond_buried", "ore_trans_crystal_deep")):
+        with open(os.path.join(VANILLA_ORES, "placed", diamond + ".json"), encoding="utf-8") as f:
+            placed = json.load(f)
+        vein = placed["feature"].split(":", 1)[1]
+        with open(os.path.join(VANILLA_ORES, "configured", vein + ".json"), encoding="utf-8") as f:
+            config = json.load(f)["config"]
+        vein = vein.replace("diamond", "trans_crystal")
+        crystal_ore(vein, config["size"], config["discard_chance_on_air_exposure"])
+        pf(crystal, f"{NS}:{vein}", boosted(diamond, placed["placement"]))
+    crystal_ore("ore_trans_crystal_exposed", 5, 0.0)
+    middle = lambda count: [{"type": "minecraft:count", "count": count}, {"type": "minecraft:in_square"},
+                            {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "max_inclusive": {"absolute": 64},
+                                                                          "min_inclusive": {"absolute": -32}}},
+                            {"type": "minecraft:biome"}]
+    pf("ore_trans_crystal_middle", f"{NS}:ore_trans_crystal_exposed", middle(8))
+    pf("ore_trans_crystal_extra", f"{NS}:ore_trans_crystal_small", middle(10))
 
     # ---- rocks
     cf("trans_boulder", {"type": "minecraft:block_blob", "config": {
@@ -727,10 +727,13 @@ def generate_vanilla_ores():
     copy_vanilla_features(VANILLA_CAVE_VINES)
 
 
-# Round 20: the realm's ores are more plentiful than vanilla's: each vanilla ore placement's count is multiplied by this
-# (and a rarity filter's chance divided by it). The realm has no big ore veins (they're vanilla's raw iron and copper
-# blocks in tuff and granite), so iron and copper get the most. Rock blobs, clay and emeralds stay as they are.
-ORE_BOOST = {"coal": 1.3, "iron": 1.8, "copper": 1.8, "gold": 1.5, "redstone": 1.3, "lapis": 1.5, "diamond": 1.5}
+# The realm's ores are more plentiful than vanilla's: each vanilla ore placement's count is multiplied by this (and a
+# rarity filter's chance divided by it), except counts of BOOST_CAP and up (vanilla's 90 tries a chunk for iron high in
+# the mountains). The realm has no big ore veins (they're vanilla's raw iron and copper blocks in tuff and granite), so
+# iron and copper get the most. Rock blobs, clay and emeralds stay as they are. Round 21 raised them again (round 20's
+# were 1.3 to 1.8).
+ORE_BOOST = {"coal": 1.6, "iron": 2.5, "copper": 2.2, "gold": 2.0, "redstone": 1.6, "lapis": 2.0, "diamond": 2.0}
+BOOST_CAP = 50
 
 
 def boosted(name, placement):
@@ -739,7 +742,7 @@ def boosted(name, placement):
     out = []
     for modifier in placement:
         modifier = dict(modifier)
-        if boost != 1.0 and modifier["type"] == "minecraft:count" and isinstance(modifier["count"], int):
+        if boost != 1.0 and modifier["type"] == "minecraft:count" and isinstance(modifier["count"], int) and modifier["count"] < BOOST_CAP:
             modifier["count"] = max(1, round(modifier["count"] * boost))
         elif boost != 1.0 and modifier["type"] == "minecraft:rarity_filter":
             modifier["chance"] = max(1, round(modifier["chance"] / boost))
@@ -792,8 +795,8 @@ BATS = [spawn("minecraft:bat", 10, 8, 8)]
 # Trans dungeons (TransDungeonFeature) instead of vanilla's cobblestone monster rooms, placed the same way.
 UNDERGROUND = [f"{NS}:trans_dungeon", f"{NS}:trans_dungeon_deep"]
 # Clay and gravel disks under shallow water (vanilla's only replace vanilla dirt, so they never showed up in the realm).
-ORES = TRANS_ORES + [f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_large",
-                     f"{NS}:ore_trans_crystal_middle", f"{NS}:trans_disk_clay", f"{NS}:trans_disk_gravel"]
+ORES = TRANS_ORES + [f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_medium", f"{NS}:ore_trans_crystal_deep",
+                     f"{NS}:ore_trans_crystal_large", f"{NS}:ore_trans_crystal_middle", f"{NS}:trans_disk_clay", f"{NS}:trans_disk_gravel"]
 # The realm's own springs: vanilla's only break out of vanilla stone, and the realm's lava is pink.
 SPRINGS = [f"{NS}:spring_trans_water", f"{NS}:spring_pink_lava"]
 # Every cave: glow lichen on trans rock (vanilla's only grows on vanilla stone), and deep down, now and then, a patch of
@@ -1087,7 +1090,8 @@ FEATURE_RANK = [
     f"{NS}:trans_dungeon", f"{NS}:trans_dungeon_deep",
     # ores
     *TRANS_ORES, f"{NS}:trans_ore_copper_large", f"{NS}:trans_ore_emerald", f"{NS}:trans_ore_clay",
-    f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_large", f"{NS}:ore_trans_crystal_middle",
+    f"{NS}:ore_trans_crystal", f"{NS}:ore_trans_crystal_medium", f"{NS}:ore_trans_crystal_deep", f"{NS}:ore_trans_crystal_large",
+    f"{NS}:ore_trans_crystal_middle",
     f"{NS}:ore_trans_crystal_extra", f"{NS}:frosted_cave_packed_ice", f"{NS}:frosted_cave_blue_ice", f"{NS}:frosted_cave_snow",
     f"{NS}:ore_sculk_gem",
     f"{NS}:trans_disk_clay", f"{NS}:trans_disk_gravel", f"{NS}:trans_disk_sand",
@@ -1246,10 +1250,17 @@ def surface_rule():
 OVERWORLD_TERRAIN = os.path.join(HERE, "vanilla_extra", "templates", "worldgen", "overworld")
 
 
+# The folder (and id prefix) of the realm's copies of the overworld's terrain. Noises are seeded by their ids, so a new
+# prefix is a new landscape for every world: round 21 moved them from trans/ to realm/ to reseed the realm (the owner
+# asked for a fresh one along with its new caves and ores).
+TERRAIN = "realm"
+
+
 def own_terrain(obj, written):
     """Copies a density function tree, pointing every density function and noise it uses at our own copy of it
-    (transdimension:trans/<vanilla path>) and writing those copies. Noises are seeded by their ids, so with its own ids the
-    realm's continents, mountains, valleys, caves and climate no longer line up with the overworld's for the same seed."""
+    (transdimension:<TERRAIN>/<vanilla path>) and writing those copies. Noises are seeded by their ids, so with its own ids
+    the realm's continents, mountains, valleys, caves and climate no longer line up with the overworld's for the same
+    seed."""
     if isinstance(obj, dict):
         return {k: (v if k == "type" else own_terrain(v, written)) for k, v in obj.items()}
     if isinstance(obj, list):
@@ -1263,22 +1274,44 @@ def own_terrain(obj, written):
                     written.add((kind, path))
                     with open(source, encoding="utf-8") as f:
                         data = json.load(f)
-                    write(os.path.join(WG, kind, "trans", path + ".json"), own_terrain(data, written) if kind == "density_function" else data)
-                return f"{NS}:trans/{path}"
+                    write(os.path.join(WG, kind, TERRAIN, path + ".json"), own_terrain(data, written) if kind == "density_function" else data)
+                return f"{NS}:{TERRAIN}/{path}"
+    return obj
+
+
+# Vanilla's cheese caves (the big open caverns with pillars) are air where 0.27 plus the cave_cheese noise (and a bit for
+# the cave layer) drops below zero. The realm's own constant is lower, so its caverns are bigger: about 9% of the deep
+# rock instead of vanilla's 6% (sampled from the noise). Spaghetti and noodle caves stay vanilla's.
+CHEESE = 0.2
+
+
+def bigger_caverns(obj):
+    """The density function tree with the cheese caves' constant set to CHEESE."""
+    if isinstance(obj, dict):
+        noise = obj.get("argument2")
+        if (obj.get("type") == "minecraft:add" and obj.get("argument1") == 0.27 and isinstance(noise, dict)
+                and noise.get("noise") == f"{NS}:{TERRAIN}/cave_cheese"):
+            return {**obj, "argument1": CHEESE}
+        return {k: bigger_caverns(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [bigger_caverns(v) for v in obj]
     return obj
 
 
 def generate_noise_settings():
     """The Trans Realm's terrain: vanilla's overworld noise settings with the realm's stone, water and surface, on its own
     copies of the overworld's density functions and noises (own_terrain), so it's a different landscape from the
-    overworld's, not the same one in pink."""
+    overworld's, not the same one in pink, and with bigger caverns (CHEESE)."""
     with open(os.path.join(OVERWORLD_TERRAIN, "noise_settings.json"), encoding="utf-8") as f:
         settings = json.load(f)
     for kind in ("density_function", "noise"):
-        folder = os.path.join(WG, kind, "trans")
-        if os.path.isdir(folder):
-            shutil.rmtree(folder)
-    settings["noise_router"] = own_terrain(settings["noise_router"], set())
+        for old in ("trans", TERRAIN):
+            folder = os.path.join(WG, kind, old)
+            if os.path.isdir(folder):
+                shutil.rmtree(folder)
+    router = own_terrain(settings["noise_router"], set())
+    settings["noise_router"] = bigger_caverns(router)
+    assert settings["noise_router"] != router, "the cheese caves' constant moved; update bigger_caverns"
     settings["default_block"] = state("trans_stone")
     settings["default_fluid"] = state("minecraft:water", level=0)
     settings["ore_veins_enabled"] = False
@@ -1345,10 +1378,10 @@ def merge_cells(cells):
     return boxes
 
 
-def entry(biome_name, temperature, humidity, continentalness, erosion, weirdness, depth=0.0):
+def entry(biome_name, temperature, humidity, continentalness, erosion, weirdness, depth=0.0, offset=0.0):
     return {"biome": f"{NS}:{biome_name}", "parameters": {
         "temperature": list(temperature), "humidity": list(humidity), "continentalness": list(continentalness),
-        "erosion": list(erosion), "weirdness": list(weirdness), "depth": depth, "offset": 0.0}}
+        "erosion": list(erosion), "weirdness": list(weirdness), "depth": depth, "offset": offset}}
 
 
 def generate_dimension():
@@ -1369,20 +1402,26 @@ def generate_dimension():
         for lo, hi in merge_cells(by_biome[name]):
             rng = [(bands[a][lo[a]][0], bands[a][hi[a]][1]) for a in range(5)]
             entries.append(entry(name, rng[1], rng[2], rng[0], rng[3], rng[4]))
-    # Round 20: like vanilla, every surface biome also sits at depth 1, so underground it's the land above's own plain caves
-    # unless a cave biome is closer. With the land only at depth 0, the cave biomes (the Blooming Caverns most of all)
-    # won almost every cave.
-    entries += [{"biome": e["biome"], "parameters": {**e["parameters"], "depth": 1.0}} for e in entries]
-    # The cave biomes, placed like vanilla's (tools: a Monte Carlo of the climate gives about 55% plain caves, 12% Crystal
-    # Caves, 7 to 10% each Pastel Lush Caves, Frosted Caves and the Pink Deep Dark, 5% Blooming Caverns): lush caves where
-    # it's wettest (vanilla's lush caves), crystal caves far inland (its dripstone caves), frosted caves under the coldest
-    # land, blooming caverns under hot, fairly dry land...
-    entries.append(entry("pastel_lush_caves", full, (0.7, 1.0), full, full, full, depth=[0.2, 0.9]))
-    entries.append(entry("crystal_caves", full, full, (0.8, 1.0), full, full, depth=[0.2, 0.9]))
-    entries.append(entry("frosted_caves", (-1.0, -0.7), full, full, full, full, depth=[0.2, 0.9]))
-    entries.append(entry("blooming_caverns", (0.7, 1.0), (0.1, 0.45), full, full, full, depth=[0.2, 0.9]))
+    # Underground it's the land above's own plain caves unless a cave biome is closer. Like vanilla, every surface biome
+    # also sits at depth 1 (round 20: with the land only at depth 0, the cave biomes won almost every cave). Round 21: and
+    # at depth 0.5 too, a little further off (offset 0.3), so a cave biome reaches at most 0.3 past its own climate box
+    # at any depth. Without that the cave biomes swelled round depth 0.5 (vanilla's dripstone and lush caves do too) and
+    # took 55 to 75% of the caves people explore, the Blooming Caverns alone up to a fifth.
+    surface = entries
+    entries = surface + [{"biome": e["biome"], "parameters": {**e["parameters"], "depth": 1.0}} for e in surface]
+    entries += [{"biome": e["biome"], "parameters": {**e["parameters"], "depth": 0.5, "offset": 0.3}} for e in surface]
+    # The cave biomes: columns from just under the surface down to the deep layers, each under its own kind of land: lush
+    # caves under the wettest land (vanilla's lush caves), crystal caves far inland (its dripstone caves), frosted caves
+    # under the coldest land and, rarely, blooming caverns under hot land. Tuned on the climate noises' real spread
+    # (tools/sim_cave_biomes.py): plain caves are 77 to 79% of every depth people explore (85% of all caves), the Crystal,
+    # Pastel Lush and Frosted Caves 6 to 7% each, the Blooming Caverns 1 to 2%.
+    cave = lambda name, *climate: entries.append(entry(name, *climate, depth=[0.2, 0.9], offset=0.05))
+    cave("pastel_lush_caves", full, (0.63, 1.0), full, full, full)
+    cave("crystal_caves", full, full, (0.86, 1.0), full, (-1.0, 0.0))
+    cave("frosted_caves", (-1.0, -0.88), full, full, full, full)
+    cave("blooming_caverns", (0.91, 1.0), (0.0, 0.2), full, full, (0.35, 1.0))
     # ...and the pink deep dark exactly where vanilla's deep dark is: right at the bottom, under the mountains (low
-    # erosion), from depth 1.05 down. The owner wants its pink ancient cities exactly as rare as vanilla's ancient cities.
+    # erosion), from depth 1.05 down.
     entries.append(entry("pink_deep_dark", full, full, full, (-1.0, -0.375), full, depth=1.1))
     dimension = {"type": f"{NS}:trans_realm", "generator": {
         "type": "minecraft:noise", "settings": f"{NS}:trans_realm",
